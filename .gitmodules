@@ -1,0 +1,3 @@
+[submodule "walib/WAF"]
+	path = walib/WAF
+	url = git@github.com:Wakanda/WAF.git
