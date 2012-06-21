@@ -1,0 +1,593 @@
+/*
+* This file is part of Wakanda software, licensed by 4D under
+*  (i) the GNU General Public License version 3 (GNU GPL v3), or
+*  (ii) the Affero General Public License version 3 (AGPL v3) or
+*  (iii) a commercial license.
+* This file remains the exclusive property of 4D and/or its licensors
+* and is protected by national and international legislations.
+* In any event, Licensee's compliance with the terms and conditions
+* of the applicable license constitutes a prerequisite to any use of this file.
+* Except as otherwise expressly stated in the applicable license,
+* such license does not include any other license or rights on this file,
+* 4D's and/or its licensors' trademarks and/or other proprietary rights.
+* Consequently, no title, copyright or other proprietary rights
+* other than those specified in the applicable license is granted.
+*/
+/* RESET ***********************************************************************/
+* {
+	margin: 0;
+	padding: 0;
+}
+
+/* TAGS ************************************************************************/
+body {
+	background-color: #e3e3e3;
+	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	color: #000;
+	overflow: hidden;
+}
+table {
+	border-collapse: collapse;
+}
+ul {
+	list-style: none;
+}
+
+
+/* GENERIC CLASSES *************************************************************/
+.title {
+	position: relative;
+	width: 100%;
+	height: 27px;
+	background-image: url(../image/Header_Center.png);
+	background-repeat: repeat-x;
+	background-position: bottom;
+	cursor: default;
+}
+.title h1 {
+	display: inline-block;
+	margin: 5px 0 0 10px;
+	font-size: 12px;
+	font-weight: bold;
+}
+
+button.add span {
+	background-image: url(../image/icon/16x16/add.png);
+}
+
+
+.content {
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	left: 0;
+}
+
+
+.dialog {
+	position: relative;
+	display: none;
+	width: 520px;
+	margin: 10% auto;
+	padding: 10px;
+	background-color: #fff;
+	border: 1px outset #aaa;
+	z-index: 10000;
+}
+.dialog button {
+	margin: 0 0 0 10px;
+}
+
+
+/* ELEMENTS ********************************************************************/
+#solution-menu {
+	background-image: url(../image/Toolbar_Center.png);
+	background-repeat: repeat-x;
+	background-position: bottom;
+	height: 36px;
+}
+#solution-menu > li:first-child {
+	margin-left: 10px;
+}
+#solution-open-recent-menu ul {
+	left: 150px;
+	top: 0;
+}
+
+
+#solution-open-recent{
+	text-decoration:none;
+        
+}
+
+#solution-open-recent:hover {
+
+         background: rgb(190, 214, 236) none !important;
+         opacity: 0.9;
+         cursor: pointer !important;
+}
+
+
+
+#solution-open input {
+	width: 300px;
+}
+
+#wakanda-website {
+	position: absolute;
+	display: block;
+	width: 85px;
+	height: 27px;
+	right: 20px;
+	top: 1px;
+	background: url(../image/logo-wakanda.png) no-repeat 0 0;
+	text-indent: -1000px;
+	overflow: hidden;
+}
+#wakanda-twitter {
+	position: absolute;
+	display: inline-block;
+	right: 120px;
+	top: 2px;
+	width: 86px;
+	height: 20px;
+	background: url(../image/twitter_logo_header.png) no-repeat 0 0;
+	text-indent: -1000px;
+	overflow: hidden;
+}
+
+
+
+
+#wakanda-Admin3 {
+	position: absolute;
+        display: block;
+        width: 85px;
+	height: 27px;
+        right: 220px;
+	top: 2px;
+        background: url(../image/adminV2.png) no-repeat 0 0;
+	text-indent: -1000px;
+	overflow: hidden;
+	
+}
+
+#wakanda-Admin2 {
+	position: absolute;
+        display: block;
+        width: 85px;
+	height: 27px;
+        right: 320px;
+	top: 2px;
+        background: url(../image/adminV2.png) no-repeat 0 0;
+	text-indent: -1000px;
+	overflow: hidden;
+	
+}
+
+
+
+
+#viewport {
+	position: absolute;
+	top: 60px;
+	right: 0;
+	bottom: 27px;
+	left: 0;
+	overflow: auto;
+}
+
+#overlay {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	left: 0;
+	top: 0;
+	background-color: #999999;
+	opacity: 0.7;
+	z-index: 1000;
+}
+#overlay .loader {
+	width: 100%;
+	height: 100%;
+	left: 0;
+	top: 0;
+	background: url(../image/ajax-loader-big.gif) no-repeat center center;
+}
+
+/* WAFCONSOLE ********************************************************/
+#wafConsole {
+	position: fixed;
+	left: 0;
+	bottom: 0;
+	width: 100%;
+	height: 27px;
+	border-top: 1px solid #929292;
+	overflow: hidden;
+	z-index: 1000;
+}
+#wafConsole .title h1 {
+	padding: 0 0 0 16px;
+	background-image: url(../image/right.png);
+	background-repeat: no-repeat;
+	background-position: 0 0;
+}
+#wafConsole .content {
+	top: 25px;
+	padding: 0 0 0 10px;
+	background-color: #fff;
+	overflow: auto;
+}
+
+#wafConsole.visible .title h1 {
+	background-image: url(../image/down.png);
+}
+
+
+/* TOOLBAR ***********************************************************/
+.toolbar {
+	position: relative;
+	display: block;
+	width: 100%;
+	height: 30px;
+}
+.toolbar li {
+	position: relative;
+	display: inline-block;
+	float: left;
+	width: 26px;
+	height: 26px;
+	margin: 0 5px 0 0;
+}
+.toolbar li.menu-sub {
+	background-image: url(../image/right.png);
+	background-repeat: no-repeat;
+	background-position: right 4px;
+}
+.head button,
+.toolbar button {
+	display: block;
+	width: 24px;
+	height: 24px;
+	margin: 2px 0 0 0;
+	background-position: center center;
+	background-repeat: no-repeat;
+	background-color: transparent;
+	overflow: hidden;
+	text-indent: -1000px;
+	border: 0 none;
+}
+.toolbar li ul {
+	position: absolute;
+	left: 0;
+	top: 23px;
+	display: none;
+	min-width: 150px;
+	background-color: #EEE;
+	border: 1px solid #AAA;
+	z-index: 500;
+	overflow: visible;
+	white-space: nowrap;
+	cursor: default;
+}
+.toolbar li ul li {
+	display: block;
+	float: none;
+	width: auto;
+	min-width: 100px;
+	height: 16px;
+	padding: 3px;
+	margin: 0;
+	line-height: 16px;
+	overflow: visible;
+	white-space: nowrap;
+}
+/*.toolbar > li:hover {
+	background-image:url("../image/button/background.png");
+	background-position:1px 3px;
+	background-repeat:no-repeat;
+}*/
+
+.toolbar li ul li:hover {
+	background-color: #A9A9A9;
+}
+.toolbar li:hover > ul {
+	display: block;
+}
+
+.head button:hover,
+.toolbar button:hover {
+	border: 1px solid #999;
+	-moz-border-radius: 3px;
+}
+.toolbar .separator {
+	width: 0;
+	font-size: 0;
+	border-right: 1px dashed #fff;
+	border-left: 1px dashed #555;
+}
+
+.toolbar li.solution button {
+	background-image: url(../image/icon/16x16/application_cascade.png);
+}
+.toolbar li.application-goto button {
+	background-image: url(../image/icon/16x16/application_go.png);
+}
+.toolbar li.catalog-goto button {
+	background-image: url(../image/icon/16x16/table_go.png);
+}
+.toolbar li.database-flush button {
+	background-image: url(../image/icon/16x16/database_refresh.png);
+}
+.toolbar li.lock button {
+	background-image: url(../image/icon/16x16/lock.png);
+}
+.toolbar li.unlock button {
+	background-image: url(../image/icon/16x16/lock_open.png);
+}
+
+/* APPLICATION ****************************************************************/
+.application {
+	position: relative;
+	width: 348px;
+	float: left;
+	margin: 10px 0 0 10px;
+}
+.application > div,
+.application > div > div {
+	position: absolute;
+}
+.application > div > .top {
+	top: 0;
+}
+.application > div > .right {
+	right: 0;
+}
+.application > div > .bottom {
+	bottom: 0;
+}
+.application > div > .left {
+	left: 0;
+}
+.application hr {
+	position: absolute;
+	width: 342px;
+	bottom: 0;
+	left: 3px;
+	height: 2px;
+	border-top: 1px solid #929292;
+	border-right: 0 none;
+	border-bottom: 1px solid #fff;
+	border-left: 0 none;
+	
+}
+
+/* application - border */
+.application .border.top,
+.application .border.bottom {
+	height: 10px;
+	background-repeat: repeat-x;
+}
+.application .border.left,
+.application .border.right {
+	width: 10px;
+	background-repeat: repeat-y;
+}
+
+/* application - corner */
+.application .corner {
+	width: 10px;
+	height: 10px;
+	background-repeat: no-repeat;
+}
+.application .corner.right.bottom {
+	background-image: url(../image/frame/Frame_BottomRight.png);
+	background-position: right bottom;
+}
+.application .corner.left.bottom {
+	background-image: url(../image/frame/Frame_BottomLeft.png);
+	background-position: left bottom;
+}
+
+/* application - content */
+.application .content {
+	right: 10px;
+	left: 10px;
+	background-repeat: repeat;
+}
+
+/* application - head */
+.application > .head {
+	position: relative;
+	height: 30px;
+}
+.application > .head > .border.left {
+	height: 30px;
+	background-image: url(../image/Header_Left.png);
+	background-position: left top;
+}
+.application > .head > .border.right {
+	height: 30px;
+	background-image: url(../image/Header_Right.png);
+	background-position: right top;
+}
+.application > .head > .content {
+	height: 30px;
+	background-image: url(../image/Header_Center.png);
+	background-position: top;
+}
+
+.application > .head h2 {
+	margin: 7px 0 0 0;
+	font-size: 12px;
+	font-weight: normal;
+}
+.application > .head button.action {
+	position: absolute;
+	width: 24px;
+	height: 24px;
+	right: 0;
+	top: 3px;
+	background-image: url(../image/icon/16x16/cog.png);
+}
+
+/* application - toolbar */
+.application > .toolbar {
+	position: relative;
+	height: 30px;
+}
+.application > .toolbar li {
+	height: 26px;
+	margin: 0 5px 0 0;
+}
+.application > .toolbar button {
+	width: 24px;
+	height: 24px;
+	margin: 2px 0 0 0;
+}
+.application .toolbar > .border.right {
+	height: 30px;
+	background-image: url(../image/frame/Frame_CenterRight.png);
+	background-position: right top;
+}
+.application .toolbar > .border.left {
+	height: 30px;
+	background-image: url(../image/frame/Frame_CenterLeft.png);
+	background-position: left top;
+}
+.application .toolbar > .content {
+	height: 30px;
+	background-image: url(../image/frame/Frame_CenterCenter.png);
+	background-repeat: repeat-x;
+}
+
+
+/* application - body */
+.application > .body {
+	position: relative;
+	padding: 0 10px 10px 10px;
+}
+
+.application > .body > .border.right {
+	top: 0;
+	bottom: 10px;
+	background-image: url(../image/frame/Frame_CenterRight.png);
+	background-position: right;
+}
+.application > .body > .border.bottom {
+	right: 10px;
+	left: 10px;
+	background-image: url(../image/frame/Frame_BottomCenter.png);
+	background-position: bottom;
+}
+.application > .body > .border.left {
+	top: 0;
+	bottom: 10px;
+	background-image: url(../image/frame/Frame_CenterLeft.png);
+	background-position: left;
+}
+
+
+.application > .body > .content {
+	position: relative;
+	left: 0;
+	padding: 10px 0 0 0;
+	background-image: url(../image/frame/Frame_CenterCenter.png);
+}
+.application > .body > .content td {
+	line-height: 20px;
+	padding: 0 2px;
+}
+
+
+/* application - input */
+.application input[type=text] {
+	width: 100px;
+	height: 18px;
+	padding: 0 3px;
+	border: 1px solid transparent;
+	background-color: transparent;
+  	line-height: 18px;
+}
+.application input[type=checkbox] {
+	display: none;
+	margin-top: 2px;
+}
+
+/* application - status */
+.application .status {
+	width: 16px;
+	height: 16px;
+	margin: 0 3px;
+	float: left;
+	
+	background-image: url(../image/icon/16x16/red.png);
+	background-repeat: no-repeat;
+	background-position: center center;
+}
+.application .status.started {
+	background-image: url(../image/icon/16x16/green.png);
+}
+.application .status.loading {
+	background-image: url(../image/icon/ajax-loader.gif);
+}
+
+
+/* application - editable */
+.application.editable input[type=text] {
+	border: 1px solid #cfcfcf;
+	background-color: #eaeaea;
+}
+.application.editable input[type=checkbox] {
+	display: inline-block;
+}
+
+/*#myTable, #myTable caption
+{
+    margin: auto;
+}
+
+#myTable
+{
+    border: #DDEEFF 2px solid;
+    border-collapse: separate;
+    border-spacing: 2px;
+    empty-cells: hide;
+}
+
+#myTable caption
+{
+    background-color: #DDEEFF;
+	font-size: 0.8em;
+}
+
+#myTable th
+{
+    color: #996600;
+    background-color: #FFCC66;
+    border: #FFCC66 1px solid;
+    font-variant: small-caps;
+    font-size: 0.8em;
+    letter-spacing: 1px;
+}
+
+#myTable td
+{
+    border: #DDEEFF 1px solid;
+    padding-left: 10px;
+}*/
+.studio-icon-remove {
+      height: 20px;
+      width: 20px;
+    background-repeat: no-repeat;
+    background-position: 2px 2px;
+    background-color: transparent;
+    border: none;
+    overflow: hidden;
+    cursor: pointer;
+   
+    background-image: url("/image/icon/remove.png");
+}
+
+

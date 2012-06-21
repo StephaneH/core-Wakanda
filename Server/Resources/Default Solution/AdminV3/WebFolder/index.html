@@ -1,0 +1,75 @@
+<!--
+* This file is part of Wakanda software, licensed by 4D under
+*  (i) the GNU General Public License version 3 (GNU GPL v3), or
+*  (ii) the Affero General Public License version 3 (AGPL v3) or
+*  (iii) a commercial license.
+* This file remains the exclusive property of 4D and/or its licensors
+* and is protected by national and international legislations.
+* In any event, Licensee's compliance with the terms and conditions
+* of the applicable license constitutes a prerequisite to any use of this file.
+* Except as otherwise expressly stated in the applicable license,
+* such license does not include any other license or rights on this file,
+* 4D's and/or its licensors' trademarks and/or other proprietary rights.
+* Consequently, no title, copyright or other proprietary rights
+* other than those specified in the applicable license is granted.
+-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+           "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
+	<meta name="generator" content="Wakanda GUIDesigner"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+	<title>Wakanda Server Admin</title>
+	
+	<link rel="stylesheet" type="text/css" href="css/admin.css" />
+	
+</head>
+
+<body>
+
+<div id="solution-identity" class="title">
+	<h1></h1>
+        <a  id="wakanda-Admin2" href="index2.html" title="adminV2">Admin2</a>
+	<a  id="wakanda-Admin3" href="index3.html" title="adminV3">Admin3</a>
+    <a id="wakanda-twitter" href="http://twitter.com/wakandasoft" title="Wakanda Twitter account" target="_blank">Wakanda Twitter account</a>
+	<a id="wakanda-website" href="http://www.wakandasoft.com" title="Wakanda website" target="_blank">Wakanda Website</a>
+</div>
+<ul id="solution-menu" class="toolbar">
+	<li class="solution"><button>Solution</button>
+		<ul>
+			<li class="solution-open">Open solution</li>
+			<li class="solution-close">Close solution</li>
+			<li id="solution-open-recent-menu" class="menu-sub">Open recent solution
+				<ul><li></li></ul>
+			</li>
+		</ul></li>
+	<li class="lock" title="Lock / Unlock all applications"><button>Lock / Unlock all applications</button></li>
+</ul>
+
+<div id="viewport"></div>
+
+<div id="wafConsole">
+	<div  class="title"><h1>Server Log</h1></div>
+	<div class="content"></div>	
+</div>
+
+<div id="overlay"><div class="loader"></div></div>
+<div id="solution-open" class="dialog">
+	<label>Solution path : <input type="text" name="solution-open-path" /><button class="solution-open">Open</button><button class="cancel">Cancel</button></label>
+</div>
+
+<!-- WAF RPC -->
+<script type="text/javascript" src="/walib/WAF/rpc/Rpc.js"></script>
+
+<!-- jQuery -->
+<script type="text/javascript" src="/walib/WAF/lib/jquery/jquery.min.js" ></script>
+
+<!-- Server admin scripts -->
+<script type="text/javascript" src="js/template.js" ></script>
+<script type="text/javascript" src="js/admin.js" ></script>
+
+
+</body>
+</html>

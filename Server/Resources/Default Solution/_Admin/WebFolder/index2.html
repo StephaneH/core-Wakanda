@@ -1,0 +1,128 @@
+﻿<!--
+* This file is part of Wakanda software, licensed by 4D under
+*  (i) the GNU General Public License version 3 (GNU GPL v3), or
+*  (ii) the Affero General Public License version 3 (AGPL v3) or
+*  (iii) a commercial license.
+* This file remains the exclusive property of 4D and/or its licensors
+* and is protected by national and international legislations.
+* In any event, Licensee's compliance with the terms and conditions
+* of the applicable license constitutes a prerequisite to any use of this file.
+* Except as otherwise expressly stated in the applicable license,
+* such license does not include any other license or rights on this file,
+* 4D's and/or its licensors' trademarks and/or other proprietary rights.
+* Consequently, no title, copyright or other proprietary rights
+* other than those specified in the applicable license is granted.
+-->
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <title>Wakanda Administration</title>
+        
+        <link type="image/x-icon" rel="shortcut icon" href="/Web%20Components/common/images/favicon.ico" />
+
+		<!-- styles -->
+		<link rel="stylesheet" type="text/css" href="styles/layouts.css"/>
+		<link rel="stylesheet" type="text/css" href="styles/toolbar.css"/>
+		<link rel="stylesheet" type="text/css" href="styles/table.css"/>
+		<link rel="stylesheet" type="text/css" href="styles/dialog.css"/>
+		<link rel="stylesheet" type="text/css" href="styles/formular.css"/>
+		<link rel="stylesheet" type="text/css" href="lib/jquery-splitter.css"/>
+               
+		<link rel="stylesheet" type="text/css" href="styles/default.css"/>
+		<link rel="stylesheet" type="text/css" href="styles/tabset.css"/>
+		<link rel="stylesheet" type="text/css" href="skins/default/styles/default.css"/>
+		<link rel="stylesheet" type="text/css" media="screen" href="lib/tonytomov-jqGrid-cfdb1b7/css/ui.jqgrid.css" />
+
+		
+		<!-- scripts & jquery libs -->
+		<script type="text/javascript" src="lib/jquery/jquery.min.js"></script> 
+		<script type="text/javascript" src="lib/jquery-ui/jquery-ui.min.js"></script>
+		
+		<script src="lib/jquery-splitter.js"></script>
+		
+		<script src="lib/jquery-animate-css-rotate-scale.js"></script>
+		<script src="lib/jquery-css-transform.js"></script>
+               
+                
+                <!-- WAF RPC -->
+                <script type="text/javascript" src="/walib/WAF/rpc/Rpc.js"></script>
+                
+                
+                <!-- administration scripts -->
+                 <script src="scripts/init.js"></script>   
+                 <script src="scripts/config.js"></script>
+                  <script src="scripts/delegate.js"></script>
+                 <script src="scripts/views/views.formular.js"></script>
+                 <script src="scripts/views/views.spliters.js"></script>
+                 
+                 
+                
+        <script>
+	$(function() {
+		$("#accordion").accordion();
+                
+	});
+	</script>
+		
+		<script src="lib/quicksand.js"></script>
+	</head>
+    <body  ondragover="_administration.handlers.dropOverHandler()" ondrop="_administration.handlers.dropHandler()">
+             
+        
+        <div id = "administration-toolbar">
+            
+            
+                        <div class="administration-tootlbar-button Verify"><div>Verify</div></div>
+			<div class="administration-tootlbar-button Repair"><div>Repair</div></div>
+			<div class="administration-tootlbar-separator"></div>
+                        <div class="administration-tootlbar-button Compact"><div>Compact</div></div>
+                        <div class="administration-tootlbar-separator"></div>
+			<div class="administration-tootlbar-button Backup"><div>Backup</div></div>
+			<div class="administration-tootlbar-button Infos"><div>Data</div></div>
+                       
+	</div>
+        
+        
+        
+        
+        <div id = "administration-workspace">
+                            <div id = "administration-workspace-left">
+				 <div id = "administration-workspace-left-content" class="content">
+                                     
+                                 <div id="accordion">
+                                 </div> 
+                                     
+                                 </div>
+                </div>
+                <div id = "administration-workspace-right">
+                    <div id = "administration-workspace-right-top">
+                        
+                        <div id = "administration-workspace-top-content" class="content">
+                              <div id="administration-header" class="waf-tabset" style="display: block; ">
+                                <ol class="waf-navigation" role="navigation">
+                                          <li class="tab-usr waf-active"><a href="#class1"><em>Settings</em></a></li>
+                                          <li class="tab-grp"><a href="#class2"><em>History</em></a></li></ol>
+                              </div>
+                            
+                            <div class = "administration-content" >
+                                
+                                
+                            </div>
+                            
+                            
+                            
+                        </div>
+                    </div>
+
+                </div>
+            
+              </div>
+	
+                <script src="scripts/administration.js"></script>	
+    </body>
+
+	
+
+	
+</html>

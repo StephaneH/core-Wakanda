@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="UTF-8"?><EntityModelCatalog>
+
+<dbInfo name="test" uuid="DEB2380315EE8E47AF7052ECFC4FADBC"/>
+
+<dataClasses name="DataClass1" className="DataClass1" collectionName="DataClass1Collection" scope="public" uuid="2DF1CBD89BDB1C4EB2B5E812FB90EF32" tablePos="1">
+
+	<extraProperties ____objectunic="true" panelColor="#996699">
+
+		<panel ____objectunic="true" isOpen="true" pathVisible="true">
+
+			<position ____objectunic="true" X="164" Y="5"/>
+</panel>
+</extraProperties>
+
+	<attributes name="ID" kind="storage" scope="public" uuid="19A85F2AA37D604AAB890550E55E6B2B" fieldPos="1" unique="true" autosequence="true" type="long" primKey="true"/>
+	<attributes name="attrBlob" kind="storage" scope="public" uuid="4D7619822D636A4DAA1F6B9402AE3DC3" fieldPos="2" type="blob"/>
+	<attributes name="attrBool" scope="public" uuid="7493036E086FF841A694568351CAAF92" fieldPos="3" type="bool" kind="storage"/>
+	<attributes name="attrByte" scope="public" uuid="FA4FE493529FDF46A5C736E2A784669D" fieldPos="4" type="byte" kind="storage"/>
+	<attributes name="attrDate" scope="public" uuid="33B3C9EF2FE5BE46BEF0A1F6D1C38EBC" fieldPos="5" type="date" kind="storage"/>
+	<attributes name="attrDuration" scope="public" uuid="8FB10FCFFD87294CA32CD88971A489D7" fieldPos="6" type="duration" kind="storage"/>
+	<attributes name="attrImage" scope="public" uuid="64338E1326D65149A2E0ADF84314A750" fieldPos="7" type="image" kind="storage"/>
+	<attributes name="attrLong" scope="public" uuid="06500F7B1D249C4BB71702456CFF2BD6" fieldPos="8" type="long" kind="storage"/>
+	<attributes name="attrLong64" scope="public" uuid="F28F6A179AA8044CA0A0C22A17570969" fieldPos="9" type="long64" kind="storage"/>
+	<attributes name="attrNumber" scope="public" uuid="661A5B52278F6440B3DC568737318B0E" fieldPos="10" type="number" kind="storage"/>
+	<attributes name="attrString" scope="public" uuid="4E58FA0EB3E36A4B8869BC7381558E1A" fieldPos="11" type="string" kind="storage"/>
+	<attributes name="attrUuid" scope="public" uuid="0834DE104B924144AFB515E03F83218A" fieldPos="12" type="uuid" kind="storage"/>
+	<attributes name="attrWord" scope="public" uuid="F1D021408EF9DF4CB1A15B099CC367E7" fieldPos="13" type="word" kind="storage"/>
+	<methods name="methodClass" applyTo="dataClass" scope="publicOnServer" from="guidedModel.DataClass1.methods.methodClass"/>
+	<methods name="methodCollection" applyTo="entityCollection" scope="publicOnServer" from="guidedModel.DataClass1.collectionMethods.methodCollection"/>
+	<methods name="methodEntity" applyTo="entity" scope="publicOnServer" from="guidedModel.DataClass1.entityMethods.methodEntity"/>
+
+</dataClasses>
+</EntityModelCatalog>

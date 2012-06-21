@@ -1,0 +1,15 @@
+﻿var v1;
+var v2 = 3;
+v3 = "";
+v4 = v3;
+var _v5;
+var v6, v7;
+var v8 = "", v9 = true;
+var v10 = 12 * 5 + 13;
+for(var v11 = 0; v11 < 10; v11++) ;
+for(var v12 in o) ;
+var v13 = 12 * 5 + 13, v14 = !true + ~15 | 'foo', v15;
+var v16 = ~1 ? true : null, v17;
+var v18 = (12 + 5 * 8)++;
+for(v19 = 0; v19 < 10; v19++) ;
+for(v20 in o) ;

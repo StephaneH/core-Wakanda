@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="UTF-8"?><EntityModelCatalog>
+
+<dbInfo uuid="DEB2380315EE8E47AF7052ECFC4FADBC" collation_locale="fr"/>
+
+<dataClasses collectionName="GoogleChartCollection" className="GoogleChart" uuid="8EF716FB6C8BAA49A9A363B2D41F6FF0" tablePos="1">
+
+	<extraProperties ____objectunic="true" panelColor="#76923C">
+
+		<panel ____objectunic="true" isOpen="true" pathVisible="true">
+
+			<position ____objectunic="true" X="25" Y="20"/>
+
+		</panel>
+
+	</extraProperties>
+
+	<attributes name="ID" kind="storage" type="long" uuid="4E1A447ACED68B4288CC95A6D17AA184" fieldPos="1" autosequence="true" unique="true" primKey="true"/>
+
+	<attributes name="label" scope="public" uuid="D4EC5E9B14C6D344B6C6A9F890CCD9E7" fieldPos="2" type="string" kind="storage"/>
+
+	<attributes name="data" scope="public" uuid="7C5D278D47AA154AB31F1472A0E0B99A" fieldPos="3" type="string" kind="storage"/>
+
+</dataClasses>
+</EntityModelCatalog>
