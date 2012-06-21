@@ -910,12 +910,18 @@ bool VRIAServerApplication::_Init()
 	{
 		JSWDebuggerFactory	fctry;
 
-#if defined(WKA_USE_CHR_REM_DBG)
-		IJSWChrmDebugger*		jswChrmDebugger = fctry.GetCD();
-		VJSGlobalContext::SetChrmDebuggerServer( jswChrmDebugger );
-#else
+#if !defined(WKA_USE_UNIFIED_DBG)
 		IJSWDebugger*		jswDebugger = fctry. Get ( );
 		VJSGlobalContext::SetDebuggerServer ( jswDebugger );
+#else
+
+		//IWAKDebuggerServer*	jswChrmDebugger = fctry.GetCD();
+		IWAKDebuggerServer*	jswDebugger = fctry.Get();
+		VJSGlobalContext::SetDebuggerServer ( jswDebugger );
+
+//		IWAKDebuggerServer*	jswChrmDebugger = fctry.GetCD();
+//		VJSGlobalContext::SetChrmDebuggerServer( jswChrmDebugger );
+
 #endif
 	}
 

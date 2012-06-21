@@ -1046,74 +1046,77 @@ void VRIAServerProject::ReleaseJSContext( VJSGlobalContext* inContext, IHTTPResp
 			::DebugMsg ( vstrMessage );
 		}
 
-		VJSContext		jsContext( inContext);
-
-		CUAGSession* session = NULL;
-
-		VRIAJSRuntimeContext *rtContext = VRIAJSRuntimeContext::GetFromJSContext( jsContext);
-		if (rtContext != NULL)
+		// sc 28/05/2012, ensure the VJSContext object is destroyed before release the context
 		{
-			CDB4DContext* dbcontext = rtContext->RetainDB4DContext(this);
-			if (dbcontext != NULL)
+			VJSContext		jsContext( inContext);
+
+			CUAGSession* session = NULL;
+
+			VRIAJSRuntimeContext *rtContext = VRIAJSRuntimeContext::GetFromJSContext( jsContext);
+			if (rtContext != NULL)
 			{
-				dbcontext->CleanUpForReuse();
-				dbcontext->Release();
+				CDB4DContext* dbcontext = rtContext->RetainDB4DContext(this);
+				if (dbcontext != NULL)
+				{
+					dbcontext->CleanUpForReuse();
+					dbcontext->Release();
+				}
+
+				// This will make sure session storage object is unlocked (user may have locked it and forgot to unlock).
+				VJSSessionStorageObject	*sessionStorageObject = rtContext->GetSessionStorageObject();
+				if (sessionStorageObject != NULL)
+					sessionStorageObject->ForceUnlock();
+
+
+				session = rtContext->RetainUAGSession();
 			}
 
-			// This will make sure session storage object is unlocked (user may have locked it and forgot to unlock).
-			VJSSessionStorageObject	*sessionStorageObject = rtContext->GetSessionStorageObject();
-			if (sessionStorageObject != NULL)
-				sessionStorageObject->ForceUnlock();
-
-
-			session = rtContext->RetainUAGSession();
-		}
-
-		// Finally, update the cookie
-		if (inResponse != NULL)
-		{
-			if (session != NULL)
-				session->SetCookie( *inResponse, kHTTP_SESSION_COOKIE_NAME);
-			else
+			// Finally, update the cookie
+			if (inResponse != NULL)
 			{
-				XBOX::VString cookieValue;
-				if (inResponse->GetRequest().GetCookie (kHTTP_SESSION_COOKIE_NAME, cookieValue))
-					inResponse->DropCookie (kHTTP_SESSION_COOKIE_NAME);
+				if (session != NULL)
+					session->SetCookie( *inResponse, kHTTP_SESSION_COOKIE_NAME);
+				else
+				{
+					XBOX::VString cookieValue;
+					if (inResponse->GetRequest().GetCookie (kHTTP_SESSION_COOKIE_NAME, cookieValue))
+						inResponse->DropCookie (kHTTP_SESSION_COOKIE_NAME);
+				}
+			}
+			
+			QuickReleaseRefCountable( session);
+
+			if ( fSolution != 0 && fSolution-> CanGarbageCollect ( ) )
+			{
+				VInterlocked::Increment ( &fRequestNumber );
+				sLONG8			nWorkingSetSize = 0;
+				if ( VSystem::AllowedToGetSystemInfo ( ) )
+					nWorkingSetSize = VSystem::GetApplicationPhysicalMemSize ( );
+
+				if ( fLastGarbageCollectRequest + 10 < fRequestNumber || fLastWorkingSetSize + 50000000 < nWorkingSetSize )
+				{
+					fLastGarbageCollectRequest = fRequestNumber;
+					fLastWorkingSetSize = nWorkingSetSize;
+					/*
+						Problem: this may be not the context hogging the memory. Need to garbage collect all contexts.
+						Need to have a usage (request) counter per context. 
+					*/
+					VString		vstrMessage ( "Garbage collecting context " );
+					sLONG8		nContext = ( sLONG8 ) inContext;
+					vstrMessage. AppendLong8 ( nContext );
+					vstrMessage. AppendCString ( "\n" );
+					::DebugMsg ( vstrMessage );
+
+					VJSGlobalObject*		globalObject = jsContext. GetGlobalObjectPrivateInstance ( );
+					globalObject-> GarbageCollect ( );
+
+					jsContext. GarbageCollect ( );
+				}
 			}
 		}
-		
-		QuickReleaseRefCountable( session);
 
-		sLONG8	nContext = ( sLONG8 ) inContext;
 		if (fJSContextPool != NULL)
 			fJSContextPool->ReleaseContext( inContext);
-
-		if ( fSolution != 0 && fSolution-> CanGarbageCollect ( ) )
-		{
-			VInterlocked::Increment ( &fRequestNumber );
-			sLONG8			nWorkingSetSize = 0;
-			if ( VSystem::AllowedToGetSystemInfo ( ) )
-				nWorkingSetSize = VSystem::GetApplicationPhysicalMemSize ( );
-
-			if ( fLastGarbageCollectRequest + 10 < fRequestNumber || fLastWorkingSetSize + 50000000 < nWorkingSetSize )
-			{
-				fLastGarbageCollectRequest = fRequestNumber;
-				fLastWorkingSetSize = nWorkingSetSize;
-				/*
-					Problem: this may be not the context hogging the memory. Need to garbage collect all contexts.
-					Need to have a usage (request) counter per context. 
-				*/
-				VString		vstrMessage ( "Garbage collecting context " );
-				vstrMessage. AppendLong8 ( nContext );
-				vstrMessage. AppendCString ( "\n" );
-				::DebugMsg ( vstrMessage );
-
-				VJSGlobalObject*		globalObject = jsContext. GetGlobalObjectPrivateInstance ( );
-				globalObject-> GarbageCollect ( );
-
-				jsContext. GarbageCollect ( );
-			}
-		}
 	}
 }
 
@@ -1905,13 +1908,43 @@ VError VRIAServerProject::_Open( VProject* inDesignProject, VRIAServerProjectOpe
 				const VValueBag *serviceBag = bagArray->GetNth( serviceIter);
 				if (serviceBag != NULL)
 				{
-					VString serviceName;
-					if (serviceBag->GetString( RIASettingsKeys::Service::name, serviceName))
+					if (RIASettingsKeys::Service::enabled.Get( serviceBag))
 					{
-						if (RIASettingsKeys::Service::enabled.Get( serviceBag))
+						VValueBag *lBag = serviceBag->Clone();
+						if (lBag != NULL)
 						{
-							VValueBag *lBag = serviceBag->Clone();
-							servicesSettingsBag.AddElement( VValueBag::StKey(serviceName), lBag);
+							VString modulePath, serviceName;
+							if (!lBag->GetString( RIASettingsKeys::Service::modulePath, modulePath) && lBag->GetString( RIASettingsKeys::Service::name, serviceName))
+							{
+								if (!serviceName.IsEmpty())
+								{
+									// compatibility note: the module path, if not defined, is built from the service name
+									modulePath = L"services/" + serviceName;
+									lBag->SetString( RIASettingsKeys::Service::modulePath, modulePath);
+								}
+							}
+
+							if (!modulePath.IsEmpty())
+							{
+								if (!lBag->GetString( RIASettingsKeys::Service::name, serviceName))
+								{
+									// resolve the service name from the module path
+									VFilePath path( modulePath, FPS_POSIX);
+									if (path.IsFile())
+										path.GetFileName( serviceName, false);
+									else if (path.IsFolder())
+										path.GetFolderName( serviceName, false);
+
+									if (!serviceName.IsEmpty())
+										lBag->SetString( RIASettingsKeys::Service::name, serviceName);
+								}
+
+								if (!serviceName.IsEmpty())
+								{
+									if (servicesSettingsBag.GetElementsCount( VValueBag::StKey(serviceName)) == 0)
+										servicesSettingsBag.AddElement( VValueBag::StKey(serviceName), lBag);
+								}
+							}
 							ReleaseRefCountable( &lBag);
 						}
 					}
@@ -1937,6 +1970,7 @@ VError VRIAServerProject::_Open( VProject* inDesignProject, VRIAServerProjectOpe
 			if (serviceBag != NULL)
 			{
 				serviceBag->SetString( RIASettingsKeys::Service::name, L"dataStore");
+				serviceBag->SetString( RIASettingsKeys::Service::modulePath, L"services/dataStore");
 				serviceBag->SetString( VValueBag::StKey( L"autoStart"), autoStart ? L"true" : L"false");
 				servicesSettingsBag.AddElement( VValueBag::StKey( L"dataStore"), serviceBag);
 				ReleaseRefCountable( &serviceBag);
@@ -1962,6 +1996,7 @@ VError VRIAServerProject::_Open( VProject* inDesignProject, VRIAServerProjectOpe
 			if (serviceBag != NULL)
 			{
 				serviceBag->SetString( RIASettingsKeys::Service::name, L"rpc");
+				serviceBag->SetString( RIASettingsKeys::Service::modulePath, L"services/rpc");
 				serviceBag->SetString( VValueBag::StKey( L"autoStart"), autoStart ? L"true" : L"false");
 				serviceBag->SetString( VValueBag::StKey( L"publishInClientGlobalNamespace"), publishInClientGlobalNamespace ? L"true" : L"false");
 				servicesSettingsBag.AddElement( VValueBag::StKey( L"rpc"), serviceBag);
@@ -1988,6 +2023,7 @@ VError VRIAServerProject::_Open( VProject* inDesignProject, VRIAServerProjectOpe
 			if (serviceBag != NULL)
 			{
 				serviceBag->SetString( RIASettingsKeys::Service::name, L"webApp");
+				serviceBag->SetString( RIASettingsKeys::Service::modulePath, L"services/webApp");
 				serviceBag->SetString( VValueBag::StKey( L"autoStart"), autoStart ? L"true" : L"false");
 				serviceBag->SetString( VValueBag::StKey( L"directoryIndex"), directoryIndex);
 				servicesSettingsBag.AddElement( VValueBag::StKey( L"webApp"), serviceBag);
@@ -2002,12 +2038,13 @@ VError VRIAServerProject::_Open( VProject* inDesignProject, VRIAServerProjectOpe
 			if (serviceBag != NULL)
 			{
 				serviceBag->SetString( RIASettingsKeys::Service::name, L"upload");
+				serviceBag->SetString( RIASettingsKeys::Service::modulePath, L"services/upload");
 				serviceBag->SetString( VValueBag::StKey( L"autoStart"), L"true");
 				servicesSettingsBag.AddElement( VValueBag::StKey( L"upload"), serviceBag);
 				ReleaseRefCountable( &serviceBag);
 			}
 		}
-		
+
 		fApplicationSettings->SetKeyVValueBag( L"services", servicesSettingsBag);
 	}
 

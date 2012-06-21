@@ -113,19 +113,25 @@ VError VRIAServerJSContextMgr::ReleaseJSContext( VJSGlobalContext* inContext)
 
 	if (inContext != NULL)
 	{
-		VJSContext jsContext( inContext);
-		VRIAJSRuntimeContext *runtimeContext = VRIAJSRuntimeContext::GetFromJSContext( jsContext);
-		if (runtimeContext != NULL)
+		VRIAServerProject *application = NULL;
+
+		// sc 28/05/2012, ensure the VJSContext object is destroyed before release the context
 		{
-			VRIAServerProject *application = runtimeContext->GetRootApplication();
-			if (application != NULL)
+			VJSContext jsContext( inContext);
+			VRIAJSRuntimeContext *runtimeContext = VRIAJSRuntimeContext::GetFromJSContext( jsContext);
+			if (runtimeContext != NULL)
 			{
-				application->ReleaseJSContext( inContext, NULL);
+				application = runtimeContext->GetRootApplication();
 			}
-			else
-			{
-				err = VRIAServerApplication::Get()->ReleaseJSContext( inContext);
-			}
+		}
+
+		if (application != NULL)
+		{
+			application->ReleaseJSContext( inContext, NULL);
+		}
+		else
+		{
+			err = VRIAServerApplication::Get()->ReleaseJSContext( inContext);
 		}
 	}
 

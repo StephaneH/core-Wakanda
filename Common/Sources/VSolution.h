@@ -203,6 +203,7 @@ public:
 	bool			GetProjectItemPosition( const XBOX::VFilePath& inFilePath, bool& outMaximized, sLONG& outMaxX, sLONG& outMaxY, sLONG& outX, sLONG& outY, sLONG& outWidth, sLONG& outHeight );
 
 	void			SetSolutionStartupParameters(VSolutionStartupParameters* inSolutionStartupParameters);
+	void			ForceSavingSolutionFile(VProjectItem*  inProjectItem, const VProjectItemTag& );
 
 	// ---------------------------------------
 	// fonctions utilitaires grand public

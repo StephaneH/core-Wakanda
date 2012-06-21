@@ -976,7 +976,7 @@ void VSolution::GetProjectItemsFromTag( const VProjectItemTag& inTag, VectorOfPr
 		}
 	}
 
-	if (!done && (inTag == kSettingTag))
+	if (!done && (inTag == kSettingTag || inTag == kUAGDirectoryTag))
 	{
 		// Particular case for settings file: search into the solution folder
 		VFileKind *fileKind = VProjectItemTagManager::Get()->RetainDefaultFileKind( inTag);
@@ -2673,6 +2673,24 @@ void VSolution::SetSolutionStartupParameters(VSolutionStartupParameters* inSolut
 	XBOX::CopyRefCountable(&fSolutionStartupParameters, inSolutionStartupParameters);
 }
 
+void VSolution::ForceSavingSolutionFile(VProjectItem* inProjectItem, const VProjectItemTag& inTag)
+{
+	e_Save_Action saveAction = e_SAVE;
+
+	if (GetDelegate() != NULL)
+		saveAction = GetDelegate()->DoActionRequireSolutionFileSaving( inProjectItem, eSA_ChangeStartupProject, true);
+
+	if ((saveAction == e_SAVE) || (saveAction == e_NO_SAVE))
+	{
+		VSolutionFileStampSaver stampSaver(this);
+		inProjectItem->AddTag( inTag);
+		_ReferenceItem( inProjectItem, true);
+		inProjectItem->Touch();
+
+		if ((saveAction == e_SAVE) && stampSaver.StampHasBeenChanged()) 
+			_SaveSolutionFile();
+	}
+}
 
 void VSolution::GetPreferencesUserFilePath( VFilePath& outPath )
 {

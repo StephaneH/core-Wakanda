@@ -128,6 +128,7 @@ LA______mAsA [%TARGET%%PRODUCT_NAME%.app/Contents/Resources]
 LA______mAs_ %DEPOT%CoreRuntime/%branch%/Resources/Language Support
 LA______mAs_ %DEPOT%CoreRuntime/%branch%/Resources/ByteSwap.TXT
 LA______mAs_ %DEPOT%CoreRuntime/%branch%/Resources/KeyboardMapping.MAC.xml
+LA______mAs_ %DEPOT%CoreRuntime/%branch%/Resources/Images
 
 LA______mAs_ %DEPOT%Wakanda/%branch%/Studio/Resources/
 LA______m_sA %DEPOT%Wakanda/%branch%/Server/Resources/Wakanda Server.MAC.icns

@@ -633,7 +633,7 @@ Admin.prototype = {
 			application,
 			applicationList;
 
-		if(this.currentSolution !== null) {
+		if(this.currentSolution !== null && this.currentSolution.applications.length > 0) {
 			html = "";
 			applicationList = this.currentSolution.applications;
 			

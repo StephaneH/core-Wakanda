@@ -150,6 +150,7 @@ namespace RIASettingsKeys
 	{
 		EXTERN_BAGKEY_NO_DEFAULT( name, XBOX::VString);
 		EXTERN_BAGKEY_WITH_DEFAULT_SCALAR( enabled, XBOX::VBoolean, bool);
+		EXTERN_BAGKEY_NO_DEFAULT( modulePath, XBOX::VString);
 	}
 
 	// Web App Service settings

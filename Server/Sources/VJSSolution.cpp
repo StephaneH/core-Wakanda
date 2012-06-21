@@ -257,7 +257,9 @@ void VJSSolution::_quitServer( XBOX::VJSParms_callStaticFunction& ioParms, VRIAS
 
 void VJSSolution::_getDebuggerPort( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerSolution* inSolution)
 {
-#if defined(WKA_USE_CHR_REM_DBG)
+
+#if defined(WKA_USE_CHR_REM_DBG) && !defined(WKA_USE_UNIFIED_DBG)
+
 	xbox_assert(false);
 	ioParms.ReturnNumber(12345);
 #else

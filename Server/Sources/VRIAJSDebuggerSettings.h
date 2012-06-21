@@ -22,7 +22,13 @@
 class VRIAServerSolution;
 
 
-class VJSDebuggerSettings : public XBOX::VObject, public IJSWDebuggerSettings
+class VJSDebuggerSettings :
+	public XBOX::VObject,
+#if !defined(WKA_USE_UNIFIED_DBG)
+	public IJSWDebuggerSettings
+#else
+	public IWAKDebuggerSettings
+#endif
 {
 	public :
 

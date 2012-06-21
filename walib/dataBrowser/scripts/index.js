@@ -148,9 +148,7 @@ DataBrowser.prototype = {
 			var currentTab;
 			
 			currentTab = this.getSelectedTab();
-			$("#"+currentTab.container.id).height($("#"+currentTab.container.id).parent().height() - 25);
 			$("#"+currentTab.container.id).width("100%");
-			$("#"+currentTab.container.id+" .dataBrowser-dataContainer").height($("#"+currentTab.container.id).height() - 50);
 			$$(currentTab.container.id+'_dataGrid').gridController.gridView.refresh();
 			$("#"+currentTab.container.id+"_autoForm").parent().height("100%");
 			$("#"+currentTab.container.id+"_autoForm").height("100%");
@@ -200,10 +198,11 @@ DataBrowser.prototype = {
 				title:"Export dataclass",
 				buttons: {
 					"No": function() {
-						$( this ).dialog( "close" );
+						$(this).dialog("close");
 					},
 					"Yes": function() {
 						DataBrowser.exportSelectedDataClass();
+						$(this).dialog("close");
 					}
 				},
 				open : true
@@ -273,13 +272,6 @@ DataBrowser.prototype = {
 		
 		this.tabView.removeTab(1);
 		this.initTabDropEvent();
-		
-		//FIXME
-		setTimeout( function () {
-			$(".dataBrowser-dataContainer").each(function(index) {
-				$(this).height($(this).parent().height() - 50);
-			});
-		}, 100);
 		
 	},
 	
@@ -542,14 +534,12 @@ DataBrowser.prototype = {
 				this.submitQuery
 			);
 			
-			if(modeTabView) {
+			if(!modeTabView) {
 				
-				$("#"+containerId+" .dataBrowser-autoForm-tabView").height($("#"+containerId).height() -50);
-				
-			} else {
 				$("#"+containerId+" .dataBrowser-dataContainer").height($("#"+containerId).height() - 50);
 				this.currentDialog.dialog("open");
 			}
+			
 			$("#"+containerId+"_query_reset_button").bind("click", function (event) {
 				
 				event.preventDefault();
@@ -583,20 +573,10 @@ DataBrowser.prototype = {
 				});
 			};
 			
-			// if(option.query !== "") {
-				// this.refreshDataClass({
-					// "name" : option.name,
-					// "query" : option.query,
-					// "modeTabView" : option.modeTabView,
-					// "containerId" : containerId
-				// });
-			// }
-			
 			if(modeTabView) {
 				
 				$("#"+tabViewContainer.id+"_splitter").bind("mousedown", {"containerId" : tabViewContainer.id}, this.mousedown_splitter);
 				$("#"+tabViewContainer.id+"_splitter").bind("dblclick", {"containerId" : tabViewContainer.id}, this.dblClickSplitter);
-				$("#"+containerId+" .dataBrowser-dataContainer").height($("#"+containerId).height() -50);
 			}
 			
 			dataGrid.gridController.onRowRightClick = function onRowRightClick_dataBrowser_dataGrid(position, rightClickEvent) {
@@ -793,7 +773,6 @@ DataBrowser.prototype = {
 			$("#"+containerId+"_autoForm").parent().css("right", "0");
 			$("#"+containerId+"_autoForm").parent().width("50%");
 			$("#"+containerId+"_autoForm").parent().show();
-			$("#"+containerId+"_autoForm").parent().height($("#"+containerId).height() -50);
 			$("#"+containerId+"_dataGrid").width("50%");
 			$("#"+containerId+"_autoForm").height("100%");
 		} else {

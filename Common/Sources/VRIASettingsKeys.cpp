@@ -149,6 +149,7 @@ namespace RIASettingsKeys
 	{
 		CREATE_BAGKEY_NO_DEFAULT( name, XBOX::VString);
 		CREATE_BAGKEY_WITH_DEFAULT_SCALAR( enabled, XBOX::VBoolean, bool, true);
+		CREATE_BAGKEY_NO_DEFAULT( modulePath, XBOX::VString);
 	}
 
 	// Web App Service settings

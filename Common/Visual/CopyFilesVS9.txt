@@ -220,6 +220,7 @@ LA______mAs_ %Depot%CoreRuntime\%Branch%\Resources\ASIPORT.WIN.RSR
 LA______mAs_ %Depot%CoreRuntime\%Branch%\Resources\KeyboardMapping.WIN.XML
 LA______mAsA %Depot%XToolbox\%Branch%\Kernel\Resources\BasicUTIs.WIN.plist
 LA______mAs_ %Depot%CoreRuntime\%Branch%\Resources\PreferencesPages.xml
+LA______mAs_ %Depot%CoreRuntime\%Branch%\Resources\Images
 
 LA______mAs_ %Depot%CoreRuntime\%Branch%\Resources\ByteSwap.TXT
 LA______mAs_ %Depot%CoreRuntime\%Branch%\Resources\Language Support
