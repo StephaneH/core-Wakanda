@@ -1,4 +1,4 @@
-package com.wakanda.qa.security;
+package com.wakanda.qa.dataperm;
 
 import org.apache.http.Header;
 import org.apache.http.HttpHost;

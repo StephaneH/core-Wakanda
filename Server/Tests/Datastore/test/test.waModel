@@ -7,13 +7,49 @@
 	<relationCurve ____objectunic="true" run="true" mode="1"/>
 </extraProperties>
 
+<dataClasses name="AddCollection1" className="AddCollection1" collectionName="AddCollection1Collection" scope="public" uuid="8C444FAC0A61D64C8921DD5D987FBE85" tablePos="27">
+
+	<extraProperties ____objectunic="true" panelColor="#BFBFBF">
+
+		<panel ____objectunic="true" isOpen="true" pathVisible="true">
+
+			<position ____objectunic="true" X="240" Y="1342"/>
+</panel>
+</extraProperties>
+
+	<attributes name="ID" kind="storage" scope="public" uuid="CF680A8362904A46BD05B7455696D194" fieldPos="1" unique="true" autosequence="true" type="long" primKey="true"/>
+
+	<attributes name="name" kind="storage" scope="public" uuid="43B3D8CC5DBCBC45A1B96917D1E41E3E" fieldPos="2" type="string"/>
+
+	<attributes name="cnum" kind="storage" scope="public" uuid="AB809CB28C5CDD4E97946437FD73C297" fieldPos="3" type="number"/>
+
+</dataClasses>
+
+<dataClasses name="AddCollection2" className="AddCollection2" collectionName="AddCollection2Collection" scope="public" uuid="DD133851819D0142B68E15F942C1A0B3" tablePos="28">
+
+	<extraProperties ____objectunic="true" panelColor="rgb(191, 191, 191)">
+
+		<panel ____objectunic="true" isOpen="true" pathVisible="false">
+
+			<position ____objectunic="true" X="458" Y="1356"/>
+</panel>
+</extraProperties>
+
+	<attributes name="ID" kind="storage" scope="public" uuid="FE8A7D3A017A9F438A15D1323B091585" fieldPos="1" unique="true" autosequence="true" type="long" primKey="true"/>
+
+	<attributes name="name" kind="storage" scope="public" uuid="52F1F8C727A95D478275A879A0C43BCD" fieldPos="2" type="string"/>
+
+	<attributes name="cnum" kind="storage" scope="public" uuid="30F333388EA17B4B8E3429DDB07F3A88" fieldPos="3" type="number"/>
+
+</dataClasses>
+
 <dataClasses name="Component" className="Component" collectionName="ComponentCollection" scope="public" uuid="B01BC67829F6D74EB53F81CAAD31CD72" tablePos="16">
 
 	<extraProperties ____objectunic="true" panelColor="#8DB3E2">
 
 		<panel ____objectunic="true" isOpen="true" pathVisible="false">
 
-			<position ____objectunic="true" X="284" Y="637"/>
+			<position ____objectunic="true" X="304" Y="585"/>
 </panel>
 </extraProperties>
 
@@ -31,7 +67,7 @@
 
 		<panel ____objectunic="true" isOpen="true" pathVisible="true">
 
-			<position ____objectunic="true" X="22" Y="1307"/>
+			<position ____objectunic="true" X="23" Y="1307"/>
 </panel>
 </extraProperties>
 
@@ -47,11 +83,39 @@
 
 		<panel ____objectunic="true" isOpen="true" pathVisible="true">
 
-			<position ____objectunic="true" X="243" Y="1159"/>
+			<position ____objectunic="true" X="602" Y="695"/>
 </panel>
 </extraProperties>
 
 	<attributes name="ID" kind="storage" scope="public" uuid="6B3BA5651D25D348B97DECF2EBEA7845" fieldPos="1" unique="true" autosequence="true" type="long" primKey="true"/>
+
+</dataClasses>
+
+<dataClasses name="MyClass_QueryTests" className="MyClass_QueryTests" collectionName="MyClass_QueryTestsCollection" scope="public" uuid="BA2E4D0BF283CB4B8EDC0F7DA0E27F54" tablePos="29">
+
+	<extraProperties ____objectunic="true" panelColor="rgb(199, 61, 69)">
+
+		<panel ____objectunic="true" isOpen="true" pathVisible="true">
+
+			<position ____objectunic="true" X="238" Y="1490"/>
+</panel>
+</extraProperties>
+
+	<attributes name="ID" kind="storage" scope="public" uuid="C76EA47EB15A1349A0A123A0FDDD6DC6" fieldPos="1" unique="true" autosequence="true" type="long" primKey="true"/>
+
+	<attributes name="name" kind="storage" scope="public" uuid="AEBDB6EDECA5AE438FE503142AA22E01" fieldPos="2" type="string"/>
+
+	<attributes name="cnum" kind="storage" scope="public" uuid="CAB23D096C9D3047A6701D5CA9B0360B" fieldPos="3" type="number"/>
+
+	<attributes name="cbyte" kind="storage" scope="public" uuid="431B22059D678D41B5CCF39D8486360E" fieldPos="4" type="byte"/>
+
+	<attributes name="clong" kind="storage" scope="public" uuid="5B78600BC3DBDE48BFDFA0D5F6BC6485" fieldPos="5" type="long"/>
+
+	<attributes name="cduration" kind="storage" scope="public" uuid="6A3790517E216B48973F520292A5D0DE" fieldPos="6" type="duration"/>
+
+	<attributes name="cbool" kind="storage" scope="public" uuid="6DF8FAAF091A184A8CA55B526838BC76" fieldPos="7" type="bool"/>
+
+	<attributes name="cdate" kind="storage" scope="public" uuid="2EE17B9B3828B3428C9BE5160F826DCA" fieldPos="8" type="date"/>
 
 </dataClasses>
 
@@ -61,7 +125,7 @@
 
 		<panel ____objectunic="true" isOpen="true" pathVisible="true">
 
-			<position ____objectunic="true" X="54" Y="124"/>
+			<position ____objectunic="true" X="20" Y="129"/>
 </panel>
 </extraProperties>
 
@@ -99,7 +163,7 @@
 
 		<panel ____objectunic="true" isOpen="true" pathVisible="true">
 
-			<position ____objectunic="true" X="629" Y="896"/>
+			<position ____objectunic="true" X="608" Y="941"/>
 </panel>
 </extraProperties>
 
@@ -117,7 +181,7 @@
 
 		<panel ____objectunic="true" isOpen="true" pathVisible="false">
 
-			<position ____objectunic="true" X="581" Y="165"/>
+			<position ____objectunic="true" X="475" Y="149"/>
 </panel>
 </extraProperties>
 
@@ -139,7 +203,7 @@
 
 		<panel ____objectunic="true" isOpen="true" pathVisible="false">
 
-			<position ____objectunic="true" X="339" Y="472"/>
+			<position ____objectunic="true" X="260" Y="434"/>
 </panel>
 </extraProperties>
 
@@ -157,7 +221,7 @@
 
 		<panel ____objectunic="true" isOpen="true" pathVisible="false" resizedHeight="">
 
-			<position ____objectunic="true" X="362" Y="296"/>
+			<position ____objectunic="true" X="254" Y="259"/>
 </panel>
 </extraProperties>
 
@@ -177,7 +241,7 @@
 
 		<panel ____objectunic="true" isOpen="true" pathVisible="false">
 
-			<position ____objectunic="true" X="43" Y="521"/>
+			<position ____objectunic="true" X="20" Y="530"/>
 </panel>
 </extraProperties>
 
@@ -193,9 +257,9 @@
 
 	<extraProperties ____objectunic="true" panelColor="#70CCC2">
 
-		<panel ____objectunic="true" isOpen="true" pathVisible="true">
+		<panel ____objectunic="true" isOpen="true" pathVisible="false">
 
-			<position ____objectunic="true" X="667" Y="1275"/>
+			<position ____objectunic="true" X="665" Y="1112"/>
 </panel>
 </extraProperties>
 
@@ -215,7 +279,7 @@
 
 		<panel ____objectunic="true" isOpen="true" pathVisible="true">
 
-			<position ____objectunic="true" X="367" Y="796"/>
+			<position ____objectunic="true" X="342" Y="741"/>
 </panel>
 </extraProperties>
 
@@ -243,7 +307,43 @@
 
 	<attributes name="cduration" kind="storage" scope="public" uuid="CFE8BAF2AD286D46B3696D8170BED83F" fieldPos="10" type="duration"/>
 
-	<attributes name="clink" kind="relatedEntity" scope="public" type="MyClass10" uuid="EFFDA4A75EF7F14DB2112C81A14F4765" fieldPos="12" path="MyClass10"/>
+	<attributes name="clink" kind="relatedEntity" scope="public" type="MyClass10" uuid="EFFDA4A75EF7F14DB2112C81A14F4765" fieldPos="11" path="MyClass10"/>
+
+</dataClasses>
+
+<dataClasses name="MyClassForImageTest" className="MyClassForImageTest" collectionName="MyClassForImageTestCollection" scope="public" uuid="D340CEFD186CF7459FE9E13ED23B685D" tablePos="25">
+
+	<extraProperties ____objectunic="true" panelColor="#fff">
+
+		<panel ____objectunic="true" isOpen="true" pathVisible="false">
+
+			<position ____objectunic="true" X="258" Y="1195"/>
+</panel>
+</extraProperties>
+
+	<attributes name="ID" kind="storage" scope="public" uuid="2DFC1107425E74479B94CAA412D901A6" fieldPos="1" unique="true" autosequence="true" type="long" primKey="true"/>
+
+	<attributes name="cname" kind="storage" scope="public" uuid="344C1ACD5941B14CBA70F7B080298C3F" fieldPos="2" type="string"/>
+
+	<attributes name="cimage" kind="storage" scope="public" uuid="69DED29E5F81884A9D94826DEB5E99DD" fieldPos="3" type="image"/>
+
+</dataClasses>
+
+<dataClasses name="MyClassForImageTest2" className="MyClassForImageTest2" collectionName="MyClassForImageTest2Collection" scope="public" uuid="5446FA1D7BCF864EA24DDB4F4BD3230A" tablePos="26">
+
+	<extraProperties ____objectunic="true" panelColor="#4FA997">
+
+		<panel ____objectunic="true" isOpen="true" pathVisible="false">
+
+			<position ____objectunic="true" X="665" Y="1281"/>
+</panel>
+</extraProperties>
+
+	<attributes name="ID" kind="storage" scope="public" uuid="372B90B375EDA44CB889CD83C6AC1519" fieldPos="1" unique="true" autosequence="true" type="long" primKey="true"/>
+
+	<attributes name="cname" kind="storage" scope="public" uuid="38469B9BFEF23E4FA94DC3615FE19893" fieldPos="2" type="string"/>
+
+	<attributes name="cimage" kind="storage" scope="public" uuid="42081C59A9A8D14685DED83CE9B6CCB0" fieldPos="3" type="image"/>
 
 </dataClasses>
 
@@ -253,7 +353,7 @@
 
 		<panel ____objectunic="true" isOpen="true" pathVisible="false">
 
-			<position ____objectunic="true" X="363" Y="168"/>
+			<position ____objectunic="true" X="255" Y="136"/>
 </panel>
 </extraProperties>
 
@@ -269,7 +369,7 @@
 
 		<panel ____objectunic="true" isOpen="true">
 
-			<position ____objectunic="true" X="57" Y="20"/>
+			<position ____objectunic="true" X="32" Y="24"/>
 </panel>
 </extraProperties>
 
@@ -283,7 +383,7 @@
 
 		<panel ____objectunic="true" isOpen="true" pathVisible="false">
 
-			<position ____objectunic="true" X="341" Y="32"/>
+			<position ____objectunic="true" X="253" Y="14"/>
 </panel>
 </extraProperties>
 
@@ -299,7 +399,7 @@
 
 		<panel ____objectunic="true" isOpen="true" pathVisible="true">
 
-			<position ____objectunic="true" X="459" Y="1313"/>
+			<position ____objectunic="true" X="458" Y="1108"/>
 </panel>
 </extraProperties>
 
@@ -347,7 +447,7 @@
 
 		<panel ____objectunic="true" isOpen="true">
 
-			<position ____objectunic="true" X="669" Y="1161"/>
+			<position ____objectunic="true" X="259" Y="1094"/>
 </panel>
 </extraProperties>
 
@@ -361,7 +461,7 @@
 
 		<panel ____objectunic="true" isOpen="true" pathVisible="false">
 
-			<position ____objectunic="true" X="579" Y="40"/>
+			<position ____objectunic="true" X="477" Y="18"/>
 </panel>
 </extraProperties>
 
@@ -377,7 +477,7 @@
 
 		<panel ____objectunic="true" isOpen="true" pathVisible="false">
 
-			<position ____objectunic="true" X="29" Y="1443"/>
+			<position ____objectunic="true" X="31" Y="1433"/>
 </panel>
 </extraProperties>
 
@@ -407,7 +507,7 @@
 
 		<panel ____objectunic="true" isOpen="true" pathVisible="false">
 
-			<position ____objectunic="true" X="449" Y="1162"/>
+			<position ____objectunic="true" X="606" Y="801"/>
 </panel>
 </extraProperties>
 
@@ -423,7 +523,7 @@
 
 		<panel ____objectunic="true" isOpen="true" pathVisible="true" resizedHeight="">
 
-			<position ____objectunic="true" X="19" Y="681"/>
+			<position ____objectunic="true" X="22" Y="681"/>
 </panel>
 </extraProperties>
 
@@ -449,7 +549,7 @@
 
 		<panel ____objectunic="true" isOpen="true" pathVisible="false" resizedHeight="">
 
-			<position ____objectunic="true" X="549" Y="633"/>
+			<position ____objectunic="true" X="536" Y="535"/>
 </panel>
 </extraProperties>
 
@@ -467,7 +567,7 @@
 
 		<panel ____objectunic="true" isOpen="true" pathVisible="true">
 
-			<position ____objectunic="true" X="249" Y="1309"/>
+			<position ____objectunic="true" X="457" Y="1231"/>
 </panel>
 </extraProperties>
 
@@ -483,7 +583,7 @@
 
 		<panel ____objectunic="true" isOpen="true" pathVisible="false">
 
-			<position ____objectunic="true" X="602" Y="405"/>
+			<position ____objectunic="true" X="520" Y="353"/>
 </panel>
 </extraProperties>
 
@@ -497,43 +597,21 @@
 
 </dataClasses>
 
-<dataClasses collectionName="MyClassForImageTestCollection" className="MyClassForImageTest" uuid="D340CEFD186CF7459FE9E13ED23B685D" tablePos="25">
+<dataClasses collectionName="PersonnCollection" className="Personn" uuid="36EC38674F409749A5F9644FA1BCDF6D" tablePos="30">
 
-	<extraProperties ____objectunic="true" panelColor="#fff">
+	<extraProperties ____objectunic="true" panelColor="#76923C">
 
 		<panel ____objectunic="true" isOpen="true" pathVisible="true">
 
-			<position ____objectunic="true" X="254" Y="1453"/>
+			<position ____objectunic="true" X="487" Y="1526"/>
 
 		</panel>
 
 	</extraProperties>
 
-	<attributes name="ID" kind="storage" type="long" uuid="2DFC1107425E74479B94CAA412D901A6" fieldPos="1" autosequence="true" unique="true" primKey="true"/>
+	<attributes name="ID" kind="storage" type="long" uuid="F621028F2BD38648B0FF6D71FB725607" fieldPos="1" autosequence="true" unique="true" primKey="true"/>
 
-	<attributes name="cname" scope="public" uuid="344C1ACD5941B14CBA70F7B080298C3F" fieldPos="2" type="string" kind="storage"/>
-
-	<attributes name="cimage" scope="public" uuid="69DED29E5F81884A9D94826DEB5E99DD" fieldPos="3" type="image" kind="storage"/>
-
-</dataClasses>
-
-<dataClasses collectionName="MyClassForImageTest2Collection" className="MyClassForImageTest2" uuid="5446FA1D7BCF864EA24DDB4F4BD3230A" tablePos="26">
-
-	<extraProperties ____objectunic="true" panelColor="#4FA997">
-
-		<panel ____objectunic="true" isOpen="true" pathVisible="true">
-
-			<position ____objectunic="true" X="476" Y="1456"/>
-
-		</panel>
-
-	</extraProperties>
-
-	<attributes name="ID" kind="storage" type="long" uuid="372B90B375EDA44CB889CD83C6AC1519" fieldPos="1" autosequence="true" unique="true" primKey="true"/>
-
-	<attributes name="cname" scope="public" uuid="38469B9BFEF23E4FA94DC3615FE19893" fieldPos="2" type="string" kind="storage"/>
-
-	<attributes name="cimage" scope="public" uuid="42081C59A9A8D14685DED83CE9B6CCB0" fieldPos="3" type="image" kind="storage"/>
+	<attributes name="personn" scope="public" uuid="CAC3CFC7B10D104F816AD9885B960D66" fieldPos="2" type="string" kind="storage"/>
 
 </dataClasses>
 </EntityModelCatalog>

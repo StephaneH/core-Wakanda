@@ -10,8 +10,8 @@ import org.apache.http.auth.AUTH;
 import org.apache.http.util.EntityUtils;
 import org.junit.Test;
 
+import com.wakanda.qa.dataperm.Targets;
 import com.wakanda.qa.dataperm.test.extend.AbstractSecurityTestCase;
-import com.wakanda.qa.security.Targets;
 
 /**
  * @author ouissam.gouni@4d.com

@@ -1,9 +1,9 @@
 /**
  * 
  */
-package com.wakanda.qa.security;
+package com.wakanda.qa.dataperm;
 
-import static com.wakanda.qa.security.Resources.*;
+import static com.wakanda.qa.dataperm.Resources.*;
 
 import java.util.Properties;
 

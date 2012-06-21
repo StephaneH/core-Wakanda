@@ -1,10 +1,10 @@
-package com.wakanda.qa.security;
+package com.wakanda.qa.dataperm;
 
-import static com.wakanda.qa.security.RequestUtil.executeRequest;
-import static com.wakanda.qa.security.Resources.getDefaultTarget;
-import static com.wakanda.qa.security.Resources.getSolutionPath;
-import static com.wakanda.qa.security.Resources.getWakandaServerPathEVName;
-import static com.wakanda.qa.security.Resources.getWebAdminTarget;
+import static com.wakanda.qa.dataperm.RequestUtil.executeRequest;
+import static com.wakanda.qa.dataperm.Resources.getDefaultTarget;
+import static com.wakanda.qa.dataperm.Resources.getSolutionPath;
+import static com.wakanda.qa.dataperm.Resources.getWakandaServerPathEVName;
+import static com.wakanda.qa.dataperm.Resources.getWebAdminTarget;
 
 import java.io.UnsupportedEncodingException;
 import java.util.GregorianCalendar;

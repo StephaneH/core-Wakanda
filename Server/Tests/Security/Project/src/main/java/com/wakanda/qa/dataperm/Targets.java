@@ -1,10 +1,10 @@
 /**
  * 
  */
-package com.wakanda.qa.security;
+package com.wakanda.qa.dataperm;
 
-import static com.wakanda.qa.security.Resources.getDefaultHostName;
-import static com.wakanda.qa.security.Resources.getGlobalProp;
+import static com.wakanda.qa.dataperm.Resources.getDefaultHostName;
+import static com.wakanda.qa.dataperm.Resources.getGlobalProp;
 
 import org.apache.http.HttpHost;
 

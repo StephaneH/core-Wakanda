@@ -8,9 +8,9 @@ import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
+import com.wakanda.qa.dataperm.ServerUtil;
 import com.wakanda.qa.dataperm.test.inherit.InheritedPermTestSuite;
 import com.wakanda.qa.dataperm.test.simple.SimplePermTestSuite;
-import com.wakanda.qa.security.ServerUtil;
 
 
 

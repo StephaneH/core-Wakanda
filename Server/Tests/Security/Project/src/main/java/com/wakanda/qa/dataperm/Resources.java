@@ -1,4 +1,4 @@
-package com.wakanda.qa.security;
+package com.wakanda.qa.dataperm;
 
 import java.io.File;
 import java.io.InputStream;

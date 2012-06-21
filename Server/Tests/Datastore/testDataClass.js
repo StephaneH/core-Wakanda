@@ -889,10 +889,21 @@ var testCase = {
             testCreateEntity_DataClassWithoutAttributes: true,
             testCreateEntityCollection_AddBadEntity: true, //L.E asks me to deactivate it 
             testDistinctValues_DuplicateNullAndNotNullData: true, //Waiting for L.R implementation
-            testQuery0: true, //TBD
         }
     },
 
+	    setUp : function () {
+     if (os.isWindows) {
+      // On ignore le test suivant sous Windows :
+     }
+     if (os.isLinux) {
+      // On ignore le test suivant sous Windows :
+	  this._should.ignore.testToArray_DataClassWithImageAttribute_ValuesShouldNotBeNull = true;
+	  this._should.ignore.testToArray_DatastoreWithImageAttribute = true;
+	  this._should.ignore.testFromArray_ArrayWhithDataContainingImages = true;
+     }
+    },
+	
     //Existence
     testDataClassExistency: function() {
         Y.Assert.isObject(ds.MyClass1, "Existence failed.");
@@ -1317,7 +1328,7 @@ var testCase = {
     //Must success
     testCompute_SyntaxDataClassAttributeAsString: function() {
         Y.Assert.isObject(ds.MyClass1.compute('cnum'), "Syntax failed :ds.MyClass1.compute('cnum').");
-        Y.Assert.isObject(ds.MyClass1.compute('cnum,cnum2'), "Syntax failed :ds.MyClass1.compute('cnum,cnum2').");
+        Y.Assert.isObject(ds.MyClass1.compute('cnum,clong'), "Syntax failed :ds.MyClass1.compute('cnum,cnum2').");
     },
     testCompute_SyntaxDataClassAttributeAsAttribute: function() {
         Y.Assert.isObject(ds.MyClass1.compute(ds.MyClass1.cnum), "Syntax failed :ds.MyClass1.compute(ds.MyClass1.cnum).");
@@ -1371,7 +1382,17 @@ var testCase = {
     },
     //Inexistant attribute
     testCompute_InexistantAttributeParam: function() {
-        Y.Assert.isNull(ds.MyClass1.compute('myInexistantAttribute'), "Inexistant attribute failed.");
+		var isGood = true;
+		try
+		{
+			ds.MyClass1.compute('myInexistantAttribute');
+			isGood = false;
+		}
+		catch(e)
+		{
+		}
+		if(!isGood)
+			Y.Assert.fail("Inexistant attribute should generate exception.");
     },
     //
     testCompute_SameAttributeTwice: function() {
@@ -1751,11 +1772,11 @@ var testCase = {
 			isGood2 = false;
 		}
 		catch(e){}
-		if(!isGood && !isGood2)
+		if(!isGood1 && !isGood2)
 			message +=" and ";
 		if(!isGood2)
 			message += "'Linked attribute'";
-        if(!isGood || !isGood2)
+        if(!isGood1 || !isGood2)
 			Y.Assert.fail("distinctValues with "+message+" fail.");
     },
     //empty collection
@@ -2808,8 +2829,33 @@ var testCase = {
     },
 	//(WAK0072462 Bug)
     testOrderBy_TypeBlob: function() {
-        Y.Assert.isNull(ds.MyOrderbyClass.orderBy('cblob asc'), "order by attribut of type blob is not allowed.");
-        Y.Assert.isNull(ds.MyOrderbyClass.orderBy('cblob desc'), "order by attribut of type blob is not allowed.");
+		var message = "";
+		var isGood1 = true;
+		var isGood2 = true;
+		try
+		{
+			ds.MyOrderbyClass.orderBy('cblob asc');
+			isGood1 = false;
+		}
+		catch(e)
+		{
+		}
+		try
+		{
+			ds.MyOrderbyClass.orderBy('cblob desc');
+			isGood2 = false;
+		}
+		catch(e)
+		{
+		}
+		if(!isGood1)
+			message+=" 'asc' ";
+		if(!isGood1 && !isGood2 )
+			message+="and";
+		if(!isGood2)
+			message+=" 'desc' ";
+		if(!isGood1 || !isGood2 )
+			Y.Assert.fail("order by attribut of type blob is not allowed. case :"+message);
     },
     //Only null values
     testOrderBy_DataClassWithOnlyNullValuesAsc: function() {
@@ -3018,9 +3064,6 @@ var testCase = {
         if (orderByError != "")
             Y.Assert.fail(orderByError);
     },
-    testQuery0: function() {
-    //
-    },
 	//we applied the remove() methode to these class: MyClass4, ToBeRemoved, MyEmptyClass, Component and TheComposite
     //test of remove() with data
 	testRemove_WithData: function() {
@@ -3098,23 +3141,22 @@ var testCase = {
         var value = -300;
         ds.MyAutoSequenceNumberClass.setAutoSequenceNumber(value);
         var entity = ds.MyAutoSequenceNumberClass.createEntity();
+		entity.save();
         Y.Assert.areSame(value, entity.ID, "setAutoSequenceNumber with negative value failed.");
     },
     //change to an already used auto sequence number
     testSetAutoSequenceNumber_AlreadyUsed: function() {
-		var isGood = false;
-        var entity = ds.MyAutoSequenceNumberClass.createEntity();
-        entity.save();
-        var id = entity.ID;
+		var isGood = true;
+        var id = -300;
 		ds.MyAutoSequenceNumberClass.setAutoSequenceNumber(id);
 		try{
 			var newEntity = ds.MyAutoSequenceNumberClass.createEntity();
 		}
 		catch(e){
-			isGood = true;
+			isGood = false;
 		}
 		if(!isGood)
-			Y.Assert.fail("setAutoSequenceNumber with already used value should fail.");
+			Y.Assert.fail("setAutoSequenceNumber with already used value shouldn't generate exception.");
     },
     //
     //Existence
@@ -3985,7 +4027,50 @@ var testCase = {
 		var entity2 = ds.MyClass1.find("ID=1");
 		coll.add(entity1);
 		coll.add(entity2,"AtTheEnd");
-		Y.Assert.areSame(1,coll.length,"add method shouldn't duplicat entities in the entity collection.");
+		Y.Assert.areSame(2,coll.length,"add method should duplicat entities in a sorted entity collection.");
+	},
+	//test coll1 and coll2 are empty.
+	testAnd_BothAreEmpty: function(){
+		var coll1 = ds.MyClass1.createEntityCollection();
+		var coll2 = ds.MyClass1.createEntityCollection();
+		var coll3 = coll1.and(coll2);
+		Y.Assert.areSame(0,coll3.length,"add of two empty collection should return an empty collection.");
+	},
+	//test collection is empty.
+	testAnd_EmptyCollection: function(){
+		var coll1 = ds.MyClass1.createEntityCollection();
+		var coll2 = ds.MyClass1.createEntityCollection();
+		var entity1 = ds.MyClass1.find("ID=1");
+		coll1.add(entity1);
+		var coll3 = coll1.and(coll2);
+		Y.Assert.areSame(0,coll3.length,"add of two empty collection should return an empty collection.");
+	},
+	//test param is empty.
+	testAnd_ParamIsEmpty: function(){
+		var coll1 = ds.MyClass1.createEntityCollection();
+		var coll2 = ds.MyClass1.createEntityCollection();
+		var entity1 = ds.MyClass1.find("ID=1");
+		coll2.add(entity1);
+		var coll3 = coll1.and(coll2);
+		Y.Assert.areSame(0,coll3.length,"add of two empty collection should return an empty collection.");
+	},
+	//test param is empty.
+	testAnd_FromIncompatibleDataclass: function(){
+		var isGood = false;
+		var coll1 = ds.AddCollection1.createEntityCollection();
+		var coll2 = ds.AddCollection2.createEntityCollection();
+		var entity1 = ds.AddCollection1.find("ID=1");
+		var entity2 = ds.AddCollection2.find("ID=1");
+		coll1.add(entity1);
+		coll2.add(entity2);
+		try{
+			var coll3 = coll1.and(coll2);
+		}
+		catch(e){
+			isGood = true;
+		}
+		if(!isGood)
+			Y.Assert.fail("and method applied to incompatible dataclass should generate exceptionf");
 	},
 	//
     testToString: function() {

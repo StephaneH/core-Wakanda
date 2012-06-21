@@ -1,18 +1,3 @@
-/*
-* This file is part of Wakanda software, licensed by 4D under
-*  (i) the GNU General Public License version 3 (GNU GPL v3), or
-*  (ii) the Affero General Public License version 3 (AGPL v3) or
-*  (iii) a commercial license.
-* This file remains the exclusive property of 4D and/or its licensors
-* and is protected by national and international legislations.
-* In any event, Licensee's compliance with the terms and conditions
-* of the applicable license constitutes a prerequisite to any use of this file.
-* Except as otherwise expressly stated in the applicable license,
-* such license does not include any other license or rights on this file,
-* 4D's and/or its licensors' trademarks and/or other proprietary rights.
-* Consequently, no title, copyright or other proprietary rights
-* other than those specified in the applicable license is granted.
-*/
 /**
  *
  * Updated September 27, 2011 - Methods and properties for managing Directory, Group and User objects
@@ -29,10 +14,36 @@ ConnectionSession = function ConnectionSession() {
      *
      * @property user
      * @attributes ReadOnly
-     * @type User | Null
+     * @type User
      */
-    this.user =  new User( ) || new Null( ); 
+    this.user =  new User( ); 
     
+    /**
+     * 
+     *
+     * @property storage
+     * @attributes 
+     * @type Storage
+     */
+    this.storage =  new Storage( ); 
+    
+    
+    /**
+     * stops the temporary promotion set for the current session using the promoteWith( ) method
+     *
+     * @method unPromote
+     * @param {Number} token
+     */
+    this.unPromote = function unPromote(token) {             };
+    
+    /**
+     * temporarily promotes the current session into the group
+     *
+     * @method promoteWith
+     * @param {Group | String} group
+     * @return {Number}
+     */
+    this.promoteWith = function promoteWith(group) {        return 0;     };
     
     /**
      * returns true if the current session belongs to the group and throws an error if false
@@ -82,8 +93,9 @@ Directory = function Directory() {
      *
      * @method setLoginListener
      * @param {String} loginListener
+     * @param {Group | String} group
      */
-    this.setLoginListener = function setLoginListener(loginListener) {             };
+    this.setLoginListener = function setLoginListener(loginListener, group) {             };
     
     /**
      * saves all changes made to the open solution directory
@@ -150,6 +162,17 @@ Directory = function Directory() {
      * @return {Group}
      */
     this.addGroup = function addGroup(name, fullName) {        return new Group( );     };
+    
+    /**
+     * returns the HA1 key resulting from the combination of userName, password and (optionally) realm parameters using a hash function
+     *
+     * @method computeHA1
+     * @param {String} userName
+     * @param {String} password
+     * @param {String} realm
+     * @return {String}
+     */
+    this.computeHA1 = function computeHA1(userName, password, realm) {        return '';     };
     
 
 };
@@ -299,6 +322,15 @@ User = function User() {
      * @type String
      */
     this.name =  ''; 
+    
+    /**
+     * 
+     *
+     * @property 
+     * @attributes 
+     * @type String
+     */
+    this. =  ''; 
     
     
     /**

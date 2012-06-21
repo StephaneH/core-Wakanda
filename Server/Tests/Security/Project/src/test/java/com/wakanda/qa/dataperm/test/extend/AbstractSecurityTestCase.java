@@ -19,8 +19,8 @@ import org.junit.rules.Timeout;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
-import com.wakanda.qa.security.RequestUtil;
-import com.wakanda.qa.security.ServerUtil;
+import com.wakanda.qa.dataperm.RequestUtil;
+import com.wakanda.qa.dataperm.ServerUtil;
 
 /**
  * Abstract class that provides common test cases utilities.

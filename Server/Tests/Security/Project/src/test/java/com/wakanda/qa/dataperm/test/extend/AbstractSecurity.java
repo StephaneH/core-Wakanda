@@ -17,9 +17,9 @@ import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 
 import com.google.gson.Gson;
-import com.wakanda.qa.security.RequestUtil;
-import com.wakanda.qa.security.RequestUtil.AuthType;
-import com.wakanda.qa.security.Resources;
+import com.wakanda.qa.dataperm.RequestUtil;
+import com.wakanda.qa.dataperm.Resources;
+import com.wakanda.qa.dataperm.RequestUtil.AuthType;
 
 /**
  * Abstract class that defines methods to implements and provides some common
