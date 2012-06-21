@@ -303,6 +303,7 @@ public class PersistenceTest extends AbstractHttpTestCase {
 	 * 
 	 * @throws Exception
 	 */
+
 	@Test
 	public void testHTTP_1_0_PersistentConnection() throws Exception {
 		HttpHost target = getDefaultTarget();
@@ -323,7 +324,12 @@ public class PersistenceTest extends AbstractHttpTestCase {
 		conn.flush();
 		// consume the response
 		HttpResponse response = conn.receiveResponseHeader();
+		logger.debug(response.getStatusLine());
+		
 		conn.receiveResponseEntity(response);
+		
+		//String content = EntityUtils.toString(response.getEntity());
+		//logger.debug(content);
 		EntityUtils.consume(response.getEntity());
 
 		// check the status code

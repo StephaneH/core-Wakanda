@@ -2,6 +2,9 @@ package com.wakanda.qa.http.test.messages;
 
 import static junitparams.JUnitParamsRunner.$;
 import static org.junit.Assert.assertTrue;
+
+import java.util.GregorianCalendar;
+
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
 
@@ -164,11 +167,15 @@ public class HttpVersionTest extends AbstractHttpTestCase {
 	 * 
 	 * @throws Exception
 	 */
+
 	@Test
 	public void testHostHeaderIsOptionalIn_1_0_HttpVersion() throws Exception {
 		String request = "GET / HTTP/1.0" + CRLF
 						+ CRLF;
+		long start = GregorianCalendar.getInstance().getTimeInMillis();
 		HttpResponse response = executeRequestString(request);
+		long duration = GregorianCalendar.getInstance().getTimeInMillis() - start;
+		logger.debug("Duration: " + duration + " ms");
 		assertEqualsStatusCode(HttpStatus.SC_OK, response);
 
 	}

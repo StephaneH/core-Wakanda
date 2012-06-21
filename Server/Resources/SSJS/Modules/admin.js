@@ -132,8 +132,12 @@ exports.Verify = function verify(option) {
 				// addProblem function in the 'this' keyword
 				'storedProblems' : [] // we add an array to store any problems that arise
 			}
-
-			app.verifyDataStore(modelFile, modelData, options);
+			
+			if(solutionOpened === true) {
+				app.verifyDataStore(modelFile, modelData, options);
+			} else {
+				app.ds.verify(options);
+			}
 
 			if(options.storedProblems.length > 0) {
 

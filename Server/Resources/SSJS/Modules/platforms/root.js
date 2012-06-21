@@ -20,7 +20,7 @@
 */
 function root( request, response ) {
 
-    var indexPath       = application.webAppService.directoryIndex,
+    var indexPath       = "",
 		host 			= request.headers.HOST,
         userAgent		= request.headers.USER_AGENT,
     	conf 			= {},
@@ -32,7 +32,10 @@ function root( request, response ) {
     conf.smartphone 	= "smartphone";
     conf.tablet 		= "tablet";
     conf.desktop 		= "webfolder";
-
+	
+	var servicesSettings = application.settings.getItem( 'services');
+	if ((servicesSettings.webApp != null) && (typeof servicesSettings.webApp != 'undefined'))
+		indexPath = servicesSettings.webApp.directoryIndex; // sc 12/06/2012 WAK0077064, application.webAppService was removed
     
     //look for a suitable directory role depending on the platform
 	switch ( platform.OS ) {

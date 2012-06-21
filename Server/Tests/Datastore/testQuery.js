@@ -45,32 +45,15 @@ var testCase = {
 			testQuery_TypeDuration_StrictlyNotEqualTo_AltKeyword1_Placeholder: true,
 			testQuery_TypeDuration_StrictlyNotEqualTo_AltKeyword2_Placeholder: true,
 			testQuery_TypeDuration_StrictlyNotEqualTo_AltKeyword3_Placeholder: true,
+			testQuery_WrongArrayOfString1: true, // To be discussed
+			testQuery_WrongArrayOfString2: true, // To be discussed
+			testQuery_ArrayOfBytes: true, // fixed bug
+			testQuery_ArrayOfLongs: true, // fixed bug
+			testQuery_ArrayOfStings: true, //fixed bug
         }
     },
-	//test query: Array of booleans
-	testQuery_ArrayOfBooleans: function() {
-		var message = "";
-		var coll = ds.MyClass_QueryTests.query("cbool in [false]");
-		if(coll.length == 4)
-		{
-			for(var i = 0 ; i<4 ; i++ )
-			{
-				if(coll[i].cbool != false )
-				{
-					message += " (probleme in the entities of retured collection) ";
-					break;
-				}
-			}
-		}
-		else
-		{
-			message += " (probleme in the length returned collection) ";
-		}
-		if(message != "" )
-			Y.Assert.fail("query method with booleans array fail "+message);
-	},
 	//test query: Array of booleans with placeholders
-	testQuery_ArrayOfBooleansAndPlaceholders: function() {
+	testQuery_ArrayOfBooleansAndPlaceholders_false: function() {
 		var message = "";
 		var array = [false] ;
 		var coll = ds.MyClass_QueryTests.query("cbool in :1",array);
@@ -87,20 +70,21 @@ var testCase = {
 		}
 		else
 		{
-			message += " (probleme in the length returned collection) ";
+			message += " (probleme in the length of returned collection) ";
 		}
 		if(message != "" )
 			Y.Assert.fail("query method with booleans array and placeholders fail "+message);
 	},
-	//test query: Array of bytes
-	testQuery_ArrayOfBytes: function() {
+	//test query: Array of booleans with placeholders
+	testQuery_ArrayOfBooleansAndPlaceholders_true: function() {
 		var message = "";
-		var coll = ds.MyClass_QueryTests.query("cbyte in ['-1','0','7']");
-		if(coll.length == 5)
+		var array = [true] ;
+		var coll = ds.MyClass_QueryTests.query("cbool in :1",array);
+		if(coll.length == 6)
 		{
-			for(var i = 0 ; i<5 ; i++ )
+			for(var i = 0 ; i<6 ; i++ )
 			{
-				if(coll[i].cbyte != "-1" && coll[i].cbyte != "0" && coll[i].cbyte != "7" )
+				if(coll[i].cbool != true)
 				{
 					message += " (probleme in the entities of retured collection) ";
 					break;
@@ -109,15 +93,15 @@ var testCase = {
 		}
 		else
 		{
-			message += " (probleme in the length returned collection) ";
+			message += " (probleme in the length of returned collection) ";
 		}
 		if(message != "" )
-			Y.Assert.fail("query method with bytes array fail "+message);
+			Y.Assert.fail("query method with booleans array and placeholders fail "+message);
 	},
 	//test query: Array of bytes with placeholders
 	testQuery_ArrayOfBytesAndPlaceholders: function() {
 		var message = "";
-		var array = ['-1','0','7'] ;
+		var array = [-1,0,7] ;
 		var coll = ds.MyClass_QueryTests.query("cbyte in :1",array);
 		if(coll.length == 5)
 		{
@@ -132,37 +116,15 @@ var testCase = {
 		}
 		else
 		{
-			message += " (probleme in the length returned collection) ";
+			message += " (probleme in the length of returned collection) ";
 		}
 		if(message != "" )
 			Y.Assert.fail("query method with bytes array and placeholders fail "+message);
 	},
-	//test query: Array of durations
-	testQuery_ArrayOfDurations: function() {
-		var message = "";
-		var coll = ds.MyClass_QueryTests.query("cduration in ['2','10','19']");
-		if(coll.length == 4)
-		{
-			for(var i = 0 ; i<4 ; i++ )
-			{
-				if(coll[i].cduration != "2" && coll[i].cduration != "10" && coll[i].cduration != "19" )
-				{
-					message += " (probleme in the entities of retured collection) ";
-					break;
-				}
-			}
-		}
-		else
-		{
-			message += " (probleme in the length returned collection) ";
-		}
-		if(message != "" )
-			Y.Assert.fail("query method with durations array fail "+message);
-	},
 	//test query: Array of durations with placeholders
 	testQuery_ArrayOfDurationsAndPlaceholders: function() {
 		var message = "";
-		var array = ['2','10','19'] ;
+		var array = [2,10,19] ;
 		var coll = ds.MyClass_QueryTests.query("cduration in :1",array);
 		if(coll.length == 4)
 		{
@@ -177,37 +139,15 @@ var testCase = {
 		}
 		else
 		{
-			message += " (probleme in the length returned collection) ";
+			message += " (probleme in the length of returned collection) ";
 		}
 		if(message != "" )
 			Y.Assert.fail("query method with durations array and placeholders fail "+message);
 	},
-	//test query: Array of longs
-	testQuery_ArrayOfLongs: function() {
-		var message = "";
-		var coll = ds.MyClass_QueryTests.query("clong in ['5','0','-5000']");
-		if(coll.length == 3)
-		{
-			for(var i = 0 ; i<3 ; i++ )
-			{
-				if(coll[i].clong != "5" && coll[i].clong != "0" && coll[i].clong != "-5000" )
-				{
-					message += " (probleme in the entities of retured collection) ";
-					break;
-				}
-			}
-		}
-		else
-		{
-			message += " (probleme in the length returned collection) ";
-		}
-		if(message != "" )
-			Y.Assert.fail("query method with longs array fail "+message);
-	},
 	//test query: Array of longs with placeholders
 	testQuery_ArrayOfLongsAndPlaceholders: function() {
 		var message = "";
-		var array = ['5','0','-5000'] ;
+		var array = [5,0,-5000] ;
 		var coll = ds.MyClass_QueryTests.query("clong in :1",array);
 		if(coll.length == 3)
 		{
@@ -222,32 +162,10 @@ var testCase = {
 		}
 		else
 		{
-			message += " (probleme in the length returned collection) ";
+			message += " (probleme in the length of returned collection) ";
 		}
 		if(message != "" )
 			Y.Assert.fail("query method with longs array and placeholders fail "+message);
-	},
-	//test query: Array of numbers
-	testQuery_ArrayOfNumbers: function() {
-		var message = "";
-		var coll = ds.MyClass_QueryTests.query("cnum in ['12','314','314']");
-		if(coll.length == 3)
-		{
-			for(var i = 0 ; i<3 ; i++ )
-			{
-				if(coll[i].cnum != "12" && coll[i].cnum != "123" && coll[i].cnum != "314" )
-				{
-					message += " (probleme in the entities of retured collection) ";
-					break;
-				}
-			}
-		}
-		else
-		{
-			message += " (probleme in the length returned collection) ";
-		}
-		if(message != "" )
-			Y.Assert.fail("query method with string array fail "+message);
 	},
 	//test query: Array of numbers with placeholders
 	testQuery_ArrayOfNumbersAndPlaceholders: function() {
@@ -267,32 +185,10 @@ var testCase = {
 		}
 		else
 		{
-			message += " (probleme in the length returned collection) ";
+			message += " (probleme in the length of returned collection) ";
 		}
 		if(message != "" )
 			Y.Assert.fail("query method with string array and placeholders fail "+message);
-	},
-	//test query: Array of strings
-	testQuery_ArrayOfStings: function() {
-		var message = "";
-		var coll = ds.MyClass_QueryTests.query("name in ['Zza','ba','toto']");
-		if(coll.length == 5)
-		{
-			for(var i = 0 ; i<5 ; i++ )
-			{
-				if(coll[i].name != "toto" && coll[i].name != "ba" && coll[i].name != "Zza" )
-				{
-					message += " (probleme in the entities of retured collection) ";
-					break;
-				}
-			}
-		}
-		else
-		{
-			message += " (probleme in the length returned collection) ";
-		}
-		if(message != "" )
-			Y.Assert.fail("query method with string array fail "+message);
 	},
 	//test query: Array of strings with placeholders
 	testQuery_ArrayOfStingsAndPlaceholders: function() {
@@ -312,10 +208,65 @@ var testCase = {
 		}
 		else
 		{
-			message += " (probleme in the length returned collection) ";
+			message += " (probleme in the length of returned collection) ";
 		}
 		if(message != "" )
 			Y.Assert.fail("query method with string array and placeholders fail "+message);
+	},
+	//test query: Array of strings with placeholders
+	testQuery_ArrayOfStings2AndPlaceholders: function() {
+		var message = "";
+		var array = ["Zza","ba","toto"] ;
+		var coll = ds.MyClass_QueryTests.query("name in :1",array);
+		if(coll.length == 5)
+		{
+			for(var i = 0 ; i<5 ; i++ )
+			{
+				if(coll[i].name != "toto" && coll[i].name != "ba" && coll[i].name != "Zza" )
+				{
+					message += " (probleme in the entities of retured collection) ";
+					break;
+				}
+			}
+		}
+		else
+		{
+			message += " (probleme in the length of returned collection) ";
+		}
+		if(message != "" )
+			Y.Assert.fail("query method with string array and placeholders fail "+message);
+	},
+	//test should not work: wrong array of string.
+	testQuery_WrongArrayOfString1: function() {
+		var isGood = false;
+		try
+		{
+			var coll = ds.MyClass_QueryTests.query("name in 'toto'");
+		}
+		catch(e)
+		{
+			isGood = true;
+		}
+		if(!isGood)
+		{
+			Y.Assert.fail("Query with wrong array should not work");
+		}
+	},
+	//test should not work: wrong array of string.
+	testQuery_WrongArrayOfString2: function() {
+		var isGood = false;
+		try
+		{
+			var coll = ds.MyClass_QueryTests.query("name in ['toto'");
+		}
+		catch(e)
+		{
+			isGood = true;
+		}
+		if(!isGood)
+		{
+			Y.Assert.fail("Query with wrong array should not work");
+		}
 	},
 	//test query: Array and conjunction with placeholders
 	testQuery_ArrayAndConjunction: function() {
@@ -339,7 +290,30 @@ var testCase = {
 		}
 		else
 		{
-			message += " (probleme in the length returned collection) ";
+			message += " (probleme in the length of returned collection) ";
+		}
+		if(message != "" )
+			Y.Assert.fail("query method with longs array fail "+message);
+	},
+	//test query: Array and conjunction with placeholders
+	testQuery_ArrayAndConjunction_Placeholders: function() {
+		var message = "";
+		var arr = [12,123,314] ;
+		var coll = ds.MyClass_QueryTests.query( "cnum in :1 and clong >= :2",arr,0);
+		if(coll.length == 2)
+		{
+			for(var i = 0 ; i<2 ; i++ )
+			{
+				if(coll[i].cnum != 12 && coll[i].cnum != 123 && coll[i].cnum != 314 )
+				{
+					message += " (probleme in the entities of retured collection) ";
+					break;
+				}
+			}
+		}
+		else
+		{
+			message += " (probleme in the length of returned collection) ";
 		}
 		if(message != "" )
 			Y.Assert.fail("query method with longs array fail "+message);
@@ -7066,7 +7040,7 @@ var testCase = {
 		var isGood = true;
 		try
 		{
-			var col = ds.MyClass_QueryTests.query("personn = toto");
+			var col = ds.Personn.query("personn = toto");
 		}
 		catch(e)
 		{
@@ -7113,9 +7087,53 @@ var testCase = {
 		}
 		else
 		{
-			message += " (probleme in the length returned collection) ";
+			message += " (probleme in the length of returned collection) ";
 		}
 		if(message != "" )
 			Y.Assert.fail("query method with N to One relation attributes fail "+message);
-	}
+	},
+	//test Query: N to One relation attribut (same dataclass )
+	testQuery_NToOneRelationAttributes_SameDataclass_LevelOne: function() {
+		var message = "";
+		var coll = ds.People.query("father.name = A");
+		if(coll.length == 4)
+		{
+			for(var i = 0 ; i < 4 ; i++ )
+			{
+				if(coll[i].father.ID != 0)
+				{
+					message += " (probleme in the entities of retured collection) ";
+					break;
+				}
+			}
+		}
+		else
+		{
+			message += " (probleme in the length of returned collection) ";
+		}
+		if(message != "" )
+			Y.Assert.fail("query method with N to One relation attributes fail "+message);
+	},
+	//test Query: N to One relation attribut (same dataclass )
+	testQuery_NToOneRelationAttributes_SameDataclass_LevelTow: function() {
+		var message = "";
+		var coll = ds.People.query("father.mother.name = B");
+		if(coll.length == 2)
+		{
+			for(var i = 0 ; i < 2 ; i++ )
+			{
+				if(coll[i].father.mother.ID != 1)
+				{
+					message += " (probleme in the entities of retured collection) ";
+					break;
+				}
+			}
+		}
+		else
+		{
+			message += " (probleme in the length of returned collection) ";
+		}
+		if(message != "" )
+			Y.Assert.fail("query method with N to One relation attributes fail "+message);
+	},
 };

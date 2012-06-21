@@ -456,7 +456,7 @@ Admin.prototype = {
 						$$("adminTabView").selectTab(2);
 						
 						$("#adminMaintenanceProjectList").html("");
-						$("#maintenanceModeleFileDetail").html("");
+						$("#maintenanceModelFileDetail").html("");
 						$("#maintenanceLogFileDetail").html("");
 						$("#maintenanceProgress").hide();
 						
@@ -679,7 +679,7 @@ Admin.prototype = {
 		} else {
 			
 			$("#adminMaintenanceProjectList").html("");
-			$("#maintenanceModeleFileDetail").html("");
+			$("#maintenanceModelFileDetail").html("");
 			$("#maintenanceLogFileDetail").html("");
 			$("#maintenanceProgress").hide();
 		}
@@ -758,7 +758,8 @@ Admin.prototype = {
 	},
 	
 	displayModeleFileDetail : function display_modele_file_detail(currentApplication) {
-		var modeleFileHtml;
+		var modeleFileHtml,
+			waDataFilePath;
 		
 		modeleFileHtml = "";
 		
@@ -769,15 +770,21 @@ Admin.prototype = {
 		}
 		
 		if(currentApplication !== null) {
+			waDataFilePath = currentApplication.waData;
+			
+			if(currentApplication.http.enabled && waDataFilePath !== '') {
+				waDataFilePath += ' <a href="http://'+currentApplication.http.hostName+':'+currentApplication.http.port+'/walib/dataBrowser/index.html" target="_blank" title="Data Browser" alt="Data Browser">[^]</a>';
+			}
+			
 			modeleFileHtml = '<div class="modele-file-line">'+
 				'<span class="modele-file-label">Model: </span><div class="modele-file-path">'+currentApplication.waModel+'</div>'+
 			'</div>'+
 			'<div class="modele-file-line">'+
-				'<span class="modele-file-label">Data: </span><div class="modele-file-path">'+currentApplication.waData+'</div>'+
+				'<span class="modele-file-label">Data: </span><div class="modele-file-path">'+waDataFilePath+'</div>'+
 			'</div>';
 		}
 		
-		$("#maintenanceModeleFileDetail").html(modeleFileHtml);
+		$("#maintenanceModelFileDetail").html(modeleFileHtml);
 	},
 	
 	displayLogFileDetail : function display_log_file_detail(logs) {

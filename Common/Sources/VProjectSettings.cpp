@@ -228,7 +228,7 @@ sLONG VProjectSettings::GetKeepAliveTimeOut() const
 void VProjectSettings::GetLogFolderPath( XBOX::VString& outFolderPath) const
 {
 	const VValueBag *bag = RetainSettings( RIASettingID::http);
-	outFolderPath = RIASettingsKeys::HTTP::logFolderPath.Get( bag);
+	outFolderPath = RIASettingsKeys::HTTP::logPath.Get( bag);
 	ReleaseRefCountable( &bag);
 }
 

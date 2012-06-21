@@ -1069,6 +1069,7 @@ void VRIAServerProject::ReleaseJSContext( VJSGlobalContext* inContext, IHTTPResp
 
 
 				session = rtContext->RetainUAGSession();
+				rtContext->SetUAGSession( NULL); // sc 05/06/2012, WAK0076874, the default session may be reused from an other client
 			}
 
 			// Finally, update the cookie

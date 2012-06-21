@@ -34,6 +34,9 @@ target_link_libraries(Wakanda Icu JavaScript JsDebugger Kernel KernelIPC ServerN
 add_dependencies(Wakanda DB4D HTTPServer LanguageSyntax SQLServer UsersAndGroups Zip)
 
 
+add_custom_command(TARGET Wakanda PRE_BUILD
+  COMMAND perl ${Depot}/Tools/Versionning/Wakanda_versionning_linux.perl ${WakandaRoot}/Server/Projet/Visual/WakandaVersNum.h)
+
 #The default behavior is to copy resources each time Wakanda is linked sucessfully...
 add_custom_command(TARGET Wakanda POST_BUILD
   COMMAND perl ${Depot}/Tools/Versionning/versionning_waf.pl ${WakandaRoot}/walib/WAF/Loader.js

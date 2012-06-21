@@ -892,19 +892,19 @@ var testCase = {
         }
     },
 
-	    setUp : function () {
-     if (os.isWindows) {
-      // On ignore le test suivant sous Windows :
-     }
-     if (os.isLinux) {
-      // On ignore le test suivant sous Windows :
-	  this._should.ignore.testToArray_DataClassWithImageAttribute_ValuesShouldNotBeNull = true;
-	  this._should.ignore.testToArray_DatastoreWithImageAttribute = true;
-	  this._should.ignore.testFromArray_ArrayWhithDataContainingImages = true;
-     }
+	setUp : function () {
+		if (os.isWindows) {
+			// On ignore le test suivant sous Windows :
+		}
+		if (os.isLinux) {
+			// On ignore le test suivant sous Linux :
+			this._should.ignore.testToArray_DataClassWithImageAttribute_ValuesShouldNotBeNull = true;
+			this._should.ignore.testToArray_DatastoreWithImageAttribute = true;
+			this._should.ignore.testFromArray_ArrayWhithDataContainingImages = true;
+		}
     },
 	
-    //Existence
+    //Existence!
     testDataClassExistency: function() {
         Y.Assert.isObject(ds.MyClass1, "Existence failed.");
     },
@@ -1212,7 +1212,7 @@ var testCase = {
         Y.Assert.isObject(ds.MyClass1.compute("cnum").cnum, "Sub object's existence (class) failed.");
     },
     //Existence on collection
-    testCompute_ExistenceOnDataClass: function() {
+    testCompute_ExistenceOnCollection: function() {
         var myCollection = ds.MyClass1.createEntityCollection();
         var entity1 = ds.MyClass1.find("cnum=2");
         var entity2 = ds.MyClass1.find("cnum=8");
@@ -2125,7 +2125,7 @@ var testCase = {
 		if(!isGood)
 			Y.Assert.fail("fromArray using array with data has failed");
     },
-	//testToArray: datastore with data containing images
+	//testFromArray: datastore with data containing images
 	testFromArray_ArrayWhithDataContainingImages: function() {
 		var isGood = true;
 		var s = "";
@@ -2761,19 +2761,28 @@ var testCase = {
             Y.Assert.fail(orderByError);
     },
     testOrderBy_TypeStringAsBlobAsc: function() {
-        var entityColAsc = ds.MyOrderbyClass.orderBy('cstringAsBlob asc');
-
-        orderByError = "";
-        entityColAsc.forEach(orderByAscendingTestStringValues);
-        if (orderByError != "")
-            Y.Assert.fail(orderByError);
+		var isGood = true;
+		try{
+			ds.MyOrderbyClass.orderBy('cstringAsBlob asc');
+			isGood = false;
+		}
+		catch(e)
+		{
+		}
+		if(!isGood)
+			Y.Assert("OrderBy should not accept a string considered as a blob");
     },
     testOrderBy_TypeStringAsBlobDesc: function() {
-        var entityColDesc = ds.MyOrderbyClass.orderBy('cstringAsBlob desc');
-        orderByError = "";
-        entityColDesc.forEach(orderByDescendingTestStringValues);
-        if (orderByError != "")
-            Y.Assert.fail(orderByError);
+		var isGood = true;
+		try{
+			ds.MyOrderbyClass.orderBy('cstringAsBlob desc');
+			isGood = false;
+		}
+		catch(e)
+		{
+		}
+		if(!isGood)
+			Y.Assert("OrderBy should not accept a string considered as a blob");
     },
     testOrderBy_TypeDurationAsc: function() {
         var entityColAsc = ds.MyOrderbyClass.orderBy('cduration asc');

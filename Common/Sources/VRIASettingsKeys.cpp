@@ -87,7 +87,7 @@ namespace RIASettingsKeys
 		CREATE_BAGKEY_WITH_DEFAULT_SCALAR( keepAliveTimeOut, XBOX::VLong, sLONG, 15);
 		CREATE_BAGKEY_WITH_DEFAULT( logFormat, XBOX::VString, L"No Log File");
 		CREATE_BAGKEY_WITH_DEFAULT( logTokens, XBOX::VString, L"");
-		CREATE_BAGKEY_WITH_DEFAULT( logFolderPath, XBOX::VString,  L"Logs/");
+		CREATE_BAGKEY_WITH_DEFAULT( logPath, XBOX::VString,  L"Logs/");
 		CREATE_BAGKEY_WITH_DEFAULT( logFileName, XBOX::VString, L"HTTPServer.waLog");
 		CREATE_BAGKEY_WITH_DEFAULT_SCALAR( logMaxSize, XBOX::VLong, sLONG, 10 * 1024);	// Max size of log file in Ko
 		CREATE_BAGKEY_WITH_DEFAULT_SCALAR( allowCompression, XBOX::VBoolean, bool, true);

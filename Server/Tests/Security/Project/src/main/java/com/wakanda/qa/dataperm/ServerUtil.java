@@ -171,11 +171,31 @@ public class ServerUtil {
 			logger.debug("Server is already running");
 			logger.debug("Trying to restart server...");
 			logger.debug("Trying to kill the server...");
-			if (!killServerViaCommandLine() || isServerRunning()) {
-				logger.debug("Could not kill the server");
+			boolean isServerKilled = false;
+			boolean isKillExec = killServerViaCommandLine();
+			if (isKillExec) {
+				int i = 0;
+				long start = GregorianCalendar.getInstance().getTimeInMillis();
+				while (!isServerKilled && i < 10) {
+					try {
+						isServerKilled = isServerRunning();
+						Thread.sleep((++i) * 1000);
+					} catch (Exception e) {
+						logger.debug("Exception: " + e.getMessage());
+					}
+				}
+				long duration = GregorianCalendar.getInstance().getTimeInMillis() - start;
+				if (!isServerKilled) {
+					logger.debug("Server is not killed after " + duration + " ms of waiting");
+					return false;
+				}else{
+					logger.debug("Server is killed after " + duration + " ms of waiting");
+				}
+				
+			}else{
+				logger.debug("Command that kills the server cannot be executed.");
 				return false;
 			}
-			logger.debug("Server is killed");
 		}
 
 		// The server is not running or killed so we launch it
@@ -186,30 +206,32 @@ public class ServerUtil {
 		}
 		logger.debug("Server is started");
 		logger.debug("Waiting a bit for the web admin to be ready...");
-
+		
 		boolean ready = false;
 		int i = 0;
 		long start = GregorianCalendar.getInstance().getTimeInMillis();
 		while (!ready && i < 10) {
 			try {
 				ready = isServerResponding();
-				// Thread.sleep((++i) * 1000);
+				Thread.sleep((++i) * 1000);
 			} catch (Exception e) {
 				logger.debug("Exception: " + e.getMessage());
 			}
 		}
-
+		long duration = GregorianCalendar.getInstance().getTimeInMillis() - start;
+		
 		if (!ready) {
-			logger.debug("Server is not responding (after " + i + " sec)");
+			logger.debug("Server is not responding (after " + duration + " sec)");
 			return false;
 		}
-		long end = GregorianCalendar.getInstance().getTimeInMillis();
-		logger.debug("Web admin is ready (after " + (end - start) + " ms)");
-
+		
+		logger.debug("Web admin is ready (after " + duration + " ms)");
+		
 		// Server is launched & Server is responding
 		// so lets load the solution
 		logger.debug("Loading the solution...");
 		return loadSolution();
+
 	}
 
 	private static boolean loadSolution(HttpHost target, String solution,

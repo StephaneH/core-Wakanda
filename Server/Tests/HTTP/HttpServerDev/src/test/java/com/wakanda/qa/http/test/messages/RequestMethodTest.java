@@ -377,7 +377,7 @@ public class RequestMethodTest extends AbstractHttpTestCase {
 		HttpResponse response = executeRequest(request);
 		int expected = HttpStatus.SC_NOT_IMPLEMENTED;
 		int actual = response.getStatusLine().getStatusCode();
-		assertEquals("[" + method + "]Method name must be case-insensitive", expected, actual);
+		assertEquals("[" + method + "]Method name must be case-sensitive", expected, actual);
 	}
 
 

@@ -228,13 +228,8 @@ VError VRIAServerSolution::Close()
 #if defined(WKA_USE_CHR_REM_DBG)
 #else
 	JSWDebuggerFactory		fctry;
-#if !defined(WKA_USE_UNIFIED_DBG)
 	IJSWDebugger*			jswDebugger = fctry. Get ( );
-#else
-	IWAKDebuggerServer*		jswDebugger = fctry. Get ( );
-#endif
-	
-		if ( jswDebugger != 0 )
+	if ( jswDebugger != 0 )
 		jswDebugger-> SetSettings ( NULL );
 
 	delete fDebuggerSettings;
@@ -366,13 +361,7 @@ VError VRIAServerSolution::Start()
 		if ( err == VE_OK )
 		{
 			JSWDebuggerFactory		fctry;
-
-#if !defined(WKA_USE_UNIFIED_DBG)
 			IJSWDebugger*			jswDebugger = fctry. Get ( );
-#else
-			IWAKDebuggerServer*		jswDebugger = fctry. Get ( );
-#endif
-
 			if ( jswDebugger != 0 )
 				jswDebugger-> SetSettings ( fDebuggerSettings );
 		}
