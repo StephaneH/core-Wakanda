@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="UTF-8"?><directory>
+
+<user ID="6B08AD0A50CF4847AB348467A89B847D" name="admin" fullName="" password=""/>
+
+ <group ID="01000000000000000000000000000000" name="Admin">
+  <include user="admin" ID="6B08AD0A50CF4847AB348467A89B847D"/>
+ </group>
+ 
+ <group ID="02000000000000000000000000000000" name="Debugger">
+  <include user="admin" ID="6B08AD0A50CF4847AB348467A89B847D"/>
+ </group>
+
+<group name="testGroup"/>
+
+<group ID="01000000000000000000000000000000" name="Admin"/>
+
+<group ID="02000000000000000000000000000000" name="Debugger"/>
+
+<user name="testUser" password="d1c9fbad9896a7477b570dab60a30bc1" fullName="Test User">
+
+	<belongsTo group="testGroup"/>
+
+
+	
+
+        
+    </user>
+
+
+
+
+
+
+ 
+	  
+</directory>

@@ -1,0 +1,54 @@
+﻿<?xml version="1.0" encoding="UTF-8"?><settings>
+
+<project publicName="" listen="0" hostName="localhost" responseFormat="json" administrator="false">
+
+	<servers>
+
+		<http started="true"/>
+
+  	  
+  	</servers>
+
+    
+  </project>
+
+<http port="8081" SSLCertificatePath="" allowSSL="true" SSLMandatory="false" SSLPort="4434" SSLMinVersion="3" useCache="false" pageCacheSize="5192" maximumProcess="100" maximumRequestsByConnection="100" maximumTimeout="15" inactiveProcessTimeout="5" acceptKeepAliveConnections="true" sendExtendedCharacterSetDirectly="false" standardSet="UTF-8" logFormat="ELF" logPath="Logs/" logMaxSize="10000"/>
+
+<dataService enabled="true" pattern="/rest/"/>
+
+<rpcService enabled="true" pattern="/rpc/"/>
+
+<file enabled="false"/>
+
+<service name="unitTest" autoStart="true"/>
+
+<webApp enabled="true" pattern="/" documentRoot="./WebFolder" directoryIndex="index.html"/>
+
+<resources location="/walib/" lifeTime="31536000"/>
+
+<javaScript reuseContexts="true"/>
+
+
+  
+  
+
+  
+  
+
+  
+  
+  
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+	
+</settings>

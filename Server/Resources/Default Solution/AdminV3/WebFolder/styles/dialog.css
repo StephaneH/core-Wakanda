@@ -1,0 +1,55 @@
+/*
+* This file is part of Wakanda software, licensed by 4D under
+*  (i) the GNU General Public License version 3 (GNU GPL v3), or
+*  (ii) the Affero General Public License version 3 (AGPL v3) or
+*  (iii) a commercial license.
+* This file remains the exclusive property of 4D and/or its licensors
+* and is protected by national and international legislations.
+* In any event, Licensee's compliance with the terms and conditions
+* of the applicable license constitutes a prerequisite to any use of this file.
+* Except as otherwise expressly stated in the applicable license,
+* such license does not include any other license or rights on this file,
+* 4D's and/or its licensors' trademarks and/or other proprietary rights.
+* Consequently, no title, copyright or other proprietary rights
+* other than those specified in the applicable license is granted.
+*/
+.ui-widget-header {
+    height: 30px;
+    width: 100%;
+    background-image: url(../images/Header_Center.png);
+    background-repeat: repeat-x;
+    background-position:0px 0px;
+    padding:0px !important;
+    
+    
+    
+    -webkit-border-top-right-radius: 5px;
+    -webkit-border-top-left-radius: 5px;
+    
+    cursor:move;
+}
+
+.ui-dialog .ui-widget-header {
+    line-height:30px;
+}
+
+.ui-dialog-content.ui-widget-content{
+    background-color: #EAEAEA;
+    
+}
+
+.ui-dialog-title {
+    margin-left:10px;
+}
+
+.ui-icon.ui-icon-closethick {
+    display: none;
+}
+
+.ui-dialog.ui-widget { /* ui-widget-content ui-corner-all  ui-draggable*/
+    -webkit-box-shadow: 1px 2px 8px #000;
+    -webkit-border-top-right-radius: 5px;
+    -webkit-border-top-left-radius: 5px;
+}
+
+

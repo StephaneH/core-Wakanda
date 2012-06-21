@@ -1,0 +1,303 @@
+/*
+* This file is part of Wakanda software, licensed by 4D under
+*  (i) the GNU General Public License version 3 (GNU GPL v3), or
+*  (ii) the Affero General Public License version 3 (AGPL v3) or
+*  (iii) a commercial license.
+* This file remains the exclusive property of 4D and/or its licensors
+* and is protected by national and international legislations.
+* In any event, Licensee's compliance with the terms and conditions
+* of the applicable license constitutes a prerequisite to any use of this file.
+* Except as otherwise expressly stated in the applicable license,
+* such license does not include any other license or rights on this file,
+* 4D's and/or its licensors' trademarks and/or other proprietary rights.
+* Consequently, no title, copyright or other proprietary rights
+* other than those specified in the applicable license is granted.
+*/
+/**
+ * Debugger default theme
+ *
+ * @style default
+ *
+ */
+
+
+/**
+ * -------------------------------------------------------
+ * Setting and/or resetting tags styles
+ *
+ * @section Tags
+ * -------------------------------------------------------
+ */
+.layout {
+	border: 10px solid transparent;
+	-webkit-border-image: url("/Web Components/common/images/shadow.png") 10;
+}
+.layout.layout-bottom {
+	border-top-width: 0;
+}
+
+
+/**
+ * ---------------------------------------------
+ * Main section
+ *
+ * @section sectionMain
+ * ---------------------------------------------
+ */
+.layout-right #sectionMain > div:not(:last-child) {
+	border-bottom: 1px solid #aeaeae;
+}
+.layout-bottom #sectionMain > div:not(:last-child) {
+	border-right: 1px solid #aeaeae;
+}
+
+
+/**
+ * -------------------------------------------------------
+ * @section Console
+ * -------------------------------------------------------
+ */
+#contentConsole .waf-log {
+}
+#contentConsole .waf-log-run {
+	/*color: blue;*/
+	color: #4c4cff;
+}
+#contentConsole .waf-error {
+	/*background-color: #efefaf;*/
+	background-color: #fff1ac;
+	color: red;
+}
+#contentConsole .waf-debug {
+}
+#contentConsole .waf-debug-link {
+	color: blue;
+}
+#contentConsole .waf-warn {
+	/*background-color: cyan;*/
+	background-color: #c2d2df;
+}
+.waf-highlight-object {
+	font-weight: bold;
+	/*color: green;*/
+	color: #00b233;
+}
+
+/**
+ * ---------------------------------------------
+ * The tabs navigation
+ *
+ * @section Tabs navigation
+ * ---------------------------------------------
+ */
+.waf-tabset .waf-navigation > li {
+    background-image: url("../images/tab-left.png");
+}
+.waf-tabset .waf-navigation > li > a {
+    background-image: url("../images/tab-middle.png");
+    background-position-x: right;
+}
+
+/* position */
+.waf-tabset .waf-navigation > li:last-child > a {
+    background-image: url("../images/tab-right.png");
+}
+
+/* states */
+.waf-tabset .waf-navigation > li.waf-active,
+.waf-tabset .waf-navigation > li.waf-active a {
+    color: #fff;
+}
+
+
+/**
+ * -------------------------------------------------------
+ * jQuery treeTable
+ *
+ * @section treeTable
+ * -------------------------------------------------------
+ */
+.treeTable {
+	border-bottom: 1px solid #d1d1d1;
+}
+.treeTable th,
+.treeTable td {
+	border-right: 1px solid #d1d1d1;
+}
+
+/* thead */
+.treeTable > thead > tr {
+	background-color: #f2f2f2;
+	border-bottom: 1px solid #aaa;
+}
+
+/* tbody */
+.treeTable > tbody > tr:not([class|="child"]) {
+	border-top: 1px solid #d1d1d1;
+}
+.treeTable > tbody > tr[class|="child"]:nth-child(even) {
+	background-color: #f1f1f1;
+}
+.treeTable > tbody > tr:not([class|="child"]).expanded {
+	border-bottom: 1px solid #d1d1d1;
+}
+
+/* state */
+/*.treeTable > tbody > tr:hover {
+	background-color: #ddd !important;
+}
+.treeTable > tbody > tr:active,
+.treeTable > tbody > tr.waf-active {
+	background-color: #abbffe !important;
+}*/
+
+/**
+ * -------------------------------------------------------
+ * List of watchers
+ *
+ * @section Watchers
+ * -------------------------------------------------------
+ */
+#contentWatchers > thead input[type="text"] {
+	background-color: #ffffe0;
+}
+#contentWatchers > thead input[type="text"]:focus {
+	background-color: #fff;
+}
+
+/**
+ * -------------------------------------------------------
+ * List of contexts
+ *
+ * @section Contexts
+ * -------------------------------------------------------
+ */
+#contentContexts .debug-frame-path a {
+	color: blue;
+}
+
+#contentContexts .debug-context {
+    font-style: italic;
+}
+#contentContexts .debug-context .expander {
+    visibility: hidden;
+}
+
+
+#contentContexts .debug-context[data-breakType="exception"],
+#contentContexts .debug-context[data-breakType="break"],
+#contentContexts .debug-context[data-breakType="pause"],
+#contentContexts .debug-context[data-breakType="debugger"],
+#contentContexts .debug-context[data-breakType="errormessage"] .expander,
+#contentContexts .debug-context[data-breakType="warningmessage"] .expander {
+    font-style: normal;
+}
+#contentContexts .debug-context[data-breakType="exception"] .expander,
+#contentContexts .debug-context[data-breakType="break"] .expander,
+#contentContexts .debug-context[data-breakType="pause"] .expander,
+#contentContexts .debug-context[data-breakType="debugger"] .expander,
+#contentContexts .debug-context[data-breakType="errormessage"] .expander,
+#contentContexts .debug-context[data-breakType="warningmessage"] .expander {
+    visibility: visible;
+}
+
+
+
+#contentContexts > tbody > tr.debug-context {
+	background-color: hsl(0, 0%, 75%);
+	background-image: -webkit-gradient(
+		linear,
+		left top,
+		left bottom,
+		from(hsla(0, 0%, 100%, 0.55)),
+		to(hsla(0, 0%, 100%, 0.1))
+	);
+}
+
+
+
+/* state */
+#contentContexts > tbody > tr.debug-context.waf-active {
+	background-color: hsl(221, 24%, 75%);
+	font-weight: bold;
+}
+
+/*
+#contentContexts > tbody > tr.debug-frame:active,
+#contentContexts > tbody > tr.debug-frame.waf-active {
+	background-color: #ffeaea;
+	background-image: -webkit-gradient(
+		linear,
+		left top,
+		left bottom,
+		from(hsla(0, 0%, 100%, 0.7)),
+		to(hsla(0, 0%, 100%, 0))
+	);
+}
+*/
+/*#contentContexts > tbody > tr.debug-context.waf-active ~ tr.debug-frame:active,
+#contentContexts > tbody > tr.debug-context.waf-active ~ tr.debug-frame.waf-active {
+	background-color: #ffb0b0;
+}*/
+#contentContexts > tbody > tr.debug-frame:active,
+#contentContexts > tbody > tr.waf-active {
+	/*background-color: #ffb0b0;*/
+	background-color: hsl(0, 100%, 95%);
+}
+
+
+/**
+ * -------------------------------------------------------
+ * List of breakpoints
+ *
+ * @section Breakpoints
+ * -------------------------------------------------------
+ */
+/* thead */
+#contentBreakpoints thead > tr:last-child {
+	background-color: #f2f2f2;
+	border-bottom: 1px solid #aaa;
+}
+
+/* tbody */
+#contentBreakpoints tbody {
+	border-bottom: 1px solid #d1d1d1;
+}
+
+.breakpoint-path {
+	color: blue;
+}
+.breakpoint-script {
+	color: green;
+}
+
+
+
+#contentBreakpoints tbody.waf-row-group {
+	border-left: 6px solid hsl(0, 0%, 60%);
+	border-right: 6px solid hsl(0, 0%, 60%);
+}
+
+
+/* states */
+#contentBreakpoints tbody:hover,
+#contentBreakpoints tbody.waf-hover {
+	background-color: #ddd;
+}
+#contentBreakpoints tbody:hover > tr:first-child,
+#contentBreakpoints tbody.waf-hover > tr:first-child {
+	background-image: -webkit-gradient(
+		linear,
+		left top,
+		left bottom,
+		from(hsla(0, 0%, 100%, 0.7)),
+		to(hsla(0, 0%, 100%, 0))
+	);
+}
+
+#contentBreakpoints tbody:active,
+#contentBreakpoints tbody.waf-active {
+	background-color: #ffdfdf;
+}
+
+

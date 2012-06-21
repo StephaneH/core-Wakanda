@@ -1,0 +1,64 @@
+﻿<?xml version="1.0" encoding="UTF-8"?><directory>
+
+<user ID="2D5A3F64D3C73B4091D39D6294C1DC93" name="user1" fullName="" password="147f42fe6a4f8a5899cafb1ab4adbfde"/>
+
+<user ID="FBD002968850BF4AB8386D05B8D7CF77" name="user2" fullName="" password="cf08a0d61c73060bd2efa80eaeda79be"/>
+
+<user ID="6CBCC2F35885484B8D0591BBBB05A38A" name="user3" fullName="" password="1a7c6d44c01ed1c1e3166a361715cd41"/>
+
+<user ID="AF4357E9CA975B409AF8193210EA5F41" name="user4" fullName="" password="ac54106313b04dbd0ccaaa08952b329b"/>
+
+<user ID="7283C6DBB0F4F04D9D0179BE7D1E8162" name="user5" fullName="" password="abfdcbfcd948c051b7bd774be218e15c"/>
+
+<user ID="4679123EBA313F449F4E60D7F9B3AE5F" name="user6" fullName="" password="d8de49bc1e7117d36972cf96f068ac7c"/>
+
+<user ID="ED9272397DAEAA4DA2BA9C128AB79DEB" name="admin" fullName="" password="003b744708c16733d1eb3371bec208fd"/>
+
+<group ID="A5AFEC032F2E904EA6F28AE2829D0AB3" name="Read">
+
+	<include user="user1" userID="2D5A3F64D3C73B4091D39D6294C1DC93"/>
+
+	<include group="Admin" groupID="82922030735BC94EAB97A404B6E3C90E"/>
+</group>
+
+<group ID="10EFBEFCF938EC4C9F189DCA691DB353" name="Create">
+
+	<include user="user2" userID="FBD002968850BF4AB8386D05B8D7CF77"/>
+
+	<include group="Admin" groupID="82922030735BC94EAB97A404B6E3C90E"/>
+</group>
+
+<group ID="60EE5734426C794EAF4E7D092AB53C76" name="Update">
+
+	<include user="user3" userID="6CBCC2F35885484B8D0591BBBB05A38A"/>
+
+	<include group="Admin" groupID="82922030735BC94EAB97A404B6E3C90E"/>
+</group>
+
+<group ID="64272E2C4F0DD54882CB8856E946D1AA" name="Remove">
+
+	<include user="user4" userID="AF4357E9CA975B409AF8193210EA5F41"/>
+
+	<include group="Admin" groupID="82922030735BC94EAB97A404B6E3C90E"/>
+</group>
+
+<group ID="3D81E23FA45D3545970CD8C0144A15D0" name="Execute">
+
+	<include user="user5" userID="7283C6DBB0F4F04D9D0179BE7D1E8162"/>
+
+	<include group="Admin" groupID="82922030735BC94EAB97A404B6E3C90E"/>
+</group>
+
+<group ID="40ADFAFA61A95D4884C8D968C011846D" name="Promote">
+
+	<include user="user6" userID="4679123EBA313F449F4E60D7F9B3AE5F"/>
+
+	<include group="Admin" groupID="82922030735BC94EAB97A404B6E3C90E"/>
+</group>
+
+<group ID="82922030735BC94EAB97A404B6E3C90E" name="Admin">
+
+	<include user="admin" userID="ED9272397DAEAA4DA2BA9C128AB79DEB"/>
+
+</group>
+</directory>

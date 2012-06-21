@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="UTF-8"?><EntityModelCatalog>
+
+<dbInfo name="NoPerm" uuid="DEB2380315EE8E47AF7052ECFC4FADBC"/>
+
+<dataClasses collectionName="NoPermCollection" className="NoPerm" uuid="3825996BA7BD3946A2BDE13B63FFCB6A" tablePos="1">
+
+	<extraProperties ____objectunic="true" panelColor="#B2A2C7">
+
+		<panel ____objectunic="true" isOpen="true" pathVisible="true">
+
+			<position ____objectunic="true" X="25" Y="20"/>
+
+		</panel>
+
+	</extraProperties>
+
+	<attributes name="ID" kind="storage" type="long" uuid="1CEDC8D6A0313E4980EBBBF41975545F" fieldPos="1" autosequence="true" unique="true" primKey="true"/>
+
+	<attributes name="name" scope="public" uuid="3AB06CAFCAC48541B5817E524E228290" fieldPos="2" type="string" kind="storage"/>
+
+</dataClasses>
+</EntityModelCatalog>

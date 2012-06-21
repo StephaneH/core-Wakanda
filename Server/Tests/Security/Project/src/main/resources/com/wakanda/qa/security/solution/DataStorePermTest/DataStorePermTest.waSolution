@@ -1,0 +1,1 @@
+﻿<?xml version="1.0" encoding="UTF-8"?><solution><project path="./NoPerm/NoPerm.waProject"/><project path="./Perm/Perm.waProject" startupProject="true"/><project path="./InheritedPerm/InheritedPerm.waProject"/><file path="./DataStorePermTest.waSettings"><tag name="settings"/></file><file path="./DataStorePermTest.waDirectory"><tag name="directory"/></file></solution>

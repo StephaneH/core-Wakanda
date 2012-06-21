@@ -1,0 +1,22 @@
+[ {
+   "devtoolsFrontendUrl": "/wka_dbg/devtools/devtools.html?host=192.168.6.39:8080&page=1",
+   "faviconUrl": "",
+   "thumbnailUrl": "/thumb/file:///Users/ghermann/Perforce/guy.hermann_Mac/depot/Wakanda/main/Server/Resources/Default%20Solution/Admin/WebFolder/hw3.html",
+   "title": "MainThread",
+   "url": "file:///Users/ghermann/Perforce/guy.hermann_Mac/depot/Wakanda/main/Server/Resources/Default%20Solution/Admin/WebFolder/hw3.html",
+   "webSocketDebuggerUrl": "ws://192.168.6.39:8080/devtools/page/1"
+}, {
+   "devtoolsFrontendUrl": "/wka_dbg/devtools/devtools.html?host=192.168.6.39:8080&page=2",
+   "faviconUrl": "",
+   "thumbnailUrl": "/thumb/file:///Users/ghermann/Perforce/guy.hermann_Mac/depot/Wakanda/main/Server/Resources/Default%20Solution/Admin/WebFolder/hw3.html",
+   "title": "Thread 1",
+   "url": "file:///Users/ghermann/Perforce/guy.hermann_Mac/depot/Wakanda/main/Server/Resources/Default%20Solution/Admin/WebFolder/hw3.html",
+   "webSocketDebuggerUrl": "ws://192.168.6.39:8080/devtools/page/2"
+}, {
+   "devtoolsFrontendUrl": "/wka_dbg/devtools/devtools.html?host=192.168.6.39:8080&page=3",
+   "faviconUrl": "",
+   "thumbnailUrl": "/thumb/file:///Users/ghermann/Perforce/guy.hermann_Mac/depot/Wakanda/main/Server/Resources/Default%20Solution/Admin/WebFolder/hw3.html",
+   "title": "Thread 2",
+   "url": "file:///Users/ghermann/Perforce/guy.hermann_Mac/depot/Wakanda/main/Server/Resources/Default%20Solution/Admin/WebFolder/hw3.html",
+   "webSocketDebuggerUrl": "ws://192.168.6.39:8080/devtools/page/3"
+}]

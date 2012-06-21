@@ -1,0 +1,13 @@
+#include "base.xcconfig"
+OTHER_LDFLAGS = -lgcov -weak_framework icuDebug
+
+
+
+
+
+
+
+
+
+
+

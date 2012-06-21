@@ -1,0 +1,81 @@
+/*
+* This file is part of Wakanda software, licensed by 4D under
+*  (i) the GNU General Public License version 3 (GNU GPL v3), or
+*  (ii) the Affero General Public License version 3 (AGPL v3) or
+*  (iii) a commercial license.
+* This file remains the exclusive property of 4D and/or its licensors
+* and is protected by national and international legislations.
+* In any event, Licensee's compliance with the terms and conditions
+* of the applicable license constitutes a prerequisite to any use of this file.
+* Except as otherwise expressly stated in the applicable license,
+* such license does not include any other license or rights on this file,
+* 4D's and/or its licensors' trademarks and/or other proprietary rights.
+* Consequently, no title, copyright or other proprietary rights
+* other than those specified in the applicable license is granted.
+*/
+.administration-tootlbar-button {
+    height:40px;
+    width:50px;
+    float:left;
+    margin-left:10px;
+    margin-top:5px;
+    
+}
+
+.administration-tootlbar-separator {
+    height:40px;
+    width:15px;
+    border-right: 1px solid #999;
+    float:left;
+    margin-left:10px;
+    margin-top:5px;
+}
+
+.administration-tootlbar-button  {
+    position:relative;
+    background-repeat:no-repeat;
+    background-size:26px 26px;
+    background-position:50% 0%;
+    opacity:0.8;
+    cursor:pointer;
+}
+
+.administration-tootlbar-button:hover{
+    opacity:1;
+}
+
+.administration-tootlbar-button.Verify {
+    background-image:url(../images/verify.png);
+}
+
+.administration-tootlbar-button.Compact {
+    background-image:url(../images/compact.png);
+}
+.administration-tootlbar-button.Repair {
+    background-image:url(../images/repair.png);
+}
+
+.administration-tootlbar-button.Restore {
+    background-image:url(../images/restore.png);
+}
+
+.administration-tootlbar-button.Backup {
+    background-image:url(../images/backup.png);
+}
+.administration-tootlbar-button.Infos {
+    background-image:url(../images/infos.png);
+}
+
+
+
+
+
+
+
+.administration-tootlbar-button div {
+    position:absolute;
+    bottom:0px;
+    width:100%;
+    text-align:center;
+
+}

@@ -1,0 +1,108 @@
+/*
+* This file is part of Wakanda software, licensed by 4D under
+*  (i) the GNU General Public License version 3 (GNU GPL v3), or
+*  (ii) the Affero General Public License version 3 (AGPL v3) or
+*  (iii) a commercial license.
+* This file remains the exclusive property of 4D and/or its licensors
+* and is protected by national and international legislations.
+* In any event, Licensee's compliance with the terms and conditions
+* of the applicable license constitutes a prerequisite to any use of this file.
+* Except as otherwise expressly stated in the applicable license,
+* such license does not include any other license or rights on this file,
+* 4D's and/or its licensors' trademarks and/or other proprietary rights.
+* Consequently, no title, copyright or other proprietary rights
+* other than those specified in the applicable license is granted.
+*/
+/**
+ * Default skin common styles
+ *
+ * @style default
+ *
+ */
+
+
+/**
+ * -------------------------------------------------------
+ * Setting and/or resetting tags styles
+ *
+ * @section Tags
+ * -------------------------------------------------------
+ */
+body {
+	font-family: "Lucida grande", "Segoe UI", Tahoma, sans-serif;
+    font-size: 11px;
+    color: #3d4246;
+}
+
+
+/**
+ * ---------------------------------------------
+ * Setting background-color of the skin
+ *
+ * @section background-color
+ * ---------------------------------------------
+ */
+.waf-content,
+.studio-corner {
+	background-color: #eaeaea;
+}
+
+
+/**
+ * -------------------------------------------------------
+ * Splitter
+ *
+ * @section Splitter
+ * -------------------------------------------------------
+ */
+.waf-boxGroup > .waf-splitter {
+	background-color: #dbdbdb;
+}
+.waf-vbox > .waf-splitter {
+	background-image: url("/Web Components/common/images/handle-horizontal.png");
+	border-top: 1px solid #fff;
+	border-bottom: 1px solid #aeaeae;
+}
+.waf-hbox > .waf-splitter {
+	background-image: url("/Web Components/common/images/handle-vertical.png");
+	border-left: 1px solid #fff;
+	border-right: 1px solid #aeaeae;
+}
+
+
+/**
+ * ---------------------------------------------
+ * The header
+ *
+ * @section waf-header
+ * ---------------------------------------------
+ */
+.waf-header {
+	background: url("/Resources/Internal Components/studio.4dbase/Resources/Images/pannels/headerMiddle.png") repeat-x 0 -3px;
+}
+
+
+/**
+ * ---------------------------------------------
+ * The actions buttons
+ *
+ * @section action buttons
+ * ---------------------------------------------
+ */
+.waf-header .waf-actions button {
+	height: 19px;
+	padding: 0 8px;
+	margin: 3px 0 0 0;
+}
+
+
+/**
+ * ---------------------------------------------
+ * The different waf states
+ *
+ * @section waf-state
+ * ---------------------------------------------
+ */
+.waf-disabled {
+	opacity: 0.5;
+}

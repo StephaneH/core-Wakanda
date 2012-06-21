@@ -1,0 +1,113 @@
+/*
+* This file is part of Wakanda software, licensed by 4D under
+*  (i) the GNU General Public License version 3 (GNU GPL v3), or
+*  (ii) the Affero General Public License version 3 (AGPL v3) or
+*  (iii) a commercial license.
+* This file remains the exclusive property of 4D and/or its licensors
+* and is protected by national and international legislations.
+* In any event, Licensee's compliance with the terms and conditions
+* of the applicable license constitutes a prerequisite to any use of this file.
+* Except as otherwise expressly stated in the applicable license,
+* such license does not include any other license or rights on this file,
+* 4D's and/or its licensors' trademarks and/or other proprietary rights.
+* Consequently, no title, copyright or other proprietary rights
+* other than those specified in the applicable license is granted.
+*/
+/**
+ * TabSet common styles
+ *
+ *
+ */
+
+
+/**
+ * ---------------------------------------------
+ * TabSet is used to navigate between tab
+ * contents
+ *
+ * @section tabSet
+ * ---------------------------------------------
+ */
+.waf-tabset {
+	position: relative;
+	min-height: 25px;
+}
+.waf-tabset .waf-navigation {
+	display: inline-block;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	white-space: nowrap;
+}
+.waf-tabset .waf-navigation > li,
+.waf-tabset .waf-navigation > li > a {
+    width: 90px;
+    height: 20px;
+    background-repeat: no-repeat;
+    background-position-x: left;
+    background-position-y: top;
+    text-decoration: none;
+    text-align: center;
+    line-height: 20px;
+    cursor: default;
+}
+.waf-tabset .waf-navigation > li {
+    margin: 3px 0 0 0;
+    float: left;
+}
+.waf-tabset .waf-navigation > li > a {
+    position: relative;
+    display: inline-block;
+    margin: 0 0 0 4px;
+}
+.waf-tabset .waf-navigation > li em {
+    padding: 0 4px 0 0;
+}
+
+.waf-tabset .waf-navigation > li:first-child {
+    margin-left: 4px;
+}
+.waf-tabset .waf-navigation > li:last-child[not:first-child] {
+    background: none;
+}
+
+
+/* states */
+/* hover */
+.waf-tabset .waf-navigation > li:hover,
+.waf-tabset .waf-navigation > li > a:hover {
+    background-position-y: -40px;
+}
+/* active */
+.waf-tabset .waf-navigation > li.waf-active,
+.waf-tabset .waf-navigation > li.waf-active a {
+    background-position-y: -20px;
+    font-weight: bold;
+}
+
+
+
+.waf-tabset .waf-content > .waf-section {
+	display: none;
+}
+.waf-tabset .waf-content > .waf-section.waf-active {
+	display: block;
+}
+
+
+/**
+ * ---------------------------------------------
+ * The tabs content
+ *
+ * @section Tabs content
+ * ---------------------------------------------
+ */
+.waf-content {
+	position: absolute;
+	top: 25px;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	overflow-x: hidden;
+	overflow-y: auto;
+}
