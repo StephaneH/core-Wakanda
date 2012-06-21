@@ -263,7 +263,10 @@ var testCase = {
 		    });
     		
         });
-        
+
+		// Do not support "half-close", consider them as "full" closing.
+		
+/*        
         socket.addListener('end', function () {
         	
     	    test.resume(function() {
@@ -275,7 +278,8 @@ var testCase = {
     	    });
         	
         });
-        
+*/	
+
         socket.addListener('close', function (hasError) {
 
     	    test.resume(function () { 
@@ -286,11 +290,16 @@ var testCase = {
         	
         });
         	
-        socket.connect(8080, "127.0.0.1");
-        
-        // Leave more time for connection to be closed by peer.
-    	
-        this.wait(15000);
+        socket.connect(8080, "127.0.0.1", function () {
+		
+			// Write to server. This will trigger an answer from it, and it will then close
+			// the connection.
+		
+			socket.write('get index.html\r\n');
+			
+        });
+            	
+        this.wait(10000);
         
     },    
 
@@ -301,11 +310,12 @@ var testCase = {
         var socket = new net.Socket();
 
         socket.addListener('data', function (data) {
-    	    // Server has replied, ok.
+		
+    	    // Server has replied, this is ok (whatever the content of answer, as long there is one).
 			socket.destroy();
 			
 			test.resume(function () { 
-				Y.Assert.isTrue(data);
+				Y.Assert.isTrue(true);
 			});
         	
         });
@@ -321,7 +331,7 @@ var testCase = {
         });
         	
         socket.connect(8080, "127.0.0.1", function () {
-        	socket.write('get index.html');
+			socket.write('get index.html\r\n');
         });
         
         /*
@@ -342,12 +352,12 @@ var testCase = {
 
 		    // Send bad request to Wakanda server, it will answer with a 400 error.
     		
-		    this.write('get index.html');
+		    this.write('get index.html\r\n');
     		
 	    });
     	*/
     	
-	    test.wait(5000);
+	    this.wait(10000);
     	
     },
 
@@ -376,7 +386,7 @@ var testCase = {
     			
 			    // Resume "data" events.
     			
-			    socket.resume();
+				socket.resume();
     			
 		    });
     		
@@ -384,10 +394,10 @@ var testCase = {
 
 		    socket.pause();				
 		    socket.setEncoding("utf8");
-		    socket.write('get index.html');    		
+		    socket.write('get index.html\r\n');    		
 	    });
     	
-	    this.wait(5000);
+	    this.wait(10000);
     	
     },
 

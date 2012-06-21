@@ -112,25 +112,14 @@ public:
 			XBOX::VError				StopHTTPServerProject( VRIAContext* inContext);
 			bool						IsHTTPServerProjectStarted( VRIAContext* inContext);
 
-			/**	@brief	Web App service handling high-level methods */
-			XBOX::VError				SetWebAppServiceEnabled( VRIAContext* inContext, bool inEnabled);
-			bool						IsWebAppServiceEnabled( VRIAContext* inContext);
-
 			/**	@brief	Data service handling high-level methods */
 			CDB4DBase*					RetainDatabase( VRIAContext* inContext);
 			VDataService*				RetainDataService( VRIAContext* inContext, XBOX::VError* outError);
-			XBOX::VError				SetDataServiceEnabled( VRIAContext* inContext, bool inEnabled);
-			bool						IsDataServiceEnabled( VRIAContext* inContext);
 			XBOX::VError				ReloadCatalog( VRIAContext* inContext);
 
 			/**	@brief	RPC service handling high-level methods */
 			VRPCCatalog*				RetainRPCCatalog( VRIAContext* inContext, XBOX::VError* outError, const IHTTPRequest* inRequest, IHTTPResponse* inResponse);
 			VRPCService*				RetainRPCService( VRIAContext* inContext, XBOX::VError* outError);
-			XBOX::VError				SetRPCServiceEnabled( VRIAContext* inContext, bool inEnabled);
-			bool						IsRPCServiceEnabled( VRIAContext* inContext);
-			/**	@brief	The relative path of the methods file is either relative to the rpc default folder or relative to the project folder (support external tagged items).
-						Returns NULL if the file does not exist or does not match any methods file. */
-			XBOX::VFile*				RetainRPCMethodsFileFromRelativePath( XBOX::VError& outError, const XBOX::VString& inRelativePath, XBOX::FilePathStyle inRelativPathStyle);
 	
 			CUAGDirectory*				RetainUAGDirectory( XBOX::VError& outError);
 
@@ -192,7 +181,7 @@ private:
 			/** @brief	Update the settings collection with all available settings files */
 			XBOX::VError				_LoadSettingsFile();
 
-			XBOX::VError				_LoadPermissionFile();
+			VRIAPermissions*			_LoadPermissionFile( XBOX::VError& outError);
 
 			/** @brief	Open the default database of the project.
 						If none default database is found and if inCreateEmptyDatabaseIfNeed is true, an empty database is created */
@@ -204,9 +193,6 @@ private:
 			/** @brief	Disable the context registration, wait for all contexts being unregistered, stop the services which depend on the http server, and finally stop the http server. */
 			XBOX::VError				_StopHTTPServer();
 
-			/**	@brief	Web App service low-level handling */
-			XBOX::VError				_SetWebAppServiceEnabled( bool inEnabled);
-
 			/**	@brief	Returns the rpc catalog which has been built from the methods files (*.js) and catalog files (*.waRpc) */
 			VRPCCatalog*				_RetainRPCCatalog( XBOX::VError& outError, const IHTTPRequest* inRequest, IHTTPResponse* inResponse);
 
@@ -217,10 +203,6 @@ private:
 			/**	@brief	Disable the application context creation. Return previous context creation state. */
 			bool						_SetContextCreationEnabled( bool inEnabled);
 			bool						_IsContextCreationEnabled() const;
-
-			/** @brief	The following method updates the Web App service settings from the Web App settings .
-						Typically, this method is called before starting the WebAppService */
-			XBOX::VError				_LoadWebAppServiceSettings();
 
 			XBOX::VError				_EvaluateScript( const XBOX::VFilePath& inFilePath);
 
@@ -260,10 +242,6 @@ private:
 
 			// Data service
 			VDataService				*fDataService;
-		#if !USE_JAVASCRIPT_DATASTORE_SERVICE
-			bool						fIsDataServiceManager;				// - false if the data service is managed by a JavaScript service
-																			// - true if the project manages the data service (deprecated behaviour)
-		#endif
 
 			// Security Manager
 			CSecurityManager			*fSecurityManager;
@@ -273,15 +251,6 @@ private:
 
 			// RPC service
 			VRPCService					*fRPCService;
-		#if !USE_JAVASCRIPT_RPC_SERVICE
-			bool						fIsRPCServiceManager;				// - false if the rpc service is managed by a JavaScript service
-																			// - true if the project manages the rpc service (deprecated behaviour)
-		#endif
-
-		#if !USE_JAVASCRIPT_WEBAPP_SERVICE
-			bool						fIsWebAppServiceManager;			// - false if the web app service is managed by a JavaScript service
-																			// - true if the project manages the web app service (deprecated behaviour)
-		#endif
 
 			// Application context
 			VRIAContextManager			*fContextMgr;
@@ -320,6 +289,24 @@ private:
 			VRIAServerProject				*fApplication;
 };
 
+
+
+// ----------------------------------------------------------------------------
+
+
+
+class VReloadCatalogMessage : public XBOX::VMessage
+{
+public:
+	VReloadCatalogMessage( VRIAServerProject* inApplication);
+	virtual ~VReloadCatalogMessage();
+
+protected:
+	virtual	void DoExecute();
+
+private:
+			VRIAServerProject	*fApplication;
+};
 
 
 #endif

@@ -15,14 +15,14 @@
 		<meta name="WAF.config.loadCSS" content="/application.css"/>
 		<meta name="WAF.config.loadCSS" content="styles/index-custom.css"/>
 		<meta name="WAF.config.loadCSS" id="waf-project-css" content="/application.css"/>
-		<meta name="WAF.config.rpc.file" content="rpc-proxy/admin?namespace=admin"/>
+		<meta name="WAF.config.rpc.file" content="rpc-proxy/webAdmin?namespace=webAdmin"/>
 </head>
 	
 	<body id="waf-body" data-viewport-width="device-width" data-viewport-user-scalable="1" data-viewport-minimum-scale="1.0" data-viewport-maximum-scale="1.0" data-viewport-initial-scale="1.0" data-viewport-height="device-height" data-type="document" data-theme="default" data-rpc-validation="false" data-rpc-namespace="rpc" data-rpc-activate="false" data-platform="desktop" data-lib="WAF" data-group="[['adminTabView','menuBar1','overviewContainer']]" data-apple-meta-tags-status-bar="default" class="default" style="visibility:hidden;">
 		<div id="logToAdmin" data-user-label="User: " data-user-display="Signed in as " data-type="login" data-password-label="Password: " data-logout-action="Logout" data-login-title="Login to Admin" data-login-button="Login" data-login-action="Login" data-lib="WAF" data-constraint-top="true" data-constraint-right="true" data-constraint-left="true" class="waf-widget waf-login default inherited  ">
 		</div>
 		<div id="adminHeader" data-type="container" data-lib="WAF" data-constraint-top="true" data-constraint-right="true" data-constraint-left="true" class="waf-widget waf-container default inherited  ">
-		 	<ul id="radioSolution" data-type="radioGroup" data-lib="WAF" data-label-position="left" data-label="" data-display="vertical" data-constraint-top="true" data-constraint-right="true" data-constraint-left="false" data-constraint-bottom="false" data-autoDispatch="true" class="waf-widget waf-radioGroup default inherited  "><li><input value="currentSolution" type="radio" name="radioSolution" id="radioSolution-0"/><label for="radioSolution-0">Current Solution</label></li><li><input value="recentSolution" type="radio" name="radioSolution" id="radioSolution-1"/><label for="radioSolution-1">Recent Solution</label></li></ul>
+			<label id="solutionComboboxLabel" data-type="label" data-lib="WAF" for="solutionCombobox" data-valign="middle" data-margin="5" class="waf-widget waf-label default inherited    waf-label-combobox " data-constraint-left="true" data-constraint-top="true">Solutions</label>
 	 		<div id="solutionCombobox" data-type="combobox" data-limit="20" data-lib="WAF" data-label-position="left" data-label="" data-editable="true" data-constraint-top="true" data-constraint-right="true" data-constraint-left="false" data-constraint-bottom="false" data-autoDispatch="true" class="waf-widget waf-combobox default inherited">
 				<select></select>
 			</div>
@@ -30,7 +30,7 @@
 	 	</div>
 		<div id="adminTabView" data-type="tabView" data-padding="20" data-menu-position="top left" data-linked-tag="menuBar1,overviewContainer,maintenanceContainer" data-lib="WAF" data-constraint-top="true" data-constraint-right="true" data-constraint-left="true" data-constraint-bottom="true" class="waf-widget waf-tabView default inherited  ">
 		 	<ul id="menuBar1" data-type="menuBar" data-tab-margin="5" data-subMenuShow="hover" data-linked-tag="adminTabView" data-lib="WAF" data-level="0" data-display="horizontal" data-constraint-top="true" data-constraint-right="false" data-constraint-left="true" data-constraint-bottom="false" class="waf-widget waf-menuBar default inherited          waf-tabView-menuBar waf-tabView-menuBar-top-left "><li id="overviewTab" data-type="menuItem" data-linked-tag="overviewContainer" data-lib="WAF" class="waf-widget waf-menuItem default inherited"><p class="waf-menuItem-text waf-menuItem-icon-top"><span>Overview</span></p></li><li id="maintenanceTab" data-type="menuItem" data-linked-tag="maintenanceContainer" data-lib="WAF" class="waf-widget waf-menuItem default inherited"><p class="waf-menuItem-text waf-menuItem-icon-top"><span>Maintenance</span></p></li></ul>
-	 		<div id="overviewContainer" data-type="container" data-linked-tag="maintenanceTab" data-lib="WAF" data-constraint-top="true" data-constraint-right="true" data-constraint-left="true" data-constraint-bottom="true" class="waf-widget waf-container default inherited  ">
+			<div id="overviewContainer" data-type="container" data-linked-tag="maintenanceTab" data-lib="WAF" data-constraint-top="true" data-constraint-right="true" data-constraint-left="true" data-constraint-bottom="true" class="waf-widget waf-container default inherited  ">
 		 	 	<div id="solutionSettingsOverview" data-type="container" data-lib="WAF" data-constraint-top="true" data-constraint-right="true" data-constraint-left="true" data-constraint-bottom="false" class="waf-widget waf-container default inherited  ">
 	 	 	 	</div>
 				<div style="display : none;" id="adminBrowseDialog">
@@ -45,6 +45,10 @@
 		  	 		<div id="maintenanceContent" data-type="container" data-lib="WAF" data-constraint-top="true" data-constraint-right="true" data-constraint-left="true" data-constraint-bottom="true" class="waf-widget waf-container default inherited  ">
 		  	 			<div id="maintenanceModeleFileDetail"></div>
 		  	 			<div id="maintenanceLogFileDetail"></div>
+						<div id="maintenanceProgress" class="console-progress">
+							<label id="progressLabel" for="adminProgressBar" data-valign="middle" data-type="label" data-margin="5" data-lib="WAF" data-constraint-top="true" data-constraint-left="true" class="waf-widget waf-label default inherited waf-label-progressBar ">Progress on [adminProgress]</label>
+							<div id="adminProgressBar" data-type="progressBar" data-showstop="false" data-no-empty-display="false" data-lib="WAF" data-label-position="top" data-label="" data-constraint-top="true" data-constraint-right="true" data-constraint-left="true" data-constraint-bottom="false" class="waf-widget waf-progressBar default inherited" data-progressinfo="adminProgress"></div>
+						</div>
 		  	 		</div>
 					<div id="wafConsole">
 						<div class="title"><h1>Logs</h1></div>

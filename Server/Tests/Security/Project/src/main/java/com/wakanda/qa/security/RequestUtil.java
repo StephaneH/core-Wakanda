@@ -7,7 +7,6 @@ import org.apache.http.HttpResponse;
 import org.apache.http.auth.AUTH;
 import org.apache.http.auth.MalformedChallengeException;
 import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.auth.AuthSchemeBase;
 import org.apache.http.impl.auth.BasicScheme;
@@ -18,29 +17,30 @@ import org.apache.log4j.Logger;
 
 public class RequestUtil {
 
+	@SuppressWarnings("unused")
+	private static Logger logger = Logger.getLogger(RequestUtil.class);
+	
+	private static DefaultHttpClient defaultHttpClient = null;
+	
 	public enum AuthType {
-		BASIC, DIGEST
+		BASIC, DIGEST, CUSTOM
 	};
 
-	private static Logger logger = Logger.getLogger(RequestUtil.class);
-
+	
+	public static DefaultHttpClient getDefaultHttpClient(){
+		if(defaultHttpClient==null){
+			defaultHttpClient = new DefaultHttpClient();
+		}
+		return defaultHttpClient;
+	}
+	
 	public static void main(String[] args) throws Exception {
-		String url = "/rest/ReadPerm/";
-		HttpGet request = new HttpGet(url);
-		HttpHost target = Resources.getDefaultTarget();
-		String user = "user1";
-		String password = "password1";
-		HttpResponse response = executeAuthenticatedRequest(request, target, user, password,
-				AuthType.BASIC, Resources.getDefaultAuthChallenge());
-		logger.debug(response.getStatusLine());
-		logger.debug(EntityUtils.toString(response.getEntity()));
 
 	}
 
 	public static HttpResponse executeRequest(HttpRequest request,
 			HttpHost target) throws Exception {
-		HttpClient httpclient = new DefaultHttpClient();
-		HttpResponse response = httpclient.execute(target, request);
+		HttpResponse response = getDefaultHttpClient().execute(target, request);
 		return response;
 	}
 
@@ -51,9 +51,10 @@ public class RequestUtil {
 		return challenge;
 	}
 
-	public static HttpResponse executeAuthenticatedRequest(HttpRequest request,
+	public static HttpResponse executeAuthenticatedRequest(final HttpRequest request,
 			HttpHost target, String user, String password, AuthType scheme,
 			Header challenge) throws Exception {
+
 		// set credentials
 		UsernamePasswordCredentials creds = new UsernamePasswordCredentials(
 				user, password);
@@ -66,19 +67,27 @@ public class RequestUtil {
 		case DIGEST:
 			authscheme = new DigestScheme();
 			break;
+		case CUSTOM:
+			String loginUrl = "/rest/$directory/login(" + user + "," + password
+					+ ")";
+			HttpResponse respLogin = executeRequest(new HttpGet(loginUrl), target);
+			EntityUtils.consume(respLogin.getEntity());
+
+			break;
 		default:
 			throw new MalformedChallengeException("Invalid scheme identifier: "
 					+ scheme);
 		}
-		authscheme.processChallenge(challenge);
-
-		Header authResponse = authscheme.authenticate(creds, request, null);
-		request.addHeader(authResponse);
+		
+		if (scheme == AuthType.BASIC || scheme == AuthType.DIGEST) {
+			authscheme.processChallenge(challenge);
+			Header authResponse = authscheme.authenticate(creds, request, null);
+			request.addHeader(authResponse);
+		}
 
 		// send the authenticated request
 		HttpResponse response = executeRequest(request, target);
 
 		return response;
 	}
-
 }

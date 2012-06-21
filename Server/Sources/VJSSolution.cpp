@@ -149,7 +149,10 @@ void VJSSolution::_open( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerS
 			{
 				startupParams = new VSolutionStartupParameters();
 				if (startupParams != NULL)
+				{
 					startupParams->SetSolutionFileToOpen( file);
+					startupParams->SetOpenProjectSymbolsTable( false);	// sc 25/05/2012, on Server, do not use the symbols table anymore
+				}
 			}
 			QuickReleaseRefCountable( file);
 		}
@@ -180,6 +183,8 @@ void VJSSolution::_openRecent( VJSParms_callStaticFunction& ioParms, VRIAServerS
 				startupParams = new VSolutionStartupParameters();
 				if (startupParams != NULL)
 				{
+					startupParams->SetOpenProjectSymbolsTable( false);	// sc 25/05/2012, on Server, do not use the symbols table anymore
+
 					VFile file( iter->second.second);
 					if (LoadSolutionStartupParametersFromLinkFile( file, *startupParams) != VE_OK)
 					{

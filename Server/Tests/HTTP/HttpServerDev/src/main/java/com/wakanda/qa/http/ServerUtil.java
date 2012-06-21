@@ -198,22 +198,31 @@ public class ServerUtil {
 		}
 		logger.debug("Server is started");
 		logger.debug("Waiting a bit for the web admin to be ready...");
-		try {
-			Thread.sleep(5000);
-		} catch (InterruptedException e) {
-			logger.debug("Exception: " + e.getMessage());
-			e.printStackTrace();
-			return false;
-		}
-		if (!isServerResponding()) {
-			logger.debug("Server is not responding");
-			return false;
+		
+		boolean ready = false;
+		int i = 0;
+		long start = GregorianCalendar.getInstance().getTimeInMillis();
+		while (!ready && i < 10) {
+			try {
+				ready = isServerResponding();
+				//Thread.sleep((++i) * 1000);
+			} catch (Exception e) {
+				logger.debug("Exception: " + e.getMessage());
+			}
 		}
 
+		if (!ready) {
+			logger.debug("Server is not responding (after " + i + " sec)");
+			return false;
+		}
+		long end = GregorianCalendar.getInstance().getTimeInMillis();
+		logger.debug("Web admin is ready (after " + (end-start) + " ms)");
+		
 		// Server is launched & Server is responding
 		// so lets load the solution
 		logger.debug("Loading the solution...");
 		return loadSolution();
+
 	}
 
 	private static boolean loadSolution(HttpHost target, String solution,
@@ -251,12 +260,15 @@ public class ServerUtil {
 					} else {
 						logger.debug("Waiting for the solution to be ready...");
 						int i = 0;
+						long start = GregorianCalendar.getInstance().getTimeInMillis();
 						while (!loaded && i < 10) {
 							loaded = isSolutionDeployed();
-							Thread.sleep((++i)*1000);
+							Thread.sleep((++i) * 1000);
 						}
 						if (loaded) {
-							logger.debug("Solution is ready (after " + i + " sec)");
+							long end = GregorianCalendar.getInstance().getTimeInMillis();
+							logger.debug("Solution is ready (after " + (end-start)
+									+ " sec)");
 						}
 					}
 				}
@@ -332,7 +344,7 @@ public class ServerUtil {
 			isServerResponding = is200Ok & isWakanda;
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.debug("Exception: " + e.getMessage());
 		}
 		return isServerResponding;
 	}
@@ -347,7 +359,7 @@ public class ServerUtil {
 			isSolutionDeployed = is200Ok & isWakanda;
 		} catch (Exception e) {
 			logger.debug("Exception: " + e.getMessage());
-			//e.printStackTrace();
+			// e.printStackTrace();
 		}
 		return isSolutionDeployed;
 	}

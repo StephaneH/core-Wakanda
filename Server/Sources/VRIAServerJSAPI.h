@@ -35,9 +35,6 @@ extern const char kSSJS_CLASS_NAME_HTTPServer[];
 extern const char kSSJS_CLASS_NAME_SSL[];
 extern const char kSSJS_CLASS_NAME_HTTPServerCache[];
 extern const char kSSJS_CLASS_NAME_Console[];
-extern const char kSSJS_CLASS_NAME_WebAppService[];
-extern const char kSSJS_CLASS_NAME_DataService[];
-extern const char kSSJS_CLASS_NAME_RPCService[];
 extern const char kSSJS_CLASS_NAME_OS[];
 extern const char kSSJS_CLASS_NAME_Process[];
 
@@ -50,9 +47,6 @@ extern const char kSSJS_PROPERTY_NAME_HTTPServer[];
 extern const char kSSJS_PROPERTY_NAME_SSL[];
 extern const char kSSJS_PROPERTY_NAME_HTTPServerCache[];
 extern const char kSSJS_PROPERTY_NAME_Console[];
-extern const char kSSJS_PROPERTY_NAME_WebAppService[];
-extern const char kSSJS_PROPERTY_NAME_DataService[];
-extern const char kSSJS_PROPERTY_NAME_RPCService[];
 extern const char kSSJS_PROPERTY_NAME_SessionStorage[];
 extern const char kSSJS_PROPERTY_NAME_AddHttpRequestHandler[];
 extern const char kSSJS_PROPERTY_NAME_RemoveHttpRequestHandler[];
@@ -306,84 +300,6 @@ public:
 	static	void			_getPort( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication);
 };
 
-
-
-// ----------------------------------------------------------------------------
-
-
-
-class VJSWebAppService : public XBOX::VJSClass<VJSWebAppService, VRIAServerProject>
-{
-public:
-	typedef XBOX::VJSClass<VJSWebAppService, VRIAServerProject>	inherited;
-
-	static	void			Initialize( const XBOX::VJSParms_initialize& inParms, VRIAServerProject* inApplication);
-	static	void			Finalize( const XBOX::VJSParms_finalize& inParms, VRIAServerProject* inApplication);
-	static	void			GetDefinition( ClassDefinition& outDefinition);
-
-	// Functions
-	static	void			_enable( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication);
-	static	void			_disable( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication);
-	static	void			_getDocumentRootFolder( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication);
-
-	// Properties getters
-	static	void			_getEnabled( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication);
-	static	void			_getDirectoryIndex( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication);
-};
-
-
-
-// ----------------------------------------------------------------------------
-
-
-
-class VJSDataService : public XBOX::VJSClass<VJSDataService, VRIAServerProject>
-{
-public:
-	typedef XBOX::VJSClass<VJSDataService, VRIAServerProject>	inherited;
-
-	static	void			Initialize( const XBOX::VJSParms_initialize& inParms, VRIAServerProject* inApplication);
-	static	void			Finalize( const XBOX::VJSParms_finalize& inParms, VRIAServerProject* inApplication);
-	static	void			GetDefinition( ClassDefinition& outDefinition);
-
-	// Functions
-	static	void			_enable( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication);
-	static	void			_disable( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication);
-
-	// Properties getters
-	static	void			_getEnabled( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication);
-};
-
-
-
-// ----------------------------------------------------------------------------
-
-
-
-class VJSRPCService : public XBOX::VJSClass<VJSRPCService, VRIAServerProject>
-{
-public:
-	typedef XBOX::VJSClass<VJSRPCService, VRIAServerProject>	inherited;
-
-	static	void			Initialize( const XBOX::VJSParms_initialize& inParms, VRIAServerProject* inApplication);
-	static	void			Finalize( const XBOX::VJSParms_finalize& inParms, VRIAServerProject* inApplication);
-	static	void			GetDefinition( ClassDefinition& outDefinition);
-
-	// Functions
-	static	void			_enable( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication);
-	static	void			_disable( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication);
-	static	void			_getCatalog( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication);
-	static	void			_getCatalogByName( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication);
-	static	void			_getCatalogByFile( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication);
-	static	void			_getMethodFilePath( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication);
-
-	// Properties getters
-	static	void			_getEnabled( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication);
-};
-
-
-
-// ----------------------------------------------------------------------------
 
 
 #endif

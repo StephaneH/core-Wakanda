@@ -73,7 +73,6 @@ VProject::VProject( VSolution *inParentSolution)
 ,fSymbolTable(NULL)
 ,fBackgroundDeleteFileTask(NULL)
 ,fItemParsingCompleteSignal(NULL)
-,fRPCFilesParsingCompleteEvent(NULL)
 ,fProjectUser(NULL)
 ,fIsWatchingFileSystem(false)
 ,fIsUpdatingSymbolTable(false)
@@ -105,12 +104,6 @@ VProject::~VProject()
 
 	delete fProjectUser;
 	fProjectUser = NULL;
-
-	if (fRPCFilesParsingCompleteEvent != NULL)
-	{
-		if (fRPCFilesParsingCompleteEvent->Unlock())
-			ReleaseRefCountable( &fRPCFilesParsingCompleteEvent);
-	}
 
 	ReleaseRefCountable( &fItemParsingCompleteSignal);
 }
@@ -463,29 +456,29 @@ void VProject::FileSystemEventHandler( const std::vector< VFilePath > &inFilePat
 	// being edited, and if it is, bump the priority up.
 	if (inKind == VFileSystemNotifier::kFileModified) 
 	{
-		IDocumentParserManager *parsingManager = GetSolution()->GetDocumentParserManager();
-		if (parsingManager) 
-		{
-			// We need the webfolder item to know if new added files will be executed in
-			// client or server context
-			VProjectItem*	webFolderProjectItem = GetProjectItemFromTag(kWebFolderTag);
+		// We need the webfolder item to know if new added files will be executed in
+		// client or server context
+		VProjectItem*	webFolderProjectItem = GetProjectItemFromTag(kWebFolderTag);
 
-			for (std::vector< VFilePath >::const_iterator iter = inFilePaths.begin(); iter != inFilePaths.end(); ++iter) 
+		for (std::vector< VFilePath >::const_iterator iter = inFilePaths.begin(); iter != inFilePaths.end(); ++iter) 
+		{
+			VProjectItem *projectItem = GetProjectItemFromFullPath( iter->GetPath() );
+			if (projectItem) 
 			{
-				VProjectItem *projectItem = GetProjectItemFromFullPath( iter->GetPath() );
-				if (projectItem) 
+				if (projectItem->ConformsTo( RIAFileKind::kCatalogFileKind))
 				{
-					if (projectItem->ConformsTo( RIAFileKind::kCatalogFileKind))
+					if (GetSolution()->AcceptReloadCatalog())
 					{
-						if (GetSolution()->AcceptReloadCatalog())
-						{
-							// temporary fix to avoid reentrance when ReloadCatalog modifies the catalog file
-							GetSolution()->SetAcceptReloadCatalog(false);
-							GetSolution()->ReloadCatalog(projectItem);
-							GetSolution()->SetAcceptReloadCatalog(true);
-						}
+						// temporary fix to avoid reentrance when ReloadCatalog modifies the catalog file
+						GetSolution()->SetAcceptReloadCatalog(false);
+						GetSolution()->ReloadCatalog(projectItem);
+						GetSolution()->SetAcceptReloadCatalog(true);
 					}
-	
+				}
+
+				IDocumentParserManager *parsingManager = GetSolution()->GetDocumentParserManager();
+				if (parsingManager != NULL && fSymbolTable != NULL)
+				{
 					if (iter->MatchExtension( RIAFileKind::kJSFileExtension, false ) || (projectItem->ConformsTo( RIAFileKind::kCatalogFileKind)) ) 
 					{
 						IDocumentParserManager::Priority priority = IDocumentParserManager::kPriorityNormal;
@@ -712,38 +705,6 @@ void VProject::BackgroundParseFiles()
 	parsingManager->GetJobCompleteSignal().Connect( this, VTask::GetCurrent(), &VProject::CoreFileLoadComplete );
 	parsingManager->ScheduleTask( this, job, IDocumentParserManager::CreateCookie( 'Proj', this), fSymbolTable );
 	job->Release();
-
-#elif RIA_SERVER
-
-	VectorOfProjectItems itemsVector;
-	
-	GetProjectItemsFromTag( kRPCMethodTag, itemsVector);
-	if (!itemsVector.empty())
-	{
-		IDocumentParserManager::IJob *job = parsingManager->CreateJob();
-		if (job != NULL)
-		{
-			VFilePath path;
-			for (VectorOfProjectItemsIterator iter = itemsVector.begin() ; iter != itemsVector.end() ; ++iter)
-			{
-				(*iter)->GetFilePath( path);
-				job->ScheduleTask( VSymbolFileInfos	(path, eSymbolFileBaseFolderProject, eSymbolFileExecContextServer) );
-			}
-
-			if (fRPCFilesParsingCompleteEventMutex.Lock())
-			{
-				if (fRPCFilesParsingCompleteEvent == NULL)
-					fRPCFilesParsingCompleteEvent = new VSyncEvent();
-
-				fRPCFilesParsingCompleteEventMutex.Unlock();
-			}
-
-			parsingManager->GetJobCompleteSignal().Connect( this, VTask::GetCurrent(), &VProject::RPCFilesParsingComplete);
-			parsingManager->ScheduleTask( this, job, IDocumentParserManager::CreateCookie( 'RPPj', this), fSymbolTable);
-			ReleaseRefCountable( &job);
-		}
-	}
-
 #endif
 
 	fIsUpdatingSymbolTable = true;
@@ -780,26 +741,6 @@ void VProject::CoreFileLoadComplete( IDocumentParserManager::TaskCookie inCookie
 }
 
 
-void VProject::RPCFilesParsingComplete( IDocumentParserManager::TaskCookie inCookie)
-{
-	if (inCookie.fCookie != this)
-		return;
-
-	if (inCookie.fIdentifier == 'RPPj')
-	{
-		if (fRPCFilesParsingCompleteEventMutex.Lock())
-		{
-			if (fRPCFilesParsingCompleteEvent != NULL)
-			{
-				if (fRPCFilesParsingCompleteEvent->Unlock())
-					ReleaseRefCountable( &fRPCFilesParsingCompleteEvent);
-			}
-			fRPCFilesParsingCompleteEventMutex.Unlock();
-		}
-	}
-}
-
-
 void VProject::StopBackgroundDeleteFiles()
 {
 	if (fBackgroundDeleteFileTask) {
@@ -831,21 +772,6 @@ void VProject::StopBackgroundParseFiles()
 	parsingManager->UnscheduleTasksForHandler( this );
 
 	fIsUpdatingSymbolTable = false;
-}
-
-
-VSyncEvent* VProject::RetainRPCFilesParsingCompleteEvent() const
-{
-	VSyncEvent *syncEvent = NULL;
-
-	if (fRPCFilesParsingCompleteEventMutex.Lock())
-	{
-		syncEvent = RetainRefCountable( fRPCFilesParsingCompleteEvent);
-
-		fRPCFilesParsingCompleteEventMutex.Unlock();
-	}
-	
-	return syncEvent;
 }
 
 
@@ -986,7 +912,7 @@ VSolution* VProject::GetSolution()
 	return fSolution;
 }
 
-VError VProject::Load()
+VError VProject::Load( bool inOpenSymbolsTable)
 {
 	VError err = VE_OK;
 
@@ -1056,7 +982,7 @@ VError VProject::Load()
 				_LoadSCCStatusOfProjectItems();
 		}
 
-		if (err == VE_OK)
+		if ((err == VE_OK) && inOpenSymbolsTable)
 		{
 			err = OpenSymbolTable();
 		}

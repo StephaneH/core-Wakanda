@@ -124,6 +124,8 @@ void VRIAServerJSCore::_openSolution( XBOX::VJSParms_callStaticFunction& ioParms
 
 		if (startupParams != NULL)
 		{
+			startupParams->SetOpenProjectSymbolsTable( false);	// sc 25/05/2012, on Server, do not use the symbols table anymore
+			
 			VRIAServerSolutionOpeningParameters openingParams( startupParams);
 
 			if (openingMode == 1)
@@ -179,6 +181,8 @@ void VRIAServerJSCore::_getRecentSolution( XBOX::VJSParms_callStaticFunction& io
 		VSolutionStartupParameters *solutionParams = new VSolutionStartupParameters();
 		if (solutionParams != NULL)
 		{
+			solutionParams->SetOpenProjectSymbolsTable( false);	// sc 25/05/2012, on Server, do not use the symbols table anymore
+
 			VFile *linkFile = new VFile( iter->second.second);
 			if (linkFile != NULL)
 			{

@@ -16,5 +16,15 @@
 
 guidedModel =// @startlock
 {
+	NoPerm :
+	{
+		methods :
+		{// @endlock
+			unsecured:function()
+			{// @lock
+				return true;
+			}// @startlock
+		}
+	}
 };// @endlock
 

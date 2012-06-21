@@ -35,22 +35,45 @@ namespace RIAPermissionsKeys
 class VRIAPermissions : public XBOX::VObject, public XBOX::IRefCountable
 {
 public:
-			VRIAPermissions();
+			VRIAPermissions( const XBOX::VFilePath& inPath);
 	virtual ~VRIAPermissions();
 
-			XBOX::VError			LoadPermissionFile( const XBOX::VFile& inFile, XBOX::VFolder* inDTDsFolder = NULL);
+			/** @brief	do nothing if the permissions file was not changed since the last loading.
+			*/
+			XBOX::VError			LoadPermissionFile( XBOX::VFolder* inDTDsFolder = NULL);
 
-			const XBOX::VValueBag*	RetainResourcePermission( const XBOX::VString& inType, const XBOX::VString& inResource, const XBOX::VString& inAction) const;
+			const XBOX::VValueBag*	RetainResourcePermission( const XBOX::VString& inType, const XBOX::VString& inResource, const XBOX::VString& inAction);
 
 			/** @brief	returns the permissions according to the passed filter. Any NULL criteria will be ignored.
 			*/
-			XBOX::VError			RetainResourcesPermission( std::vector< XBOX::VRefPtr<XBOX::VValueBag> >& outPermissions, const XBOX::VString* inType, const XBOX::VString* inResource, const XBOX::VString* inAction) const;
+			XBOX::VError			RetainResourcesPermission( std::vector< XBOX::VRefPtr<XBOX::VValueBag> >& outPermissions, const XBOX::VString* inType, const XBOX::VString* inResource, const XBOX::VString* inAction);
 
-			bool					IsResourceAccessGrantedForSession( const XBOX::VString& inType, const XBOX::VString& inResource, const XBOX::VString& inAction, CUAGSession *inUAGSession) const;
+			/** @brief	add a permission for a resource. inGroupID may be NULL. The permissions file is saved.
+			*/
+			XBOX::VError			AddResourcePermission( const XBOX::VString& inType, const XBOX::VString& inResource, const XBOX::VString& inAction, const XBOX::VUUID* inGroupID);
+
+			/** @brief	remove a permission. The permissions file is saved.
+			*/
+			XBOX::VError			RemoveResourcePermission( const XBOX::VString& inType, const XBOX::VString& inResource, const XBOX::VString& inAction);
+
+			bool					IsResourceAccessGrantedForSession( const XBOX::VString& inType, const XBOX::VString& inResource, const XBOX::VString& inAction, CUAGSession *inUAGSession);
 
 private:
+			XBOX::VError			_LoadPermissionFile( XBOX::VFolder* inDTDsFolder = NULL);
+			XBOX::VError			_SavePermissionFile();
+
+			XBOX::VFilePath										fPath;
+			XBOX::VTime											fModificationTime;	// The file modification time when last loading occurs
 			std::vector< XBOX::VRefPtr<XBOX::VValueBag> >		fPermissions;
+	mutable	XBOX::VCriticalSection								fMutex;
 };
+
+
+
+
+const XBOX::VError VE_RIA_INVALID_PERMISSION_DEFINITION		= MAKE_VERROR( 'perm', 1001);
+const XBOX::VError VE_RIA_PERMISSION_ALREADY_EXISTS			= MAKE_VERROR( 'perm', 1002);
+
 
 
 

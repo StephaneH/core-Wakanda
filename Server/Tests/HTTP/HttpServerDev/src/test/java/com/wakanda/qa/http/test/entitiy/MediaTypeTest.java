@@ -189,7 +189,7 @@ public class MediaTypeTest extends AbstractHttpTestCase {
 	/**
 	 * <b>Implements:</b> MediaTypes05
 	 * <p/>
-	 * Check that the type, sub-type attribute names are case- insensitive
+	 * Check that the type, sub-type attribute names are case-insensitive
 	 * <p/>
 	 * <b>Reference:</b> SPEC689 (RFC2616) 3.7
 	 * 

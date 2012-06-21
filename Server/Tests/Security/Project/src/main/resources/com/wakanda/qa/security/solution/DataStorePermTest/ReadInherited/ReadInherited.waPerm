@@ -1,0 +1,4 @@
+﻿<?xml version="1.0" encoding="UTF-8"?><permissions>
+
+<allow action="read" groupID="0FFE0664C717154D95B45F5071490A62" resource="ReadInherited" temporaryForcePermissions="false" type="model"/>
+</permissions>

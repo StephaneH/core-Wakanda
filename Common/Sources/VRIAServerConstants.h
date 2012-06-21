@@ -119,10 +119,5 @@ const XBOX::VError	VE_RIA_CANNOT_POST_MESSAGE_TO_SERVICES			= MAKE_VERROR( kRIA_
 const XBOX::VError	VE_RIA_CANNOT_LOAD_PERMISSIONS					= MAKE_VERROR( kRIA_OSTYPE_SIGNATURE, 1061);
 
 
-#define USE_JAVASCRIPT_WEBAPP_SERVICE		1	// mean that the webapp service is implemented as a JavaScript service with a commonjs module
-#define USE_JAVASCRIPT_RPC_SERVICE			1	// mean that the rpc service is implemented as a JavaScript service with a commonjs module
-#define USE_JAVASCRIPT_DATASTORE_SERVICE	1	// mean that the datastore service is implemented as a JavaScript service with a commonjs module
-
-
 
 #endif

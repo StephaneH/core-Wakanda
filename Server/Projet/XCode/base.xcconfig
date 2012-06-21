@@ -1,6 +1,10 @@
-//Definition du Rootdu depot
+//Definition du Root du depot
+BRANCH_NAME_l=WAK2
+BRANCH_NAME_u=WAK2
+
 DEPOT_ROOT=../../../../..
-QD_ROOT=$(DEPOT_ROOT)/4eDimension/WAK2
+QD_ROOT=$(DEPOT_ROOT)/4eDimension/$(BRANCH_NAME_l)
+
 //Xerces Definition
 VERSION_XERCES = 3.0.1
 GCC_PREPROCESSOR_DEFINITIONS_XERCES = XERCES_3_0_1;
@@ -9,7 +13,7 @@ GCC_PREPROCESSOR_DEFINITIONS_XERCES = XERCES_3_0_1;
 VERSION_ICU = 4.8
 
 //WebKit Version
-VERSION_WEBKIT = 742
+VERSION_WEBKIT = 534.53
 
 //Architectures
 ARCHS = x86_64
@@ -52,11 +56,11 @@ WRAPPER_EXTENSION = app
 //Search Path
 FRAMEWORK_SEARCH_PATHS_XERCES = "${DEPOT_ROOT}/xerces/$(VERSION_XERCES)/Frameworks $(ARCHS)"
 FRAMEWORK_SEARCH_PATHS_ICU = "$(DEPOT_ROOT)/icu/$(VERSION_ICU)/Frameworks $(ARCHS)" 
-FRAMEWORK_SEARCH_PATHS = "${DEPOT_ROOT}/XToolbox/WAK2/Frameworks $(ARCHS)" $(FRAMEWORK_SEARCH_PATHS_XERCES) $(FRAMEWORK_SEARCH_PATHS_ICU) $(DEPOT_ROOT)/cppunit/1.11.4/Frameworks "$(DEPOT_ROOT)/webkit/${VERSION_WEBKIT}/JavaScriptCore/build_$(ARCHS)/$(CONFIGURATION)" "$(DEPOT_ROOT)/iODBC/3.52.5/Frameworks";
+FRAMEWORK_SEARCH_PATHS = "${DEPOT_ROOT}/XToolbox/$(BRANCH_NAME_u)/Frameworks $(ARCHS)" $(FRAMEWORK_SEARCH_PATHS_XERCES) $(FRAMEWORK_SEARCH_PATHS_ICU) $(DEPOT_ROOT)/cppunit/1.11.4/Frameworks "$(DEPOT_ROOT)/webkit/${VERSION_WEBKIT}/JavaScriptCore/build_$(ARCHS)/$(CONFIGURATION)" "$(DEPOT_ROOT)/iODBC/3.52.5/Frameworks";
 
 HEADER_SEARCH_PATHS_XERCES = "${DEPOT_ROOT}/xerces/$(VERSION_XERCES)/xerces/src"
-HEADER_SEARCH_PATHS_JSC    = "${DEPOT_ROOT}/webkit/${VERSION_WEBKIT}/JavaScriptCore/ForwardingHeaders" "$(DEPOT_ROOT)/webkit/${VERSION_WEBKIT}" "$(DEPOT_ROOT)/webkit/${VERSION_WEBKIT}/WebCore/inspector"
-HEADER_SEARCH_PATHS = ${HEADER_SEARCH_PATHS_JSC} ../../Sources ../../../Common/Sources ${DEPOT_ROOT}/HelperTools/1.0/Sources ${DEPOT_ROOT}/XToolbox/WAK2 ${DEPOT_ROOT}/Components/WAK2 ${DEPOT_ROOT}/XToolbox/WAK2/KernelIPC/Sources ${DEPOT_ROOT}/XToolbox/WAK2/ServerNet/Headers ${DEPOT_ROOT}/XToolbox/WAK2/SQLConnector/Headers
+HEADER_SEARCH_PATHS_JSC    = "${DEPOT_ROOT}/webkit/${VERSION_WEBKIT}/JavaScriptCore/ForwardingHeaders" "$(DEPOT_ROOT)/webkit/${VERSION_WEBKIT}" "$(DEPOT_ROOT)/webkit/${VERSION_WEBKIT}/WebCore/inspector" "$(DEPOT_ROOT)/webkit/${VERSION_WEBKIT}/JavaScriptCore/4D"
+HEADER_SEARCH_PATHS = ${HEADER_SEARCH_PATHS_JSC} ../../Sources ../../../Common/Sources ${DEPOT_ROOT}/HelperTools/1.0/Sources ${DEPOT_ROOT}/XToolbox/$(BRANCH_NAME_u) ${DEPOT_ROOT}/Components/$(BRANCH_NAME_u)
 
 //GCC Language
 GCC_PRECOMPILE_PREFIX_HEADER = YES

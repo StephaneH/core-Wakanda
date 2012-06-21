@@ -26,8 +26,10 @@
 #include "VRIAServerApplication.h"
 #include "VRIAServerLogger.h"
 #include "UsersAndGroups/Sources/UsersAndGroups.h"
-#include "VRIAServerSolution.h"
 #include "VRIAJSDebuggerSettings.h"
+#include "VRIAPermissions.h"
+#include "VRIAServerSolution.h"
+
 
 
 USING_TOOLBOX_NAMESPACE
@@ -135,6 +137,7 @@ fOpeningParameters(NULL),
 fDebuggerSettings(NULL),
 #endif
 fUAGDirectory(NULL),
+fPermissions(NULL),
 fJSContextPool(NULL),
 fJSRuntimeDelegate(NULL),
 fLogger(NULL),
@@ -211,6 +214,7 @@ VError VRIAServerSolution::Close()
 		fApplicationsMutex.Unlock();
 	}
 
+	ReleaseRefCountable( &fPermissions);
 	xbox_assert(fUAGDirectory->GetRefCount() == 1);
 	ReleaseRefCountable( &fUAGDirectory);
 
@@ -486,6 +490,17 @@ CUAGDirectory* VRIAServerSolution::RetainUAGDirectory() const
 }
 
 
+VRIAPermissions* VRIAServerSolution::RetainPermissions( XBOX::VError *outError) const
+{
+	VRIAPermissions *permissions = RetainRefCountable( fPermissions);
+
+	if (outError != NULL)
+		*outError = VE_OK;
+
+	return permissions;
+}
+
+
 bool VRIAServerSolution::GetUUID( VUUID& outUUID) const
 {
 	if (fDesignSolution != NULL)
@@ -732,6 +747,13 @@ VError VRIAServerSolution::_Open( VSolution* inDesignSolution, VRIAServerSolutio
 				err = _LoadDatabaseSettings();
 				if (err != VE_OK)
 					err = ThrowError( VE_RIA_CANNOT_LOAD_DATABASE_SETTINGS);
+			}
+
+			if (err == VE_OK || fState.inMaintenance)
+			{
+				fPermissions = _LoadPermissionFile( err);
+				if (err != VE_OK)
+					err = ThrowError( VE_RIA_CANNOT_LOAD_PERMISSIONS);
 			}
 
 			if (err == VE_OK || fState.inMaintenance)
@@ -1176,6 +1198,33 @@ CUAGDirectory* VRIAServerSolution::_OpenUAGDirectory( VError& outError)
 	}
 	return directory;
 }
+
+
+VRIAPermissions* VRIAServerSolution::_LoadPermissionFile( VError& outError)
+{
+	VRIAPermissions *permissions = NULL;
+
+	outError = VE_OK;
+
+	if (testAssert(fDesignSolution != NULL))
+	{
+		VProjectItem *item = fDesignSolution->GetProjectItemFromTag( kPermissionsTag);
+		if (item != NULL)
+		{
+			VFilePath path;
+			item->GetFilePath( path);
+
+			permissions = new VRIAPermissions( path);
+			if (permissions == NULL)
+				outError = ThrowError( VE_MEMORY_FULL);
+			else
+				outError = permissions->LoadPermissionFile();
+		}
+	}
+
+	return permissions;	
+}
+
 
 // THIS TEST METHOD WILL GO AWAY INTO ITS OWN SEPARATE SOURCE FILE
 VError VRIAServerSolution::TEST_RegisterDebuggerUAGCallback ( )

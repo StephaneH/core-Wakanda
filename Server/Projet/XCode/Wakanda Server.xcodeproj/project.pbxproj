@@ -24,6 +24,7 @@
 		F4041F3014DA911B006902E7 /* VRIAPermissions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F4041F2E14DA911B006902E7 /* VRIAPermissions.cpp */; };
 		F4041FB014DAE4C0006902E7 /* VJSPermissions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F4041FAE14DAE4C0006902E7 /* VJSPermissions.cpp */; };
 		F40ED03B134DA6E00099B3F1 /* VProjectItem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F40ED03A134DA6E00099B3F1 /* VProjectItem.cpp */; };
+		F412FD1115625F16000BE0C0 /* 4DJavaScriptCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F412FD0E15625F02000BE0C0 /* 4DJavaScriptCore.framework */; };
 		F4176816131F9EE300106722 /* VRIAServerProgressIndicator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F4176814131F9EE300106722 /* VRIAServerProgressIndicator.cpp */; };
 		F42BBE66131E9BDE00F45C82 /* ServerNetDebug.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F42BBE3B131E9B5500F45C82 /* ServerNetDebug.framework */; };
 		F42BBE8E131E9C3400F45C82 /* GraphicsDebug.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F42BBE4B131E9B8A00F45C82 /* GraphicsDebug.framework */; };
@@ -41,7 +42,6 @@
 		F442BF5B131E96FB00C72C81 /* VRIAServerSolution.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F442BF47131E96FB00C72C81 /* VRIAServerSolution.cpp */; };
 		F442BF5C131E96FB00C72C81 /* VRIAServerTools.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F442BF49131E96FB00C72C81 /* VRIAServerTools.cpp */; };
 		F442BF5D131E96FB00C72C81 /* VRPCService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F442BF4C131E96FB00C72C81 /* VRPCService.cpp */; };
-		F4BC321D1554038100D9659A /* 4DJavaScriptCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F4B977ED1552E18100D2EDFD /* 4DJavaScriptCore.framework */; };
 		F4CAA8F9149F7B380042797C /* VProjectSettings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F4CAA8F5149F7B380042797C /* VProjectSettings.cpp */; };
 		F4CAA8FA149F7B380042797C /* VSolutionSettings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F4CAA8F7149F7B380042797C /* VSolutionSettings.cpp */; };
 		F4D7FA2513AA31C200E9CF25 /* commonJSAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F4D7FA2313AA31C200E9CF25 /* commonJSAPI.cpp */; };
@@ -102,6 +102,62 @@
 			proxyType = 1;
 			remoteGlobalIDString = E44229E4152B392700E32705;
 			remoteInfo = "libHelperTool x64";
+		};
+		F412FD0115625F02000BE0C0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F412FCF415625F02000BE0C0 /* JavaScriptCore.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 932F5BD90822A1C700736975;
+			remoteInfo = JavaScriptCore;
+		};
+		F412FD0315625F02000BE0C0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F412FCF415625F02000BE0C0 /* JavaScriptCore.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = F4E88D4215345D8700EABD46;
+			remoteInfo = "JavaScriptCore x86_64";
+		};
+		F412FD0515625F02000BE0C0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F412FCF415625F02000BE0C0 /* JavaScriptCore.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 141211200A48793C00480255;
+			remoteInfo = minidom;
+		};
+		F412FD0715625F02000BE0C0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F412FCF415625F02000BE0C0 /* JavaScriptCore.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 14BD59BF0A3E8F9000BAF59C;
+			remoteInfo = testapi;
+		};
+		F412FD0915625F02000BE0C0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F412FCF415625F02000BE0C0 /* JavaScriptCore.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 932F5BE10822A1C700736975;
+			remoteInfo = jsc;
+		};
+		F412FD0B15625F02000BE0C0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F412FCF415625F02000BE0C0 /* JavaScriptCore.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = F435DA5615343B64000CEE94;
+			remoteInfo = 4DJavaScriptCore;
+		};
+		F412FD0D15625F02000BE0C0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F412FCF415625F02000BE0C0 /* JavaScriptCore.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = F435DA6C15343BFD000CEE94;
+			remoteInfo = "4DJavaScriptCore x86_64";
+		};
+		F412FD0F15625F0C000BE0C0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F412FCF415625F02000BE0C0 /* JavaScriptCore.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = F435DA6315343BFD000CEE94;
+			remoteInfo = "4DJavaScriptCore x86_64";
 		};
 		F42BBE36131E9B5500F45C82 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -186,48 +242,6 @@
 			proxyType = 2;
 			remoteGlobalIDString = E44226F1152AF2B000E32705;
 			remoteInfo = SampleShellTool;
-		};
-		F4B977E41552E18100D2EDFD /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F4B977D91552E18100D2EDFD /* 4DJavaScriptCore.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 932F5BD90822A1C700736975;
-			remoteInfo = 4DJavaScriptCore;
-		};
-		F4B977E61552E18100D2EDFD /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F4B977D91552E18100D2EDFD /* 4DJavaScriptCore.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 141211200A48793C00480255;
-			remoteInfo = minidom;
-		};
-		F4B977E81552E18100D2EDFD /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F4B977D91552E18100D2EDFD /* 4DJavaScriptCore.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 14BD59BF0A3E8F9000BAF59C;
-			remoteInfo = testapi;
-		};
-		F4B977EA1552E18100D2EDFD /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F4B977D91552E18100D2EDFD /* 4DJavaScriptCore.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 932F5BE10822A1C700736975;
-			remoteInfo = jsc;
-		};
-		F4B977EC1552E18100D2EDFD /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F4B977D91552E18100D2EDFD /* 4DJavaScriptCore.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = F47C0CA71403E41800A9348A;
-			remoteInfo = "4DJavaScriptCore x64";
-		};
-		F4B977F21552E18A00D2EDFD /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F4B977D91552E18100D2EDFD /* 4DJavaScriptCore.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = F47C0A311403E41800A9348A;
-			remoteInfo = "4DJavaScriptCore x64";
 		};
 		F4EBB359131E9C8E0005EDB8 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -425,20 +439,6 @@
 			remoteGlobalIDString = F437D24A113EC706009FE5D8;
 			remoteInfo = "LanguageSyntax x64";
 		};
-		F4EBB4E3131EA0790005EDB8 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F4EBB4D4131EA0790005EDB8 /* Comp - SQL */;
-			proxyType = 2;
-			remoteGlobalIDString = 8D01CCD20486CAD60068D4B7;
-			remoteInfo = SQL;
-		};
-		F4EBB4E5131EA0790005EDB8 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F4EBB4D4131EA0790005EDB8 /* Comp - SQL */;
-			proxyType = 2;
-			remoteGlobalIDString = F44522DB11648C27005984A9;
-			remoteInfo = "SQL x64";
-		};
 		F4EBB4F3131EA0930005EDB8 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F4EBB4E7131EA0930005EDB8 /* Comp - UsersAndGroups */;
@@ -487,13 +487,6 @@
 			proxyType = 1;
 			remoteGlobalIDString = F437D212113EC706009FE5D8;
 			remoteInfo = "LanguageSyntax x64";
-		};
-		F4EBB511131EA12C0005EDB8 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F4EBB4D4131EA0790005EDB8 /* Comp - SQL */;
-			proxyType = 1;
-			remoteGlobalIDString = F445229B11648C27005984A9;
-			remoteInfo = "SQL x64";
 		};
 		F4EBB513131EA1390005EDB8 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -562,6 +555,7 @@
 		F4041FAF14DAE4C0006902E7 /* VJSPermissions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VJSPermissions.h; path = ../../Sources/VJSPermissions.h; sourceTree = SOURCE_ROOT; };
 		F406E498134CA47F00D45870 /* VProjectItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VProjectItem.h; path = ../../../Common/Sources/VProjectItem.h; sourceTree = SOURCE_ROOT; };
 		F40ED03A134DA6E00099B3F1 /* VProjectItem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VProjectItem.cpp; path = ../../../Common/Sources/VProjectItem.cpp; sourceTree = SOURCE_ROOT; };
+		F412FCF415625F02000BE0C0 /* JavaScriptCore.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = JavaScriptCore.xcodeproj; path = ../../../../../webkit/534.53/JavaScriptCore/JavaScriptCore.xcodeproj; sourceTree = SOURCE_ROOT; };
 		F4176814131F9EE300106722 /* VRIAServerProgressIndicator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VRIAServerProgressIndicator.cpp; path = ../../Sources/VRIAServerProgressIndicator.cpp; sourceTree = SOURCE_ROOT; };
 		F4176815131F9EE300106722 /* VRIAServerProgressIndicator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VRIAServerProgressIndicator.h; path = ../../Sources/VRIAServerProgressIndicator.h; sourceTree = SOURCE_ROOT; };
 		F42BBE15131E9B5400F45C82 /* Dll - XBox - ServerNet */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "Dll - XBox - ServerNet"; path = ../../../../../XToolbox/WAK2/ServerNet/Projects/XCode/ServerNet.xcodeproj; sourceTree = SOURCE_ROOT; };
@@ -597,7 +591,6 @@
 		F442BF82131E9A8700C72C81 /* RIAServerDebugMacho.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RIAServerDebugMacho.pch; sourceTree = "<group>"; };
 		F442BF83131E9A8700C72C81 /* RIAServerFinalMacho.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RIAServerFinalMacho.pch; sourceTree = "<group>"; };
 		F456C375153564F1001D3475 /* HelperTools.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = HelperTools.xcodeproj; path = ../../../../../HelperTools/1.0/Projects/HelperTools.xcodeproj; sourceTree = SOURCE_ROOT; };
-		F4B977D91552E18100D2EDFD /* 4DJavaScriptCore.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = 4DJavaScriptCore.xcodeproj; path = ../../../../../webkit/742/JavaScriptCore/4DJavaScriptCore.xcodeproj; sourceTree = SOURCE_ROOT; };
 		F4CAA8F5149F7B380042797C /* VProjectSettings.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VProjectSettings.cpp; path = ../../../Common/Sources/VProjectSettings.cpp; sourceTree = SOURCE_ROOT; };
 		F4CAA8F6149F7B380042797C /* VProjectSettings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VProjectSettings.h; path = ../../../Common/Sources/VProjectSettings.h; sourceTree = SOURCE_ROOT; };
 		F4CAA8F7149F7B380042797C /* VSolutionSettings.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VSolutionSettings.cpp; path = ../../../Common/Sources/VSolutionSettings.cpp; sourceTree = SOURCE_ROOT; };
@@ -627,7 +620,6 @@
 		F4EBB49D131EA0410005EDB8 /* Comp - DB4D */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "Comp - DB4D"; path = ../../../../../Components/WAK2/DB4D/projects/Xcode/DB4D.xcodeproj; sourceTree = SOURCE_ROOT; };
 		F4EBB4B1131EA0530005EDB8 /* Comp - HTTPServer */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "Comp - HTTPServer"; path = ../../../../../Components/WAK2/HTTPServer/Projects/XCode/HTTPServer.xcodeproj; sourceTree = SOURCE_ROOT; };
 		F4EBB4C1131EA0660005EDB8 /* Comp - Language Syntax */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "Comp - Language Syntax"; path = "../../../../../Components/WAK2/Language Syntax/Projects/XCode/Language Syntax.xcodeproj"; sourceTree = SOURCE_ROOT; };
-		F4EBB4D4131EA0790005EDB8 /* Comp - SQL */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "Comp - SQL"; path = ../../../../../Components/WAK2/SQL/Projects/Xcode/SQL.xcodeproj; sourceTree = SOURCE_ROOT; };
 		F4EBB4E7131EA0930005EDB8 /* Comp - UsersAndGroups */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "Comp - UsersAndGroups"; path = ../../../../../Components/WAK2/UsersAndGroups/projects/XCode/UsersAndGroups.xcodeproj; sourceTree = SOURCE_ROOT; };
 		F4EBB4F7131EA0AA0005EDB8 /* Comp - Zip */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "Comp - Zip"; path = ../../../../../Components/WAK2/Zip/Projects/Xcode/Zip.xcodeproj; sourceTree = SOURCE_ROOT; };
 		F4F8C5441164DEF7005C7BC6 /* Wakanda Server.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Wakanda Server.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -638,7 +630,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F4BC321D1554038100D9659A /* 4DJavaScriptCore.framework in Frameworks */,
+				F412FD1115625F16000BE0C0 /* 4DJavaScriptCore.framework in Frameworks */,
 				F403B4E215356FFE00966ECB /* libInstallHelperToolDebugx64.a in Frameworks */,
 				F4EBB425131E9E8C0005EDB8 /* XercesDebug.framework in Frameworks */,
 				F4EBB3F7131E9DD40005EDB8 /* XMLDebug.framework in Frameworks */,
@@ -756,7 +748,6 @@
 				42F42967147E4C0100B02139 /* Comp - Security Manager */,
 				F4EBB4F7131EA0AA0005EDB8 /* Comp - Zip */,
 				F4EBB4E7131EA0930005EDB8 /* Comp - UsersAndGroups */,
-				F4EBB4D4131EA0790005EDB8 /* Comp - SQL */,
 				F4EBB4C1131EA0660005EDB8 /* Comp - Language Syntax */,
 				F4EBB4B1131EA0530005EDB8 /* Comp - HTTPServer */,
 				F4EBB49D131EA0410005EDB8 /* Comp - DB4D */,
@@ -767,7 +758,7 @@
 		39C6D88008BA2F35005685B8 /* Dependencies */ = {
 			isa = PBXGroup;
 			children = (
-				F4B977D91552E18100D2EDFD /* 4DJavaScriptCore.xcodeproj */,
+				F412FCF415625F02000BE0C0 /* JavaScriptCore.xcodeproj */,
 				F456C375153564F1001D3475 /* HelperTools.xcodeproj */,
 				F4EBB40B131E9E6B0005EDB8 /* XercesLib.xcodeproj */,
 				F4EBB34F131E9C8E0005EDB8 /* Dll - XBox - Kernel */,
@@ -1059,6 +1050,20 @@
 			name = Zip;
 			sourceTree = "<group>";
 		};
+		F412FCF515625F02000BE0C0 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F412FD0215625F02000BE0C0 /* JavaScriptCore.framework */,
+				F412FD0415625F02000BE0C0 /* JavaScriptCore.framework */,
+				F412FD0615625F02000BE0C0 /* minidom */,
+				F412FD0815625F02000BE0C0 /* testapi */,
+				F412FD0A15625F02000BE0C0 /* jsc */,
+				F412FD0C15625F02000BE0C0 /* 4DJavaScriptCore.framework */,
+				F412FD0E15625F02000BE0C0 /* 4DJavaScriptCore.framework */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		F42BBE16131E9B5400F45C82 /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -1099,18 +1104,6 @@
 				F442BF3C131E96FB00C72C81 /* VRIAServerHTTPSession.h */,
 			);
 			name = Sessions;
-			sourceTree = "<group>";
-		};
-		F4B977DA1552E18100D2EDFD /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				F4B977E51552E18100D2EDFD /* 4DJavaScriptCore.framework */,
-				F4B977E71552E18100D2EDFD /* minidom */,
-				F4B977E91552E18100D2EDFD /* testapi */,
-				F4B977EB1552E18100D2EDFD /* jsc */,
-				F4B977ED1552E18100D2EDFD /* 4DJavaScriptCore.framework */,
-			);
-			name = Products;
 			sourceTree = "<group>";
 		};
 		F4E2C3461337AD6800E34403 /* Precompile */ = {
@@ -1208,15 +1201,6 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		F4EBB4D5131EA0790005EDB8 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				F4EBB4E4131EA0790005EDB8 /* SQLServerDebug.bundle */,
-				F4EBB4E6131EA0790005EDB8 /* SQLServerDebug.bundle */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
 		F4EBB4E8131EA0930005EDB8 /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -1262,14 +1246,13 @@
 				F4EBB50C131EA1140005EDB8 /* PBXTargetDependency */,
 				F4EBB50E131EA11F0005EDB8 /* PBXTargetDependency */,
 				F4EBB510131EA1280005EDB8 /* PBXTargetDependency */,
-				F4EBB512131EA12C0005EDB8 /* PBXTargetDependency */,
 				F4EBB514131EA1390005EDB8 /* PBXTargetDependency */,
 				F4EBB516131EA1460005EDB8 /* PBXTargetDependency */,
 				42A4A407147EAEE1000575A8 /* PBXTargetDependency */,
 				F403B4E115356FF300966ECB /* PBXTargetDependency */,
 				E46123D0153856E7009B648D /* PBXTargetDependency */,
 				E46123D2153856E7009B648D /* PBXTargetDependency */,
-				F4B977F31552E18A00D2EDFD /* PBXTargetDependency */,
+				F412FD1015625F0C000BE0C0 /* PBXTargetDependency */,
 			);
 			name = "Wakanda Server x64";
 			productInstallPath = "$(HOME)/Applications";
@@ -1301,10 +1284,6 @@
 			projectDirPath = "";
 			projectReferences = (
 				{
-					ProductGroup = F4B977DA1552E18100D2EDFD /* Products */;
-					ProjectRef = F4B977D91552E18100D2EDFD /* 4DJavaScriptCore.xcodeproj */;
-				},
-				{
 					ProductGroup = F4EBB49E131EA0410005EDB8 /* Products */;
 					ProjectRef = F4EBB49D131EA0410005EDB8 /* Comp - DB4D */;
 				},
@@ -1319,10 +1298,6 @@
 				{
 					ProductGroup = 42F42968147E4C0100B02139 /* Products */;
 					ProjectRef = 42F42967147E4C0100B02139 /* Comp - Security Manager */;
-				},
-				{
-					ProductGroup = F4EBB4D5131EA0790005EDB8 /* Products */;
-					ProjectRef = F4EBB4D4131EA0790005EDB8 /* Comp - SQL */;
 				},
 				{
 					ProductGroup = F4EBB4E8131EA0930005EDB8 /* Products */;
@@ -1365,6 +1340,10 @@
 					ProjectRef = F456C375153564F1001D3475 /* HelperTools.xcodeproj */;
 				},
 				{
+					ProductGroup = F412FCF515625F02000BE0C0 /* Products */;
+					ProjectRef = F412FCF415625F02000BE0C0 /* JavaScriptCore.xcodeproj */;
+				},
+				{
 					ProductGroup = F4EBB40C131E9E6B0005EDB8 /* Products */;
 					ProjectRef = F4EBB40B131E9E6B0005EDB8 /* XercesLib.xcodeproj */;
 				},
@@ -1389,6 +1368,55 @@
 			fileType = wrapper.cfbundle;
 			path = SecurityManagerDebug.bundle;
 			remoteRef = 42F429F3147E567800B02139 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F412FD0215625F02000BE0C0 /* JavaScriptCore.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = JavaScriptCore.framework;
+			remoteRef = F412FD0115625F02000BE0C0 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F412FD0415625F02000BE0C0 /* JavaScriptCore.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = JavaScriptCore.framework;
+			remoteRef = F412FD0315625F02000BE0C0 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F412FD0615625F02000BE0C0 /* minidom */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = minidom;
+			remoteRef = F412FD0515625F02000BE0C0 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F412FD0815625F02000BE0C0 /* testapi */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = testapi;
+			remoteRef = F412FD0715625F02000BE0C0 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F412FD0A15625F02000BE0C0 /* jsc */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = jsc;
+			remoteRef = F412FD0915625F02000BE0C0 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F412FD0C15625F02000BE0C0 /* 4DJavaScriptCore.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = 4DJavaScriptCore.framework;
+			remoteRef = F412FD0B15625F02000BE0C0 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F412FD0E15625F02000BE0C0 /* 4DJavaScriptCore.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = 4DJavaScriptCore.framework;
+			remoteRef = F412FD0D15625F02000BE0C0 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		F42BBE37131E9B5500F45C82 /* ServerNetDebug.framework */ = {
@@ -1459,41 +1487,6 @@
 			fileType = "compiled.mach-o.executable";
 			path = SampleShellTool;
 			remoteRef = F456C386153564F1001D3475 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		F4B977E51552E18100D2EDFD /* 4DJavaScriptCore.framework */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			path = 4DJavaScriptCore.framework;
-			remoteRef = F4B977E41552E18100D2EDFD /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		F4B977E71552E18100D2EDFD /* minidom */ = {
-			isa = PBXReferenceProxy;
-			fileType = "compiled.mach-o.executable";
-			path = minidom;
-			remoteRef = F4B977E61552E18100D2EDFD /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		F4B977E91552E18100D2EDFD /* testapi */ = {
-			isa = PBXReferenceProxy;
-			fileType = "compiled.mach-o.executable";
-			path = testapi;
-			remoteRef = F4B977E81552E18100D2EDFD /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		F4B977EB1552E18100D2EDFD /* jsc */ = {
-			isa = PBXReferenceProxy;
-			fileType = "compiled.mach-o.executable";
-			path = jsc;
-			remoteRef = F4B977EA1552E18100D2EDFD /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		F4B977ED1552E18100D2EDFD /* 4DJavaScriptCore.framework */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			path = 4DJavaScriptCore.framework;
-			remoteRef = F4B977EC1552E18100D2EDFD /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		F4EBB35A131E9C8E0005EDB8 /* libKernelDebug.a */ = {
@@ -1657,20 +1650,6 @@
 			remoteRef = F4EBB4D2131EA0660005EDB8 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		F4EBB4E4131EA0790005EDB8 /* SQLServerDebug.bundle */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.cfbundle;
-			path = SQLServerDebug.bundle;
-			remoteRef = F4EBB4E3131EA0790005EDB8 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		F4EBB4E6131EA0790005EDB8 /* SQLServerDebug.bundle */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.cfbundle;
-			path = SQLServerDebug.bundle;
-			remoteRef = F4EBB4E5131EA0790005EDB8 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
 		F4EBB4F4131EA0930005EDB8 /* UsersAndGroupsDebug.bundle */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.cfbundle;
@@ -1734,7 +1713,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "echo \"Versionning ...\"\nperl \"${DEPOT_ROOT}/Tools/Versionning/Wakanda_versionning_mac.pl\"\nif [ \"$?\" != \"0\" ] ; then\n \techo \"error: Erreur versionning\"\n\texit 2; \nelse \n\tFicLoaderJs=\"${PROJECT_DIR}/../../../walib/WAF/Loader.js\"\n\tchangelist=`cat ${DEPOT_ROOT}/Tools/Versionning/version.txt | cut -d. -f3 `\n\tcp \"${FicLoaderJs}\" \"${OBJROOT}/Loader.js\"\n\tcat \"${OBJROOT}/Loader.js\" | sed \"s/\\('BUILD'\\ *:\\ *\\)'[0-9]*'/\\1'${changelist}'/\" > \"${FicLoaderJs}\"\nfi\n\necho \"Copying resources files ...\"\n\"${DEPOT_ROOT}/Tools/BuildMac/scripts_compil_main/Scripts/CopyFiles_Mac.sh\" \"$BUILT_PRODUCTS_DIR/$FULL_PRODUCT_NAME\" \"E\"\nif [ \"$?\" != \"0\" ] ; then\n \texit 1; \nfi\n\nexit 0";
+			shellScript = "echo \"Versionning ...\"\nperl \"${DEPOT_ROOT}/Tools/Versionning/Wakanda_versionning_mac.pl\"\nif [ \"$?\" != \"0\" ] ; then\n \techo \"error: Erreur versionning\"\n\texit 2; \nelse \n\tFicLoaderJs=\"${PROJECT_DIR}/../../../walib/WAF/Loader.js\"\n\tchangelist=`cat ${DEPOT_ROOT}/Tools/Versionning/version.txt | cut -d. -f3 `\n\tcp \"${FicLoaderJs}\" \"${OBJROOT}/Loader.js\"\n\tcat \"${OBJROOT}/Loader.js\" | sed \"s/\\('BUILD'\\ *:\\ *\\)'[0-9]*'/\\1'${changelist}'/\" > \"${FicLoaderJs}\"\nfi\n\necho \"Copying resources files ...\"\n\"${DEPOT_ROOT}/Tools/BuildMac/scripts_compil_${BRANCH_NAME_l}/Scripts/CopyFiles_Mac.sh\" \"$BUILT_PRODUCTS_DIR/$FULL_PRODUCT_NAME\" \"E\"\nif [ \"$?\" != \"0\" ] ; then\n \texit 1; \nfi\n\nexit 0";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -1808,6 +1787,11 @@
 			name = "libHelperTool x64";
 			targetProxy = F403B4E015356FF300966ECB /* PBXContainerItemProxy */;
 		};
+		F412FD1015625F0C000BE0C0 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "4DJavaScriptCore x86_64";
+			targetProxy = F412FD0F15625F0C000BE0C0 /* PBXContainerItemProxy */;
+		};
 		F42BBE68131E9BEA00F45C82 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = "ServerNet x64";
@@ -1817,11 +1801,6 @@
 			isa = PBXTargetDependency;
 			name = "Graphics x64";
 			targetProxy = F42BBE8C131E9C2700F45C82 /* PBXContainerItemProxy */;
-		};
-		F4B977F31552E18A00D2EDFD /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = "4DJavaScriptCore x64";
-			targetProxy = F4B977F21552E18A00D2EDFD /* PBXContainerItemProxy */;
 		};
 		F4EBB37B131E9CF60005EDB8 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -1862,11 +1841,6 @@
 			isa = PBXTargetDependency;
 			name = "LanguageSyntax x64";
 			targetProxy = F4EBB50F131EA1280005EDB8 /* PBXContainerItemProxy */;
-		};
-		F4EBB512131EA12C0005EDB8 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = "SQL x64";
-			targetProxy = F4EBB511131EA12C0005EDB8 /* PBXContainerItemProxy */;
 		};
 		F4EBB514131EA1390005EDB8 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;

@@ -1055,6 +1055,77 @@ bool VSolution::_IsVectorContainsReferencedItems( const VectorOfProjectItems& in
 }
 
 
+VProjectItem* VSolution::_CreateFileItemFromPath( XBOX::VError& outError, const XBOX::VFilePath& inPath, bool inRecursive, bool inTouchSolutionFile)
+{
+	VProjectItem *result = NULL;
+
+	if (inPath.IsFile())
+	{
+		VFilePath parentPath, solutionFolderPath;
+		if (inPath.GetParent( parentPath) && GetSolutionFolderPath( solutionFolderPath))
+		{
+			if ((solutionFolderPath == parentPath) || parentPath.IsChildOf( solutionFolderPath))
+			{
+				VProjectItem *parentItem = GetProjectItemFromFullPath( parentPath.GetPath());
+				if ((parentItem == NULL) && inRecursive)
+				{
+					parentItem = _CreateFolderItemFromPath( outError, parentPath, true, inTouchSolutionFile);
+				}
+
+				if (parentItem != NULL)
+				{
+					VFile file(inPath);
+					VString fileName;
+					inPath.GetFileName( fileName);
+
+					result = VProjectItemFile::Instantiate( fileName, parentItem);
+					if (result != NULL)
+					{
+						_DoItemAdded( result, inTouchSolutionFile);
+					}
+				}
+			}
+		}
+	}
+	return result;
+}
+
+
+VProjectItem* VSolution::_CreateFolderItemFromPath( XBOX::VError& outError, const XBOX::VFilePath& inPath, bool inRecursive, bool inTouchSolutionFile)
+{
+	VProjectItem *result = NULL;
+
+	if (inPath.IsFolder())
+	{
+		VFilePath parentPath, solutionFolderPath;
+		if (inPath.GetParent( parentPath) && GetSolutionFolderPath( solutionFolderPath))
+		{
+			if ((solutionFolderPath == parentPath) || parentPath.IsChildOf( solutionFolderPath))
+			{
+				VProjectItem *parentItem = GetProjectItemFromFullPath( parentPath.GetPath());
+				if ((parentItem == NULL) && inRecursive)
+				{
+					parentItem = _CreateFolderItemFromPath( outError, parentPath, true, inTouchSolutionFile);
+				}
+
+				if (parentItem != NULL)
+				{
+					VString folderName;
+					inPath.GetFolderName( folderName);
+
+					result = VProjectItemFolder::Instantiate( folderName, parentItem);
+					if (result != NULL)
+					{
+						_DoItemAdded( result, inTouchSolutionFile);
+					}
+				}
+			}
+		}
+	}
+	return result;
+}
+
+
 XBOX::VError VSolution::CountFilesAndFolders( const VFolder& inFolder, sLONG& outFilesCount, sLONG &outFoldersCount, bool inRecursive)
 {
 	outFilesCount = 0;
@@ -1507,11 +1578,15 @@ VError VSolution::DisableDebuggerGroup ( )
 VError VSolution::LoadProjects()
 {
 	VError err = VE_OK;
+	VSolutionStartupParameters *startupParams = RetainStartupParameters();
 
 	for (VectorOfProjectsIterator iter = fProjects.begin() ; iter != fProjects.end() && err == VE_OK ; ++iter)
 	{
-		err = (*iter)->Load();
+		err = (*iter)->Load( (startupParams != NULL) ? startupParams->GetOpenProjectSymbolsTable() : true);
 	}
+
+	ReleaseRefCountable( &startupParams);
+
 	return err;
 }
 
@@ -2231,6 +2306,18 @@ VProjectItem* VSolution::ReferenceExternalFile( XBOX::VError& outError, VProject
 }
 
 
+VProjectItem* VSolution::CreateFileItemFromPath( XBOX::VError& outError, const XBOX::VFilePath& inPath, bool inRecursive)
+{
+	return _CreateFileItemFromPath( outError, inPath, inRecursive, true);
+}
+
+
+VProjectItem* VSolution::CreateFolderItemFromPath( XBOX::VError& outError, const XBOX::VFilePath& inPath, bool inRecursive)
+{
+	return _CreateFolderItemFromPath( outError, inPath, inRecursive, true);
+}
+
+
 VProject* VSolution::AddExistingProject(const VURL& inProjectFileURL, bool inReferenceIt)
 {
 	if (IsProjectInSolution(inProjectFileURL))
@@ -2258,10 +2345,11 @@ VProject* VSolution::AddExistingProject(const VURL& inProjectFileURL, bool inRef
 		if ((saveAction == e_SAVE) || (saveAction == e_NO_SAVE))
 		{
 			VSolutionFileStampSaver stampSaver( this);
+			VSolutionStartupParameters *startupParams = RetainStartupParameters();
 			
 			_AddProject( project, inReferenceIt, true);
 
-			project->Load();
+			project->Load( (startupParams != NULL) ? startupParams->GetOpenProjectSymbolsTable() : true);
 
 			if (fStartupProject == NULL)
 			{
@@ -2271,6 +2359,8 @@ VProject* VSolution::AddExistingProject(const VURL& inProjectFileURL, bool inRef
 
 			if ((saveAction == e_SAVE) && stampSaver.StampHasBeenChanged())
 				_SaveSolutionFile();
+
+			ReleaseRefCountable( &startupParams);
 		}
 		else
 		{
@@ -2962,9 +3052,11 @@ VProject* VSolution::CreateProjectFromTemplate( VError& outError, const VFolder&
 			project = VProject::Instantiate( outError, this, projectFilePath);
 			if (outError == VE_OK && project != NULL)
 			{
+				VSolutionStartupParameters *startupParams = RetainStartupParameters();
+				
 				_AddProject( project, true, true);
 
-				project->Load();
+				project->Load(  (startupParams != NULL) ? startupParams->GetOpenProjectSymbolsTable() : true);
 
 				if (fStartupProject == NULL)
 				{
@@ -3023,6 +3115,7 @@ VProject* VSolution::CreateProjectFromTemplate( VError& outError, const VFolder&
 					}
 				}
 				ReleaseRefCountable( &settings);
+				ReleaseRefCountable( &startupParams);
 			}
 			else
 			{
@@ -3370,7 +3463,7 @@ VSolution* VSolutionManager::OpenSolution( VSolutionStartupParameters* inSolutio
 }
 
 
-VSolution* VSolutionManager::OpenSolution( const VFilePath& inSolutionFilePath, ISolutionMessageManager* inSolutionMessageManager, ISolutionBreakPointsManager* inSolutionBreakPointsManager, ISolutionUser* inSolutionUser)
+VSolution* VSolutionManager::OpenSolution( const VFilePath& inSolutionFilePath, ISolutionMessageManager* inSolutionMessageManager, ISolutionBreakPointsManager* inSolutionBreakPointsManager, ISolutionUser* inSolutionUser, bool inOpenProjectSymbolsTable)
 {
 	VSolution *solution = NULL;
 
@@ -3381,6 +3474,7 @@ VSolution* VSolutionManager::OpenSolution( const VFilePath& inSolutionFilePath, 
 		if (startupParams != NULL && file != NULL)
 		{
 			startupParams->SetSolutionFileToOpen( file);
+			startupParams->SetOpenProjectSymbolsTable( inOpenProjectSymbolsTable);
 			solution = OpenSolution( startupParams, inSolutionMessageManager, inSolutionBreakPointsManager, inSolutionUser);
 		}
 		ReleaseRefCountable( &startupParams);

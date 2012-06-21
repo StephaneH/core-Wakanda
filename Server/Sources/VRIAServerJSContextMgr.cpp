@@ -1112,6 +1112,8 @@ void VJSContextPool::_InitGlobalClasses()
 		VJSGlobalClass::AddStaticFunction( kSSJS_PROPERTY_NAME_GetWalibFolder, VJSGlobalClass::js_callStaticFunction<VJSApplicationGlobalObject::_getWalibFolder>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete);
 
 		VJSGlobalClass::AddStaticFunction( kSSJS_PROPERTY_NAME_GetItemsWithRole, VJSGlobalClass::js_callStaticFunction<VJSApplicationGlobalObject::_getItemsWithRole>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete);
+
+		VJSGlobalClass::AddStaticFunction( "reloadModel", VJSGlobalClass::js_callStaticFunction<VJSApplicationGlobalObject::_reloadModel>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete);
 	
 		VJSGlobalClass::AddStaticFunction( kSSJS_PROPERTY_NAME_verifyDataStore, VJSGlobalClass::js_callStaticFunction<VJSApplicationGlobalObject::_verifyDataStore>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete);
 
@@ -1136,12 +1138,6 @@ void VJSContextPool::_InitGlobalClasses()
 		VJSGlobalClass::AddStaticValue( kSSJS_PROPERTY_NAME_Administrator, VJSGlobalClass::js_getProperty<VJSApplicationGlobalObject::_getIsAdministrator>, NULL, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete);
 
 		VJSGlobalClass::AddStaticValue( kSSJS_PROPERTY_NAME_HTTPServer, VJSGlobalClass::js_getProperty<VJSApplicationGlobalObject::_getHttpServer>, NULL, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete);
-
-		VJSGlobalClass::AddStaticValue( kSSJS_PROPERTY_NAME_WebAppService, VJSGlobalClass::js_getProperty<VJSApplicationGlobalObject::_getWebAppService>, NULL, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete);
-
-		VJSGlobalClass::AddStaticValue( kSSJS_PROPERTY_NAME_DataService, VJSGlobalClass::js_getProperty<VJSApplicationGlobalObject::_getDataService>, NULL, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete);
-
-		VJSGlobalClass::AddStaticValue( kSSJS_PROPERTY_NAME_RPCService, VJSGlobalClass::js_getProperty<VJSApplicationGlobalObject::_getRPCService>, NULL, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete);
 
 		VJSGlobalClass::AddStaticValue( kSSJS_PROPERTY_NAME_Console, VJSGlobalClass::js_getProperty<VJSApplicationGlobalObject::_getConsole>, NULL, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete);
 
@@ -1172,8 +1168,6 @@ void VJSContextPool::_InitGlobalClasses()
 		VJSSolution::Class();
 		VJSApplication::Class();
 		VJSHTTPServer::Class();
-		VJSWebAppService::Class();
-		VJSDataService::Class();
 		VRIAServerJSCore::Class();
 		VJSRPCServiceCore::Class();
 		VRIAServerJSCore::Class();

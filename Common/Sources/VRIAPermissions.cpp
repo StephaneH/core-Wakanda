@@ -23,6 +23,38 @@ USING_TOOLBOX_NAMESPACE
 
 
 
+class VRIAPermissionsSearch : public XBOX::VObject
+{
+public:
+			VRIAPermissionsSearch( const VString& inType, const VString& inResource, const VString& inAction) : fType(inType), fResource(inResource), fAction(inAction) {;}
+	virtual	~VRIAPermissionsSearch() {;}
+
+			bool operator() ( VRefPtr<VValueBag> inPermission)
+			{
+				VString resource, type, action;
+				
+				inPermission->GetString( RIAPermissionsKeys::type, type);
+				if (!fType.EqualToString( type, true))
+					return false;
+
+				inPermission->GetString( RIAPermissionsKeys::resource, resource);
+				if (!fResource.EqualToString( resource, true))
+					return false;
+
+				inPermission->GetString( RIAPermissionsKeys::action, action);
+				if (!fAction.EqualToString( action, true))
+					return false;
+
+				return true;
+			}
+private:
+			VString		fType;
+			VString		fResource;
+			VString		fAction;
+};
+
+
+
 namespace RIAPermissionsKeys
 {
 	CREATE_BAGKEY( allow);
@@ -34,7 +66,8 @@ namespace RIAPermissionsKeys
 
 
 
-VRIAPermissions::VRIAPermissions()
+VRIAPermissions::VRIAPermissions( const XBOX::VFilePath& inPath)
+: fPath(inPath)
 {
 }
 
@@ -44,119 +77,256 @@ VRIAPermissions::~VRIAPermissions()
 }
 
 
-VError VRIAPermissions::LoadPermissionFile( const VFile& inFile, VFolder* inDTDsFolder)
+VError VRIAPermissions::LoadPermissionFile( VFolder* inDTDsFolder)
 {
 	VError err = VE_OK;
 
-	fPermissions.clear();
-
-	if (inFile.Exists())
+	if (fMutex.Lock())
 	{
-		VValueBag bag;
-		err = LoadBagFromXML( inFile, L"permissions", bag, XML_ValidateNever, NULL, inDTDsFolder);
-		if (err == VE_OK)
-		{
-			VBagArray *bagArray = bag.GetElements( RIAPermissionsKeys::allow);
-			if (bagArray != NULL)
-			{
-				VIndex permCount = bagArray->GetCount();
-				for (VIndex permIter = 1 ; permIter <= permCount ; ++permIter)
-				{
-					VValueBag *permissionBag = bagArray->GetNth( permIter);
-					if (permissionBag != NULL)
-					{
-						VString type, resource, action, groupID;
-
-						if (	!permissionBag->GetString( RIAPermissionsKeys::type, type)
-							||	!permissionBag->GetString( RIAPermissionsKeys::resource, resource)
-							||	!permissionBag->GetString( RIAPermissionsKeys::action, action) )
-							continue;
-
-						if (type.IsEmpty() || resource.IsEmpty() || action.IsEmpty())
-							continue;
-
-						fPermissions.push_back( VRefPtr<VValueBag>(permissionBag));
-					}
-				}
-			}
-		}
-	}
-	else
-	{
-		err = VE_FILE_NOT_FOUND;
+		err = _LoadPermissionFile( inDTDsFolder);
+		fMutex.Unlock();
 	}
 
 	return err;
 }
 	
 
-const VValueBag* VRIAPermissions::RetainResourcePermission( const VString& inType, const VString& inResource, const VString& inAction) const
+const VValueBag* VRIAPermissions::RetainResourcePermission( const VString& inType, const VString& inResource, const VString& inAction)
 {
 	if (inType.IsEmpty() || inResource.IsEmpty() || inAction.IsEmpty())
 		return NULL;
 
-	VValueBag *permissionBag = NULL;
+	const VValueBag *permissionBag = NULL;
 
-	for (std::vector< XBOX::VRefPtr<XBOX::VValueBag> >::const_iterator permIter = fPermissions.begin() ; (permIter != fPermissions.end()) && (permissionBag == NULL) ; ++permIter)
+	if (fMutex.Lock())
 	{
-		VString resource, type, action;
-		
-		(*permIter)->GetString( RIAPermissionsKeys::type, type);
-		if (!inType.EqualToString( type, true))
-			continue;
+		VError err = _LoadPermissionFile( NULL);	// sc 16/05/2012 check for permissions file changes
+		if (err == VE_OK)
+		{
+			VRIAPermissionsSearch search( inType, inResource, inAction);
+			std::vector< VRefPtr<VValueBag> >::iterator found = std::find_if( fPermissions.begin(), fPermissions.end(), search);
+			if (found != fPermissions.end())
+				permissionBag = found->Retain();
+		}
 
-		(*permIter)->GetString( RIAPermissionsKeys::resource, resource);
-		if (!inResource.EqualToString( resource, true))
-			continue;
-
-		(*permIter)->GetString( RIAPermissionsKeys::action, action);
-		if (!inAction.EqualToString( action, true))
-			continue;
-
-		permissionBag = (*permIter).Retain();
+		fMutex.Unlock();
 	}
 
 	return permissionBag;
 }
 
 
-XBOX::VError VRIAPermissions::RetainResourcesPermission( std::vector< XBOX::VRefPtr<XBOX::VValueBag> >& outPermissions, const XBOX::VString* inType, const XBOX::VString* inResource, const XBOX::VString* inAction) const
+XBOX::VError VRIAPermissions::RetainResourcesPermission( std::vector< XBOX::VRefPtr<XBOX::VValueBag> >& outPermissions, const XBOX::VString* inType, const XBOX::VString* inResource, const XBOX::VString* inAction)
 {
 	VError err = VE_OK;
 
-	if (inType == NULL && inResource == NULL && inAction == NULL)
+	if (fMutex.Lock())
 	{
-		outPermissions.insert( outPermissions.end(), fPermissions.begin(), fPermissions.end());
+		err = _LoadPermissionFile( NULL);	// sc 16/05/2012 check for permissions file changes
+		if (err == VE_OK)
+		{
+			if (inType == NULL && inResource == NULL && inAction == NULL)
+			{
+				outPermissions.insert( outPermissions.end(), fPermissions.begin(), fPermissions.end());
+			}
+			else
+			{
+				for (std::vector< XBOX::VRefPtr<XBOX::VValueBag> >::const_iterator permIter = fPermissions.begin() ; permIter != fPermissions.end() ; ++permIter)
+				{
+					if (inType != NULL)
+					{
+						VString type;
+						(*permIter)->GetString( RIAPermissionsKeys::type, type);
+						if (!inType->EqualToString( type, true))
+							continue;
+					}
+
+					if (inResource != NULL)
+					{
+						VString resource;
+						(*permIter)->GetString( RIAPermissionsKeys::resource, resource);
+						if (!inResource->EqualToString( resource, true))
+							continue;
+					}
+
+					if (inAction != NULL)
+					{
+						VString action;
+						(*permIter)->GetString( RIAPermissionsKeys::action, action);
+						if (!inAction->EqualToString( action, true))
+							continue;
+					}
+
+					outPermissions.push_back( *permIter);
+				}
+			}
+		}
+
+		fMutex.Unlock();
+	}
+
+	return err;
+}
+
+
+XBOX::VError VRIAPermissions::AddResourcePermission( const XBOX::VString& inType, const XBOX::VString& inResource, const XBOX::VString& inAction, const XBOX::VUUID* inGroupID)
+{
+	if (inType.IsEmpty() || inResource.IsEmpty() || inAction.IsEmpty())
+		return VE_RIA_INVALID_PERMISSION_DEFINITION;
+
+	VError err = VE_OK;
+
+	if (fMutex.Lock())
+	{
+		err = _LoadPermissionFile( NULL);	// sc 16/05/2012 ensure permissions are up to date
+		if (err == VE_OK)
+		{
+			VRIAPermissionsSearch search( inType, inResource, inAction);
+			std::vector< VRefPtr<VValueBag> >::iterator found = std::find_if( fPermissions.begin(), fPermissions.end(), search);
+			if (found != fPermissions.end())
+			{
+				err = VE_RIA_PERMISSION_ALREADY_EXISTS;
+			}
+			else
+			{
+				VValueBag *permissionBag = new VValueBag();
+				if (permissionBag != NULL)
+				{
+					permissionBag->SetString( RIAPermissionsKeys::type, inType);
+					permissionBag->SetString( RIAPermissionsKeys::resource, inResource);
+					permissionBag->SetString( RIAPermissionsKeys::action, inAction);
+
+					if (inGroupID != NULL)
+					{
+						VString uuidStr;
+						inGroupID->GetString( uuidStr);
+						permissionBag->SetString( RIAPermissionsKeys::groupID, uuidStr);
+					}
+
+					fPermissions.push_back( VRefPtr<VValueBag>(permissionBag));
+
+					err = _SavePermissionFile();
+				}
+				else
+				{
+					err = VE_MEMORY_FULL;
+				}
+				ReleaseRefCountable( &permissionBag);
+			}
+		}
+
+		fMutex.Unlock();
+	}
+
+	return err;
+}
+
+
+XBOX::VError VRIAPermissions::RemoveResourcePermission( const XBOX::VString& inType, const XBOX::VString& inResource, const XBOX::VString& inAction)
+{
+	if (inType.IsEmpty() || inResource.IsEmpty() || inAction.IsEmpty())
+		return VE_RIA_INVALID_PERMISSION_DEFINITION;
+
+	VError err = VE_OK;
+
+	if (fMutex.Lock())
+	{
+		err = _LoadPermissionFile( NULL);	// sc 16/05/2012 ensure permissions are up to date
+		if (err == VE_OK)
+		{
+			VRIAPermissionsSearch search( inType, inResource, inAction);
+			std::vector< VRefPtr<VValueBag> >::iterator found = std::find_if( fPermissions.begin(), fPermissions.end(), search);
+			if (found != fPermissions.end())
+			{
+				fPermissions.erase( found);
+				err = _SavePermissionFile();
+			}
+		}
+
+		fMutex.Unlock();
+	}
+
+	return err;
+}
+
+
+bool VRIAPermissions::IsResourceAccessGrantedForSession( const VString& inType, const VString& inResource, const VString& inAction, CUAGSession *inUAGSession)
+{
+	const VValueBag *permissionBag = RetainResourcePermission( inType, inResource, inAction);
+	if (permissionBag == NULL)
+		return false;
+
+	bool accessGranted = false;
+	VString uuidStr;
+
+	if (permissionBag->GetString( RIAPermissionsKeys::groupID, uuidStr))
+	{
+		VUUID groupID;
+		groupID.FromString( uuidStr);
+
+		if (inUAGSession != NULL)
+		{
+			accessGranted = inUAGSession->BelongsTo( groupID);
+		}
 	}
 	else
 	{
-		for (std::vector< XBOX::VRefPtr<XBOX::VValueBag> >::const_iterator permIter = fPermissions.begin() ; permIter != fPermissions.end() ; ++permIter)
+		accessGranted = true;
+	}
+
+	ReleaseRefCountable( &permissionBag);
+
+	return accessGranted;
+}
+
+
+XBOX::VError VRIAPermissions::_LoadPermissionFile( XBOX::VFolder* inDTDsFolder)
+{
+	VError err = VE_OK;
+
+	VFile file(fPath);
+	if (file.Exists())
+	{
+		VTime modificationTime;
+		err = file.GetTimeAttributes( &modificationTime);
+
+		if (err == VE_OK)
 		{
-			if (inType != NULL)
+			if (fModificationTime != modificationTime)
 			{
-				VString type;
-				(*permIter)->GetString( RIAPermissionsKeys::type, type);
-				if (!inType->EqualToString( type, true))
-					continue;
-			}
+				fPermissions.clear();
 
-			if (inResource != NULL)
-			{
-				VString resource;
-				(*permIter)->GetString( RIAPermissionsKeys::resource, resource);
-				if (!inResource->EqualToString( resource, true))
-					continue;
-			}
+				VValueBag bag;
+				err = LoadBagFromXML( file, L"permissions", bag, XML_ValidateNever, NULL, inDTDsFolder);
+				if (err == VE_OK)
+				{
+					VBagArray *bagArray = bag.GetElements( RIAPermissionsKeys::allow);
+					if (bagArray != NULL)
+					{
+						VIndex permCount = bagArray->GetCount();
+						for (VIndex permIter = 1 ; permIter <= permCount ; ++permIter)
+						{
+							VValueBag *permissionBag = bagArray->GetNth( permIter);
+							if (permissionBag != NULL)
+							{
+								VString type, resource, action, groupID;
 
-			if (inAction != NULL)
-			{
-				VString action;
-				(*permIter)->GetString( RIAPermissionsKeys::action, action);
-				if (!inAction->EqualToString( action, true))
-					continue;
-			}
+								if (	!permissionBag->GetString( RIAPermissionsKeys::type, type)
+									||	!permissionBag->GetString( RIAPermissionsKeys::resource, resource)
+									||	!permissionBag->GetString( RIAPermissionsKeys::action, action) )
+									continue;
 
-			outPermissions.push_back( *permIter);
+								if (type.IsEmpty() || resource.IsEmpty() || action.IsEmpty())
+									continue;
+
+								fPermissions.push_back( VRefPtr<VValueBag>(permissionBag));
+							}
+						}
+					}
+
+					fModificationTime = modificationTime;
+				}
+			}
 		}
 	}
 
@@ -164,23 +334,27 @@ XBOX::VError VRIAPermissions::RetainResourcesPermission( std::vector< XBOX::VRef
 }
 
 
-bool VRIAPermissions::IsResourceAccessGrantedForSession( const VString& inType, const VString& inResource, const VString& inAction, CUAGSession *inUAGSession) const
+XBOX::VError VRIAPermissions::_SavePermissionFile()
 {
-	const VValueBag *permissionBag = RetainResourcePermission( inType, inResource, inAction);
-	if (permissionBag == NULL)
-		return true;
+	if (!fPath.IsFile())
+		return VE_UNKNOWN_ERROR;
 
-	bool accessGranted = false;
-	VString uuidStr;
-	VUUID groupID;
+	VValueBag bag;
 
-	permissionBag->GetString( RIAPermissionsKeys::groupID, uuidStr);
-	groupID.FromString( uuidStr);
-
-	if (inUAGSession != NULL)
-		accessGranted = inUAGSession->BelongsTo( groupID);
-
-	ReleaseRefCountable( &permissionBag);
-
-	return accessGranted;
+	for (std::vector< XBOX::VRefPtr<XBOX::VValueBag> >::const_iterator permIter = fPermissions.begin() ; permIter != fPermissions.end() ; ++permIter)
+	{
+		bag.AddElement( RIAPermissionsKeys::allow, *permIter);
+	}
+		
+	VFile file(fPath);
+	VError err = WriteBagToFileInXML( bag, L"permissions", &file, true);
+	if (err == VE_OK)
+	{
+		VTime modificationTime;
+		err = file.GetTimeAttributes( &modificationTime);
+		if (err == VE_OK)
+			fModificationTime = modificationTime;
+	}
+	
+	return err;
 }

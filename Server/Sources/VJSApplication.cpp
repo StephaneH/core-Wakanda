@@ -174,6 +174,26 @@ void VJSApplicationGlobalObject::_getItemsWithRole( XBOX::VJSParms_callStaticFun
 }
 
 
+void VJSApplicationGlobalObject::_reloadModel( XBOX::VJSParms_callStaticFunction& ioParms, XBOX::VJSGlobalObject* inGlobalObject)
+{
+	bool done = false;
+	VRIAJSRuntimeContext *rtContext = VRIAJSRuntimeContext::GetFromJSGlobalObject( inGlobalObject);
+	if (rtContext != NULL)
+	{
+		VRIAServerProject *application = rtContext->GetRootApplication();
+		if (application != NULL)
+		{
+			VJSApplication::_reloadModel( ioParms, application);
+			done = true;
+		}
+	}
+
+	if (!done)
+	{
+		ThrowError( VE_RIA_JS_CANNOT_BE_USED_IN_THIS_CONTEXT);
+	}
+}
+
 
 void VJSApplicationGlobalObject::_verifyDataStore( XBOX::VJSParms_callStaticFunction& ioParms, XBOX::VJSGlobalObject* inGlobalObject)
 {
@@ -448,69 +468,6 @@ void VJSApplicationGlobalObject::_getHttpServer( XBOX::VJSParms_getProperty& ioP
 }
 
 
-void VJSApplicationGlobalObject::_getWebAppService( XBOX::VJSParms_getProperty& ioParms, XBOX::VJSGlobalObject* inGlobalObject)
-{
-	bool done = false;
-	VRIAJSRuntimeContext *rtContext = VRIAJSRuntimeContext::GetFromJSGlobalObject( inGlobalObject);
-	if (rtContext != NULL)
-	{
-		VRIAServerProject *application = rtContext->GetRootApplication();
-		if (application != NULL)
-		{
-			VJSApplication::_getWebAppService( ioParms, application);
-			done = true;
-		}
-	}
-
-	if (!done)
-	{
-		ioParms.ReturnUndefinedValue();
-	}
-}
-
-
-void VJSApplicationGlobalObject::_getDataService( XBOX::VJSParms_getProperty& ioParms, XBOX::VJSGlobalObject* inGlobalObject)
-{
-	bool done = false;
-	VRIAJSRuntimeContext *rtContext = VRIAJSRuntimeContext::GetFromJSGlobalObject( inGlobalObject);
-	if (rtContext != NULL)
-	{
-		VRIAServerProject *application = rtContext->GetRootApplication();
-		if (application != NULL)
-		{
-			VJSApplication::_getDataService( ioParms, application);
-			done = true;
-		}
-	}
-
-	if (!done)
-	{
-		ioParms.ReturnUndefinedValue();
-	}
-}
-
-
-void VJSApplicationGlobalObject::_getRPCService( XBOX::VJSParms_getProperty& ioParms, XBOX::VJSGlobalObject* inGlobalObject)
-{
-	bool done = false;
-	VRIAJSRuntimeContext *rtContext = VRIAJSRuntimeContext::GetFromJSGlobalObject( inGlobalObject);
-	if (rtContext != NULL)
-	{
-		VRIAServerProject *application = rtContext->GetRootApplication();
-		if (application != NULL)
-		{
-			VJSApplication::_getRPCService( ioParms, application);
-			done = true;
-		}
-	}
-
-	if (!done)
-	{
-		ioParms.ReturnUndefinedValue();
-	}
-}
-
-
 void VJSApplicationGlobalObject::_getConsole( XBOX::VJSParms_getProperty& ioParms, XBOX::VJSGlobalObject* inGlobalObject)
 {
 	bool done = false;
@@ -764,6 +721,7 @@ void VJSApplication::GetDefinition( ClassDefinition& outDefinition)
 		{ kSSJS_PROPERTY_NAME_GetSettingFile, js_callStaticFunction<_getSettingFile>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
 		{ kSSJS_PROPERTY_NAME_GetWalibFolder, js_callStaticFunction<_getWalibFolder>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
 		{ kSSJS_PROPERTY_NAME_GetItemsWithRole, js_callStaticFunction<_getItemsWithRole>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
+		{ "reloadModel", js_callStaticFunction<_reloadModel>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
 		{ kSSJS_PROPERTY_NAME_verifyDataStore, js_callStaticFunction<_verifyDataStore>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
 		{ kSSJS_PROPERTY_NAME_repairDataStore, js_callStaticFunction<_repairInto>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
 		{ kSSJS_PROPERTY_NAME_compactDataStore, js_callStaticFunction<_compactInto>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
@@ -781,9 +739,6 @@ void VJSApplication::GetDefinition( ClassDefinition& outDefinition)
 		{ kSSJS_PROPERTY_NAME_Name, js_getProperty<_getName>, NULL, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
 		{ kSSJS_PROPERTY_NAME_Administrator, js_getProperty<_getIsAdministrator>, NULL, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
 		{ kSSJS_PROPERTY_NAME_HTTPServer, js_getProperty<_getHttpServer>, NULL, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
-		{ kSSJS_PROPERTY_NAME_WebAppService, js_getProperty<_getWebAppService>, NULL, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
-		{ kSSJS_PROPERTY_NAME_DataService, js_getProperty<_getDataService>, NULL, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
-		{ kSSJS_PROPERTY_NAME_RPCService, js_getProperty<_getRPCService>, NULL, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
 		{ kSSJS_PROPERTY_NAME_Console, js_getProperty<_getConsole>, NULL, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
 		{ kSSJS_PROPERTY_NAME_Pattern, js_getProperty<_getPattern>, NULL, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
 		{ kSSJS_PROPERTY_NAME_Storage, js_getProperty<_getStorage>, NULL, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
@@ -1317,6 +1272,17 @@ void VJSApplication::_getItemsWithRole( XBOX::VJSParms_callStaticFunction& ioPar
 }
 
 
+void VJSApplication::_reloadModel( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication)
+{
+	VReloadCatalogMessage *msg = new VReloadCatalogMessage( inApplication);
+	if (msg != NULL)
+	{
+		msg->PostTo( VTaskMgr::Get()->GetMainTask());
+		msg->Release();
+	}
+}
+
+
 void VJSApplication::_getSolution( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication)
 {
 	ioParms.ReturnValue( VJSSolution::CreateInstance( ioParms.GetContextRef(), inApplication->GetSolution()));
@@ -1348,24 +1314,6 @@ void VJSApplication::_getIsAdministrator( XBOX::VJSParms_getProperty& ioParms, V
 void VJSApplication::_getHttpServer( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication)
 {
 	ioParms.ReturnValue( VJSHTTPServer::CreateInstance( ioParms.GetContextRef(), inApplication));
-}
-
-
-void VJSApplication::_getWebAppService( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication)
-{
-	ioParms.ReturnValue( VJSWebAppService::CreateInstance( ioParms.GetContextRef(), inApplication));
-}
-
-
-void VJSApplication::_getDataService( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication)
-{
-	ioParms.ReturnValue( VJSDataService::CreateInstance( ioParms.GetContextRef(), inApplication));
-}
-
-
-void VJSApplication::_getRPCService( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication)
-{
-	ioParms.ReturnValue( VJSRPCService::CreateInstance( ioParms.GetContextRef(), inApplication));
 }
 
 

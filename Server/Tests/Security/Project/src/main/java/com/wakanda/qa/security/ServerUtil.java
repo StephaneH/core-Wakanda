@@ -88,7 +88,7 @@ public class ServerUtil {
 	public static boolean killServerViaInnerProcess() {
 		if (serverProcess != null) {
 			serverProcess.destroy();
-			//serverProcess = null;
+			// serverProcess = null;
 			return true;
 		} else {
 			logger.debug("No inner process attached to the server (Not started or already killed)");
@@ -185,18 +185,26 @@ public class ServerUtil {
 			return false;
 		}
 		logger.debug("Server is started");
-		logger.debug("Waiting 5 seconds for the server to be ready...");
-		try {
-			Thread.sleep(5000);
-		} catch (InterruptedException e) {
-			logger.debug("Exception: " + e.getMessage());
-			e.printStackTrace();
+		logger.debug("Waiting a bit for the web admin to be ready...");
+
+		boolean ready = false;
+		int i = 0;
+		long start = GregorianCalendar.getInstance().getTimeInMillis();
+		while (!ready && i < 10) {
+			try {
+				ready = isServerResponding();
+				// Thread.sleep((++i) * 1000);
+			} catch (Exception e) {
+				logger.debug("Exception: " + e.getMessage());
+			}
+		}
+
+		if (!ready) {
+			logger.debug("Server is not responding (after " + i + " sec)");
 			return false;
 		}
-		if (!isServerResponding()) {
-			logger.debug("Server is not responding");
-			return false;
-		}
+		long end = GregorianCalendar.getInstance().getTimeInMillis();
+		logger.debug("Web admin is ready (after " + (end - start) + " ms)");
 
 		// Server is launched & Server is responding
 		// so lets load the solution
@@ -206,56 +214,58 @@ public class ServerUtil {
 
 	private static boolean loadSolution(HttpHost target, String solution,
 			boolean fixedWait) {
-		// if the web admin is available, load the solution
-		boolean loaded = false;
-		if (isServerResponding()) {
-			try {
-				// build the post request body
-				long id = GregorianCalendar.getInstance().getTimeInMillis();
-				solution = solution.replaceAll("\\\\", "/");
-				String postData = "{\"jsonrpc\":\"2.0\",\"id\":"
-						+ id
-						+ ",\"module\":\"admin\",\"method\":\"openSolution\",\"params\":\""
-						+ solution + "\"}";
+			// if the web admin is available, load the solution
+			boolean loaded = false;
+			if (isServerResponding()) {
+				try {
+					// build the post request body
+					long id = GregorianCalendar.getInstance().getTimeInMillis();
+					solution = solution.replaceAll("\\\\", "/");
+					String postData = "{\"jsonrpc\":\"2.0\",\"id\":"
+							+ id
+							+ ",\"module\":\"admin\",\"method\":\"openSolution\",\"params\":\""
+							+ solution + "\"}";
 
-				HttpPost request = buildPostRequest(postData);
-				logger.debug("POST:" + postData);
-				HttpResponse response = executeRequest(request, target);
-				String content = EntityUtils.toString(response.getEntity());
-				logger.debug(content);
-				int statusCode = response.getStatusLine().getStatusCode();
-				boolean accepted = statusCode == HttpStatus.SC_OK
-						&& content.contains("\"result\":true");
-				if (!accepted) {
-					logger.debug("Server has rejected open solution request");
-				} else {
-					logger.debug("Server has accepted open solution request");
-					if (fixedWait) {
-						int timeout = 15000;
-						logger.debug("Waiting " + timeout
-								+ " ms for the solution to be ready...");
-						Thread.sleep(timeout);
-						loaded = isSolutionDeployed();
+					HttpPost request = buildPostRequest(postData);
+					logger.debug("POST:" + postData);
+					HttpResponse response = executeRequest(request, target);
+					String content = EntityUtils.toString(response.getEntity());
+					logger.debug(content);
+					int statusCode = response.getStatusLine().getStatusCode();
+					boolean accepted = statusCode == HttpStatus.SC_OK
+							&& content.contains("\"result\":true");
+					if (!accepted) {
+						logger.debug("Server has rejected open solution request");
 					} else {
-						logger.debug("Waiting for the solution to be ready...");
-						int i = 0;
-						while (!loaded && i < 10) {
+						logger.debug("Server has accepted open solution request");
+						if (fixedWait) {
+							int timeout = 15000;
+							logger.debug("Waiting " + timeout
+									+ " ms for the solution to be ready...");
+							Thread.sleep(timeout);
 							loaded = isSolutionDeployed();
-							Thread.sleep((++i)*1000);
-						}
-						if (loaded) {
-							logger.debug("Solution is ready (after " + i + " sec)");
+						} else {
+							logger.debug("Waiting for the solution to be ready...");
+							int i = 0;
+							while (!loaded && i < 10) {
+								loaded = isSolutionDeployed();
+								Thread.sleep((++i) * 1000);
+							}
+							if (loaded) {
+								logger.debug("Solution is ready (after " + i
+										+ " sec)");
+							}
 						}
 					}
+				} catch (Exception e) {
+					logger.debug("Unexpected exception: " + e.getMessage());
+					e.printStackTrace();
 				}
-			} catch (Exception e) {
-				logger.debug("Unexpected exception: " + e.getMessage());
-				e.printStackTrace();
+			} else {
+				logger.debug("The web admin is not available");
 			}
-		} else {
-			logger.debug("The web admin is not available");
-		}
-		return loaded;
+			return loaded;
+
 	}
 
 	public static HttpPost buildPostRequest(String body)
@@ -312,29 +322,32 @@ public class ServerUtil {
 	public static boolean isServerResponding() {
 		boolean isServerResponding = false;
 		try {
-			HttpResponse response = RequestUtil.executeRequest(new HttpGet("/"),
-					getWebAdminTarget());
+			HttpResponse response = executeRequest(
+					new HttpGet("/"), getWebAdminTarget());
 			boolean is200Ok = response.getStatusLine().getStatusCode() == HttpStatus.SC_OK;
 			boolean isWakanda = response.getFirstHeader(HttpHeaders.SERVER)
 					.getValue().contains("Wakanda");
 			isServerResponding = is200Ok & isWakanda;
+			EntityUtils.consume(response.getEntity());
 
 		} catch (Exception e) {
-			//e.printStackTrace();
-		}
+			logger.debug(e.getMessage());
+		} 
 		return isServerResponding;
 	}
 
 	public static boolean isSolutionDeployed(HttpHost target) {
 		boolean isSolutionDeployed = false;
 		try {
-			HttpResponse response = RequestUtil.executeRequest(new HttpGet("/"), target);
+			HttpResponse response = executeRequest(
+					new HttpGet("/"), target);
 			boolean is200Ok = response.getStatusLine().getStatusCode() == HttpStatus.SC_OK;
 			boolean isWakanda = response.getFirstHeader(HttpHeaders.SERVER)
 					.getValue().contains("Wakanda");
 			isSolutionDeployed = is200Ok & isWakanda;
+			EntityUtils.consume(response.getEntity());
 		} catch (Exception e) {
-			//e.printStackTrace();
+			logger.debug(e.getMessage());
 		}
 		return isSolutionDeployed;
 	}

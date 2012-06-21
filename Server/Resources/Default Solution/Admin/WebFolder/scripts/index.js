@@ -16,7 +16,6 @@ WAF.onAfterInit = function onAfterInit() {
 	var adminRepairButton = {};	// @buttonImage
 	var solutionCombobox = {};	// @combobox
 	var adminVerifyButton = {};	// @buttonImage
-	var radioSolution = {};	// @radioGroup
 	var logToAdmin = {};	// @login
 	var documentEvent = {};	// @document
 	var logToAdmin = {};	// @login
@@ -45,13 +44,13 @@ WAF.onAfterInit = function onAfterInit() {
 
 	adminCompactButton.click = function adminCompactButton_click (event)// @startlock
 	{// @endlock
-		this.disable();
+		// this.disable();
 		adminObject.compactApplication();
 	};// @lock
 
 	adminRepairButton.click = function adminRepairButton_click (event)// @startlock
 	{// @endlock
-		this.disable();
+		// this.disable();
 		adminObject.repairApplication();
 	};// @lock
 
@@ -62,15 +61,8 @@ WAF.onAfterInit = function onAfterInit() {
 
 	adminVerifyButton.click = function adminVerifyButton_click (event)// @startlock
 	{// @endlock
-		this.disable();
+		// this.disable();
 		adminObject.verifyApplication();
-	};// @lock
-
-	radioSolution.change = function radioSolution_change (event) {
-		
-		if(this.getValue() === "currentSolution") {
-			adminObject.selectCurrentSolution();
-		}
 	};// @lock
 
 	logToAdmin.logout = function logToAdmin_logout (event)// @startlock
@@ -95,7 +87,6 @@ WAF.onAfterInit = function onAfterInit() {
 	WAF.addListener("adminRepairButton", "click", adminRepairButton.click, "WAF");
 	WAF.addListener("solutionCombobox", "change", solutionCombobox.change, "WAF");
 	WAF.addListener("adminVerifyButton", "click", adminVerifyButton.click, "WAF");
-	WAF.addListener("radioSolution", "change", radioSolution.change, "WAF");
 	WAF.addListener("logToAdmin", "logout", logToAdmin.logout, "WAF");
 	WAF.addListener("logToAdmin", "logout", logToAdmin.logout, "WAF");
 	WAF.addListener("logToAdmin", "login", logToAdmin.login, "WAF");
@@ -175,15 +166,11 @@ function Admin() {
 	this.currentSolution = null;
 	this.currentApplicationName = null;
 	this.recentSolutions = null;
+	this.recentSolutionsHash = {};
 	this.viewMode = "";
 	
 	this.maintenanceActionRunning = false;
-	this.verifingApplication = {};
-	this.repairingApplication = {};
-	this.compactingApplication = {};
-	this.backupingApplication = {};
-	this.restoringApplication = {};
-	this.dataFlusingApplication = {};
+	this.maintenanceApplication = null;
 	
 	this.reloadingPage = false;
 	this.reloadingSetTimeOut = [];
@@ -194,15 +181,30 @@ Admin.prototype = {
 	init : function init_admin() {
 		
 		var i,
-			runningSolution;
+			recentSolution,
+			runningSolution,
+			recentSolutionLabel;
 		
 		$("#loadingContainer").show();
-		this.recentSolutions = admin.getRecentSolutionsList();
+		
+		runningSolution = webAdmin.getSolution();
+		
+		this.recentSolutions = webAdmin.getRecentSolutions();
+		this.recentSolutionsHash = {};
 		
 		for(i = 0; i < this.recentSolutions.length; i++) {
 			
-			if(this.recentSolutions[i].hasOwnProperty("name")) {
-				$$("solutionCombobox").addOption(this.recentSolutions[i].name, this.recentSolutions[i].name, false);
+			recentSolution = this.recentSolutions[i];
+			
+			if(recentSolution.hasOwnProperty("name")) {
+				
+				recentSolutionLabel = recentSolution.name;
+				if(runningSolution.name !== "DefaultSolution" && runningSolution.name === recentSolution.name) {
+					recentSolutionLabel += " (Running)";
+				}
+				
+				$$("solutionCombobox").addOption(recentSolution.hash, recentSolutionLabel, false);
+				this.recentSolutionsHash[recentSolution.hash] = recentSolution.name;
 			}
 		}
 		
@@ -218,7 +220,12 @@ Admin.prototype = {
 			}
 		}
 		
-		runningSolution = admin.getSolution();
+		/**
+		 * Not necessary for the current version
+		 */
+		$("#adminSaveButton").hide();
+		$("#adminCancelButton").hide();
+		$("#adminUnlockButton").hide();
 		
 		$("#adminHeader").show();
 		$("#adminTabView").show();
@@ -231,14 +238,12 @@ Admin.prototype = {
 		
 		if(runningSolution.name !== "DefaultSolution" || runningSolution.applications.length > 1) {
 			this.currentRunningSolution = runningSolution
-			this.selectSolution(this.currentRunningSolution.name);
-			$$("solutionCombobox").setValue(this.currentRunningSolution.name);
-			$$("radioSolution").select("currentSolution");
+			this.selectSolution(this.currentRunningSolution.hash);
+			$$("solutionCombobox").setValue(this.currentRunningSolution.hash);
 		} else {
-			$$("radioSolution").select("recentSolution");
 			if(this.recentSolutions.length > 0 && this.recentSolutions[0].hasOwnProperty("name")) {
-				this.selectSolution(this.recentSolutions[0].name);
-				$$("solutionCombobox").setValue(this.recentSolutions[0].name);
+				this.selectSolution(this.recentSolutions[0].hash);
+				$$("solutionCombobox").setValue(this.recentSolutions[0].hash);
 			}
 		}
 		
@@ -266,11 +271,12 @@ Admin.prototype = {
 		timer: null,
 		opened: false,
 		node: $('#wafConsole'),
+		maintenanceLogId : 0,
 		
 		getServerLog : function(open, option) {
 			
 			try {
-				var result = admin.getLogMessages();
+				var result = webAdmin.getLogMessages();
 				
 				if(open === undefined) {
 					open = true;
@@ -279,7 +285,21 @@ Admin.prototype = {
 				this.log(result.messages, open, option);
 			} catch(e) {
 				this.log('<b>getServerLog failed :</b> ' + e, open, option);
-			};
+			}
+		},
+		getMaintenanceLog : function get_maintenance_log(open, option) {
+			
+			try {
+				var result = webAdmin.getMaintenanceLog(this.maintenanceLogId);
+				if(open === undefined) {
+					open = true;
+				}
+				
+				this.log(result.messages, open, option);
+				this.maintenanceLogId = result.maxId;
+			} catch(e) {
+				this.log('<b>getMaintenanceLog failed :</b> ' + e, open, option);
+			}
 		},
 		log : function console_log(contents, open, option) {
 			
@@ -303,7 +323,7 @@ Admin.prototype = {
 				html = contents.toString() + '<br />';
 			}
 			
-			if(option !== undefined) {
+			if(option !== undefined && option.hasOwnProperty("solutionName") && option.hasOwnProperty("applicationName")) {
 				
 				logSolutionName = option.solutionName;
 				logApplicationName = option.applicationName;
@@ -314,7 +334,7 @@ Admin.prototype = {
 				logApplicationName = adminObject.currentApplicationName;
 			}
 			
-			if(logSolutionName !== adminObject.currentSolution.name || logApplicationName !== adminObject.currentApplicationName) {
+			if(adminObject.currentSolution !== null && adminObject.currentApplicationName !== null && (logSolutionName !== adminObject.currentSolution.name || logApplicationName !== adminObject.currentApplicationName)) {
 				logDisplay = 'display : none;';
 			}
 
@@ -328,7 +348,8 @@ Admin.prototype = {
 					html = '<p class="' + logSolutionName.replace(" ", "-") + "-" + logApplicationName.replace(" ", "-") + '-log" style="'+logDisplay+'">' + html + '</p>';
 				}
 				
-				$('#wafConsole .content').append(html).scrollTop($('#wafConsole .content')[0].scrollHeight);
+				$('#wafConsole .content').append(html)
+					.scrollTop($('#wafConsole .content')[0].scrollHeight);
 			}
 		},
 		error : function console_log_error(contents, open, option) {
@@ -336,18 +357,18 @@ Admin.prototype = {
 			if($.isArray(contents) && contents.length > 0) {
 				
 				contents.forEach(function (element, index, elementArray) {
-					elementArray[index] = add_error_tag(element);
+					elementArray[index] = addErrorTag(element);
 				});
 			} else if($.isPlainObject(contents) && contents.message && (contents.message !== '')) {
 				
-				contents.message = add_error_tag(contents.message);
-				contents.description = add_error_tag(contents.description);
+				contents.message = addErrorTag(contents.message);
+				contents.description = addErrorTag(contents.description);
 			} else if(contents.toString() !== '') {
 				
-				contents = add_error_tag(contents.toString());
+				contents = addErrorTag(contents.toString());
 			}
 			
-			function add_error_tag(element) {
+			function addErrorTag(element) {
 				
 				return '<span class="log-error">'+element+'</span>';
 			
@@ -414,51 +435,52 @@ Admin.prototype = {
 	
 	selectSolution : function select_solution(selectedSolution) {
 		
-		this.currentSolution = null;
 		$("#loadingContainer").show();
 		
-		if(this.currentRunningSolution !== null && this.currentRunningSolution.name === selectedSolution) {
+		if(this.currentRunningSolution !== null && this.currentRunningSolution.name === this.recentSolutionsHash[selectedSolution]) {
 			
 			this.displaySelectedSolution(this.currentRunningSolution);
 			
 		} else {
 			
-			admin.getSolutionmaintenanceAsync({
+			webAdmin.getSolutionMaintenanceAsync({
 				"onsuccess" : function (response) {
 					if(response.hasOwnProperty("name")) {
 						adminObject.displaySelectedSolution(response);
 						adminObject.console.getServerLog(false);
 					} else {
 						alert("Error: cannot open this solution");
+						adminObject.currentSolution = null;
+						adminObject.currentApplicationName = null;
 						$("#loadingContainer").hide();
+						$$("adminTabView").selectTab(2);
+						
 						$("#adminMaintenanceProjectList").html("");
 						$("#maintenanceModeleFileDetail").html("");
 						$("#maintenanceLogFileDetail").html("");
+						$("#maintenanceProgress").hide();
 						
-						$$("adminTabView").selectTab(2);
 						adminObject.console.getServerLog(true);
 					}
 				}
 			}, selectedSolution);
 			
 		}
-		this.refreshAdminHeader(selectedSolution);
+		this.refreshAdminHeader(this.recentSolutionsHash[selectedSolution]);
 	},
 	
-	refreshAdminHeader : function refresh_admin_header(selectedSolution) {
+	refreshAdminHeader : function refresh_admin_header(selectedSolutionName) {
 		
-		if(this.currentRunningSolution !== null && this.currentRunningSolution.name === selectedSolution) {
+		if(this.currentRunningSolution !== null && this.currentRunningSolution.name === selectedSolutionName) {
 			
-			$$("radioSolution").select("currentSolution");
-			selectedSolution = this.getActiveIcon() + selectedSolution;
+			selectedSolutionName = this.getActiveIcon() + selectedSolutionName;
 			
 		} else {
 			
-			$$("radioSolution").select("recentSolution");
-			selectedSolution = this.getMaintenanceIcon() + selectedSolution;
+			selectedSolutionName = this.getMaintenanceIcon() + selectedSolutionName;
 		}
 		
-		$$("solutionName").setValue(selectedSolution);
+		$$("solutionName").setValue(selectedSolutionName);
 	},
 	
 	getMaintenanceIcon : function get_maintenance_icon() {
@@ -481,10 +503,10 @@ Admin.prototype = {
 		$("#adminRestoreButton").hide();
 		$("#adminFlushDataButton").hide();
 		
-		$("#adminSaveButton").show(100);
-		$("#adminCancelButton").show(200);
-		$("#adminBrowseButton").show(300);
-		$("#adminUnlockButton").show(300);
+		// $("#adminSaveButton").show(100);
+		// $("#adminCancelButton").show(200);
+		$("#adminBrowseButton").show(100);
+		// $("#adminUnlockButton").show(300);
 		
 		$$("adminSaveButton").disable();
 		$$("adminCancelButton").disable();
@@ -513,7 +535,7 @@ Admin.prototype = {
 		if(this.currentSolution !== null) {
 			
 			if(this.currentSolution.settings === undefined || this.currentSolution.settings === null || $.isEmptyObject(this.currentSolution.settings)) {
-				this.currentSolution.settings = admin.getSettingsFileForSolution(this.currentSolution.name);
+				this.currentSolution.settings = webAdmin.getSettingsFileForSolution(this.currentSolution.hash);
 			}
 			if(!$.isEmptyObject(this.currentSolution.settings)) {
 				settingsHtml = this.getSolutionSettingsMarkup(this.currentSolution.settings);
@@ -562,6 +584,7 @@ Admin.prototype = {
 	displayMaintenanceTab : function display_overview_tab() {
 		this.selectMode(this.MODE_MAINTENANCE);
 		
+		this.displayMaintenanceToolbar();
 		this.displayMaintenanceProjectList();
 		
 	},
@@ -628,9 +651,9 @@ Admin.prototype = {
 			}
 			
 			$("#adminMaintenanceProjectList").html(html);
-			if(applicationList.length > 0){
+			if(applicationList.length > 0) {
 				
-				this.displayMaintenanceProject(applicationList[0].name, false);
+				this.displayMaintenanceProject(applicationList[0].name, true);
 			}
 			
 			projects = $("#adminMaintenanceProjectList .project-list");
@@ -649,6 +672,16 @@ Admin.prototype = {
 					$(this).removeClass("project-hover");
 				});
 			}
+			
+			if(this.maintenanceApplication !== null) {
+				$('#projectList-'+this.maintenanceApplication.solution.replace(" ", "-")+'-'+this.maintenanceApplication.application.replace(" ", "-")+' span.project-busy').show();
+			}
+		} else {
+			
+			$("#adminMaintenanceProjectList").html("");
+			$("#maintenanceModeleFileDetail").html("");
+			$("#maintenanceLogFileDetail").html("");
+			$("#maintenanceProgress").hide();
 		}
 	},
 	
@@ -694,22 +727,33 @@ Admin.prototype = {
 			}
 			
 			if(this.currentSolution !== null && this.currentApplicationName !== null) {
-				admin.FilesAsync(
+				webAdmin.FilesAsync(
 				{
 					"onsuccess" : function (response) {
 						adminObject.displayLogFileDetail(response);
 					},
 					"onerror" : function (response) {
-						
+						$("#maintenanceLogFileDetail").html("");
 					}
 				}
 				, {
-					"name" : this.currentApplicationName,
-					"sol_name" : this.currentSolution.name
+					"applicationName" : this.currentApplicationName,
+					"hash" : this.currentSolution.hash
 				});
 			}
 			
 			this.console.showApplicationLog();
+		}
+		
+		if(
+			!this.maintenanceActionRunning ||
+			this.maintenanceApplication === null ||
+			this.maintenanceApplication.solution !== this.currentSolution.name ||
+			this.maintenanceApplication.application !== this.currentApplicationName
+		) {
+			$("#maintenanceProgress").hide();
+		} else {
+			$("#maintenanceProgress").show();
 		}
 	},
 	
@@ -790,7 +834,7 @@ Admin.prototype = {
 					selectedOption = '';
 				}
 				
-				logFileHtml += '</select></span>';
+				logFileHtml += '</select><a href="#" class="log-downloader" title="Download this file" onclick="return adminObject.downloadLogFile(\'logVerifyFile\');">&nbsp;</a></span>';
 			} else {
 				
 				logFileHtml += '<span class="log-file-label">The Data has never been verified.</span>';
@@ -825,7 +869,7 @@ Admin.prototype = {
 					selectedOption = '';
 				}
 				
-				logFileHtml += '</select></span>';
+				logFileHtml += '</select><a href="#" class="log-downloader" title="Download this file" onclick="return adminObject.downloadLogFile(\'logRepairFile\');">&nbsp;</a></span>';
 				
 			} else {
 				
@@ -860,7 +904,7 @@ Admin.prototype = {
 					selectedOption = '';
 				}
 				
-				logFileHtml += '</select></span>';
+				logFileHtml += '</select><a href="#" class="log-downloader" title="Download this file" onclick="return adminObject.downloadLogFile(\'logCompactFile\');">&nbsp;</a></span>';
 				
 			} else {
 				logFileHtml += '<span class="log-file-label">The Data has never been compacted.</span>';
@@ -899,33 +943,58 @@ Admin.prototype = {
 		return currentApplication;
 	},
 	
-	startWatchingServerLog : function start_waching_server_log(option) {
+	startWatchingMaintenanceLog : function start_waching_maintenance_log(option) {
 		var timer;
 		
 		timer = window.setInterval(function() {
-			adminObject.console.getServerLog(true, option);
+			adminObject.console.getMaintenanceLog(true, option);
 		}, 500);
 		
 		return timer;
 	},
 	
-	stopWatchingServerLog : function stop_waching_server_log(timer) {
+	stopWatchingMaintenanceLog : function stop_waching_maintenance_log(timer) {
 		window.clearInterval(timer);
 	},
 	
+	formatErrorsToDisplay : function format_errors_to_display(errors) {
+		var i,
+			error,
+			formatedErrors;
+		
+		formatedErrors = [];
+		for(i = 0; i < errors.length; i++) {
+			
+			error = errors[i];
+			formatedErrors[i] = '<span>'+
+				'<span style="color : '+(error.ErrorLevel === 3 ? "orange" : "red")+'">'+error.ErrorText+'</span><br/>'+
+				'<span>ErrorLevel: '+error.ErrorLevelLabel+'</span><br/>'+
+				'<span>ErrorNumber: '+error.ErrorNumber+'</span><br/>'+
+				'<span>ProblemTypeText: '+error.ProblemTypeText+'</span><br/>'+
+				'<span>ProblemType: '+error.ProblemType+'</span><br/>'+
+			'</span>';
+		}
+		
+		return formatedErrors;
+	},
+	
 	verifyApplication : function verify_application() {
-		var app,
-			option,
-			logTimer;
+		var option,
+			logTimer,
+			verifyOption;
 		
 		if(!this.maintenanceActionRunning && this.currentSolution !== null) {
 			
-			app = {
-				name : this.currentApplicationName,
-				sol_name : this.currentSolution.name
+			verifyOption = {
+				applicationName : this.currentApplicationName,
+				hash : this.currentSolution.hash
 			};
 			
 			this.maintenanceActionRunning = true;
+			this.maintenanceApplication = {
+				"solution": this.currentSolution.name,
+				"application": this.currentApplicationName
+			}
 			this.displayMaintenanceToolbar();
 			
 			$('#projectList-'+this.currentSolution.name.replace(" ", "-")+'-'+this.currentApplicationName.replace(" ", "-")+' span.project-busy').show();
@@ -935,42 +1004,59 @@ Admin.prototype = {
 				applicationName: this.currentApplicationName
 			};
 			
-			adminObject.console.head('Verifing '+app.name, true, option);
-			logTimer = this.startWatchingServerLog(option);
+			adminObject.console.head('Verifing ' + verifyOption.applicationName + " - " + new Date(), true, option);
+			logTimer = this.startWatchingMaintenanceLog(option);
 			
-			admin.VerifyAsync({
+			webAdmin.verifyApplicationAsync({
 				"onsuccess" : function (response) {
+					var errors;
+					
 					adminObject.maintenanceActionRunning = false;
+					adminObject.maintenanceApplication = null;
 					$('.project-list span.project-busy').hide();
 					
-					adminObject.stopWatchingServerLog(logTimer);
-					adminObject.console.getServerLog(true, option);
+					adminObject.stopWatchingMaintenanceLog(logTimer);
+					adminObject.console.getMaintenanceLog(true, option);
 					
 					if(response.errors.length > 0) {
-						adminObject.console.error(response.errors, true, option);
+						errors = adminObject.formatErrorsToDisplay(response.errors);
+						adminObject.console.error("<b>Errors</b>", true, option);
+						adminObject.console.log(errors, true, option);
 					}
+					
+					$$("adminProgressBar").stopListening();
+					$("#maintenanceProgress").hide();
+					adminObject.console.head('End Verifing ' + verifyOption.applicationName + " - " + new Date(), true, option);
 					
 					adminObject.displayMaintenanceProject(adminObject.currentApplicationName, true);
 				},
 				"onerror" : function(errorResponse) {
 					
 					adminObject.maintenanceActionRunning = false;
+					adminObject.maintenanceApplication = null;
 					adminObject.displayMaintenanceToolbar();
 					$('.project-list span.project-busy').hide();
 					
-					adminObject.stopWatchingServerLog(logTimer);
-					adminObject.console.getServerLog(true, option);
+					adminObject.stopWatchingMaintenanceLog(logTimer);
+					adminObject.console.getMaintenanceLog(true, option);
 					adminObject.console.error(errorResponse, true, option);
+					
+					$$("adminProgressBar").stopListening();
+					$("#maintenanceProgress").hide();
+					adminObject.console.head('End Verifing ' + verifyOption.applicationName + " - " + new Date(), true, option);
 				}
-			}, app);
+			}, verifyOption);
+			
+			$("#maintenanceProgress").show();
+			$$("adminProgressBar").startListening();
 		}
 	},
 	
 	repairApplication : function verify_application() {
-		var app,
-			option,
+		var option,
 			logTimer,
-			canRepair;
+			canRepair,
+			repairOption;
 			
 		if(!this.maintenanceActionRunning && this.currentSolution !== null) {
 			
@@ -978,8 +1064,9 @@ Admin.prototype = {
 			if(canRepair === false && confirm("This action required to stop current running solution. Do you want to continue ?")) {
 				
 				$("#loadingContainer").show();
-				if(admin.closeSolution()) {
+				if(webAdmin.closeSolution()) {
 					this.currentRunningSolution = null;
+					this.console.maintenanceLogId = 0;
 					this.refreshAdminHeader(this.currentSolution.name);
 					
 					adminObject.reloadingSetTimeOut.push(setTimeout(adminObject.waitServerAndCallback, 500, function() {
@@ -993,12 +1080,16 @@ Admin.prototype = {
 			
 			if(this.currentRunningSolution === null || canRepair) {
 				
-				app = {
-					name : this.currentApplicationName,
-					sol_name : this.currentSolution.name
+				repairOption = {
+					applicationName : this.currentApplicationName,
+					hash : this.currentSolution.hash
 				};
 				
 				this.maintenanceActionRunning = true;
+				this.maintenanceApplication = {
+					"solution": this.currentSolution.name,
+					"application": this.currentApplicationName
+				}
 				this.displayMaintenanceToolbar();
 				
 				$('#projectList-'+this.currentSolution.name.replace(" ", "-")+'-'+this.currentApplicationName.replace(" ", "-")+' span.project-busy').show();
@@ -1008,37 +1099,51 @@ Admin.prototype = {
 					applicationName: this.currentApplicationName
 				};
 				
-				adminObject.console.head('Repairing '+app.name, true, option);
-				logTimer = this.startWatchingServerLog(option);
+				adminObject.console.head('Repairing '+repairOption.applicationName + " - " + new Date(), true, option);
+				logTimer = this.startWatchingMaintenanceLog(option);
 				
-				admin.RepairAsync({
+				webAdmin.repairApplicationAsync({
 					"onsuccess" : function (response) {
 						
 						adminObject.maintenanceActionRunning = false;
-						
+						adminObject.maintenanceApplication = null;
 						$('.project-list span.project-busy').hide();
 						
-						adminObject.stopWatchingServerLog(logTimer);
-						adminObject.console.getServerLog(true, option);
+						adminObject.stopWatchingMaintenanceLog(logTimer);
+						adminObject.console.getMaintenanceLog(true, option);
 						
 						if(response.errors.length > 0) {
-							adminObject.console.error(response.errors, true, option);
+							errors = adminObject.formatErrorsToDisplay(response.errors);
+							adminObject.console.error("<b>Errors</b>", true, option);
+							adminObject.console.log(errors, true, option);
 						}
+						
+						$$("adminProgressBar").stopListening();
+						$("#maintenanceProgress").hide();
+						adminObject.console.head('End Repairing '+repairOption.applicationName + " - " + new Date(), true, option);
 						
 						adminObject.displayMaintenanceProject(adminObject.currentApplicationName, true);
 					},
 					"onerror" : function (errorResponse) {
 						
 						adminObject.maintenanceActionRunning = false;
+						adminObject.maintenanceApplication = null;
 						adminObject.displayMaintenanceToolbar();
 						
 						$('.project-list span.project-busy').hide();
 						
-						adminObject.stopWatchingServerLog(logTimer);
-						adminObject.console.getServerLog(true, option);
+						adminObject.stopWatchingMaintenanceLog(logTimer);
+						adminObject.console.getMaintenanceLog(true, option);
 						adminObject.console.error(errorResponse, true, option);
+						
+						$$("adminProgressBar").stopListening();
+						$("#maintenanceProgress").hide();
+						adminObject.console.head('End Repairing '+repairOption.applicationName + " - " + new Date(), true, option);
 					}
-				}, app);
+				}, repairOption);
+				
+				$("#maintenanceProgress").show();
+				$$("adminProgressBar").startListening();
 			} else {
 				adminObject.displayMaintenanceToolbar();
 			}
@@ -1046,10 +1151,10 @@ Admin.prototype = {
 	},
 	
 	compactApplication : function compact_application() {
-		var app,
-			option,
+		var option,
 			logTimer,
-			canCompact;
+			canCompact,
+			compactOption;
 		
 		if(!this.maintenanceActionRunning && this.currentSolution !== null) {
 			
@@ -1057,8 +1162,9 @@ Admin.prototype = {
 			if(canCompact === false && confirm("This action required to stop current running solution. Do you want to continue ?")) {
 				
 				$("#loadingContainer").show();
-				if(admin.closeSolution()) {
+				if(webAdmin.closeSolution()) {
 					this.currentRunningSolution = null;
+					this.console.maintenanceLogId = 0;
 					this.refreshAdminHeader(this.currentSolution.name);
 					
 					adminObject.reloadingSetTimeOut.push(setTimeout(adminObject.waitServerAndCallback, 500, function() {
@@ -1071,12 +1177,16 @@ Admin.prototype = {
 			}
 			
 			if(this.currentRunningSolution === null || canCompact) {
-				app = {
-					name : this.currentApplicationName,
-					sol_name : this.currentSolution.name
+				compactOption = {
+					applicationName : this.currentApplicationName,
+					hash : this.currentSolution.hash
 				};
 				
 				this.maintenanceActionRunning = true;
+				this.maintenanceApplication = {
+					"solution": this.currentSolution.name,
+					"application": this.currentApplicationName
+				}
 				this.displayMaintenanceToolbar();
 				
 				$('#projectList-'+this.currentSolution.name.replace(" ", "-")+'-'+this.currentApplicationName.replace(" ", "-")+' span.project-busy').show();
@@ -1086,37 +1196,51 @@ Admin.prototype = {
 					applicationName: this.currentApplicationName
 				};
 				
-				adminObject.console.head('Compacting '+app.name, true, option);
-				logTimer = this.startWatchingServerLog(option);
+				adminObject.console.head('Compacting '+compactOption.applicationName + " - " + new Date(), true, option);
+				logTimer = this.startWatchingMaintenanceLog(option);
 				
-				admin.CompactAsync({
+				webAdmin.compactApplicationAsync({
 					"onsuccess" : function (response) {
 						
 						adminObject.maintenanceActionRunning = false;
-						
+						adminObject.maintenanceApplication = null;
 						$('.project-list span.project-busy').hide();
 						
-						adminObject.stopWatchingServerLog(logTimer);
-						adminObject.console.getServerLog(true, option);
+						adminObject.stopWatchingMaintenanceLog(logTimer);
+						adminObject.console.getMaintenanceLog(true, option);
 						
 						if(response.errors.length > 0) {
-							adminObject.console.error(response.errors, true, option);
+							errors = adminObject.formatErrorsToDisplay(response.errors);
+							adminObject.console.error("<b>Errors</b>", true, option);
+							adminObject.console.log(errors, true, option);
 						}
+						
+						$$("adminProgressBar").stopListening();
+						$("#maintenanceProgress").hide();
+						adminObject.console.head('End Compacting '+compactOption.applicationName + " - " + new Date(), true, option);
 						
 						adminObject.displayMaintenanceProject(adminObject.currentApplicationName, true);
 					},
 					"onerror" : function (errorResponse) {
 						
 						adminObject.maintenanceActionRunning = false;
-						
+						adminObject.maintenanceApplication = null;
 						adminObject.displayMaintenanceToolbar();
 						$('.project-list span.project-busy').hide();
 						
-						adminObject.stopWatchingServerLog(logTimer);
-						adminObject.console.getServerLog(true, option);
+						adminObject.stopWatchingMaintenanceLog(logTimer);
+						adminObject.console.getMaintenanceLog(true, option);
 						adminObject.console.error(errorResponse, true, option);
+						
+						$$("adminProgressBar").stopListening();
+						$("#maintenanceProgress").hide();
+						adminObject.console.head('End Compacting '+compactOption.applicationName + " - " + new Date(), true, option);
 					}
-				}, app);
+				}, compactOption);
+				
+				$("#maintenanceProgress").show();
+				$$("adminProgressBar").startListening();
+				
 			} else {
 				adminObject.displayMaintenanceToolbar();
 			}
@@ -1127,7 +1251,7 @@ Admin.prototype = {
 		
 		if(this.currentSolution !== null) {
 			$("#loadingContainer").show();
-			admin.openRecentSolutionAsync({
+			webAdmin.openRecentSolutionAsync({
 				"onsuccess" : function (response) {
 					
 					if(response === true) {
@@ -1141,7 +1265,7 @@ Admin.prototype = {
 						$("#loadingContainer").hide();
 					}
 				}
-			}, this.currentSolution.name);
+			}, this.currentSolution.hash);
 		} else {
 			
 			alert("Please select a solution");
@@ -1207,7 +1331,7 @@ Admin.prototype = {
 		if(this.currentSolution !== null) {
 			
 			$("#loadingContainer").show();
-			admin.closeSolutionAsync({
+			webAdmin.closeSolutionAsync({
 				"onsuccess" : function (response) {
 					if(response === true) {
 						adminObject.reloadingSetTimeOut.push(setTimeout(adminObject.waitServerAndCallback, 500, null));
@@ -1252,7 +1376,7 @@ Admin.prototype = {
 	openSolutionByPath : function open_solution_by_path(path) {
 		
 		$("#loadingContainer").show();
-		admin.openSolutionAsync({
+		webAdmin.openSolutionByPathAsync({
 			"onsuccess" : function (response) {
 				
 				if(response === true) {
@@ -1269,6 +1393,13 @@ Admin.prototype = {
 				alert("Cannot open this solution");
 			}
 		}, path);
+	},
+	
+	downloadLogFile : function downloadLogFile(logSelectId) {
+		var downloadUrl;
+		
+		downloadUrl = "/ReadFile?name="+$("#"+logSelectId).val()+"&download=true";
+		window.open(downloadUrl, "download log");
 	},
 	
 	shortcutHandler : function admin_shortcut_handler(event) {

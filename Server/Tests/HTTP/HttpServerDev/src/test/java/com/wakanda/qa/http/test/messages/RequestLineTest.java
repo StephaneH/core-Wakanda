@@ -42,7 +42,7 @@ public class RequestLineTest extends AbstractHttpTestCase {
 	/**
 	 * <b>Implements:</b> RequestLine02
 	 * <p/>
-	 * Check that server returns 401 (Bad Request) when URI and protocol version
+	 * Check that server returns 400 (Bad Request) when URI and protocol version
 	 * are missing.
 	 * <p/> 
 	 * <b>Reference:</b> SPEC690 (RFC2616) 5.1
@@ -60,7 +60,7 @@ public class RequestLineTest extends AbstractHttpTestCase {
 	/**
 	 * <b>Implements:</b> RequestLine03
 	 * <p/>
-	 * Check that server returns 401 (Bad Request) when protocol version is
+	 * Check that server returns 400 (Bad Request) when protocol version is
 	 * missing.
 	 * <p/>
 	 * <b>Reference:</b> SPEC690 (RFC2616) 5.1
@@ -78,7 +78,7 @@ public class RequestLineTest extends AbstractHttpTestCase {
 	/**
 	 * <b>Implements:</b> RequestLine04
 	 * <p/>
-	 * Check that server returns 401 (Bad Request) when request line contains
+	 * Check that server returns 400 (Bad Request) when request line contains
 	 * more elements than expected.
 	 * <p/>
 	 * <b>Reference:</b> SPEC690 (RFC2616) 5.1

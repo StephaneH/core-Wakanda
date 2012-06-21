@@ -68,7 +68,7 @@ public:
 			VSolution*						CreateNewSolutionFromTemplate( const XBOX::VFilePath& inSolutionFilePath, const XBOX::VFolder& inSolutionTemplateFolder, ISolutionMessageManager* inSolutionMessageManager = NULL, ISolutionBreakPointsManager* inSolutionBreakPointsManager = NULL, ISolutionUser* inSolutionUser = NULL);
 			/** @brief	The startup parameters, message managers, breakpoints manager and solution user are retained */
 			VSolution*						OpenSolution( VSolutionStartupParameters* inSolutionStartupParameters, ISolutionMessageManager* inSolutionMessageManager = NULL, ISolutionBreakPointsManager* inSolutionBreakPointsManager = NULL, ISolutionUser* inSolutionUser = NULL);
-			VSolution*						OpenSolution( const XBOX::VFilePath& inSolutionFilePath, ISolutionMessageManager* inSolutionMessageManager = NULL, ISolutionBreakPointsManager* inSolutionBreakPointsManager = NULL, ISolutionUser* inSolutionUser = NULL);
+			VSolution*						OpenSolution( const XBOX::VFilePath& inSolutionFilePath, ISolutionMessageManager* inSolutionMessageManager = NULL, ISolutionBreakPointsManager* inSolutionBreakPointsManager = NULL, ISolutionUser* inSolutionUser = NULL, bool inOpenProjectSymbolsTable = true);
 
 			bool							CloseSolution( VSolution *inSolution);
 
@@ -257,10 +257,13 @@ public:
 	XBOX::VError	RemoveItems( const VectorOfProjectItems& inProjectItems, bool inDeletePhysicalItems);
 	XBOX::VError	RenameItem( VProjectItem *inProjectItem, const XBOX::VString& inNewName);
 
-	VProject*		AddExistingProject(const XBOX::VURL& inProjectFileURL, bool inMustBeReferenced = true);
+	VProject*		AddExistingProject(const XBOX::VURL& inProjectFileURL, bool inMustBeReferenced);
 	XBOX::VError	RemoveProject( VProject *inProject, bool inDeleteProjectFolder);
 	VProjectItem*	ReferenceExternalFolder( XBOX::VError& outError, VProjectItem *inParentItem, const XBOX::VURL& inURL);
 	VProjectItem*	ReferenceExternalFile( XBOX::VError& outError, VProjectItem *inParentItem, const XBOX::VURL& inURL);
+
+	VProjectItem*	CreateFileItemFromPath( XBOX::VError& outError, const XBOX::VFilePath& inPath, bool inRecursive);
+	VProjectItem*	CreateFolderItemFromPath( XBOX::VError& outError, const XBOX::VFilePath& inPath, bool inRecursive);
 
 	// ---------------------------------------
 	// Source Control
@@ -397,6 +400,9 @@ private:
 	void					_UnreferenceItem( VProjectItem *inItem, bool inTouchSolutionFile);
 	bool					_IsItemReferenced( VProjectItem *inItem) const;
 	bool					_IsVectorContainsReferencedItems( const VectorOfProjectItems& inProjectItems, bool inRecursive) const;
+
+	VProjectItem*			_CreateFileItemFromPath( XBOX::VError& outError, const XBOX::VFilePath& inPath, bool inRecursive, bool inTouchSolutionFile);
+	VProjectItem*			_CreateFolderItemFromPath( XBOX::VError& outError, const XBOX::VFilePath& inPath, bool inRecursive, bool inTouchSolutionFile);
 
 			// Utilities
 	static	XBOX::VError			_CountFilesAndFolders( const XBOX::VFolder& inFolder, sLONG& outFilesCount, sLONG &outFoldersCount, bool inRecursive);

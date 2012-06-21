@@ -49,11 +49,7 @@ public:
 			XBOX::VError					SetEnabled( bool inEnabled);
 
 			bool							IsEnabled() const;
-
-			/** @brief	Returns the rpc proxy file according to the rpc methods file.
-						Returns an empty proxy if the file does not match any methods file. */
-			XBOX::VError					GetProxy( XBOX::VString& outProxy, const XBOX::VFile* inFile, const XBOX::VString& inNamespace);
-			
+		
 			/** @brief	Returns the rpc proxy file according to the rpc module path. */
 			XBOX::VError					GetProxy( XBOX::VString& outProxy, const XBOX::VString& inModulePath, const XBOX::VString& inNamespace, const IHTTPRequest* inRequest, IHTTPResponse* inResponse);
 

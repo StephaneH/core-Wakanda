@@ -30,6 +30,7 @@ class VRIAServerSolutionJSRuntimeDelegate;
 class VSolutionStartupParameters;
 class CUAGDirectory;
 class VJSDebuggerSettings;
+class VRIAPermissions;
 
 
 
@@ -114,6 +115,8 @@ public:
 
 			CUAGDirectory*					RetainUAGDirectory() const;
 
+			VRIAPermissions*				RetainPermissions( XBOX::VError *outError) const;
+
 			bool							GetUUID( XBOX::VUUID& outUUID) const;
 
 			// Logging
@@ -149,6 +152,8 @@ private:
 
 			CUAGDirectory*					_OpenUAGDirectory( XBOX::VError& outError);
 
+			VRIAPermissions*				_LoadPermissionFile( XBOX::VError& outError);
+
 			/* FOR TEST PURPOSES ONLY. A method to see the whole authentication chain in action.
 			THIS TEST METHOD WILL GO AWAY INTO ITS OWN HEADER SOURCE FILE */
 			XBOX::VError TEST_RegisterDebuggerUAGCallback ( );
@@ -179,6 +184,7 @@ private:
 #endif
 			// Users and groups directory
 			CUAGDirectory					*fUAGDirectory;
+			VRIAPermissions					*fPermissions;
 
 			// JavaScript contexts
 			VJSContextPool							*fJSContextPool;

@@ -461,6 +461,7 @@ VSolutionStartupParameters* VRIAServerApplication::RetainDefaultSolutionStartupP
 			{
 				startupParams->SetStoreInLinkFile( false);
 				startupParams->SetSolutionFileToOpen( file);
+				startupParams->SetOpenProjectSymbolsTable( false);	// sc 25/05/2012, on Server, do not use the symbols table anymore
 
 				VRIAServerSolutionOpeningParameters openingParams( startupParams);
 				openingParams.SetOpeningMode( eSOM_FOR_RUNNING);
@@ -492,6 +493,7 @@ XBOX::VError VRIAServerApplication::OpenSolutionAsCurrentSolution( const XBOX::V
 	{
 		VFile *file = new VFile( inDesignSolutionFilePath);
 		startupParams->SetSolutionFileToOpen( file);
+		startupParams->SetOpenProjectSymbolsTable( false);	// sc 25/05/2012, on Server, do not use the symbols table anymore
 		QuickReleaseRefCountable( file);
 	}
 
@@ -1049,6 +1051,7 @@ void VRIAServerApplication::_OnStartup( VRIAServerStartupParameters *inStartupPa
 					openingParams.SetOpeningMode( eSOM_FOR_RUNNING);
 					openingParams.UpdateStartupParameters( solutionStartupParameters);
 					solutionStartupParameters->SetSolutionFileToOpen( solutionFile);
+					solutionStartupParameters->SetOpenProjectSymbolsTable( false);	// sc 25/05/2012, on Server, do not use the symbols table anymore
 				}
 			}
 			else
@@ -1229,7 +1232,8 @@ VError VRIAServerApplication::_OpenSolutionAsCurrentSolution( VSolutionStartupPa
 				if (designSolution != NULL)
 				{
 					designSolution->StartWatchingFileSystem();
-					designSolution->StartUpdatingSymbolTable();
+					if ((inStartupParameters != NULL) ? inStartupParameters->GetOpenProjectSymbolsTable() : true)
+						designSolution->StartUpdatingSymbolTable();
 				}
 				
 				err = solution->Start();

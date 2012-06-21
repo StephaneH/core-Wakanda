@@ -6,6 +6,6 @@
 	>
 	<Tool
 		Name="VCCLCompilerTool"
-		AdditionalIncludeDirectories="&quot;$(SolutionDir)\..\..\webkit\742\build\include\&quot;;&quot;$(SolutionDir)\..\..\webkit\742\WebCore\inspector&quot;"
+		AdditionalIncludeDirectories="&quot;$(SolutionDir)\..\..\webkit\534.53\JavaScriptCore\4D\&quot;;&quot;$(SolutionDir)\..\..\webkit\534.53\build\include\&quot;;&quot;$(SolutionDir)\..\..\webkit\534.53\WebCore\inspector&quot;;&quot;$(SolutionDir)\..\..\webkit\534.53\&quot;"
 	/>
 </VisualStudioPropertySheet>

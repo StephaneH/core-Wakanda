@@ -1,0 +1,4 @@
+﻿<?xml version="1.0" encoding="UTF-8"?><permissions>
+<allow action="read" groupID="0FFE0664C717154D95B45F5071490A62" resource="ReadOverride" temporaryForcePermissions="false" type="model"/>
+<allow action="read" groupID="A5AFEC032F2E904EA6F28AE2829D0AB3" resource="ReadOverride.ReadOverride" temporaryForcePermissions="false" type="dataClass"/>
+</permissions>

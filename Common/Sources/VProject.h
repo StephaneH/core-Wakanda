@@ -49,7 +49,7 @@ public:
 	static	VProject*						Instantiate( XBOX::VError& outError, VSolution *inParentSolution, const XBOX::VFilePath& inProjectFile);
 
 			/* @brief	Read the project file, create referenced project items, synchronize with file system and open the symbols table */
-			XBOX::VError					Load();
+			XBOX::VError					Load( bool inOpenSymbolsTable);
 			/* @brief	Close the symbols table */
 			XBOX::VError					Unload();
 
@@ -132,8 +132,6 @@ public:
 	void						StopBackgroundParseFiles();
 	
 	std::vector<XBOX::VFilePath>&	GetDeletedFilePaths()				{ return fDeletedFilePaths; }
-
-	XBOX::VSyncEvent*			RetainRPCFilesParsingCompleteEvent() const;
 
 	void						ParseProjectItemForEditor( VProjectItem *inItem, XBOX::VString& inContents );
 	
@@ -243,9 +241,6 @@ private:
 
 	std::vector<XBOX::VFilePath>	fDeletedFilePaths;
 
-			XBOX::VSyncEvent			*fRPCFilesParsingCompleteEvent;
-	mutable	XBOX::VCriticalSection		fRPCFilesParsingCompleteEventMutex;
-
 			bool				fIsWatchingFileSystem;
 			bool				fIsUpdatingSymbolTable;
 
@@ -257,7 +252,6 @@ private:
 	void LoadKludgeSymbols( ISymbolTable *inTable );
 	void LoadKludgeFile( const XBOX::VFolder &inFolder, const XBOX::VString &inName, ESymbolFileExecContext inExecContext, IDocumentParserManager::IJob *inJob );
 
-	void RPCFilesParsingComplete( IDocumentParserManager::TaskCookie inCookie);
 	static sLONG BackgroundDeleteFile( XBOX::VTask *inTask );
 
 	void _GetProjectItemsByExtension( const XBOX::VString &inExtension, VectorOfProjectItems &outItems );

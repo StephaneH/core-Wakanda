@@ -41,7 +41,7 @@ LAsA %DEPOT%XToolbox/WAK2/ServerNet/Projects/CMake/Build/%LibMode%/ServerNet%Lib
 LAsA %DEPOT%XToolbox/WAK2/XML/Projects/CMake/Build/%LibMode%/Xml%LibMode_SR%.so
 LAsA %DEPOT%XToolbox/WAK2/JavaScript/Projects/CMake/Build/%LibMode%/JavaScript%LibMode_SR%.so
 
-LAsA %DEPOT%webkit/742/JavaScriptCore/CMake/Build/%LibMode%/JsCore%LibMode_SR%.so
+LAsA %DEPOT%webkit/534.53/JavaScriptCore/CMake/Build/%LibMode%/JsCore%LibMode_SR%.so
 LAsA %DEPOT%curl/7.19.7/CMake/Build/%LibMode%/Curl%LibMode_SR%.so
 LAsA %DEPOT%icu/4.8/projets/CMake/Build/%LibMode%/Icu%LibMode_SR%.so
 
@@ -66,9 +66,6 @@ LAsA %DEPOT%Components/WAK2/HTTPServer/Projects/CMake/Build/%LibMode%/HTTPServer
 LAsA [%TARGET%%DIR_COMPONENT%Native Components/LanguageSyntax%LibMode_SR%.bundle/Contents/Linux]
 LAsA %DEPOT%Components/WAK2/Language Syntax/Projects/CMake/Build/%LibMode%/LanguageSyntax%LibMode_SR%.so
 
-LAsA [%TARGET%%DIR_COMPONENT%Native Components/SQLServer%LibMode_SR%.bundle/Contents/Linux]
-LAsA %DEPOT%Components/WAK2/SQL/Projects/CMake/Build/%LibMode%/SQLServer%LibMode_SR%.so
-
 LAsA [%TARGET%%DIR_COMPONENT%Native Components/UsersAndGroups%LibMode_SR%.bundle/Contents/Linux]
 LAsA %DEPOT%Components/WAK2/UsersAndGroups/projects/CMake/Build/%LibMode%/UsersAndGroups%LibMode_SR%.so
 
@@ -88,9 +85,6 @@ LAsA %DEPOT%Components/WAK2/HTTPServer/Resources
 LAsA [%TARGET%%DIR_COMPONENT%Native Components/LanguageSyntax%LibMode_SR%.bundle/Contents/]
 LAsA %DEPOT%Components/WAK2/Language Syntax/Resources
 
-LAsA [%TARGET%%DIR_COMPONENT%Native Components/SQLServer%LibMode_SR%.bundle/]
-LAsA %DEPOT%Components/WAK2/SQL/Resources
-
 LAsA [%TARGET%%DIR_COMPONENT%Native Components/UsersAndGroups%LibMode_SR%.bundle/Contents/]
 LAsA %DEPOT%Components/WAK2/UsersAndGroups/Resources
 
@@ -104,17 +98,11 @@ LAsA %DEPOT%Wakanda/WAK2/Server/Resources/Default Solution
 LAsA %DEPOT%Wakanda/WAK2/Server/Resources/debugger
 LAsA %DEPOT%Wakanda/WAK2/Server/Resources/%LibLangueLproj%
 LAsA %DEPOT%Wakanda/WAK2/Server/Resources/Templates
-LAsA %DEPOT%Wakanda/WAK2/Studio/Resources/JavaScript Support Files
 LAsA %DEPOT%Wakanda/WAK2/Common/Resources/
 
-LAsA %DEPOT%CoreRuntime/WAK2/Resources/BasicUTIs.WIN.plist
+LAsA %DEPOT%XToolbox/WAK2/Kernel/Resources/BasicUTIs.WIN.plist
 
 LAsA [%TARGET%%PRODUCT_NAME%/Resources/Templates/Blank/WebFolder/images]
-
-LAsA [%TARGET%%PRODUCT_NAME%/walib/FileServices]
-LAsA [%TARGET%%PRODUCT_NAME%/walib/FileServices/Database]
-LAsA %DEPOT%Wakanda/WAK2/walib/FileServices/bespin.4dbase/bespin.waCatalog
-LAsA %DEPOT%Wakanda/WAK2/walib/FileServices/bespin.4dbase/bespin.waData
 
 LAsA [%TARGET%%PRODUCT_NAME%/walib]
 LAsA %DEPOT%Wakanda/WAK2/walib/WAF
@@ -123,15 +111,10 @@ LAsA %DEPOT%Wakanda/WAK2/walib/dataBrowser
 LAsA [%TARGET%%PRODUCT_NAME%]
 L*sA %DEPOT%Wakanda/WAK2/Server/Resources/SSJS/Modules
 
-LAsA [%TARGET%%PRODUCT_NAME%/Modules/fileService]
-LAsA %DEPOT%Wakanda/WAK2/walib/FileServices/bespin.4dbase/bespin.waCatalog
-LAsA %DEPOT%Wakanda/WAK2/walib/FileServices/bespin.4dbase/bespin.waData
-
 LAsA [%TARGET%%PRODUCT_NAME%/Resources/Templates]
 LAsA %DEPOT%Wakanda/WAK2/Server/Resources/Default Solution/Admin
 
 LAsA [%TARGET%%PRODUCT_NAME%/Resources/%LibLangueLproj%]
-LAsA %DEPOT%CoreRuntime/WAK2/Resources/%LibLangueLproj%/Errors_xbox_%Lib2Langue%.xlf
-LAsA %DEPOT%CoreRuntime/WAK2/Resources/%LibLangueLproj%/Errors_javascript_%Lib2Langue%.xlf
-LAsA %DEPOT%CoreRuntime/WAK2/Resources/%LibLangueLproj%/ServerNet%Lib2Langue%.xlf
-LAsA %DEPOT%CoreRuntime/WAK2/Resources/%LibLangueLproj%/SQL%Lib2Langue%.xlf
+LAsA %DEPOT%XToolbox/WAK2/Kernel/Resources/%LibLangueLproj%/Errors_xbox_%Lib2Langue%.xlf
+LAsA %DEPOT%XToolbox/WAK2/JavaScript/Resources/%LibLangueLproj%/Errors_javascript_%Lib2Langue%.xlf
+LAsA %DEPOT%XToolbox/WAK2/ServerNet/Resources/%LibLangueLproj%/ServerNet%Lib2Langue%.xlf

@@ -321,10 +321,10 @@ public class CharSetTest extends AbstractHttpTestCase {
 	}
 
 	/**
-	 * <b>Implements:</b> CharSet07
+	 * <b>Implements:</b> CharSet08
 	 * <p>
 	 * Check that server does not label the charset of entities encoded
-	 * ISO-8859-1.
+	 * US-ASCII.
 	 * <p>
 	 * <b>Reference:</b> RFC2616 19.3
 	 * 

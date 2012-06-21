@@ -273,7 +273,7 @@ public class ResourceTest extends AbstractHttpTestCase {
 	/**
 	 * <b>Implements:</b> Resource08
 	 * <p/>
-	 * Check that the host header value is case insensitive.
+	 * Check that the host header value is case-insensitive.
 	 * <p/>
 	 * <b>Reference:</b> SPEC690 (RFC2616) 5.2
 	 * 

@@ -112,27 +112,6 @@ private:
 };
 
 
-// ----------------------------------------------------------------------------
-
-
-class VReloadCatalogMessage : public VMessage
-{
-public:
-	VReloadCatalogMessage( VRIAServerProject* inApplication) { fApplication = RetainRefCountable( inApplication); }
-	virtual ~VReloadCatalogMessage() { QuickReleaseRefCountable( fApplication); }
-
-protected:
-	virtual	void DoExecute()
-			{
-				if (fApplication != NULL)
-					fApplication->ReloadCatalog( NULL);
-			}
-
-private:
-			VRIAServerProject	*fApplication;
-};
-
-
 
 // ----------------------------------------------------------------------------
 
@@ -207,15 +186,6 @@ fJSRuntimeDelegate(NULL),
 fRPCService(NULL),
 fLogReader(NULL),
 fOpeningParameters(NULL),
-#if !USE_JAVASCRIPT_WEBAPP_SERVICE
-fIsWebAppServiceManager(false),
-#endif
-#if !USE_JAVASCRIPT_DATASTORE_SERVICE
-fIsDataServiceManager(false),
-#endif
-#if !USE_JAVASCRIPT_RPC_SERVICE
-fIsRPCServiceManager(false),
-#endif
 fHTTPServerProject (NULL),
 fApplicationStorage(NULL),
 fApplicationSettings(NULL),
@@ -244,15 +214,6 @@ fJSRuntimeDelegate(NULL),
 fRPCService(NULL),
 fLogReader(NULL),
 fOpeningParameters(NULL),
-#if !USE_JAVASCRIPT_WEBAPP_SERVICE
-fIsWebAppServiceManager(false),
-#endif
-#if !USE_JAVASCRIPT_DATASTORE_SERVICE
-fIsDataServiceManager(false),
-#endif
-#if !USE_JAVASCRIPT_RPC_SERVICE
-fIsRPCServiceManager(false),
-#endif
 fHTTPServerProject (NULL),
 fApplicationStorage(NULL),
 fApplicationSettings(NULL),
@@ -409,72 +370,6 @@ VError VRIAServerProject::Start()
 	{
 		if (fHTTPServerProject != NULL)
 		{
-
-		#if !USE_JAVASCRIPT_WEBAPP_SERVICE
-			// Is the Web App Service enabled on startup ?
-			VValueBag *webAppSettings = fSettings.RetainSettings( RIASettingID::webApp);
-			if (webAppSettings != NULL)
-			{
-				fIsWebAppServiceManager = true;
-
-				err = _SetWebAppServiceEnabled( RIASettingsKeys::WebApp::enabled.Get( webAppSettings));
-				if (err != VE_OK)
-					err = ThrowError( (RIASettingsKeys::WebApp::enabled.Get( webAppSettings)) ? VE_RIA_CANNOT_ENABLE_WEB_APP_SERVICE : VE_RIA_CANNOT_DISABLE_WEB_APP_SERVICE);
-				
-				webAppSettings->Release();
-			}
-		#endif
-
-
-		#if !USE_JAVASCRIPT_DATASTORE_SERVICE
-			if (fDataService != NULL)
-			{
-				// Is the Data Service enabled on startup ?
-				VValueBag *dataServiceSettings = fSettings.RetainSettings( RIASettingID::dataService);
-				if (dataServiceSettings != NULL)
-				{
-					fIsDataServiceManager = true;
-
-					if (fDatabase != NULL)
-					{
-						bool enabled = RIASettingsKeys::DataService::enabled.Get( dataServiceSettings);
-						
-						err = fDataService->SetEnabled( enabled);
-						if (err != VE_OK)
-							err = ThrowError( enabled ? VE_RIA_CANNOT_ENABLE_DATA_SERVICE : VE_RIA_CANNOT_DISABLE_DATA_SERVICE);
-					}
-					dataServiceSettings->Release();
-				}
-			}
-		#endif
-
-			
-		#if !USE_JAVASCRIPT_RPC_SERVICE
-			if (fRPCService != NULL)
-			{
-				// Is the RPC Service enabled on startup ?
-				VValueBag *rpcSettingsBag = fSettings.RetainSettings( RIASettingID::rpcService);
-				if (rpcSettingsBag != NULL)
-				{
-					fIsRPCServiceManager = true;
-
-					bool enabled = RIASettingsKeys::RPCService::enabled.Get( rpcSettingsBag);
-
-					if (enabled)
-					{
-						fRPCService->SetPatternForProxy( L"^/rpc-proxy/");
-						fRPCService->SetPublishInClientGlobalNamespace( RIASettingsKeys::RPCService::publishInClientGlobalNamespace.Get( rpcSettingsBag));
-					}
-
-					err = fRPCService->SetEnabled( enabled);
-					if (err != VE_OK)
-						err = ThrowError( enabled ? VE_RIA_CANNOT_ENABLE_RPC_SERVICE : VE_RIA_CANNOT_DISABLE_RPC_SERVICE);
-
-					rpcSettingsBag->Release();
-				}
-			}
-		#endif
-
 			// For debugging purpose, add a handler for the requests sent by Wakanda Studio
 			VDebugHTTPRequestHandler *debugHandler = new VDebugHTTPRequestHandler( this, CVSTR("(?i)/debug/.*"));
 			if (debugHandler != NULL)
@@ -585,21 +480,6 @@ VError VRIAServerProject::Stop()
 
 	// Post 'applicationWillStop' message to the services
 	_PostServicesMessage( L"applicationWillStop");
-
-#if !USE_JAVASCRIPT_WEBAPP_SERVICE
-	if (fIsWebAppServiceManager)
-		_SetWebAppServiceEnabled( false);
-#endif
-
-#if !USE_JAVASCRIPT_DATASTORE_SERVICE
-	if ((fDataService != NULL) && fIsDataServiceManager)
-		fDataService->SetEnabled( false);
-#endif
-
-#if !USE_JAVASCRIPT_RPC_SERVICE
-	if ((fRPCService != NULL) && fIsRPCServiceManager)
-		fRPCService->SetEnabled( false);
-#endif
 
 	if (fHTTPServerProject != NULL)
 	{
@@ -791,36 +671,6 @@ bool VRIAServerProject::IsHTTPServerProjectStarted (VRIAContext* inContext)
 }
 
 
-VError VRIAServerProject::SetWebAppServiceEnabled( VRIAContext* inContext, bool inEnabled)
-{
-	VError err = VE_OK;
-
-	VRIAContext *context = _ValidateAndRetainContext( inContext, true);
-	if (context != NULL)
-	{
-		err = _SetWebAppServiceEnabled( inEnabled);
-		context->Release();
-	}
-	return err;
-}
-
-
-bool VRIAServerProject::IsWebAppServiceEnabled( VRIAContext* inContext)
-{
-	bool result = false;
-
-	VRIAContext *context = _ValidateAndRetainContext( inContext, true);
-	if (context != NULL)
-	{
-		if (fHTTPServerProject != NULL)
-			result = fHTTPServerProject->GetEnableStaticPagesService();
-
-		context->Release();
-	}
-	return result;
-}
-
-
 CDB4DBase* VRIAServerProject::RetainDatabase( VRIAContext* inContext)
 {
 	CDB4DBase *base = NULL;
@@ -858,64 +708,6 @@ VDataService* VRIAServerProject::RetainDataService( VRIAContext* inContext, VErr
 }
 
 
-VError VRIAServerProject::SetDataServiceEnabled( VRIAContext* inContext, bool inEnabled)
-{
-	VError err = VE_OK;
-
-	VRIAContext *context = _ValidateAndRetainContext( inContext, true);
-	if (context != NULL)
-	{
-		if (fDataService != NULL)
-		{
-			if (inEnabled && !fDataService->IsEnabled())
-			{
-				VValueBag *dataServiceSettings = fSettings.RetainSettings( RIASettingID::dataService);
-				if (dataServiceSettings != NULL)
-				{
-					err = fDataService->SetEnabled( inEnabled);
-
-					ReleaseRefCountable( &dataServiceSettings);
-				}
-				else
-				{
-					err = ThrowError( VE_RIA_DATA_SERVICE_SETTINGS_NOT_FOUND);
-				}
-			}
-			else if (!inEnabled && fDataService->IsEnabled())
-			{
-				err = fDataService->SetEnabled( inEnabled);
-			}
-		}
-		else
-		{
-			err = ThrowError( VE_RIA_DATA_SERVICE_NOT_FOUND);
-		}
-		context->Release();
-	}
-	else
-	{
-		err = ThrowError( VE_RIA_INVALID_CONTEXT);
-	}
-	return err;
-}
-
-
-bool VRIAServerProject::IsDataServiceEnabled( VRIAContext* inContext)
-{
-	bool result = false;
-
-	VRIAContext *context = _ValidateAndRetainContext( inContext, true);
-	if (context != NULL)
-	{
-		if (fDataService != NULL)
-			result = fDataService->IsEnabled();
-
-		context->Release();
-	}
-	return result;
-}
-
-
 VError VRIAServerProject::ReloadCatalog( VRIAContext* inContext)
 {
 	VError err = VE_OK;
@@ -939,17 +731,6 @@ VError VRIAServerProject::ReloadCatalog( VRIAContext* inContext)
 			{
 				if (fDataService != NULL)
 				{
-				#if !USE_JAVASCRIPT_DATASTORE_SERVICE
-					if (fIsDataServiceManager)
-					{
-						if (fDataService->IsEnabled())
-						{
-							enableDataService = true;
-							err = fDataService->SetEnabled( false);
-						}
-					}
-				#endif
-
 					fDataService->SetDatabase( NULL);
 				}
 				
@@ -1010,11 +791,6 @@ VError VRIAServerProject::ReloadCatalog( VRIAContext* inContext)
 						if (fDataService != NULL)
 						{
 							fDataService->SetDatabase( fDatabase);
-						
-						#if !USE_JAVASCRIPT_DATASTORE_SERVICE
-							if (fIsDataServiceManager && enableDataService)
-								err = fDataService->SetEnabled( true);
-						#endif
 						}
 					}
 					else
@@ -1086,122 +862,6 @@ VRPCService* VRIAServerProject::RetainRPCService( VRIAContext* inContext, XBOX::
 		*outError = err;
 
 	return service;
-}
-
-
-VError VRIAServerProject::SetRPCServiceEnabled( VRIAContext* inContext, bool inEnabled)
-{
-	VError err = VE_OK;
-
-	VRIAContext *context = _ValidateAndRetainContext( inContext, true);
-	if (context != NULL)
-	{
-		if (fRPCService != NULL)
-		{
-			if (inEnabled && !fRPCService->IsEnabled())
-			{
-				// Update the RPC Service with the settings
-				VValueBag *settingsBag = fSettings.RetainSettings( RIASettingID::rpcService);
-				if (settingsBag != NULL)
-				{
-					fRPCService->SetPatternForProxy( L"^/rpc-proxy/");
-					fRPCService->SetPublishInClientGlobalNamespace( RIASettingsKeys::RPCService::publishInClientGlobalNamespace.Get( settingsBag));
-
-					err = fRPCService->SetEnabled( inEnabled);
-
-					settingsBag->Release();
-				}
-				else
-				{
-					err = ThrowError( VE_RIA_RPC_SERVICE_SETTINGS_NOT_FOUND);
-				}
-			}
-			else if (!inEnabled && fRPCService->IsEnabled())
-			{
-				err = fRPCService->SetEnabled( inEnabled);
-			}
-		}
-		else
-		{
-			err = ThrowError( VE_RIA_RPC_SERVICE_NOT_FOUND);
-		}
-
-		context->Release();
-	}
-	else
-	{
-		err = ThrowError( VE_RIA_INVALID_CONTEXT);
-	}
-	return err;
-}
-
-
-bool VRIAServerProject::IsRPCServiceEnabled( VRIAContext* inContext)
-{
-	bool result = false;
-
-	VRIAContext *context = _ValidateAndRetainContext( inContext, true);
-	if (context != NULL)
-	{
-		if (fRPCService != NULL)
-			result = fRPCService->IsEnabled();
-
-		context->Release();
-	}
-	return result;
-}
-
-
-VFile* VRIAServerProject::RetainRPCMethodsFileFromRelativePath( VError& outError, const VString& inRelativePath, FilePathStyle inRelativPathStyle)
-{
-	VFile *result = NULL;
-
-	outError = VE_OK;
-
-	// The path may be relative to the default rpc folder
-	VString relativePath;
-	VFilePath fullPath;
-	VProjectItemTagManager::Get()->GetPreferedDefaultFolder( kRPCMethodTag, relativePath);
-	relativePath.AppendString( inRelativePath);
-	BuildPathFromRelativePath( fullPath, relativePath, inRelativPathStyle);
-
-	if (!fullPath.IsEmpty() && fullPath.IsFile())
-	{
-		result = new VFile( fullPath);
-		if (result != NULL)
-		{
-			if (!result->Exists())
-				ReleaseRefCountable( &result);
-		}
-		else
-		{
-			outError = ThrowError( VE_MEMORY_FULL);
-		}
-	}
-
-	if (outError == VE_OK && result == NULL)
-	{
-		// The path may be relative to the project folder
-		BuildPathFromRelativePath( fullPath, inRelativePath, inRelativPathStyle);
-		if (!fullPath.IsEmpty() && fullPath.IsFile())
-		{
-			result = new VFile( fullPath);
-			if (result != NULL)
-			{
-				if (!result->Exists())
-					ReleaseRefCountable( &result);
-			}
-			else
-			{
-				outError = ThrowError( VE_MEMORY_FULL);
-			}
-		}
-	}
-
-	if (result == NULL)
-		outError = ThrowError( VE_FILE_NOT_FOUND);
-
-	return result;
 }
 
 
@@ -1831,7 +1491,7 @@ VError VRIAServerProject::_Open( VProject* inDesignProject, VRIAServerProjectOpe
 
 		if (err == VE_OK || fState.inMaintenance)
 		{
-			err = _LoadPermissionFile();
+			fPermissions = _LoadPermissionFile( err);
 			if  (err != VE_OK)
 				err = ThrowError( VE_RIA_CANNOT_LOAD_PERMISSIONS);
 		}
@@ -2234,34 +1894,6 @@ VError VRIAServerProject::_Open( VProject* inDesignProject, VRIAServerProjectOpe
 			fApplicationSettings->SetKeyVBagArray (L"virtualFolder", *bagArray, false);
 		ReleaseRefCountable (&bagArray);
 
-
-	#if !USE_JAVASCRIPT_WEBAPP_SERVICE
-		// WebApp service settings
-		bag = fSettings.RetainSettings( RIASettingID::webApp);
-		if (bag != NULL)
-			fApplicationSettings->SetKeyVValueBag( L"webApp", *bag);
-		ReleaseRefCountable( &bag);
-	#endif
-
-
-	#if !USE_JAVASCRIPT_DATASTORE_SERVICE
-		// Data service settings
-		bag = fSettings.RetainSettings( RIASettingID::dataService);
-		if (bag != NULL)
-			fApplicationSettings->SetKeyVValueBag( L"dataService", *bag);
-		ReleaseRefCountable( &bag);
-	#endif
-
-
-	#if !USE_JAVASCRIPT_RPC_SERVICE
-		// RPC service settings
-		bag = fSettings.RetainSettings( RIASettingID::rpcService);
-		if (bag != NULL)
-			fApplicationSettings->SetKeyVValueBag( L"rpcService", *bag);
-		ReleaseRefCountable( &bag);
-	#endif
-
-
 		// Services settings
 		VValueBag servicesSettingsBag;
 		bagArray = fSettings.RetainServicesSettings();
@@ -2288,8 +1920,6 @@ VError VRIAServerProject::_Open( VProject* inDesignProject, VRIAServerProjectOpe
 		}
 		ReleaseRefCountable( &bagArray);
 
-
-	#if USE_JAVASCRIPT_DATASTORE_SERVICE
 		// By default, if a database is opened, the "dataStore" service is enabled, even if none settings have been found
 		if (!fSettings.HasServiceSettings( L"dataStore"))
 		{
@@ -2312,10 +1942,7 @@ VError VRIAServerProject::_Open( VProject* inDesignProject, VRIAServerProjectOpe
 				ReleaseRefCountable( &serviceBag);
 			}
 		}
-	#endif
 
-
-	#if USE_JAVASCRIPT_RPC_SERVICE
 		// By default, the "rpc" service is enabled, even if none settings have been found
 		if (!fSettings.HasServiceSettings( L"rpc"))
 		{
@@ -2341,10 +1968,7 @@ VError VRIAServerProject::_Open( VProject* inDesignProject, VRIAServerProjectOpe
 				ReleaseRefCountable( &serviceBag);
 			}
 		}
-	#endif
 
-
-	#if USE_JAVASCRIPT_WEBAPP_SERVICE
 		// By default, the "webApp" service is enabled, even if none settings have been found
 		if (!fSettings.HasServiceSettings( L"webApp"))
 		{
@@ -2370,7 +1994,6 @@ VError VRIAServerProject::_Open( VProject* inDesignProject, VRIAServerProjectOpe
 				ReleaseRefCountable( &serviceBag);
 			}
 		}
-	#endif
 
 		// By default, the "upload" service is enabled, even if none settings have been found
 		if (!fSettings.HasServiceSettings( L"upload"))
@@ -2417,34 +2040,29 @@ VError VRIAServerProject::_LoadSettingsFile()
 }
 
 
-VError VRIAServerProject::_LoadPermissionFile()
+VRIAPermissions* VRIAServerProject::_LoadPermissionFile( VError& outError)
 {
-	VError err = VE_OK;
+	VRIAPermissions *permissions = NULL;
+
+	outError = VE_OK;
 
 	if (testAssert(fDesignProject != NULL))
 	{
 		VProjectItem *item = fDesignProject->GetProjectItemFromTag( kPermissionsTag);
 		if (item != NULL)
 		{
-			if (fPermissions == NULL)
-			{
-				fPermissions = new VRIAPermissions();
-				if (fPermissions == NULL)
-					err = ThrowError( VE_MEMORY_FULL);
-			}
+			VFilePath path;
+			item->GetFilePath( path);
 
-			if (err == VE_OK)
-			{
-				VFilePath path;
-				item->GetFilePath( path);
-				
-				VFile file( path);
-				err = fPermissions->LoadPermissionFile( file);
-			}
+			permissions = new VRIAPermissions( path);
+			if (permissions == NULL)
+				outError = ThrowError( VE_MEMORY_FULL);
+			else
+				outError = permissions->LoadPermissionFile();
 		}
 	}
 
-	return err;	
+	return permissions;	
 }
 
 
@@ -2701,21 +2319,6 @@ VError VRIAServerProject::_StopHTTPServer()
 			// Post 'httpServerWillStop' message to the services
 			_PostServicesMessage( L"httpServerWillStop");
 			
-		#if !USE_JAVASCRIPT_WEBAPP_SERVICE
-			if (fIsWebAppServiceManager)
-				_SetWebAppServiceEnabled (false);
-		#endif
-
-		#if !USE_JAVASCRIPT_DATASTORE_SERVICE
-			if ((fDataService != NULL) && fIsDataServiceManager)
-				fDataService->SetEnabled( false);
-		#endif
-
-		#if !USE_JAVASCRIPT_RPC_SERVICE
-			if ((fRPCService != NULL) && fIsRPCServiceManager)
-				fRPCService->SetEnabled( false);
-		#endif
-
 			err = fHTTPServerProject->StopProcessing();
 
 			if (err == VE_OK)
@@ -2735,27 +2338,6 @@ VError VRIAServerProject::_StopHTTPServer()
 }
 
 
-VError VRIAServerProject::_SetWebAppServiceEnabled( bool inEnabled)
-{
-	VError err = VE_OK;
-
-	if (fHTTPServerProject != NULL)
-	{
-		if (inEnabled)
-			err = _LoadWebAppServiceSettings();
-
-		if (err == VE_OK)
-			fHTTPServerProject->EnableStaticPagesService (inEnabled);
-	}
-	else
-	{
-		err =  ThrowError (VE_RIA_HTTP_SERVER_PROJECT_NOT_FOUND);
-	}
-
-	return err;
-}
-
-
 VRPCCatalog* VRIAServerProject::_RetainRPCCatalog( VError& outError, const IHTTPRequest* inRequest, IHTTPResponse* inResponse)
 {
 	VRPCCatalog *catalog = NULL;
@@ -2764,97 +2346,9 @@ VRPCCatalog* VRIAServerProject::_RetainRPCCatalog( VError& outError, const IHTTP
 
 	if (testAssert(fDesignProject != NULL))
 	{
-		// sc 22/06/2011 always ensure that the symbols table is up to date for the methods files before building the catalog
-		VSyncEvent *syncEvent = fDesignProject->RetainRPCFilesParsingCompleteEvent();
-		if (syncEvent != NULL)
-		{
-			syncEvent->Lock();
-			ReleaseRefCountable( &syncEvent);
-		}
-
 		catalog = new VRPCCatalog();
 		if (catalog != NULL)
 		{
-			// Update the catalog with catalog files
-			VectorOfProjectItems itemsVector;
-			VectorOfVFile files;
-
-			fDesignProject->GetProjectItemsFromTag( kRPCCatalogTag, itemsVector);
-			for (VectorOfProjectItemsIterator iter = itemsVector.begin() ; iter != itemsVector.end() && outError == VE_OK ; ++iter)
-			{
-				if (*iter != NULL)
-				{
-					VFilePath path;
-					(*iter)->GetFilePath( path);
-					if (!path.IsEmpty() && path.IsFile())
-					{
-						VFile *file = new VFile( path);
-						if (file != NULL)
-						{
-							files.push_back( file);
-							file->Release();
-						}
-						else
-						{
-							outError = ThrowError( VE_MEMORY_FULL);
-						}
-					}
-				}
-			}
-
-			if (outError == VE_OK)
-				outError = catalog->SetCatalogFilesList( files);
-
-			if (outError == VE_OK)
-			{
-				// Update the catalog with methods files
-				CLanguageSyntaxComponent *languageSyntax = VRIAServerApplication::Get()->GetComponentLanguageSyntax();
-				if (languageSyntax != NULL)
-				{
-					// sc 03/03/2010 use the project symbol table
-					ISymbolTable *symbolTable = fDesignProject->GetSymbolTable();
-					if (symbolTable != NULL)
-					{
-						itemsVector.clear();
-						files.clear();
-
-						fDesignProject->GetProjectItemsFromTag( kRPCMethodTag, itemsVector);
-						for (VectorOfProjectItemsIterator iter = itemsVector.begin() ; iter != itemsVector.end() && outError == VE_OK ; ++iter)
-						{
-							if (*iter != NULL)
-							{
-								VFilePath path;
-								(*iter)->GetFilePath( path);
-								if (!path.IsEmpty() && path.IsFile())
-								{
-									VFile *file = new VFile(path);
-									if (file != NULL)
-									{
-										files.push_back( file);
-										file->Release();
-									}
-									else
-									{
-										outError = ThrowError( VE_MEMORY_FULL);
-									}
-								}
-							}
-						}
-
-						if (outError == VE_OK)
-							outError = catalog->SetMethodsFilesList( files, languageSyntax, symbolTable);
-					}
-					else
-					{
-						outError = ThrowError( VE_RIA_SYMBOLS_TABLE_NOT_FOUND);
-					}
-				}
-				else
-				{
-					outError = ThrowError( VE_RIA_LANGUAGE_SYNTAX_COMPONENT_NOT_FOUND);
-				}
-			}
-
 			if (fPermissions != NULL)
 			{
 				// chech whether we have some modules permissions
@@ -2894,14 +2388,6 @@ VRPCCatalog* VRIAServerProject::_RetainRPCCatalog( VError& outError, const IHTTP
 					}
 				}
 			}
-
-		#if VERSIONDEBUG
-			MapOfRPCSchema schemas;
-			catalog->RetainAllSchemas( schemas);
-			DebugMsg( "RPC catalog contains the following functions: \r\n");
-			//for (MapOfRPCSchema_iter iter = schemas.begin() ; iter != schemas.end() ; ++iter)
-			//	DebugMsg( L"- " + iter->first.GetMethodName() + L"\r\n");
-		#endif
 		}
 		else
 		{
@@ -2945,53 +2431,6 @@ bool VRIAServerProject::_SetContextCreationEnabled( bool inEnabled)
 bool VRIAServerProject::_IsContextCreationEnabled() const
 {
 	return fContextCreationEnabled;
-}
-
-
-VError VRIAServerProject::_LoadWebAppServiceSettings()
-{
-	VError err = VE_OK;
-
-	if (fHTTPServerProject != NULL)
-	{
-		IHTTPServerProjectSettings *httpSettings = fHTTPServerProject->GetSettings();
-		if (httpSettings != NULL)
-		{
-			// Set the web folder path
-			VProjectItem *webFolder = fDesignProject->GetProjectItemFromTag( kWebFolderTag);
-			if (webFolder != NULL)
-			{
-				VFilePath webFolderPath;
-				if (webFolder->GetFilePath( webFolderPath))
-				{
-					httpSettings->SetWebFolderPath( webFolderPath);
-				}
-			}
-
-			// Set index page name
-			VValueBag *webAppSettings = fSettings.RetainSettings( RIASettingID::webApp);
-			if (webAppSettings != NULL)
-			{
-				httpSettings->SetIndexPageName( RIASettingsKeys::WebApp::directoryIndex.Get( webAppSettings));
-				webAppSettings->Release();
-			}
-			else
-			{
-				err = ThrowError( VE_RIA_CANNOT_LOAD_WEB_APP_SETTINGS);
-			}
-
-		}
-		else
-		{
-			err = VE_UNKNOWN_ERROR;
-		}
-	}
-	else
-	{
-		err = ThrowError (VE_RIA_HTTP_SERVER_PROJECT_NOT_FOUND);
-	}
-
-	return err;
 }
 
 
@@ -3096,3 +2535,25 @@ VProgressIndicator* VRIAServerProjectJSRuntimeDelegate::CreateProgressIndicator(
 }
 
 
+
+// ----------------------------------------------------------------------------
+
+
+
+VReloadCatalogMessage::VReloadCatalogMessage( VRIAServerProject* inApplication)
+{
+	fApplication = RetainRefCountable( inApplication);
+}
+
+
+VReloadCatalogMessage::~VReloadCatalogMessage()
+{
+	QuickReleaseRefCountable( fApplication);
+}
+
+
+void VReloadCatalogMessage::DoExecute()
+{
+	if (fApplication != NULL)
+		fApplication->ReloadCatalog( NULL);
+}
