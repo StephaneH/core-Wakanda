@@ -41,7 +41,7 @@ var Client = function (args) {
     this.error = {};
     this.Protocol = null;
 
-    var necessaryParams = ['hostname','port','user','password','database','ssl'];
+    var necessaryParams = ['hostname', 'user', 'password', 'database', 'port', 'ssl'];
     //Here we can use an object for the needed parameters or an explicit ones.
     //If the argument is an object we shall verify that all the needed parameters exist
 

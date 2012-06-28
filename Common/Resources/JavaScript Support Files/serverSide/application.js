@@ -203,15 +203,6 @@ Application = function Application() {
     this.console =  new Console( ); 
     
     /**
-     * 
-     *
-     * @property internal
-     * @attributes 
-     * @type ServerCore
-     */
-    this.internal =  new ServerCore( ); 
-    
-    /**
      * returns an object containing information about the current operating system
      *
      * @property os
@@ -264,6 +255,16 @@ Application = function Application() {
      * @param {Object} proxy
      */
     this.XMLHttpRequest = function XMLHttpRequest(proxy) {             };
+    
+    /**
+     * constructor of the class objects of type Blob
+     *
+     * @method Blob
+     * @param {Number} size
+     * @param {Number} filler
+     * @param {String} mimeType
+     */
+    this.Blob = function Blob(size, filler, mimeType) {             };
     
     /**
      * returns an object of the ConnectionSession type identifying the current session under which the current user is actually running on the server
@@ -653,7 +654,7 @@ Application = function Application() {
     this.saveText = function saveText(textToSave, file, charset) {             };
     
     /**
-     * constructor of the dedicated class objects of type Worker
+     * constructor of the dedicated class objects of the Worker type
      *
      * @method Worker
      * @param {String} scriptPath
@@ -661,14 +662,13 @@ Application = function Application() {
     this.Worker = function Worker(scriptPath) {             };
     
     /**
-     * creates a new File object
+     * constructor of the File type objects
      *
      * @method File
-     * @param {String | Folder} path
-     * @param {String} fileName
+     * @param {String} absolutePath
      * @return {File}
      */
-    this.File = function File(path, fileName) {        return new File( );     };
+    this.File = function File(absolutePath) {        return new File( );     };
     
     /**
      * creates a new object of type Folder
@@ -701,6 +701,35 @@ Application = function Application() {
     this.TextStream = function TextStream(file, readMode, charset) {        return new TextStream( );     };
     
     /**
+     * allows the user to look up the filesystem for a file or directory referred to by a local url
+     *
+     * @method resolveLocalFileSystemSyncURL
+     * @param {String} url
+     * @return {EntrySync}
+     */
+    this.resolveLocalFileSystemSyncURL = function resolveLocalFileSystemSyncURL(url) {        return new EntrySync( );     };
+    
+    /**
+     * requests a FileSystemSync object in which application data can be stored
+     *
+     * @method requestFileSystemSync
+     * @param {Number} type
+     * @param {Number} size
+     * @return {FileSystemSync}
+     */
+    this.requestFileSystemSync = function requestFileSystemSync(type, size) {        return new FileSystemSync( );     };
+    
+    /**
+     * requests a FileSystemSync object in which application data can be stored
+     *
+     * @method FileSystemSync
+     * @param {Number} type
+     * @param {Number} size
+     * @return {FileSystemSync}
+     */
+    this.FileSystemSync = function FileSystemSync(type, size) {        return new FileSystemSync( );     };
+    
+    /**
      * references a JavaScript file from a parent JavaScript file
      *
      * @method include
@@ -708,6 +737,14 @@ Application = function Application() {
      * @param {String | Boolean} refresh
      */
     this.include = function include(file, refresh) {             };
+    
+    /**
+     * import and execute any JavaScript file(s) in the current JavaScript context
+     *
+     * @method importScripts
+     * @param {String} scriptPath
+     */
+    this.importScripts = function importScripts(scriptPath) {             };
     
     /**
      * repairs the datastore&#39;s data file defined by model and data, and generates the repairedData data file.

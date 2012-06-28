@@ -137,7 +137,196 @@ var testCase = {
         Y.Assert.areSame(exceptionMsg, "Syntax Error: Undefined parameter ssl", "incorrect exception message!");
     },
 
-    //testing that all client method exist
+    //testing to connect with invalid userName type
+    testConnectWithAnInvalidUserNameType: function() {
+        
+        var exceptionOccur = false;
+        var exceptionMsg = "";
+        try {
+            var dbconn = mysql.connect('192.168.4.16',16,'wakandaqa','');
+        }
+        catch (err) {
+            exceptionOccur = true;
+            exceptionMsg = err.message;
+        }
+        if (dbconn) dbconn.close();
+        Y.Assert.isTrue(exceptionOccur, "An exception shall occur here!");
+        Y.Assert.areSame(exceptionMsg, "invalid user type! expected a string.");
+    },
+
+	//testing to connect with invalid userName value
+	testConnectWithAnInvalidUserNameValue: function() {
+        
+        var exceptionOccur = false;
+        var exceptionMsg = "";
+        try {
+            var dbconn = mysql.connect('192.168.4.16','boot','wakandaqa','');
+        }
+        catch (err) {
+            exceptionOccur = true;
+            exceptionMsg = err.message;
+        }
+        if (dbconn) dbconn.close();
+        Y.Assert.isTrue(exceptionOccur, "An exception shall occur here!");
+        Y.Assert.areSame(exceptionMsg.substring(0, 29), "Access denied for user 'boot'");
+    },
+    
+    //testing to connect with invalid password type
+    testConnectWithAnInvalidPasswordType: function() {
+        
+        var exceptionOccur = false;
+        var exceptionMsg = "";
+        try {
+            var dbconn = mysql.connect('192.168.4.16','wakandaqa',12,'');
+        }
+        catch (err) {
+            exceptionOccur = true;
+            exceptionMsg = err.message;
+        }
+        if (dbconn) dbconn.close();
+        Y.Assert.isTrue(exceptionOccur, "An exception shall occur here!");
+        Y.Assert.areSame(exceptionMsg, "invalid password type! expected a string.");
+    },
+
+	//testing to connect with invalid password value
+	testConnectWithAnInvalidPasswordValue: function() {
+        
+        var exceptionOccur = false;
+        var exceptionMsg = "";
+        try {
+            var dbconn = mysql.connect('192.168.4.16','wakandaqa','boot','');
+        }
+        catch (err) {
+            exceptionOccur = true;
+            exceptionMsg = err.message;
+        }
+        if (dbconn) dbconn.close();
+        Y.Assert.isTrue(exceptionOccur, "An exception shall occur here!");
+        Y.Assert.areSame(exceptionMsg.substring(0, 34), "Access denied for user 'wakandaqa'");
+    },
+    
+ 	//testing to connect with invalid port type
+    testConnectWithAnInvalidPortType: function() {
+        
+        var exceptionOccur = false;
+        var exceptionMsg = "";
+        try {
+            var dbconn = mysql.connect('192.168.4.16','wakandaqa','wakandaqa','','33');
+        }
+        catch (err) {
+            exceptionOccur = true;
+            exceptionMsg = err.message;
+        }
+        if (dbconn) dbconn.close();
+        Y.Assert.isTrue(exceptionOccur, "An exception shall occur here!");
+        Y.Assert.areSame(exceptionMsg, "invalid port type! expected a number.");
+    },
+
+	//testing to connect with invalid port value
+	testConnectWithAnInvalidPortValue: function() {
+        
+        var exceptionOccur = false;
+        var exceptionMsg = "";
+        try {
+            var dbconn = mysql.connect('192.168.4.16','wakandaqa','wakandaqa','',33);
+        }
+        catch (err) {
+            exceptionOccur = true;
+            exceptionMsg = err.message;
+        }
+        if (dbconn) dbconn.close();
+        Y.Assert.isTrue(exceptionOccur, "An exception shall occur here!");
+        Y.Assert.areSame(exceptionMsg, "Error: Failed to create a connected socket");
+    },
+
+	//testing to connect using ssl 
+	testConnectWithSSL: function() {
+        
+        var exceptionOccur = false;
+        var exceptionMsg = "";
+        try {
+            var dbconn = mysql.connect('192.168.4.16','wakandaqa','wakandaqa','testdb_win',3306,true);
+        }
+        catch (err) {
+            exceptionOccur = true;
+            exceptionMsg = err.message;
+        }
+        if (dbconn) dbconn.close();
+        Y.Assert.isFalse(exceptionOccur, "No exception shall occur here!");
+        
+    },
+
+	//testing to connect using ssl user with true value in ssl argument
+	testConnectWithSSLUsingTrueSSLUserWithTrueArg: function() {
+        
+        var exceptionOccur = false;
+        var exceptionMsg = "";
+        try {
+            var dbconn = mysql.connect('192.168.4.16','testssl','pwd','testdb_win',3306,true);
+        }
+        catch (err) {
+            exceptionOccur = true;
+            exceptionMsg = err.message;
+        }
+        if (dbconn) dbconn.close();
+        Y.Assert.isFalse(exceptionOccur, "No exception shall occur here!");
+        
+    },
+
+	//testing to connect using ssl user with false value in ssl argument
+	testConnectWithSSLUsingTrueSSLUserWithFalseArg: function() {
+        
+        var exceptionOccur = false;
+        var exceptionMsg = "";
+        try {
+            var dbconn = mysql.connect('192.168.4.16','testssl','pwd','testdb_win',3306,false);
+        }
+        catch (err) {
+            exceptionOccur = true;
+            exceptionMsg = err.message;
+        }
+        if (dbconn) dbconn.close();
+        Y.Assert.isTrue(exceptionOccur, "An exception shall occur here!");
+        Y.Assert.areSame(exceptionMsg.substring(0, 32), "Access denied for user 'testssl'");
+    },
+   
+	//test if close function exist
+    testCloseExist: function() {
+        var closeExist = false;
+        var exceptionOccur = false;
+        var exceptionMsg = "";
+        try {
+            var dbconn = mysql.connect(params);
+            if (dbconn.close) closeExist = true;
+        }
+        catch (err) {
+            exceptionOccur = true;
+            exceptionMsg = err;
+        }
+        if (dbconn) dbconn.close();
+        Y.Assert.isFalse(exceptionOccur, "No exception shall occur here!" + exceptionMsg);
+        Y.Assert.isTrue(closeExist, "close function definition is missing!");
+    },
+
+    //test close connection (test execut query after close connection
+	testCloseLogic: function() {        
+        var exceptionOccur = false;
+        var exceptionMsg = "";
+        try {
+            var dbconn = mysql.connect('192.168.4.16','wakandaqa','wakandaqa','testdb_win',3306,false);
+             if (dbconn) 
+				dbconn.close();
+				var q = 'select * from test_select_table';
+				 dbconn.execute(q);
+        }
+        catch (err) {
+            exceptionOccur = true;
+            exceptionMsg = err.message;
+        }        
+        Y.Assert.isTrue(exceptionOccur, "An exception shall occur here!");
+        Y.Assert.areSame(exceptionMsg, "Invalid object state: Method net.SocketSync.write() cannot be called in current state.");
+    },
+        
     //test if useDatabase function exist
     testUseDatabaseExist: function() {
         var useDatabaseExist = false;
@@ -155,7 +344,7 @@ var testCase = {
         Y.Assert.isFalse(exceptionOccur, "No exception shall occur here!" + exceptionMsg);
         Y.Assert.isTrue(useDatabaseExist, "useDatabase function definition is missing!");
     },
-
+ 
     //test if execute function exist
     testExecuteExist: function() {
         var executeExist = false;
@@ -526,9 +715,8 @@ var testCase = {
         var exceptionMsg = "";
         try {
             var dbconn = mysql.connect(params);
-            var q = 'SELECT * FROM test_select_table';
-            dbconn.execute(q);
-            var result = dbconn.getNextResult();
+            var q = 'SELECT * FROM test_select_table';            
+            var result = dbconn.execute(q);
             if (result.getNextRows) getNextRowsExist = true;
         }
         catch (err) {
@@ -547,9 +735,8 @@ var testCase = {
         var exceptionMsg = "";
         try {
             var dbconn = mysql.connect(params);
-            var q = 'SELECT * FROM test_select_table';
-            dbconn.execute(q);
-            var result = dbconn.getNextResult();
+            var q = 'SELECT * FROM test_select_table';            
+            var result = dbconn.execute(q);
             if (result.skipRows) skipRowsExist = true;
         }
         catch (err) {
@@ -649,8 +836,8 @@ var testCase = {
         if (dbconn) dbconn.close();
         Y.Assert.isFalse(exceptionOccur, "No exception shall occur here!" + exceptionMsg);
         Y.Assert.areSame(res.length, 2, "expected 2 ids!");
-        Y.Assert.areSame(res[0], "1", "the first id is incorrect");
-        Y.Assert.areSame(res[1], "2", "the second id is incorrect!");
+        Y.Assert.areSame(res[0], 1, "the first id is incorrect");
+        Y.Assert.areSame(res[1], 2, "the second id is incorrect!");
     },
 
     testExecuteWithMultipleSelect: function() {
@@ -685,8 +872,8 @@ var testCase = {
         }
         if (dbconn) dbconn.close();
         Y.Assert.isFalse(exceptionOccur, "No exception shall occur here!" + exceptionMsg);
-        Y.Assert.areSame(res[0][0], "1", "the first id is incorrect");
-        Y.Assert.areSame(res[0][1], "2", "the second id is incorrect!");
+        Y.Assert.areSame(res[0][0], 1, "the first id is incorrect");
+        Y.Assert.areSame(res[0][1], 2, "the second id is incorrect!");
         Y.Assert.areSame(res[1][0], "3", "the first string is incorrect");
         Y.Assert.areSame(res[1][1], "4", "the second string is incorrect!");
     },
@@ -710,7 +897,7 @@ var testCase = {
             exceptionMsg = err;
         }
         Y.Assert.isFalse(exceptionOccur, "No exception shall occur here!" + exceptionMsg);
-        Y.Assert.areSame(n, "0", "incorrect number!");
+        Y.Assert.areSame(n, 0, "incorrect number!");
         Y.Assert.areSame(s, "0", "incorrect string!");
     },
 
@@ -733,7 +920,7 @@ var testCase = {
             exceptionMsg = err;
         }
         Y.Assert.isFalse(exceptionOccur, "No exception shall occur here!" + exceptionMsg);
-        Y.Assert.areSame(n, "1001", "incorrect number!");
+        Y.Assert.areSame(n, 1001, "incorrect number!");
         Y.Assert.areSame(s, "1002", "incorrect string!");
     },
 
@@ -757,7 +944,7 @@ var testCase = {
         Y.Assert.areSame(rows, 0, "incorrect rows number!");
     },
 
-    testSelect: function() {
+    testSelectEtoil: function() {
         var exceptionOccur = false;
         try {
             var dbconn = mysql.connect(params);
@@ -773,7 +960,7 @@ var testCase = {
         if (dbconn) dbconn.close();
         Y.Assert.areEqual(row.id, 1, "Incorrect id value");
         Y.Assert.areEqual(row.number, 2, "Incorrect number value");
-        Y.Assert.areEqual(row.string, 3, "Incorrect string value");
+        Y.Assert.areEqual(row.string, "3", "Incorrect string value");
     },
 
     //test insert
@@ -826,7 +1013,7 @@ var testCase = {
         if (dbconn) dbconn.close();
         Y.Assert.isFalse(exceptionOccur, "No exception shall occur here!");
         Y.Assert.areEqual(row.number, 0, "the number is different");
-        Y.Assert.areEqual(row.string, 0, "the string is different");
+        Y.Assert.areEqual(row.string, "0", "the string is different");
     },
 
     //test delete

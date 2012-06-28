@@ -1034,12 +1034,12 @@ void VJSHTMLForm::GetProperty (XBOX::VJSParms_getProperty& ioParms, IHTMLForm *i
 
 	if ((NULL != inHTMLForm) && ioParms.GetPropertyNameAsLong (&num))
 	{
-		std::vector<IHTMLFormPart *> formPartsList;
+		VHTMLFormPartVector formPartsList;
 
 		inHTMLForm->GetFormPartsList (formPartsList);
 		if ((formPartsList.size() > 0) && (num >= 0) && (num <= formPartsList.size()))
 		{
-			IHTMLFormPart *	formPart = const_cast<IHTMLFormPart *> (formPartsList.at (num));
+			IHTMLFormPart *	formPart = const_cast<IHTMLFormPart *> (formPartsList.at (num).Get() );
 			VJSObject		resultObject = VJSHTMLFormPart::CreateInstance (ioParms.GetContext(), formPart);
 			ioParms.ReturnValue (resultObject);
 		}
@@ -1086,7 +1086,7 @@ void VJSHTMLForm::_GetCount (XBOX::VJSParms_getProperty& ioParms, IHTMLForm *inH
 {
 	if (NULL != inHTMLForm)
 	{
-		std::vector<IHTMLFormPart *> formPartsList;
+		VHTMLFormPartVector formPartsList;
 
 		inHTMLForm->GetFormPartsList (formPartsList);
 		ioParms.ReturnNumber (formPartsList.size());

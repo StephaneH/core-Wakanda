@@ -84,7 +84,7 @@ public abstract class AbstractHttpTestCase {
 		return new HashMap<String, Long>();
 	}
 	
-	private static int DEFAULT_TIMEOUT = 10000;
+	private static int DEFAULT_TIMEOUT = 30000;
 	
 	@Rule
 	public TestRule timeout = new Timeout(DEFAULT_TIMEOUT){
@@ -137,8 +137,8 @@ public abstract class AbstractHttpTestCase {
 		return Resources.getDefaultTarget();
 	}
 
-	protected String getDefaultHostName() {
-		return Resources.getDefaultHostName();
+	protected String getDefaultTargetName() {
+		return Resources.getDefaultTargetName();
 	}
 
 	protected int getDefaultPort() {

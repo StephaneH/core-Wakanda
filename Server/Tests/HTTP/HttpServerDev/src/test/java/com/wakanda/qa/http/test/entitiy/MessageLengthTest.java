@@ -16,6 +16,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.wakanda.qa.http.Resources;
@@ -181,10 +182,12 @@ public class MessageLengthTest extends AbstractHttpTestCase {
 	 * the Content-Length is ignored.
 	 * <p>
 	 * <b>Reference:</b> SPEC690 (RFC2616) 4.4
-	 * 
+	 * The test is ignored for now because the feature is not yet implemented.
+	 * <p/>
 	 * @throws Exception
 	 */
 	@Test
+	@Ignore
 	public void testThatContentLengthIsIgnoredWhenRequestIncludesANonIdentityTransferCoding()
 			throws Exception {
 		String request = "POST /checkPostMethod/ HTTP/1.1" + CRLF
@@ -211,15 +214,18 @@ public class MessageLengthTest extends AbstractHttpTestCase {
 
 	/**
 	 * <b>Implements:</b> MessageLength06
-	 * <p>
+	 * <p/>
 	 * Check that when the message does include an identity transfer-coding, the
 	 * Content-Length is used.
-	 * <p>
+	 * <p/>
+	 * The test is ignored for now because the feature is not yet implemented.
+	 * <p/>
 	 * <b>Reference:</b> SPEC690 (RFC2616) 4.4
 	 * 
 	 * @throws Exception
 	 */
 	@Test
+	@Ignore
 	public void testThatContentLengthIsUsedWhenRequestIncludesAnIdentityTransferCoding()
 			throws Exception {
 		String request = "POST /checkPostMethod/ HTTP/1.1" + CRLF
@@ -238,9 +244,7 @@ public class MessageLengthTest extends AbstractHttpTestCase {
 
 		String expected = "12345";
 		String actual = EntityUtils.toString(entity);
-
-		// if the server uses content-length it would return "3;\n123\n2;\n"
-		//logger.debug(actual);
+		logger.debug(actual);
 		assertEquals("Wrong content", expected, actual);
 	}
 

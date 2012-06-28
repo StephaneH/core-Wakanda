@@ -1,7 +1,7 @@
 ﻿
 
 var testCase = {
-    name: "Datastore test (parte 2)",
+    name: "Datastore test(testsOfQueryMethod)",
     
         _should: {
         ignore: {
@@ -7079,15 +7079,30 @@ var testCase = {
 	testQuery_NToOneRelationAttributes: function() {
 		var message = "";
 		var coll = ds.OneToN.query("oneToN.name = 'oneToN 1*'");
-		var coll2 = ds.OneToN.query("oneToN.name = :1","oneToN 1*");
-		if(coll.length == 2 || coll2.length == 2 )
+		if(coll.length == 2)
 		{
-			if(coll[0].ID!=1 || coll[1].ID != 2 || coll2[0].ID != 1 || coll2[1].ID != 2 )
+			if(coll[0].ID!=1 || coll[1].ID != 2)
 				message += " (probleme in the entities of retured collection) ";
 		}
 		else
 		{
-			message += " (probleme in the length of returned collection) ";
+			message += " (probleme in the length of returned collection [ "+ coll.length +"] )";
+		}
+		if(message != "" )
+			Y.Assert.fail("query method with N to One relation attributes fail "+message);
+	},
+	//test query: N to One relation
+	testQuery_NToOneRelationAttributes_Placeholder: function() {
+		var message = "";
+		var coll = ds.OneToN.query("oneToN.name = :1","oneToN 1*");
+		if(coll.length == 2)
+		{
+			if(coll[0].ID!=1 || coll[1].ID != 2)
+				message += " (probleme in the entities of retured collection) ";
+		}
+		else
+		{
+			message += " (probleme in the length of returned collection [ "+ coll.length +"] )" ;
 		}
 		if(message != "" )
 			Y.Assert.fail("query method with N to One relation attributes fail "+message);
@@ -7136,4 +7151,38 @@ var testCase = {
 		if(message != "" )
 			Y.Assert.fail("query method with N to One relation attributes fail "+message);
 	},
+	//test Query: Javascript functions
+	testQuery_JavascriptFunctions: function() {
+		var message = "";
+		isGood = true;
+		try
+		{
+			var coll = ds.Employee.query("$(name.length == firstname.length)", { allowJavascript: true });
+		}
+		catch(e)
+		{
+			isGood = false;
+		}
+		if(isGood){
+			if(coll.length == 3)
+			{
+				for(var i = 0 ; i < 3 ; i++ )
+				{
+					if(coll[i].name != coll[i].firstname)
+					{
+						message += " (probleme in the entities of retured collection) ";
+						break;
+					}
+				}
+			}
+			else
+			{
+				message += " (probleme in the length of returned collection"+"["+coll.length+"]instead of 3) ";
+			}
+			if(message != "" )
+				Y.Assert.fail("query method associated with Javascript functions fail "+message);
+		}
+		else
+			Y.Assert.fail("query method associated with Javascript functions generated unexpected exception");
+	},	
 };

@@ -11,6 +11,8 @@ import static org.junit.Assume.assumeTrue;
 
 import java.io.File;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
@@ -276,8 +278,8 @@ public class HeaderTest extends AbstractHttpTestCase {
 		// request
 		HttpGet request = new HttpGet("/mediaType/" + filename);
 		String fieldName = "aCcEpT";
-		// Client does not accept text/html
-		request.addHeader(fieldName, "text/html; q=0");
+		// Client accepts only text/xml
+		request.addHeader(fieldName, "text/xml");
 
 		// response
 		HttpResponse response = executeRequest(request);
@@ -401,6 +403,13 @@ public class HeaderTest extends AbstractHttpTestCase {
 	 * 
 	 * @throws Exception
 	 */
+	
+	@Override
+	protected Map<String, Long> getUnitTestsTimeout() {
+		Map<String, Long> hash = new HashMap<String, Long>();
+		hash.put("testThatContentLengthHeaderFieldNameIsCaseInsensitive", new Long(30000));
+		return hash;
+	}
 	@Test
 	public void testThatContentLengthHeaderFieldNameIsCaseInsensitive()
 			throws Exception {
@@ -422,6 +431,7 @@ public class HeaderTest extends AbstractHttpTestCase {
 
 		String expectedContent = "12345";
 		String actualContent = EntityUtils.toString(entity);
+		logger.debug(actualContent);
 		assumeThat(actualContent, is(expectedContent));
 		
 		// check now the case-sensitivity
@@ -439,6 +449,7 @@ public class HeaderTest extends AbstractHttpTestCase {
 		entity = response.getEntity();
 		assertNotNull(entity);
 		actualContent = EntityUtils.toString(entity);
+		logger.debug(actualContent);
 		assertEquals("Wrong content", expectedContent, actualContent);
 	}
 	

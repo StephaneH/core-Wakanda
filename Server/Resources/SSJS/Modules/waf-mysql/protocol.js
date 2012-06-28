@@ -1,19 +1,18 @@
 /*
-* This file is part of Wakanda software, licensed by 4D under
-*  (i) the GNU General Public License version 3 (GNU GPL v3), or
-*  (ii) the Affero General Public License version 3 (AGPL v3) or
-*  (iii) a commercial license.
-* This file remains the exclusive property of 4D and/or its licensors
-* and is protected by national and international legislations.
-* In any event, Licensee's compliance with the terms and conditions
-* of the applicable license constitutes a prerequisite to any use of this file.
-* Except as otherwise expressly stated in the applicable license,
-* such license does not include any other license or rights on this file,
-* 4D's and/or its licensors' trademarks and/or other proprietary rights.
-* Consequently, no title, copyright or other proprietary rights
-* other than those specified in the applicable license is granted.
-*/
-
+ * This file is part of Wakanda software, licensed by 4D under
+ *  (i) the GNU General Public License version 3 (GNU GPL v3), or
+ *  (ii) the Affero General Public License version 3 (AGPL v3) or
+ *  (iii) a commercial license.
+ * This file remains the exclusive property of 4D and/or its licensors
+ * and is protected by national and international legislations.
+ * In any event, Licensee's compliance with the terms and conditions
+ * of the applicable license constitutes a prerequisite to any use of this file.
+ * Except as otherwise expressly stated in the applicable license,
+ * such license does not include any other license or rights on this file,
+ * 4D's and/or its licensors' trademarks and/or other proprietary rights.
+ * Consequently, no title, copyright or other proprietary rights
+ * other than those specified in the applicable license is granted.
+ */
 /*
     The aim of this class is to provide an interface to all database queries
     for MySQL.
@@ -24,7 +23,6 @@
 
     for further information please refer to the mysql protocol
 */
-
 //retreive all defined constants
 var constants = require('waf-mysql/constants');
 
@@ -34,9 +32,6 @@ var SHA1 = require('waf-mysql/sha1Module');
 //retreive the net module
 var net = require('net');
 
-//retreive TLS (Transport Layer Security) module
-var tls = require('tls');
-
 //retreive the utils module
 var utils = require('waf-mysql/utils');
 
@@ -45,7 +40,7 @@ var utils = require('waf-mysql/utils');
     It initializes the fields of the class with the default values.
 */
 function Protocol() {
-    this.index = 0;
+    this.packetNumber = 1;
     this.isConnected = false;
     //if the a database is used
     this.isInitDB = false;
@@ -87,54 +82,75 @@ function Protocol() {
             - ssl if the connection is encrypted or not
             - database the default database on the server
 */
+
 Protocol.prototype.connect = function(params) {
     this.params = params;
-    if(params.ssl){
-		try{
-			//creates a new secured client connection on the specified port and
-			//returns the corresponding SocketSync.
-			this.socket = tls.connectSync(params.port);
-		}
-		catch(err){
-			throw new Error("Can't create a connected socket with TLS module! " + err.message);
-		}
+    try {
+        //call for synchronous socket
+        this.socket = new net.SocketSync();
     }
-    else{
-		try{
-			//call for synchronous socket
-			this.socket = new net.SocketSync();
-		}
-		catch(err){
-			throw new Error("Can't create a connected socket with Net module! " + err.message);
-		}
+    catch (err) {
+        throw new Error("Can't create a connected socket with Net module! " + err.message);
     }
 
     //verify the type of given as arguments
-    if (typeof params.hostname === 'string' && typeof params.port === 'number') {
-        try {
-            this.socket.connect(params.port, params.hostname);
-        }
-        //If there is a connection problem due to incorrect server address or port
-        catch (err) {
-            this.error = {
-                message: err,
-                code: -1
-            };
-            this.isError = true;
-            throw new Error(this.error.message);
-        }
+
+    if (typeof params.hostname === 'string') {
+		if(typeof params.port === 'number'){
+			try {
+				this.socket.connect(params.port, params.hostname);
+			}
+			//If there is a connection problem due to incorrect server address or port
+			catch (err) {
+				this.error = {
+					message: err,
+					code: -1
+				};
+				this.isError = true;
+				throw new Error(this.error.message);
+			}
+		}
+		else{
+			var errMsg = "invalid port type! expected a number.";
+			throw new Error(errMsg);
+		}
     }
     else {
-        var errMsg = "hostname or port invalid, " + "hostname = " + params.hostname + ", port = " + params.port;
+        var errMsg = "invalid hostname type! expected a string.";
         throw new Error(errMsg);
     }
 
+	//A check for parameters types
+	if(typeof params.user !== 'string'){
+        var errMsg = "invalid user type! expected a string.";
+        throw new Error(errMsg);
+	}
+
+	if(typeof params.password !== 'string'){
+        var errMsg = "invalid password type! expected a string.";
+        throw new Error(errMsg);
+	}
+
+	if(typeof params.database !== 'string'){
+        var errMsg = "invalid database type! expected a string.";
+        throw new Error(errMsg);
+	}
+
+	if(typeof params.ssl !== 'boolean'){
+        var errMsg = "invalid ssl type! expected a boolean.";
+        throw new Error(errMsg);
+	}
 
     //read data from server
     this.data = this.socket.read();
 
     //Handshake Init packet
     this._getHandshakeInitPacket();
+
+    if (params.ssl) {
+        this._sendTLSAuthPacket();
+        this.socket.setSecure();
+    }
 
     //if the handshake packet is correctly received send client packet
     if (!this.isError) {
@@ -150,16 +166,15 @@ Protocol.prototype.connect = function(params) {
     //if there is an error process it an exit
     if (authResp === 0xff) {
         this._readAuthErrorPacket();
-        return;
     }
     else if (authResp === 0x00) {
         //if there is a default database
         if (params.database !== '') {
             //use it and if an error occured exit
-            if (this.useDatabase(params.database)){
+            if (this.useDatabase(params.database)) {
                 this.isConnected = true;
             }
-            else{
+            else {
                 return;
             }
         }
@@ -183,7 +198,7 @@ Protocol.prototype.setLang = function(charSet) {
             this.charsetNumber = refLang;
             return true;
         }
-        else{
+        else {
             return false;
         }
     }
@@ -194,11 +209,11 @@ Protocol.prototype.setLang = function(charSet) {
             this.charsetNumber = charSet;
             return true;
         }
-        else{
+        else {
             return false;
         }
     }
-    else{
+    else {
         return false;
     }
 }
@@ -248,7 +263,7 @@ Protocol.prototype._readOkPacket = function(packetLength, i) {
     //the main goal is to know if there is a message field or not because it's optionnal
     var readed = 5 + this.data.getOffsetRead();
 
-    if (packetLength > readed){
+    if (packetLength > readed) {
         //this.records[i]['message'] =  this.data.readString(packetLength-readed);
         this.records[i]['message'] = this.data.readLCBString();
     }
@@ -264,8 +279,7 @@ Protocol.prototype._getHandshakeInitPacket = function() {
     }
     else {
         //read datas from the server
-        var
-        packetLength, svIndex, scrambleIndex, index, scramble,
+        var packetLength, svIndex, scrambleIndex, index, scramble,
 
         index = 0;
         packetLength = this.data.readUInt24LE(index);
@@ -304,12 +318,31 @@ Protocol.prototype._getHandshakeInitPacket = function() {
 }
 
 /*
+    This function sends the client's ssl packet
+*/
+Protocol.prototype._sendTLSAuthPacket = function() {
+    var packLength, tlsPacket, index;
+    packLength = 4 + 4;
+    tlsPacket = new Buffer(packLength);
+    index = 0;
+    tlsPacket.writeUInt24LE(packLength - 4, index);
+    index += 3;
+    //Write the Sequence Number
+    tlsPacket.writeUInt8(this.packetNumber, index);
+    this.packetNumber += 1;
+    index += 1;
+    //Write the Client flag
+    var newFlags = this.flags | constants.flags.CLIENT_SSL;
+    tlsPacket.writeUInt32LE(newFlags, index);
+    index += 4;
+    this.socket.write(tlsPacket);
+}
+
+/*
     This function sends the client's auth packet
 */
 Protocol.prototype._sendClientAuthPacket = function() {
-    var
-    theToken, theTokenLength, packLength, authPacket, index;
-
+    var theToken, theTokenLength, packLength, authPacket, index;
     //the token to send when the database has a password [only for MySQL 4.1 and later].
     theToken = SHA1.getToken(this.params.password, this.serverOptions.scramble);
     theTokenLength = (theToken.length != 1) ? theToken.length : 0;
@@ -319,7 +352,8 @@ Protocol.prototype._sendClientAuthPacket = function() {
     authPacket.writeUInt24LE(packLength - 4, index);
     index += 3;
     //Write the Sequence Number
-    authPacket.writeUInt8(1, index);
+    authPacket.writeUInt8(this.packetNumber, index);
+    this.packetNumber += 1;
     index += 1;
     //Write the Client flag
     authPacket.writeUInt32LE(this.flags, index);
@@ -362,7 +396,7 @@ Protocol.prototype.useDatabase = function(database) {
         throw new Error(errMsg);
     }
 
-    if (!this.socket){
+    if (!this.socket) {
         return false;
     }
 
@@ -388,10 +422,10 @@ Protocol.prototype.useDatabase = function(database) {
         this._readAuthErrorPacket();
         return false;
     }
-    else if (authResp === 0x00){
+    else if (authResp === 0x00) {
         return true;
     }
-    else{
+    else {
         return false;
     }
 }
@@ -508,8 +542,8 @@ Protocol.prototype._readAuthErrorPacket = function() {
     this.data.readUInt8(offset);
     offset += 1;
     this.error.errno = this.data.readUInt16LE(offset);
-	offset += 2;
-	//Skip sqlstate marker and the sqlstate
+    offset += 2;
+    //Skip sqlstate marker and the sqlstate
     offset += 6;
     if (packetLength > 9) {
         //after an error packet there is always no more information to read from the server
@@ -660,7 +694,7 @@ Protocol.prototype.prepareForFetch = function(i, eof) {
         this._readOkPacket(headerLength, i);
 
         //if there is no more statement result to read
-        if (eof || (this.records[i]['serverStatus'] & constants.serverStatus.SERVER_MORE_RESULTS_EXISTS) == 0){
+        if (eof || (this.records[i]['serverStatus'] & constants.serverStatus.SERVER_MORE_RESULTS_EXISTS) == 0) {
             this.hasNext = false;
         }
         //console.log("OK? END");
@@ -765,7 +799,6 @@ Protocol.prototype.setNextFetch = function() {
         //C++ function
         this.data.prepareSelectFetch();
     }
-
 }
 
 Protocol.prototype.fetch = function(count) {
@@ -812,7 +845,7 @@ Protocol.prototype.isResultSetError = function() {
 
 Protocol.prototype.getAffectedRowCount = function() {
     var affectedRows = 0;
-    if (this.records[this.fResult]){
+    if (this.records[this.fResult]) {
         affectedRows = this.records[this.fResult].affectedRows;
     }
     return affectedRows;

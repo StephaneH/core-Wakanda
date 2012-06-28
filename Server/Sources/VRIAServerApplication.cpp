@@ -246,6 +246,7 @@ VRIAServerApplication::VRIAServerApplication()
 : fInitCalled(false)
 , fInitOK(false)
 , fSolution(NULL)
+, fIsOpeningOrClosingCurrentSolution(0)
 , fLocalizer(NULL)
 , fComponent_DB4D(NULL)
 , fComponent_LanguageSyntax(NULL)
@@ -1179,99 +1180,110 @@ VError VRIAServerApplication::_OpenSolutionAsCurrentSolution( VSolutionStartupPa
 
 	VError err = VE_OK;
 
-	// first, close previous opened solution
-	// sc 21/01/2010, to avoid dead locks, never lock the solution mutex during the solution stopping.
-	if (fSolution != NULL)
+	if (fIsOpeningOrClosingCurrentSolution == 0)	// sc 21/06/2012 reentrance safeguard
 	{
-		VSolution *designSolution = fSolution->GetDesignSolution();
-		if (designSolution != NULL)
-		{
-			designSolution->StopWatchingFileSystem();
-			designSolution->StopUpdatingSymbolTable();
-		}
+		++fIsOpeningOrClosingCurrentSolution;
 
-		err = fSolution->Stop();
-		xbox_assert(err == VE_OK);
-	}
-
-	if (fSolutionMutex.Lock())
-	{
+		// first, close previous opened solution
+		// sc 21/01/2010, to avoid dead locks, never lock the solution mutex during the solution stopping.
 		if (fSolution != NULL)
 		{
-			err = fSolution->Close();
-			_WithdrawServiceRecord(DEFAULT_SERVICE_NAME);
+			VSolution *designSolution = fSolution->GetDesignSolution();
+			if (designSolution != NULL)
+			{
+				designSolution->StopWatchingFileSystem();
+				designSolution->StopUpdatingSymbolTable();
+			}
+
+			err = fSolution->Stop();
 			xbox_assert(err == VE_OK);
-			ReleaseRefCountable( &fSolution);
 		}
 
-		VRIAServerSolution *solution = NULL;
-		
-		VRIAServerSolutionOpeningParameters openingParams( inStartupParameters);
-		sLONG adminHttpPort = -1;
-		
-		assert(openingParams.GetOpeningMode() == eSOM_FOR_RUNNING);
-		if (fStartupParameters->GetAdministratorHttpPort( adminHttpPort))
-			openingParams.SetCustomAdministratorHttpPort( adminHttpPort);
-		openingParams.UpdateStartupParameters( inStartupParameters);
-
-		solution = VRIAServerSolution::OpenSolution( err, inStartupParameters);
-
-		if (err == VE_OK)
+		if (fSolutionMutex.Lock())
 		{
-			if (solution != NULL)
+			if (fSolution != NULL)
 			{
-				// sc 10/02/2010 keep informations about recent opened solutions: save the startup parameters in the solution link file
-				if ((inStartupParameters != NULL) && inStartupParameters->GetStoreInLinkFile())
-				{
-					VString name;
-					solution->GetName( name);
-					SaveSolutionStartupParametersToLinkFile( name, *inStartupParameters);
-				}
+				err = fSolution->Close();
+				_WithdrawServiceRecord(DEFAULT_SERVICE_NAME);
+				xbox_assert(err == VE_OK);
+				ReleaseRefCountable( &fSolution);
+			}
 
-				VSolution *designSolution = solution->GetDesignSolution();
-				if (designSolution != NULL)
+			VRIAServerSolution *solution = NULL;
+			
+			VRIAServerSolutionOpeningParameters openingParams( inStartupParameters);
+			sLONG adminHttpPort = -1;
+			
+			assert(openingParams.GetOpeningMode() == eSOM_FOR_RUNNING);
+			if (fStartupParameters->GetAdministratorHttpPort( adminHttpPort))
+				openingParams.SetCustomAdministratorHttpPort( adminHttpPort);
+			openingParams.UpdateStartupParameters( inStartupParameters);
+
+			solution = VRIAServerSolution::OpenSolution( err, inStartupParameters);
+
+			if (err == VE_OK)
+			{
+				if (solution != NULL)
 				{
-					designSolution->StartWatchingFileSystem();
-					if ((inStartupParameters != NULL) ? inStartupParameters->GetOpenProjectSymbolsTable() : true)
-						designSolution->StartUpdatingSymbolTable();
-				}
-				
-				err = solution->Start();
-				if (err != VE_OK)
-				{
-					// sc 19/01/2011 if the solution started with errors, the solution must be stopped
-					designSolution->StopWatchingFileSystem();
-					designSolution->StopUpdatingSymbolTable();
-					solution->Stop();
+					// sc 10/02/2010 keep informations about recent opened solutions: save the startup parameters in the solution link file
+					if ((inStartupParameters != NULL) && inStartupParameters->GetStoreInLinkFile())
+					{
+						VString name;
+						solution->GetName( name);
+						SaveSolutionStartupParametersToLinkFile( name, *inStartupParameters);
+					}
+
+					VSolution *designSolution = solution->GetDesignSolution();
+					if (designSolution != NULL)
+					{
+						designSolution->StartWatchingFileSystem();
+						if ((inStartupParameters != NULL) ? inStartupParameters->GetOpenProjectSymbolsTable() : true)
+							designSolution->StartUpdatingSymbolTable();
+					}
+					
+					err = solution->Start();
+					if (err != VE_OK)
+					{
+						// sc 19/01/2011 if the solution started with errors, the solution must be stopped
+						designSolution->StopWatchingFileSystem();
+						designSolution->StopUpdatingSymbolTable();
+						solution->Stop();
+					}
 				}
 			}
-		}
 
-		if (err == VE_OK)
-		{
-			fSolution = solution;
-		}
-		else
-		{
-			if (solution != NULL)
+			if (err == VE_OK)
 			{
-				solution->Close();
-				ReleaseRefCountable( &solution);
+				fSolution = solution;
 			}
+			else
+			{
+				if (solution != NULL)
+				{
+					solution->Close();
+					ReleaseRefCountable( &solution);
+				}
+			}
+
+			if ((fSolution == NULL) && openingParams.GetOpenDefaultSolutionWhenOpeningFails())
+			{
+				VSolutionStartupParameters *startupParams  = RetainDefaultSolutionStartupParameters();
+				OpenSolutionAsCurrentSolution( startupParams);
+				QuickReleaseRefCountable( startupParams);
+			}
+
+			
+			if (fSolution != NULL)
+				_PublishServiceRecord(DEFAULT_SERVICE_NAME);
+
+			fSolutionMutex.Unlock();
 		}
 
-		if ((fSolution == NULL) && openingParams.GetOpenDefaultSolutionWhenOpeningFails())
-		{
-			VSolutionStartupParameters *startupParams  = RetainDefaultSolutionStartupParameters();
-			OpenSolutionAsCurrentSolution( startupParams);
-			QuickReleaseRefCountable( startupParams);
-		}
-
-		
-		if (fSolution != NULL)
-			_PublishServiceRecord(DEFAULT_SERVICE_NAME);
-
-		fSolutionMutex.Unlock();
+		--fIsOpeningOrClosingCurrentSolution;
+	}
+	else
+	{
+		err = vThrowError( VE_RIA_CURRENT_SOLUTION_ALREADY_BEING_OPENED);
 	}
 
 	return err;
@@ -1283,13 +1295,16 @@ VError VRIAServerApplication::_CloseCurrentSolution()
 	
 	VError err = VE_OK;
 
-	if (fSolutionMutex.Lock())
+	if (fIsOpeningOrClosingCurrentSolution == 0)	// sc 21/06/2012 reentrance safeguard
 	{
+		++fIsOpeningOrClosingCurrentSolution;
+
+		// sc 21/06/2012, to avoid dead locks, never lock the solution mutex during the solution stopping.
 		if (fSolution != NULL)
 		{
 			VSolution *designSolution = fSolution->GetDesignSolution();
 			if (designSolution != NULL)
-			{													   
+			{
 				designSolution->StopWatchingFileSystem();
 				designSolution->StopUpdatingSymbolTable();
 			}
@@ -1298,16 +1313,29 @@ VError VRIAServerApplication::_CloseCurrentSolution()
 
 			err = fSolution->Stop();
 
-			if (err == VE_OK)
-				err = fSolution->Close();
-			_WithdrawServiceRecord(DEFAULT_SERVICE_NAME);
-
-			ReleaseRefCountable( &fSolution);
+			xbox_assert(err == VE_OK);
 		}
 
-		
-		fSolutionMutex.Unlock();
+		if (fSolutionMutex.Lock())
+		{
+			if (fSolution != NULL)
+			{
+				err = fSolution->Close();
+				_WithdrawServiceRecord(DEFAULT_SERVICE_NAME);
+				xbox_assert(err == VE_OK);
+				ReleaseRefCountable( &fSolution);
+			}
+
+			fSolutionMutex.Unlock();
+		}
+
+		--fIsOpeningOrClosingCurrentSolution;
 	}
+	else
+	{
+		err = vThrowError( VE_RIA_CURRENT_SOLUTION_ALREADY_BEING_CLOSED);
+	}
+
 	return err;
 }
 

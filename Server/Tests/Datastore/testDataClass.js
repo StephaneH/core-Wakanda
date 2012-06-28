@@ -935,7 +935,6 @@ var testCase = {
     testCallInexistantDataClass: function() {
         Y.Assert.isUndefined(ds.MyInexistantClass1, "Inexistance failed.");
     },
-
     //Existence
     testLength_ExistenceOnDataClass: function() {
         Y.Assert.isNumber(ds.MyClass1.length, "Existence failed.");
@@ -1011,8 +1010,6 @@ var testCase = {
         Y.Assert.isNumber(myCollection.average('cnum'), "Existence (collection) failed.");
     },
     //Syntax
-    //Must fails
-
     //empty param
     testAverage_DataClassAttributeAsEmptyString: function() {
     	var isGood = true;
@@ -1028,44 +1025,44 @@ var testCase = {
          	Y.Assert.fail("Syntax: ds.MyClass1.average('') should return error.");
     },
     //without first param
-//without first param
+	//without first param
     testAverage_WithoutFirstParam: function() {
-	var s = "";
-	var isGood = true, isGood1 = true;
-	try
-	{
-		ds.MyClass1.average(false);
-		isGood = false;
-	}
-	catch(e){}
-	if(!isGood){
-		s+="ds.MyClass1.average(false), "; //ds.MyClass1.average(false) should not pass.
-		isGood1 = false;
-	}	
-	isGood = true;
-	try
-	{
-		ds.MyClass1.average(true);
-		isGood = false;
-	}
-	catch(e){}
-	if(!isGood){
-		s+="ds.MyClass1.average(true), "; //ds.MyClass1.average(true) should not pass.
-		isGood1 = false;
-	}
-	isGood = true;
-	try
-	{
-		ds.MyClass1.average("distinct");
-		isGood = false;
-	}
-	catch(e){}
-	if(!isGood){
-		s+="ds.MyClass1.average(\"distinct\") "; //ds.MyClass1.average(""distinct"") should not pass.
-		isGood1 = false;
-	}
-	if(!isGood1)
-		Y.Assert.fail(""+s+" should not pass.");
+		var s = "";
+		var isGood = true, isGood1 = true;
+		try
+		{
+			ds.MyClass1.average(false);
+			isGood = false;
+		}
+		catch(e){}
+		if(!isGood){
+			s+="ds.MyClass1.average(false), "; //ds.MyClass1.average(false) should not pass.
+			isGood1 = false;
+		}	
+		isGood = true;
+		try
+		{
+			ds.MyClass1.average(true);
+			isGood = false;
+		}
+		catch(e){}
+		if(!isGood){
+			s+="ds.MyClass1.average(true), "; //ds.MyClass1.average(true) should not pass.
+			isGood1 = false;
+		}
+		isGood = true;
+		try
+		{
+			ds.MyClass1.average("distinct");
+			isGood = false;
+		}
+		catch(e){}
+		if(!isGood){
+			s+="ds.MyClass1.average(\"distinct\") "; //ds.MyClass1.average(""distinct"") should not pass.
+			isGood1 = false;
+		}
+		if(!isGood1)
+			Y.Assert.fail(""+s+" should not pass.");
     },
     //bad field type
     //string
@@ -2770,7 +2767,7 @@ var testCase = {
 		{
 		}
 		if(!isGood)
-			Y.Assert("OrderBy should not accept a string considered as a blob");
+			Y.Assert.fail("OrderBy should not accept a string considered as a blob");
     },
     testOrderBy_TypeStringAsBlobDesc: function() {
 		var isGood = true;
@@ -2782,7 +2779,7 @@ var testCase = {
 		{
 		}
 		if(!isGood)
-			Y.Assert("OrderBy should not accept a string considered as a blob");
+			Y.Assert.fail("OrderBy should not accept a string considered as a blob");
     },
     testOrderBy_TypeDurationAsc: function() {
         var entityColAsc = ds.MyOrderbyClass.orderBy('cduration asc');

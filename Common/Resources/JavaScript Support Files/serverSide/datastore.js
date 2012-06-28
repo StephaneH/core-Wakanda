@@ -1,21 +1,6 @@
-/*
-* This file is part of Wakanda software, licensed by 4D under
-*  (i) the GNU General Public License version 3 (GNU GPL v3), or
-*  (ii) the Affero General Public License version 3 (AGPL v3) or
-*  (iii) a commercial license.
-* This file remains the exclusive property of 4D and/or its licensors
-* and is protected by national and international legislations.
-* In any event, Licensee's compliance with the terms and conditions
-* of the applicable license constitutes a prerequisite to any use of this file.
-* Except as otherwise expressly stated in the applicable license,
-* such license does not include any other license or rights on this file,
-* 4D's and/or its licensors' trademarks and/or other proprietary rights.
-* Consequently, no title, copyright or other proprietary rights
-* other than those specified in the applicable license is granted.
-*/
 /**
  *
- * Updated September 27, 2011 - The Datastore API provides server-side JavaScript classes and methods to manage models, datastore classes, attributes, entity collections, and entities on Wakanda Server.
+ * How to create and use the server-side datastore class events.
  *
  * @class Datastore
  * @extends Object
@@ -96,6 +81,15 @@ EntityAttribute = function EntityAttribute() {
      */
     this.name =  ''; 
     
+    /**
+     * returns the current scope property value of the attribute
+     *
+     * @property scope
+     * @attributes 
+     * @type String
+     */
+    this.scope =  ''; 
+    
     
     /**
      * returns the name of the EntityAttribute object as a string
@@ -118,7 +112,7 @@ EntityAttribute = function EntityAttribute() {
 
 
 Datastore = function Datastore() {
-    var    className;
+    var className;
     
     /**
      * 
@@ -131,7 +125,7 @@ Datastore = function Datastore() {
     
     
     /**
-     * returns a Folder type reference to the datastore "temporary files" folder
+     * returns a Folder type reference to the datastore &quot;temporary files&quot; folder
      *
      * @method getTempFolder
      * @return {Folder}
@@ -216,42 +210,16 @@ Datastore = function Datastore() {
     this.commit = function commit() {             };
     
     /**
-     * compacts the datastore's data file designated by model and data, and generates the compactedData data file.
+     * carries out a structural check of the objects contained in the Datastore to which it is applied
      *
-     * @method compactDataStore
-     * @param {File} model
-     * @param {File} data
-     * @param {Object} options
-     * @param {File} compactedData
-     */
-    this.compactDataStore = function compactDataStore(model, data, options, compactedData) {             };
-    
-    /**
-     * repairs the datastore's data file defined by model and data, and generates the repairedData data file.
-     *
-     * @method repairDataStore
-     * @param {File} model
-     * @param {File} data
-     * @param {Object} options
-     * @param {File} repairedData
-     */
-    this.repairDataStore = function repairDataStore(model, data, options, repairedData) {             };
-    
-    /**
-     * verifies the structure of the objects contained in a data file designated by model and data.
-     *
-     * @method verifyDataStore
-     * @param {File} model
-     * @param {File} data
+     * @method verify
      * @param {Object} options
      */
-    this.verifyDataStore = function verifyDataStore(model, data, options) {             };
+    this.verify = function verify(options) {             };
     
 
 };
-
-
-//ds = new Datastore();
+ds = new Datastore();
 
 Entity = function Entity() {
     
@@ -328,10 +296,10 @@ Entity = function Entity() {
     /**
      * returns True or False depending on whether the entity iterator points to an entity that is currently loaded in memory
      *
-     * @method loaded
+     * @method isLoaded
      * @return {Boolean}
      */
-    this.loaded = function loaded() {        return true;     };
+    this.isLoaded = function isLoaded() {        return true;     };
     
     /**
      * checks the validity of the pointer to the current entity within an iteration of entities
@@ -345,9 +313,33 @@ Entity = function Entity() {
      * puts the entity pointer on the next entity within an iteration of entities
      *
      * @method next
+     * @return {Entity | Null}
+     */
+    this.next = function next() {        return new Entity( ) || new Null( );     };
+    
+    /**
+     * passes the entity through the validation process
+     *
+     * @method validate
      * @return {Boolean}
      */
-    this.next = function next() {        return true;     };
+    this.validate = function validate() {        return true;     };
+    
+    /**
+     * returns the current value of the internal stamp of the entity to which it is applied
+     *
+     * @method getStamp
+     * @return {Number}
+     */
+    this.getStamp = function getStamp() {        return 0;     };
+    
+    /**
+     * 
+     *
+     * @method 
+     * @return {Number | String}
+     */
+    this. = function () {        return 0 || '';     };
     
 
 };
@@ -496,7 +488,7 @@ EntityCollection = function EntityCollection() {
     this.forEach = function forEach(callbackFn) {             };
     
     /**
-     * returns the datastore class (object of the&nbsp;DatastoreClass type) of the entity collection
+     * returns the datastore class (object of the&amp;nbsp;DatastoreClass type) of the entity collection
      *
      * @method getDataClass
      * @return {DatastoreClass}
@@ -508,11 +500,12 @@ EntityCollection = function EntityCollection() {
      *
      * @method add
      * @param {EntityCollection | Entity} toAdd
+     * @param {String | Boolean} atTheEnd
      */
-    this.add = function add(toAdd) {             };
+    this.add = function add(toAdd, atTheEnd) {             };
     
     /**
-     * sorts the entities in the entity collection or datastore class and returns a new entity collection containing sorted data
+     * sorts the entities in the entity collection or datastore class and returns a new sorted entity collection
      *
      * @method orderBy
      * @param {String | DatastoreClassAttribute} attributeList
@@ -587,9 +580,10 @@ dataClass = function dataClass() {
      * creates a new blank object of type EntityCollection attached to the datastore class to which it is applied
      *
      * @method createEntityCollection
+     * @param {String | Boolean} keepSorted
      * @return {EntityCollection}
      */
-    this.createEntityCollection = function createEntityCollection() {        return new EntityCollection( );     };
+    this.createEntityCollection = function createEntityCollection(keepSorted) {        return new EntityCollection( );     };
     
     /**
      * permanently removes entities from the datastore
@@ -662,7 +656,7 @@ dataClass = function dataClass() {
     this.forEach = function forEach(callbackFn) {             };
     
     /**
-     * sorts the entities in the entity collection or datastore class and returns a new entity collection containing sorted data
+     * sorts the entities in the entity collection or datastore class and returns a new sorted entity collection
      *
      * @method orderBy
      * @param {String | DatastoreClassAttribute} attributeList
@@ -769,6 +763,22 @@ dataClass = function dataClass() {
      * @return {String}
      */
     this.getName = function getName() {        return '';     };
+    
+    /**
+     * returns the current scope property value of the datastore class
+     *
+     * @method getScope
+     * @return {String}
+     */
+    this.getScope = function getScope() {        return '';     };
+    
+    /**
+     * returns the percentage of logical fragmentation for the entities of the datastore class
+     *
+     * @method getFragmentation
+     * @return {Number}
+     */
+    this.getFragmentation = function getFragmentation() {        return 0;     };
     
 
 };

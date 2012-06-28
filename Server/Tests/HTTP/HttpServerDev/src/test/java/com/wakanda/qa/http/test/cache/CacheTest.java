@@ -24,7 +24,6 @@ import org.apache.http.client.methods.HttpTrace;
 import org.apache.http.impl.cookie.DateUtils;
 import org.apache.http.util.EntityUtils;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -42,8 +41,10 @@ public class CacheTest extends AbstractHttpTestCase {
 
 	private String generetedURL = null;
 
-	@Before
+	@Override
 	public void before() throws Exception {
+		super.before();
+		
 		// generate a resource and store it in the application web folder
 		String generated = "/toCheckCache" + RandomStringUtils.randomNumeric(3)
 				+ ".tmp";
@@ -427,8 +428,7 @@ public class CacheTest extends AbstractHttpTestCase {
 	 * @throws ParseException
 	 * @throws IOException
 	 */
-	private CacheEntry getServerCacheEntry(String url) throws ParseException,
-			IOException {
+	private CacheEntry getServerCacheEntry(String url) throws Exception {
 		CacheInfo cacheInfo = getServerCacheInfo();
 		for (CacheEntry entry : cacheInfo.getCachedObjects()) {
 			if (entry.getUrl().equals(url)) {
@@ -445,12 +445,13 @@ public class CacheTest extends AbstractHttpTestCase {
 	 * @throws ParseException
 	 * @throws IOException
 	 */
-	private CacheInfo getServerCacheInfo() throws ParseException, IOException {
+	private CacheInfo getServerCacheInfo() throws Exception {
 		HttpGet request = new HttpGet("/cache");
-		HttpResponse response = executeRequest(request);
-		String json = EntityUtils.toString(response.getEntity());
-		// logger.debug(json);
-		CacheInfo cacheInfo = new Gson().fromJson(json, CacheInfo.class);
+		HttpResponse response = Resources.executeAuthenticatedRequest(request);
+		logger.debug(response.getStatusLine());
+		String content = EntityUtils.toString(response.getEntity());
+		logger.debug(content);
+		CacheInfo cacheInfo = new Gson().fromJson(content, CacheInfo.class);
 		return cacheInfo;
 	}
 

@@ -27,6 +27,7 @@ import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.wakanda.qa.http.test.extend.AbstractHttpTestCase;
@@ -508,11 +509,14 @@ public class PersistenceTest extends AbstractHttpTestCase {
 	 * Check that the server sends its responses to pipe-lined requests in the
 	 * same order that the requests were received.
 	 * <p/>
+	 * The test is ignored for now because the feature is not yet implemented.
+	 * <p/>
 	 * <b>Reference:</b> SPEC693 (RFC2616 8.1.2.2)
 	 * 
 	 * @throws Exception
 	 */
 	@Test
+	@Ignore
 	public void testThatServerRespondsToPipelinedRequestsInTheSameOrderThatTheRequestsWereReceived()
 			throws Exception {
 		HttpHost target = getDefaultTarget();

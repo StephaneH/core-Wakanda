@@ -8,9 +8,7 @@ import static org.junit.Assert.fail;
 import java.io.File;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.http.Header;
 import org.apache.http.HttpHost;
@@ -49,16 +47,6 @@ public class HandShakeTest extends AbstractHttpTestCase {
 	}
 
 	@Override
-	protected Map<String, Long> getUnitTestsTimeout() {
-		Map<String, Long> timeout = new HashMap<String, Long>();
-		timeout.put(
-				"testThatServerRespondsWith100ContinueUponReceivingExpect100ContinueWhenTheRequestIsAcceptedAndContinueToReadFromInputStream",
-				new Long(30000));
-		timeout.put("testThatServerDoesNotPerformRequestedMethodIfItReturnsFinalStatusCode", new Long(30000));
-		return timeout;
-	}
-
-	@Override
 	protected List<String> getUnitTestsToExcludeFromBefore() {
 		List<String> toExclude = new ArrayList<String>();
 		toExclude
@@ -73,11 +61,14 @@ public class HandShakeTest extends AbstractHttpTestCase {
 	 * request with "100-continue" expectation and continue to read from the
 	 * input stream when the request is accepted.
 	 * <p/>
+	 * The test is ignored for now because the feature is expected in WAK3.
+	 * <p/>
 	 * <B>Reference:</b> SPEC693 (RFC1616 8.2.3)
 	 * 
 	 * @throws Exception
 	 */
 	@Test
+	@Ignore
 	public void testThatServerRespondsWith100ContinueUponReceivingExpect100ContinueAndContinueToReadFromInputStreamWhenTheRequestIsAccepted()
 			throws Exception {
 		DefaultHttpClientConnection conn = new DefaultHttpClientConnection();
@@ -140,11 +131,14 @@ public class HandShakeTest extends AbstractHttpTestCase {
 	 * the client is unauthorized to execute the request or 400 Bad Request when
 	 * the Host header field is missing.
 	 * <p/>
+	 * The test is ignored for now because the feature is expected in WAK3.
+	 * <p/>
 	 * <B>Reference:</b> SPEC693 (RFC1616 8.2.3)
 	 * 
 	 * @throws Exception
 	 */
 	@Test
+	@Ignore
 	public void testThatServerRespondsWithFinalStatusCodeUponReceivingExpect100ContinueWhenRequestIsRejected()
 			throws Exception {
 		DefaultHttpClientConnection conn = new DefaultHttpClientConnection();
@@ -197,11 +191,14 @@ public class HandShakeTest extends AbstractHttpTestCase {
 	 * Check that the server closes the connection or continue to read and
 	 * discard the rest of the request if it responds with a final status code.
 	 * <p/>
+	 * The test is ignored for now because the feature is expected in WAK3.
+	 * <p/>
 	 * <B>Reference:</b> SPEC693 (RFC1616 8.2.3)
 	 * 
 	 * @throws Exception
 	 */
 	@Test
+	@Ignore
 	public void testThatServerDiscardRestOfRequestIfItRespondsWithFinalStatusCode()
 			throws Exception {
 		DefaultHttpClientConnection conn = new DefaultHttpClientConnection();
@@ -270,11 +267,14 @@ public class HandShakeTest extends AbstractHttpTestCase {
 	 * Check that the server does not perform the requested method if it returns
 	 * a final status code.
 	 * <p/>
+	 * The test is ignored for now because the feature is expected in WAK3.
+	 * <p/>
 	 * <B>Reference:</b> SPEC693 (RFC1616 8.2.3)
 	 * 
 	 * @throws Exception
 	 */
 	@Test
+	@Ignore
 	public void testThatServerDoesNotPerformRequestedMethodIfItReturnsFinalStatusCode() throws Exception{
 		
 		// temp file that the request is supposed to create
@@ -317,11 +317,14 @@ public class HandShakeTest extends AbstractHttpTestCase {
 	 * request message does not include an Expect request-header field with the
 	 * "100-continue" expectation.
 	 * <p/>
+	 * The test is ignored for now because the feature is expected in WAK3.
+	 * <p/>
 	 * <B>Reference:</b> SPEC693 (RFC1616 8.2.3)
 	 * 
 	 * @throws Exception
 	 */
 	@Test
+	@Ignore
 	public void testThatServerDoesNotSend100ContinueIfRequestDoesNotInclude100ContinueExpectation()
 			throws Exception {
 		DefaultHttpClientConnection conn = new DefaultHttpClientConnection();
@@ -390,11 +393,14 @@ public class HandShakeTest extends AbstractHttpTestCase {
 	 * Check that the server does not send a 100 (Continue) response if the
 	 * request comes from an HTTP/1.0 (or earlier) client.
 	 * <p/>
+	 * The test is ignored for now because the feature is expected in WAK3.
+	 * <p/>
 	 * <B>Reference:</b> SPEC693 (RFC1616 8.2.3)
 	 * 
 	 * @throws Exception
 	 */
 	@Test
+	@Ignore
 	public void testThatServerDoesNotSend100ContinueWhen_HTTP_1_0()
 			throws Exception {
 		DefaultHttpClientConnection conn = new DefaultHttpClientConnection();
@@ -463,10 +469,12 @@ public class HandShakeTest extends AbstractHttpTestCase {
 	 * received some or all the request body.
 	 * <p/>
 	 * <B>Reference:</b> SPEC693 (RFC1616 8.2.3)
-	 * 
+	 * The test is ignored for now because the feature is expected in WAK3.
+	 * <p/>
 	 * @throws Exception
 	 */
 	@Test
+	@Ignore
 	public void testThatServerMayOmit100ContinueIfItHasAlreadyReceivedRequestBody()
 			throws Exception {
 		DefaultHttpClientConnection conn = new DefaultHttpClientConnection();
@@ -528,11 +536,14 @@ public class HandShakeTest extends AbstractHttpTestCase {
 	 * Check that the server responds with a final status code after it sent a
 	 * 100 (Continue) response once the request body is received and processed.
 	 * <p/>
+	 * The test is ignored for now because the feature is expected in WAK3.
+	 * <p/>
 	 * <B>Reference:</b> SPEC693 (RFC1616 8.2.3)
 	 * 
 	 * @throws Exception
 	 */
 	@Test
+	@Ignore
 	public void testThatServerRespondsWithFinalStatusCodeAfterItSent100ContinueOnceRequestBodyReceivedAndProcessed()
 			throws Exception {
 		DefaultHttpClientConnection conn = new DefaultHttpClientConnection();
@@ -592,11 +603,14 @@ public class HandShakeTest extends AbstractHttpTestCase {
 	 * Check that the server responds with a 417 (Expectation Failed) status if
 	 * the expectation cannot be met.
 	 * <p/>
+	 * The test is ignored for now because the feature is expected in WAK3.
+	 * <p/>
 	 * <B>Reference:</b> SPEC693 (RFC1616 8.2.3)
 	 * 
 	 * @throws Exception
 	 */
 	@Test
+	@Ignore
 	public void testThatServerRespondsWith417ExpectationFailedIfExpectationCannotBeMet()
 			throws Exception {
 		
@@ -638,11 +652,14 @@ public class HandShakeTest extends AbstractHttpTestCase {
 	 * <p/>
 	 * Check that the server is case-insensitive toward 100-continue token.
 	 * <p/>
+	 * The test is ignored for now because the feature is expected in WAK3.
+	 * <p/>
 	 * <B>Reference:</b> SPEC698 (RFC2616 14.20)
 	 * 
 	 * @throws Exception
 	 */
 	@Test
+	@Ignore
 	public void testThatServerIsCaseInsensToward100ContinueToken()
 			throws Exception {
 		DefaultHttpClientConnection conn = new DefaultHttpClientConnection();

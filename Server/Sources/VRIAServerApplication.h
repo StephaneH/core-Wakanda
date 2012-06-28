@@ -238,6 +238,7 @@ private:
 	
 			VRIAServerSolution*				fSolution;
 	mutable	XBOX::VCriticalSection			fSolutionMutex;
+			sLONG							fIsOpeningOrClosingCurrentSolution;
 
 			XBOX::VLocalizationManager*		fLocalizer;
 

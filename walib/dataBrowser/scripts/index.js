@@ -609,6 +609,10 @@ DataBrowser.prototype = {
 				DataBrowser.openAutoForm(parameters);
 			};
 			
+			if(option.query !== "") {
+				$("#"+containerId+"_query_form").submit();
+			}
+			
 		} else {
 			
 			if(modeTabView) {
@@ -1055,13 +1059,14 @@ DataBrowser.prototype = {
 		
 		var i,
 			ds,
-			dsDetails,
-			dsAttributes,
 			source,
+			dsDetails,
+			sourceName,
 			modeTabView,
 			containerId,
-			dataSourceName,
-			sourceName;
+			dsAttribute,
+			dsAttributes,
+			dataSourceName;
 		
 		dataSourceName = parameters.name;
 		containerId = parameters.containerId;
@@ -1084,7 +1089,9 @@ DataBrowser.prototype = {
 		
 		for(i = 0; i < dsAttributes.length; i++) {
 			
-			if(dsAttributes[i].kind === "storage") {
+			dsAttribute = dsAttributes[i];
+			
+			if(dsAttribute.kind !== "relatedEntity" && dsAttribute.kind !== "relatedEntities") {
 				
 				if(i !== 0) {
 					if(dsDetails.colNames !== "") {
@@ -1096,10 +1103,10 @@ DataBrowser.prototype = {
 				}
 				
 				dsDetails.columns.push({
-					sourceAttID : dsAttributes[i].name,
-	                title : dsAttributes[i].name,
-	                colID : dsAttributes[i].name,
-					width : this.defaultColumnWidthForType(dsAttributes[i].type)
+					sourceAttID : dsAttribute.name,
+	                title : dsAttribute.name,
+	                colID : dsAttribute.name,
+					width : this.defaultColumnWidthForType(dsAttribute.type)
 				});
 				
 			}
@@ -1328,14 +1335,20 @@ DataBrowser.prototype = {
 
 		$tabDropZone.bind("dragover", function(e) {
 			
+			var $this,
+				$tabToWindowDraggingDiv;
+			
 			e.preventDefault();
 			e.stopPropagation();
 			
-			$(this).css("opacity", "0.5");
-			$(this).css("z-index", "999999");
-			$("#tabToWindowDraggingDiv").show();
-			$("#tabToWindowDraggingDiv").css("top", e.originalEvent.pageY + 20);
-			$("#tabToWindowDraggingDiv").css("left", e.originalEvent.pageX);
+			$tabToWindowDraggingDiv = $("#tabToWindowDraggingDiv");
+			$this = $(this);
+			
+			$this.css("opacity", "0.5");
+			$this.css("z-index", "999999");
+			$tabToWindowDraggingDiv.show();
+			$tabToWindowDraggingDiv.css("top", e.originalEvent.pageY + 20);
+			$tabToWindowDraggingDiv.css("left", e.originalEvent.pageX);
 			
 			return false;
 		})
@@ -1354,6 +1367,7 @@ DataBrowser.prototype = {
 			$(this).css("opacity", "");
 			$(this).css("z-index", "");
 			$("#tabToWindowDraggingDiv").hide();
+			
 			return false;
 		})
 		.bind("drop", function(e) {

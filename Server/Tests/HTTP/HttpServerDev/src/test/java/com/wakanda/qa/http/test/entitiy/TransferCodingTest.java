@@ -23,6 +23,7 @@ import org.apache.http.message.BasicHttpEntityEnclosingRequest;
 import org.apache.http.params.SyncBasicHttpParams;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.wakanda.qa.http.test.extend.AbstractHttpTestCase;
@@ -36,16 +37,19 @@ public class TransferCodingTest extends AbstractHttpTestCase {
 
 	/**
 	 * <b>Implements:</b> TransferCoding01
-	 * <p>
+	 * <p/>
 	 * Check that when the server receives an entity-body with a transfer-coding
 	 * it does not understand, it should returns 501 (Unimplemented), and closes
 	 * the connection.
-	 * <p>
+	 * <p/>
+	 * The test is ignored for now because the feature is not yet implemented.
+	 * <p/>
 	 * <b>Reference:</b> SPEC689 (RFC2616) 3.6
 	 * 
 	 * @throws Exception
 	 */
 	@Test
+	@Ignore
 	public void testThatServerReturns501WhenReceivesAnEntityBodyWithUnknowenTransferCoding()
 			throws Exception {
 
@@ -64,16 +68,19 @@ public class TransferCodingTest extends AbstractHttpTestCase {
 
 	/**
 	 * <b>Implements:</b> TransferCoding02
-	 * <p>
+	 * <p/>
 	 * Check that when the "chunked" transfer-coding is used, it MUST be the
 	 * last transfer-coding applied to the message-body, otherwise server
 	 * responds with 400 bad request.
-	 * <p>
+	 * <p/>
+	 * The test is ignored for now because the feature is not yet implemented.
+	 * <p/>
 	 * <b>Reference:</b> SPEC689 (RFC2616) 3.6
 	 * 
 	 * @throws Exception
 	 */
 	@Test
+	@Ignore
 	public void testThatServerReturns400WhenChunkedIsNotTheLastTransferCodingAppliedToRequestBody()
 			throws Exception {
 		// request
@@ -92,15 +99,18 @@ public class TransferCodingTest extends AbstractHttpTestCase {
 
 	/**
 	 * <b>Implements:</b> TransferCoding03
-	 * <p>
+	 * <p/>
 	 * Check that the "chunked" transfer-coding MUST NOT be applied more than
 	 * once to a message-body, otherwise server responds with 400 bad request.
-	 * <p>
+	 * <p/>
+	 * The test is ignored for now because the feature is not yet implemented.
+	 * <p/>
 	 * <b>Reference:</b> SPEC689 (RFC2616) 3.6
 	 * 
 	 * @throws Exception
 	 */
 	@Test
+	@Ignore
 	public void testThatServerReturns400WhenChunkedIsAppliedMoreThanOnce()
 			throws Exception {
 		// request
@@ -119,14 +129,17 @@ public class TransferCodingTest extends AbstractHttpTestCase {
 
 	/**
 	 * <b>Implements:</b> TransferCoding04
-	 * <p>
+	 * <p/>
 	 * Check that server accepts and parses "chunked" transfert-coding.
-	 * <p>
+	 * <p/>
+	 * The test is ignored for now because the feature is not yet implemented.
+	 * <p/>
 	 * <b>Reference:</b> SPEC689 (RFC2616) 3.6
 	 * 
 	 * @throws Exception
 	 */
 	@Test
+	@Ignore
 	public void testThatServerAcceptsAndParesesChunkedTransferCoding()
 			throws Exception {
 		// request

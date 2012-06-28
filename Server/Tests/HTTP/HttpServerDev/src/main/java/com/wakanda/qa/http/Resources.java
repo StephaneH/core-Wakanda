@@ -24,12 +24,18 @@ import org.apache.http.HttpHeaders;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
+import org.apache.http.auth.MalformedChallengeException;
+import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.auth.AuthSchemeBase;
+import org.apache.http.impl.auth.BasicScheme;
+import org.apache.http.impl.auth.DigestScheme;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicLineFormatter;
 import org.apache.log4j.Logger;
 
@@ -41,7 +47,7 @@ public class Resources {
 	private static Properties urlp = null;
 
 	public static void main(String[] atgs) throws InterruptedException {
-		logger.debug(getDefaultHostName());
+		logger.debug(getDefaultTargetName());
 	}
 
 	private static Properties getProperties(String fileName) {
@@ -78,21 +84,25 @@ public class Resources {
 	}
 
 	public static HttpHost getDefaultTarget() {
-		return new HttpHost(getDefaultHostName(), getDefaultPort());
+		return new HttpHost(getDefaultTargetName(), getDefaultPort());
 	}
 
 	public static HttpHost getWebAdminTarget() {
-		return new HttpHost(getDefaultHostName(), getWebAdminPort());
+		return new HttpHost(getDefaultTargetName(), getWebAdminPort());
 	}
 
-	public static String getDefaultHostName() {
+	public static String getDefaultTargetName() {
 		return getGlobalProp().getProperty("host");// "192.168.0.2";
 													// "www.voila.fr";
 	}
 
 	public static int getDefaultPort() {
-		return Integer.parseInt(getGlobalProp().getProperty("port1"));// 80;
+		return Integer.parseInt(getGlobalProp().getProperty("port"));// 80;
 																		// 8081;
+	}
+	
+	public static int getMultiHostPort() {
+		return Integer.parseInt(getGlobalProp().getProperty("multiHostPort"));
 	}
 
 	public static int getWebAdminPort() {
@@ -202,6 +212,57 @@ public class Resources {
 			HttpHost target) throws HttpException, IOException {
 		HttpResponse response = HttpRequestExecutor.execute(target, request);
 		return response;
+	}
+	
+	public enum AuthType {
+		BASIC, DIGEST, CUSTOM
+	};
+	
+	public static HttpResponse executeAuthenticatedRequest(final HttpRequest request,
+			HttpHost target, String user, String password, AuthType scheme,
+			Header challenge) throws Exception {
+
+		// set credentials
+		UsernamePasswordCredentials creds = new UsernamePasswordCredentials(
+				user, password);
+		// build authen response header
+		AuthSchemeBase authscheme = null;
+		switch (scheme) {
+		case BASIC:
+			authscheme = new BasicScheme();
+			break;
+		case DIGEST:
+			authscheme = new DigestScheme();
+			break;
+		default:
+			throw new MalformedChallengeException("Invalid scheme identifier: "
+					+ scheme);
+		}
+		
+		if (scheme == AuthType.BASIC || scheme == AuthType.DIGEST) {
+			authscheme.processChallenge(challenge);
+			Header authResponse = authscheme.authenticate(creds, request, null);
+			request.addHeader(authResponse);
+		}
+
+		// send the authenticated request
+		HttpResponse response = executeRequest(request, target);
+
+		return response;
+	}
+	
+	public static HttpResponse executeAuthenticatedRequest(final HttpRequest request,
+			HttpHost target, AuthType scheme,
+			Header challenge) throws Exception {
+		return executeAuthenticatedRequest(request, target, "admin", "", scheme, challenge);
+	}
+	
+	public static HttpResponse executeAuthenticatedRequest(final HttpRequest request, HttpHost target) throws Exception {
+		return executeAuthenticatedRequest(request, target, AuthType.BASIC, new BasicHeader(HttpHeaders.WWW_AUTHENTICATE, "Basic Wakanda"));
+	}
+	
+	public static HttpResponse executeAuthenticatedRequest(final HttpRequest request) throws Exception {
+		return executeAuthenticatedRequest(request, getDefaultTarget());
 	}
 
 	public static String readFileAsString(String filePath)

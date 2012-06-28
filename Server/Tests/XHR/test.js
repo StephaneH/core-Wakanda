@@ -151,7 +151,11 @@ var testCase = {
 		var myXHR = new XMLHttpRequest();
 		myXHR.open("POST", "http://127.0.0.1:8081/testEcho/foo?bar= baz", false);
 		myXHR.send("{\"foo\": 'bar baz',\n\t\"42\": 42}");
-		result = JSON.parse(myXHR.responseText);
+		try {
+			result = JSON.parse(myXHR.responseText);
+		} catch (e) {
+			Y.Assert.fail(e.message + ': ' + myXHR.responseText);
+		}
 		Y.Assert.areSame("object", typeof result);
 		Y.ObjectAssert.hasKeys([
 			"url", 
@@ -172,7 +176,7 @@ var testCase = {
 			"HOST"
 		], result.headers);
 		Y.Assert.areSame("/testEcho/foo?bar= baz", result.url);
-		Y.Assert.areSame("/testEcho/foo?bar= baz", result.rawURL);
+		Y.Assert.areSame("/testEcho/foo?bar=%20baz", result.rawURL);
 		Y.Assert.areSame("/testEcho/foo", result.urlPath);
 		Y.Assert.areSame("bar= baz", result.urlQuery);
 		Y.Assert.areSame("127.0.0.1:8081", result.host);
@@ -180,7 +184,7 @@ var testCase = {
 		Y.Assert.areSame("HTTP/1.1", result.version);
 		Y.Assert.areSame("", result.user);
 		Y.Assert.areSame("", result.password);
-		Y.Assert.areSame("POST /testEcho/foo?bar= baz HTTP/1.1", result.requestLine);
+		Y.Assert.areSame("POST /testEcho/foo?bar=%20baz HTTP/1.1", result.requestLine);
 		Y.Assert.areSame("*" + "/" + "*", result.headers.ACCEPT);
 		Y.Assert.areSame("127.0.0.1:8081", result.headers.HOST);
 		Y.Assert.areSame("{\"foo\": 'bar baz',\n\t\"42\": 42}", result.body);

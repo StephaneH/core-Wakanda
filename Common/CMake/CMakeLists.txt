@@ -293,13 +293,6 @@ set(DB4DBuild		${DB4DProj}/Build/${CMAKE_BUILD_TYPE})
 add_subdirectory(${DB4DProj} ${DB4DBuild})
 
 
-set(SQLServerRoot	${ComponentsRoot}/SQL CACHE INTERNAL "Path to SQLServer src.")
-set(SQLServerProj	${SQLServerRoot}/Projects/CMake)
-set(SQLServerBuild	${SQLServerProj}/Build/${CMAKE_BUILD_TYPE})
-
-add_subdirectory(${SQLServerProj} ${SQLServerBuild})
-
-
 set(LanguageSyntaxRoot	${ComponentsRoot}/Language\ Syntax CACHE INTERNAL "Path to Language Syntax src.")
 set(LanguageSyntaxProj	${LanguageSyntaxRoot}/Projects/CMake)
 set(LanguageSyntaxBuild	${LanguageSyntaxProj}/Build/${CMAKE_BUILD_TYPE})

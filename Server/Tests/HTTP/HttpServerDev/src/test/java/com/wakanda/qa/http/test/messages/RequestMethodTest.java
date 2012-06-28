@@ -177,7 +177,7 @@ public class RequestMethodTest extends AbstractHttpTestCase {
 		//logger.debug(getRequestAsString(request));
 		
 		HttpParams params = new SyncBasicHttpParams();
-		Socket socket = new Socket(getDefaultHostName(), getDefaultPort());
+		Socket socket = new Socket(getDefaultTargetName(), getDefaultPort());
 		conn.bind(socket, params);
 		HttpResponse response = httpexecutor.execute(request, conn, context);
 

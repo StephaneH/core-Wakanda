@@ -1,18 +1,3 @@
-/*
-* This file is part of Wakanda software, licensed by 4D under
-*  (i) the GNU General Public License version 3 (GNU GPL v3), or
-*  (ii) the Affero General Public License version 3 (AGPL v3) or
-*  (iii) a commercial license.
-* This file remains the exclusive property of 4D and/or its licensors
-* and is protected by national and international legislations.
-* In any event, Licensee's compliance with the terms and conditions
-* of the applicable license constitutes a prerequisite to any use of this file.
-* Except as otherwise expressly stated in the applicable license,
-* such license does not include any other license or rights on this file,
-* 4D's and/or its licensors' trademarks and/or other proprietary rights.
-* Consequently, no title, copyright or other proprietary rights
-* other than those specified in the applicable license is granted.
-*/
 /**
  *
  * This API provides you with useful tools to handle files, folders, and streams on the Wakanda Server.
@@ -76,9 +61,9 @@ BinaryStream = function BinaryStream() {
      * writes the string value you passed as the parameter in the BinaryStream  object at the current cursor location
      *
      * @method putString
-     * @param {String} stringValue
+     * @param {} 
      */
-    this.putString = function putString(stringValue) {             };
+    this.putString = function putString() {             };
     
     /**
      * writes the real value you passed as the parameter in the BinaryStream  object at the current cursor location
@@ -174,6 +159,44 @@ BinaryStream = function BinaryStream() {
      */
     this.close = function close() {             };
     
+    /**
+     * writes the Buffer you passed as the buffer parameter in the BinaryStream  object at the current cursor location
+     *
+     * @method putBuffer
+     * @param {Buffer} buffer
+     * @param {Number} offset
+     * @param {Number} size
+     */
+    this.putBuffer = function putBuffer(buffer, offset, size) {             };
+    
+    /**
+     * writes the BLOB you passed as the blob parameter in the BinaryStream  object at the current cursor location
+     *
+     * @method putBlob
+     * @param {Blob} blob
+     * @param {Number} offset
+     * @param {Number} size
+     */
+    this.putBlob = function putBlob(blob, offset, size) {             };
+    
+    /**
+     * returns a new Buffer object containing the next sizeToRead data in the BinaryStream object
+     *
+     * @method getBuffer
+     * @param {Number} sizeToRead
+     * @return {Buffer}
+     */
+    this.getBuffer = function getBuffer(sizeToRead) {        return new Buffer( );     };
+    
+    /**
+     * creates a new BLOB object containing the next sizeToRead data in the BinaryStream object
+     *
+     * @method getBlob
+     * @param {Number} sizeToRead
+     * @return {Blob}
+     */
+    this.getBlob = function getBlob(sizeToRead) {        return new Blob( );     };
+    
 
 };
 
@@ -256,9 +279,9 @@ File = function File() {
      *
      * @property creationDate
      * @attributes ReadOnly
-     * @type Date
+     * @type 
      */
-    this.creationDate =  new Date( ); 
+    this.creationDate =  ; 
     
     /**
      * returns true if the file referenced in the File object already exists at the defined path
@@ -301,9 +324,9 @@ File = function File() {
      *
      * @property nameNoExt
      * @attributes ReadOnly
-     * @type String
+     * @type 
      */
-    this.nameNoExt =  ''; 
+    this.nameNoExt =  ; 
     
     /**
      * returns a new Folder object containing the parent folder of the File or Folder object
@@ -346,9 +369,9 @@ File = function File() {
      *
      * @property visible
      * @attributes ReadOnly
-     * @type Boolean
+     * @type 
      */
-    this.visible =  true; 
+    this.visible =  ; 
     
     
     /**
@@ -503,9 +526,9 @@ Folder = function Folder() {
      *
      * @property modificationDate
      * @attributes ReadOnly
-     * @type Date
+     * @type 
      */
-    this.modificationDate =  new Date( ); 
+    this.modificationDate =  ; 
     
     /**
      * gets or sets the name of the Folder object without the path information
@@ -690,6 +713,226 @@ Folder = function Folder() {
      * @return {Boolean}
      */
     this.next = function next() {        return true;     };
+    
+
+};
+
+
+EntrySync = function EntrySync() {
+    
+    
+    /**
+     * 
+     *
+     * @property name
+     * @attributes 
+     * @type String
+     */
+    this.name =  ''; 
+    
+    /**
+     * 
+     *
+     * @property isFile
+     * @attributes 
+     * @type Boolean
+     */
+    this.isFile =  true; 
+    
+    /**
+     * 
+     *
+     * @property isDirectory
+     * @attributes 
+     * @type Boolean
+     */
+    this.isDirectory =  true; 
+    
+    /**
+     * 
+     *
+     * @property fullPath
+     * @attributes 
+     * @type String
+     */
+    this.fullPath =  ''; 
+    
+    /**
+     * 
+     *
+     * @property filesystem
+     * @attributes 
+     * @type FileSystemSync
+     */
+    this.filesystem =  new FileSystemSync( ); 
+    
+    
+    /**
+     * returns a URL that can be used to identify the EntrySync
+     *
+     * @method toURL
+     * @return {String}
+     */
+    this.toURL = function toURL() {        return '';     };
+    
+    /**
+     * deletes the entry (file or directory) from the filesystem
+     *
+     * @method remove
+     */
+    this.remove = function remove() {             };
+    
+    /**
+     * moves the EntrySync object to a different location in the filesystem
+     *
+     * @method moveTo
+     * @param {DirectoryEntrySync} dest
+     * @param {String} name
+     */
+    this.moveTo = function moveTo(dest, name) {             };
+    
+    /**
+     * returns the parent DirectoryEntrySync of the EntrySync to which it is applied
+     *
+     * @method getParent
+     * @return {DirectoryEntrySync}
+     */
+    this.getParent = function getParent() {        return new DirectoryEntrySync( );     };
+    
+    /**
+     * returns a Metadata object providing information about the state of a file or directory
+     *
+     * @method getMetadata
+     * @return {Metadata}
+     */
+    this.getMetadata = function getMetadata() {        return new Metadata( );     };
+    
+    /**
+     * copies the EntrySync object to a different location in the filesystem
+     *
+     * @method copyTo
+     * @param {DirectoryEntrySync} dest
+     * @param {String} name
+     * @return {EntrySync}
+     */
+    this.copyTo = function copyTo(dest, name) {        return new EntrySync( );     };
+    
+
+};
+
+
+DirectoryEntrySync = function DirectoryEntrySync() {
+    
+    
+    
+    /**
+     * returns a Folder object that represents the current state of the folder referenced by the DirectoryEntrySync
+     *
+     * @method folder
+     * @return {Folder}
+     */
+    this.folder = function folder() {        return new Folder( );     };
+    
+    /**
+     * deletes the directory and all of its contents, if any
+     *
+     * @method removeRecursively
+     */
+    this.removeRecursively = function removeRecursively() {             };
+    
+    /**
+     * creates or looks up a file and returns a new entry to it
+     *
+     * @method getFile
+     * @param {String} path
+     * @param {Object} options
+     * @return {FileEntrySync}
+     */
+    this.getFile = function getFile(path, options) {        return new FileEntrySync( );     };
+    
+    /**
+     * creates or looks up a directory and returns a new entry to it
+     *
+     * @method getDirectory
+     * @param {String} path
+     * @param {Object} options
+     * @return {DirectoryEntrySync}
+     */
+    this.getDirectory = function getDirectory(path, options) {        return new DirectoryEntrySync( );     };
+    
+    /**
+     * creates a new DirectoryReaderSync object to read entries from the DirectorySync to which it is applied
+     *
+     * @method createReader
+     * @return {DirectoryReaderSync}
+     */
+    this.createReader = function createReader() {        return new DirectoryReaderSync( );     };
+    
+
+};
+
+
+DirectoryReaderSync = function DirectoryReaderSync() {
+    
+    
+    
+    /**
+     * method returns the next block of entries in the directory
+     *
+     * @method readEntries
+     * @return {Array}
+     */
+    this.readEntries = function readEntries() {        return [];     };
+    
+
+};
+
+
+FileEntrySync = function FileEntrySync() {
+    
+    
+    
+    /**
+     * returns a File object that represents the current state of the file referenced by the FileEntrySync
+     *
+     * @method file
+     * @return {File}
+     */
+    this.file = function file() {        return new File( );     };
+    
+    /**
+     * creates a new FileWriterSync associated with the file that the FileEntrySync represents
+     *
+     * @method createWriter
+     * @return {FileWriterSync}
+     */
+    this.createWriter = function createWriter() {        return new FileWriterSync( );     };
+    
+
+};
+
+
+FileSystemSync = function FileSystemSync() {
+    
+    
+    /**
+     * 
+     *
+     * @property root
+     * @attributes ReadOnly
+     * @type DirectoryEntrySync
+     */
+    this.root =  new DirectoryEntrySync( ); 
+    
+    /**
+     * 
+     *
+     * @property name
+     * @attributes ReadOnly
+     * @type String
+     */
+    this.name =  ''; 
+    
     
 
 };

@@ -4,7 +4,6 @@ var adminObject;
 WAF.onAfterInit = function onAfterInit() {
 	
 	$("#adminTabView").hide();
-	checkAdminAccess();
 	
 // @lock
 
@@ -79,6 +78,11 @@ WAF.onAfterInit = function onAfterInit() {
 		
 	};// @lock
 	
+	documentEvent.onLoad = function documentEvent_onLoad (event)
+ 	{
+		checkAdminAccess();
+	};
+	
 // @region eventManager// @startlock
 	WAF.addListener("adminStopSolutionButton", "click", adminStopSolutionButton.click, "WAF");
 	WAF.addListener("adminBrowseButton", "click", adminBrowseButton.click, "WAF");
@@ -90,6 +94,7 @@ WAF.onAfterInit = function onAfterInit() {
 	WAF.addListener("logToAdmin", "logout", logToAdmin.logout, "WAF");
 	WAF.addListener("logToAdmin", "logout", logToAdmin.logout, "WAF");
 	WAF.addListener("logToAdmin", "login", logToAdmin.login, "WAF");
+	WAF.addListener("document", "onLoad", documentEvent.onLoad, "WAF");
 // @endregion
 	
 	$("body").bind("keypress", function (event) {
@@ -238,11 +243,11 @@ Admin.prototype = {
 		
 		if(runningSolution.name !== "DefaultSolution" || runningSolution.applications.length > 1) {
 			this.currentRunningSolution = runningSolution
-			this.selectSolution(this.currentRunningSolution.hash);
+			// this.selectSolution(this.currentRunningSolution.hash);
 			$$("solutionCombobox").setValue(this.currentRunningSolution.hash);
 		} else {
 			if(this.recentSolutions.length > 0 && this.recentSolutions[0].hasOwnProperty("name")) {
-				this.selectSolution(this.recentSolutions[0].hash);
+				// this.selectSolution(this.recentSolutions[0].hash);
 				$$("solutionCombobox").setValue(this.recentSolutions[0].hash);
 			}
 		}
@@ -688,7 +693,7 @@ Admin.prototype = {
 	selectCurrentSolution : function select_current_solution() {
 		
 		if(this.currentRunningSolution !== null) {
-			this.selectSolution(this.currentRunningSolution.name);
+			// this.selectSolution(this.currentRunningSolution.name);
 			$$("solutionCombobox").setValue(this.currentRunningSolution.name);
 		}
 	},

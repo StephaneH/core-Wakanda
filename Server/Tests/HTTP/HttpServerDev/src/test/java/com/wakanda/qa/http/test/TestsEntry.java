@@ -40,7 +40,7 @@ public class TestsEntry {
 			return;
 		}
 		fail("Cannot start server or load solution on "
-				+ Resources.getDefaultHostName() + " : "
+				+ Resources.getDefaultTargetName() + " : "
 				+ Resources.getDefaultPort());
 
 	};

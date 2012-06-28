@@ -22,6 +22,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -117,7 +118,7 @@ public class CharSetTest extends AbstractHttpTestCase {
 	public void testThatServerSupportsCharSetWhenDynamicContent(Charset charset)
 			throws Exception {
 
-		//Charset charset = Charset.forName("ISO-8859-8");
+		// Charset charset = Charset.forName("ISO-8859-8");
 		// Init variables
 		String charsetName = charset.name();
 		logger.debug("Testing " + charsetName + " charset...");
@@ -241,15 +242,25 @@ public class CharSetTest extends AbstractHttpTestCase {
 
 	/**
 	 * <b>Implements:</b> CharSet06
-	 * <p>
+	 * <p/>
 	 * Check that server responds with 415 when the charset of the request
 	 * entity is not supported.
-	 * <p>
+	 * <p/>
+	 * Le test est ignoré car le serveur n'a aucun moyen de savoir si le request handler accepte le
+	 * charset, c'est donc à chaque requestHandler de vérifier si le
+	 * charset est supporté/accepté.
+	 * <p/>
 	 * <b>Reference:</b> SPEC695 (RFC2616) 10.4.16
 	 * 
 	 * @throws Exception
 	 */
 	@Test
+	/*
+	 * Le Server n'a aucun moyen de savoir si le request handler accepte le
+	 * charset, c'est donc à chaque requestHandler de vérifier si le
+	 * charset est supporté/accepté.
+	 */
+	@Ignore
 	public void testThatServerReplaysWith415WhenCharsetOfRequestEntityIsNotSupported()
 			throws Exception {
 		// entity
