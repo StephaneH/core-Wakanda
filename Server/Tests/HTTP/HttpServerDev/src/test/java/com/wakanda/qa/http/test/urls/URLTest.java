@@ -12,11 +12,13 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.util.EntityUtils;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.wakanda.qa.http.RFC1738URLEncoder;
 import com.wakanda.qa.http.WWWFormURLEncoder;
 import com.wakanda.qa.http.test.extend.AbstractHttpTestCase;
+import com.wakanda.qa.utils.Requestor.HttpSimpleBufferedResponse;
 
 /**
  * This class manages all test cases related with the URL.
@@ -65,15 +67,15 @@ public class URLTest extends AbstractHttpTestCase {
 		// expected
 		String request1 = "GET " + url + " HTTP/1.1" + CRLF + "Host:"
 				+ getDefaultHostHeaderValue() + CRLF + CRLF;
-		HttpResponse response1 = executeRawRequest(request1, false);
-		int exSC = response1.getStatusLine().getStatusCode();
+		HttpSimpleBufferedResponse response1 = executeRawRequest(request1);
+		int exSC = response1.getStatusCode();
 		byte[] exContent = EntityUtils.toByteArray(response1.getEntity());
 
 		// actual
 		String request2 = "GET " + url.toUpperCase() + " HTTP/1.1" + CRLF
 				+ "Host:" + getDefaultHostHeaderValue() + CRLF + CRLF;
-		HttpResponse response2 = executeRawRequest(request2, false);
-		int acSC = response2.getStatusLine().getStatusCode();
+		HttpSimpleBufferedResponse response2 = executeRawRequest(request2);
+		int acSC = response2.getStatusCode();
 		byte[] acContent = EntityUtils.toByteArray(response2.getEntity());
 
 		// check
@@ -139,6 +141,7 @@ public class URLTest extends AbstractHttpTestCase {
 	 * @throws Exception
 	 */
 	@Test
+	@Ignore
 	public void testThatURLEncodedWith_Application_x_www_form_urlencoded_IsSupported()
 			throws Exception {
 

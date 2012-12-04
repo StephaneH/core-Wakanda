@@ -1167,8 +1167,6 @@ void VJSContextPool::_InitGlobalClasses()
 
 		VJSGlobalClass::AddStaticValue( kSSJS_PROPERTY_NAME_Permissions, VJSGlobalClass::js_getProperty<VJSApplicationGlobalObject::_getPermissions>, NULL, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete);
 
-		VJSGlobalClass::AddStaticValue( kSSJS_PROPERTY_NAME_RPCCatalog, VJSGlobalClass::js_getProperty<VJSApplicationGlobalObject::_getRPCCatalog>, NULL, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete);
-
 		VJSGlobalClass::AddStaticValue( kSSJS_PROPERTY_NAME_wildchar, VJSGlobalClass::js_getProperty<VJSApplicationGlobalObject::_getWildChar>, NULL, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete);
 
 

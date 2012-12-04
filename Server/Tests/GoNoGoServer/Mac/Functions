@@ -80,7 +80,7 @@ do
     sleep 5
 
 done <<EOF
-{"jsonrpc":"2.0","id":1234,"module":"admin","method":"openSolution","params":["${SolutionsRelease}/${SolutionName[${2}]}/${SolutionName[${2}]}.waSolution"]}
+{"jsonrpc":"2.0","id":1234,"module":"admin","method":"openSolution","params":["${SolutionsRelease}/${SolutionName[${2}]}/${Solution[${2}]}.waSolution"]}
 EOF
    
 }
@@ -101,7 +101,7 @@ do
     sleep 5
 
 done <<EOF
-{"jsonrpc":"2.0","id":1234,"module":"admin","method":"closeSolution","params":["${SolutionsRelease}/${SolutionName[${2}]}/${SolutionName[${2}]}.waSolution"]}
+{"jsonrpc":"2.0","id":1234,"module":"admin","method":"closeSolution","params":["${SolutionsRelease}/${SolutionName[${2}]}/${Solution[${2}]}.waSolution"]}
 EOF
 
 }
@@ -122,7 +122,7 @@ do
     sleep 5
 
 done <<EOF
-{"jsonrpc":"2.0","id":1234,"module":"admin","method":"closeSolution","params":["${SolutionsRelease}/${SolutionName[${2}]/${SolutionName[${2}]}.waSolution"]}
+{"jsonrpc":"2.0","id":1234,"module":"admin","method":"closeSolution","params":["${SolutionsRelease}/${SolutionName[${2}]/${Solution[${2}]}.waSolution"]}
 EOF
 
 }
@@ -184,7 +184,7 @@ function SimpleGETServer()
 
 {
 
-wget --no-proxy -d -v -o ${HomeDirectory}${Directory}global_log_${DATELOG}/tmpGET_${DATELOG}/SimpleGetServer/logSimpleGetServer -P ${HomeDirectory}${Directory}global_log_${DATELOG}/tmpGET_${DATELOG}/SimpleGetServer ${WEBADMIN}
+wget --no-proxy -v -o ${HomeDirectory}${Directory}global_log_${DATELOG}/tmpGET_${DATELOG}/SimpleGetServer/logSimpleGetServer -P ${HomeDirectory}${Directory}global_log_${DATELOG}/tmpGET_${DATELOG}/SimpleGetServer ${WEBADMIN}
 
 }
 
@@ -200,7 +200,7 @@ function SimpleGETSolution()
 
 {
 
-wget --no-proxy -d -v -o ${HomeDirectory}${Directory}global_log_${DATELOG}/tmpGET_${DATELOG}/SimpleGetSolution/logSimpleGetSolution -P ${HomeDirectory}${Directory}global_log_${DATELOG}/tmpGET_${DATELOG}/SimpleGetSolution ${WEBADMIN_SOLUTION}
+wget --no-proxy -v -o ${HomeDirectory}${Directory}global_log_${DATELOG}/tmpGET_${DATELOG}/SimpleGetSolution/logSimpleGetSolution -P ${HomeDirectory}${Directory}global_log_${DATELOG}/tmpGET_${DATELOG}/SimpleGetSolution ${WEBADMIN_SOLUTION}
 
 }
 
@@ -214,7 +214,7 @@ function SimpleGETSolutionSSL()
 
 {
 
-wget --no-proxy --no-check-certificate -d -v -o ${HomeDirectory}${Directory}global_log_${DATELOG}/tmpGET_${DATELOG}/SimpleGetSolutionSSL/logSimpleGetSolutionSSL -P ${HomeDirectory}${Directory}global_log_${DATELOG}/tmpGET_${DATELOG}/SimpleGetSolutionSSL ${protocole[${1}]}${LOCALHOST}:${port[${2}]}
+wget --no-proxy --no-check-certificate -v -o ${HomeDirectory}${Directory}global_log_${DATELOG}/tmpGET_${DATELOG}/SimpleGetSolutionSSL/logSimpleGetSolutionSSL -P ${HomeDirectory}${Directory}global_log_${DATELOG}/tmpGET_${DATELOG}/SimpleGetSolutionSSL ${protocole[${1}]}${LOCALHOST}:${port[${2}]}
 
 }
 
@@ -228,7 +228,7 @@ function GETrestFile()
 
 {
 
-wget --no-proxy -d -v -o ${HomeDirectory}${Directory}global_log_${DATELOG}/tmpJSON_${DATELOG}/Rest/logGetrestFile -P ${HomeDirectory}${Directory}global_log_${DATELOG}/tmpJSON_${DATELOG}/Rest  ${LOCALHOST}:${port[${1}]}/rest/
+wget --no-proxy -v -o ${HomeDirectory}${Directory}global_log_${DATELOG}/tmpJSON_${DATELOG}/Rest/logGetrestFile -P ${HomeDirectory}${Directory}global_log_${DATELOG}/tmpJSON_${DATELOG}/Rest  ${LOCALHOST}:${port[${1}]}/rest/
 
 }
 
@@ -242,7 +242,7 @@ function GETrestFileSSL()
 
 {
 
-wget --no-proxy --no-check-certificate -d -v -o ${HomeDirectory}${Directory}global_log_${DATELOG}/tmpJSON_${DATELOG}/RestSSL/logGetrestFileSSL -P ${HomeDirectory}${Directory}global_log_${DATELOG}/tmpJSON_${DATELOG}/RestSSL ${protocole[${1}]}${LOCALHOST}:${port[${2}]}/rest/
+wget --no-proxy --no-check-certificate -v -o ${HomeDirectory}${Directory}global_log_${DATELOG}/tmpJSON_${DATELOG}/RestSSL/logGetrestFileSSL -P ${HomeDirectory}${Directory}global_log_${DATELOG}/tmpJSON_${DATELOG}/RestSSL ${protocole[${1}]}${LOCALHOST}:${port[${2}]}/rest/
 
 }
 
@@ -256,7 +256,7 @@ function GETNetworkIP()
 
 {
 
-wget --no-proxy -d -v -o ${HomeDirectory}${Directory}global_log_${DATELOG}/tmpGET_${DATELOG}/GetPrivateIP/logGetNetworkIP -P ${HomeDirectory}${Directory}global_log_${DATELOG}/tmpGET_${DATELOG}/GetPrivateIP ${PRIVATE_IP}:${port[1]}
+wget --no-proxy -v -o ${HomeDirectory}${Directory}global_log_${DATELOG}/tmpGET_${DATELOG}/GetPrivateIP/logGetNetworkIP -P ${HomeDirectory}${Directory}global_log_${DATELOG}/tmpGET_${DATELOG}/GetPrivateIP ${PRIVATE_IP}:${port[1]}
 
 }
 
@@ -270,7 +270,7 @@ function GETNetworkIPSSL()
 
 {
 
-wget --no-proxy --no-check-certificate -d -v -o ${HomeDirectory}${Directory}global_log_${DATELOG}/tmpGET_${DATELOG}/GetPrivateIPSSL/logGetNetworkIPSSL -P ${HomeDirectory}${Directory}global_log_${DATELOG}/tmpGET_${DATELOG}/GetPrivateIPSSL ${protocole[${1}]}${PRIVATE_IP}:${port[${2}]}
+wget --no-proxy --no-check-certificate -v -o ${HomeDirectory}${Directory}global_log_${DATELOG}/tmpGET_${DATELOG}/GetPrivateIPSSL/logGetNetworkIPSSL -P ${HomeDirectory}${Directory}global_log_${DATELOG}/tmpGET_${DATELOG}/GetPrivateIPSSL ${protocole[${1}]}${PRIVATE_IP}:${port[${2}]}
 
 }
 

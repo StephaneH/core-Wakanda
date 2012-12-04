@@ -73,7 +73,6 @@ const char kSSJS_PROPERTY_NAME_Internal[] = "internal";
 const char kSSJS_PROPERTY_NAME_Directory[] = "directory";
 const char kSSJS_PROPERTY_NAME_OS[] = "os";
 const char kSSJS_PROPERTY_NAME_Permissions[] = "permissions";
-const char kSSJS_PROPERTY_NAME_RPCCatalog[] = "rpcCatalog";
 const char kSSJS_PROPERTY_NAME_backupSettings[] = "backupSettings";
 const char kSSJS_PROPERTY_NAME_wildchar[] = "wildchar";
 
@@ -2331,8 +2330,9 @@ void VJSMIMEReader::GetDefinition (ClassDefinition& outDefinition)
 {
 	static XBOX::VJSClass<VJSMIMEReader, void>::StaticFunction functions[] = {
 
-		{	"parseMail",		js_callStaticFunction<_ParseMail>,			JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete	},
-		{	0,					0,											0																	},
+		{	"parseMail",			js_callStaticFunction<_ParseMail>,			JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete	},
+		{	"parseEncodedWords",	js_callStaticFunction<_ParseEncodedWords>,	JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete	},
+		{	0,						0,											0																	},
 
 	};
 
@@ -2432,15 +2432,11 @@ void VJSMIMEReader::_ParseMail (XBOX::VJSParms_callStaticFunction &ioParms, void
 	
 		if (stream.OpenReading() == XBOX::VE_OK) {
 
-			if (_ParseMailHeader(ioParms.GetContext(), mailObject, &stream, &isMIME, &boundary)) {
+			XBOX::VMIMEMailHeader	header;
+
+			if (_ParseMailHeader(ioParms.GetContext(), mailObject, &stream, &isMIME, &header)) {
 
 				if (isMIME) {
-
-					if (boundary.IsEmpty()) {
-
-//** No boundary string found in header ! Will be unable to parse MIME parts.
-
-					}
 
 					// Make an XBOX::VMemoryBufferStream that "contains" only the MIME stream.
 					// Patch the memory buffers to make it starts at MIME boundary.
@@ -2477,13 +2473,13 @@ void VJSMIMEReader::_ParseMail (XBOX::VJSParms_callStaticFunction &ioParms, void
 					p = (uBYTE *) memoryBuffers[j].GetDataPtr() + offset;
 
 					memoryBuffers[j].ForgetData();	// Prevent memory from being freed.
-					memoryBuffers[j].SetDataPtr(p, size, size);
+					memoryBuffers[j].SetDataPtr(p, size, size);		
+
+					XBOX::VMemoryBufferStream	mimeStream(&memoryBuffers[j], i - j);
 
 					// _ParseMIMEBody() will open mimeStream and then close it when done.
 
-					XBOX::VMemoryBufferStream	mimeStream(&memoryBuffers[j], i - j);
-			
-					_ParseMIMEBody(ioParms.GetContext(), mailObject, &mimeStream, boundary);
+					_ParseMIMEBody(ioParms.GetContext(), mailObject, &mimeStream, &header);
 
 				} else {
 
@@ -2509,14 +2505,107 @@ void VJSMIMEReader::_ParseMail (XBOX::VJSParms_callStaticFunction &ioParms, void
 	delete[] memoryBuffers;
 }
 
-// Return true if header was parsed successfully. outIsMIME content is valid only if parsing was successful. 
-// If *outIsMIME is true, then *outBoundary should contain the "boundary" string.
+void VJSMIMEReader::_ParseEncodedWords (XBOX::VJSParms_callStaticFunction &ioParms, void *)
+{
+	bool			isOk, isAllocated;
+	uBYTE			*data;
+	VSize			dataSize;
+	XBOX::VString	result;
 
-bool VJSMIMEReader::_ParseMailHeader (XBOX::VJSContext inContext, XBOX::VJSObject &inMailObject, XBOX::VMemoryBufferStream *inStream, bool *outIsMIME, XBOX::VString *outBoundary)
+	result.Clear();
+	if (ioParms.IsStringParam(1)) {
+
+		XBOX::VString	string;
+
+		if (!ioParms.GetStringParam(1, string))
+
+			isOk = false;
+
+		else {
+
+			if ((dataSize = string.GetLength())) {
+
+				if ((data = new uBYTE[dataSize]) == NULL) {
+
+					XBOX::vThrowError(XBOX::VE_MEMORY_FULL);
+					return;
+
+				} else {
+
+					// Data is supposed to be 7-bit ASCII characters.
+
+					VSize			i;
+					uBYTE			*p;
+					const UniChar	*q;
+					
+					for (i = 0, p = data, q = string.GetCPointer(); i < dataSize; i++, p++, q++)
+
+						*p = *q;	
+
+				}
+
+			}
+			isOk = isAllocated = true;
+
+		}
+
+	} else if (ioParms.IsObjectParam(1)) {
+
+		XBOX::VJSObject	jsBuffer(ioParms.GetContext());
+
+		if (!ioParms.GetParamObject(1, jsBuffer) || !jsBuffer.IsOfClass(VJSBufferClass::Class())) 
+
+			isOk = false;
+
+		else {
+	
+			XBOX::VJSBufferObject	*buffer;
+
+			buffer = jsBuffer.GetPrivateData<VJSBufferClass>();
+			xbox_assert(buffer != NULL);
+
+			data = (uBYTE *) buffer->GetDataPtr();
+			dataSize = buffer->GetDataSize();
+		
+			isOk = true;
+			isAllocated = false;
+
+		}
+
+	} else 
+
+		isOk = false;
+
+	if (!isOk) 
+
+		XBOX::vThrowError(XBOX::VE_JVSC_WRONG_PARAMETER, "1");
+		
+	else if (dataSize) {
+
+		xbox_assert(data != NULL);
+
+		XBOX::VMIMEReader::DecodeEncodedWords(data, dataSize, &result);
+
+		if (isAllocated)
+
+			delete[] data;
+
+	}
+
+	ioParms.ReturnString(result);
+}
+
+// Return true if header was parsed successfully. Returned values are valid only if parsing was successful. 
+// If *outIsMultiPart is true, then *outBoundary must contain the "boundary" string.
+
+bool VJSMIMEReader::_ParseMailHeader (XBOX::VJSContext inContext, 
+	XBOX::VJSObject &inMailObject, XBOX::VMemoryBufferStream *inStream, 
+	bool *outIsMIME, 
+	XBOX::VMIMEMailHeader *outHeader)
 {
 	xbox_assert(inStream != NULL);
 	xbox_assert(outIsMIME != NULL);
-	xbox_assert(outBoundary != NULL);
+	xbox_assert(outHeader != NULL);
 
 	XBOX::VString	line;
 
@@ -2536,11 +2625,10 @@ bool VJSMIMEReader::_ParseMailHeader (XBOX::VJSContext inContext, XBOX::VJSObjec
 	arguments.push_back(XBOX::VJSValue(inContext));
 	arguments.push_back(XBOX::VJSValue(inContext));
 
-	bool			isMIME;
 	sLONG			i, j, k;
 	XBOX::VString	fieldName, fieldBody;
 
-	isMIME = false;
+	*outIsMIME = false;
 	for ( ; ; ) {
 
 		bool	isFullLine;
@@ -2581,7 +2669,7 @@ bool VJSMIMEReader::_ParseMailHeader (XBOX::VJSContext inContext, XBOX::VJSObjec
 
 		if (fieldName.EqualToString("MIME-Version"))
 
-			isMIME = true;
+			*outIsMIME = true;
 
 		// Read field body, skipping leading spaces. An empty field body is possible.
 
@@ -2601,10 +2689,22 @@ bool VJSMIMEReader::_ParseMailHeader (XBOX::VJSContext inContext, XBOX::VJSObjec
 			fieldBody.Clear();
 
 		// Try to find boundary string, do not care if mail is MIME. 
+		// Also save field bodies for "single part" MIME mails.
 
-		if (fieldName.EqualToString("Content-Type"))
+		if (fieldName.EqualToString("Content-Type")) {
 
-			_ParseBoundary(fieldBody, outBoundary);
+			outHeader->fIsMultiPart = _IsMultiPart(fieldBody);
+			_ParseBoundary(fieldBody, &outHeader->fBoundary);
+
+			outHeader->fContentType = fieldBody;
+
+		} else if (fieldName.EqualToString("Content-Disposition"))
+
+			outHeader->fContentDisposition = fieldBody;
+
+		else if (fieldName.EqualToString("Content-Transfer-Encoding"))
+
+			outHeader->fContentTransferEncoding = fieldBody;
 
 		// Add field to Mail object.
 
@@ -2613,8 +2713,6 @@ bool VJSMIMEReader::_ParseMailHeader (XBOX::VJSContext inContext, XBOX::VJSObjec
 		inMailObject.CallFunction(addFieldFunction, &arguments, &result, NULL);
 
 	}
-
-	*outIsMIME = isMIME;
 
 	return true;
 }
@@ -2662,8 +2760,23 @@ bool VJSMIMEReader::_ParseTextBody (XBOX::VJSContext inContext, XBOX::VJSObject 
 	return isOk;
 }
 
-bool VJSMIMEReader::_ParseMIMEBody (XBOX::VJSContext inContext, XBOX::VJSObject &inMailObject, XBOX::VMemoryBufferStream *inStream, const XBOX::VString &inBoundary)
+bool VJSMIMEReader::_ParseMIMEBody (
+	XBOX::VJSContext inContext, 
+	XBOX::VJSObject &inMailObject, 
+	XBOX::VMemoryBufferStream *inStream, 
+	const XBOX::VMIMEMailHeader *inHeader)
 {
+	xbox_assert(inHeader != NULL);
+
+	// Messages using MIME extensions are not necessarly multi-part. For instance, it can 
+	// be a single "text/plain" with a UTF-8 charset encoded using base64.
+
+	if (inHeader->fIsMultiPart && inHeader->fBoundary.IsEmpty()) {
+
+		//** No boundary string found in header ! Will be unable to parse MIME parts.
+
+	}
+
 	VMIMEMessage	*mimeMessage;
 
 	if ((mimeMessage = new VMIMEMessage()) == NULL) {
@@ -2675,7 +2788,7 @@ bool VJSMIMEReader::_ParseMIMEBody (XBOX::VJSContext inContext, XBOX::VJSObject 
 
 		XBOX::VJSObject	mimeMessageObject(inContext);
 
-		mimeMessage->LoadMail(inBoundary, *inStream);		
+		mimeMessage->LoadMail(inHeader, *inStream);
 
 		mimeMessageObject = VJSMIMEMessage::CreateInstance(inContext, mimeMessage);
 		inMailObject.SetProperty("messageParts", mimeMessageObject);
@@ -2768,6 +2881,53 @@ bool VJSMIMEReader::_GetLine (XBOX::VString *outString, XBOX::VMemoryBufferStrea
 	}
 
 	return isFullLine;
+}
+
+// Check "Content-Type" field for "multipart/*".
+
+bool VJSMIMEReader::_IsMultiPart (const XBOX::VString &inContentTypeBody)
+{
+	VSize	length;
+	VIndex	i;
+	UniChar	c;
+	
+	length = inContentTypeBody.GetLength();
+	i = 1;
+	for ( ; ; ) {
+
+		if (i > length)
+
+			return false;
+		
+		c = inContentTypeBody.GetUniChar(i);
+		i++;
+		if (c != ' ' && c != '\t')
+
+			break;
+
+	}
+
+	XBOX::VString	type(c);
+
+	for ( ; ; ) {
+
+		if (i > length)
+
+			break;
+
+		c = inContentTypeBody.GetUniChar(i);
+		i++;
+		if (!::isalpha(c))
+
+			break;
+
+		else
+
+			type.AppendUniChar(c);
+
+	}
+
+	return type.EqualToString("multipart");
 }
 
 // Parse the field body of "Content-Type". Look for boundary="<boundary string>". 

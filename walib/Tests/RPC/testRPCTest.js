@@ -21,6 +21,30 @@
 var testCase = {
 	
 	name: 'WAF RPC API simple tests',
+
+    _should: {
+        ignore: {
+            testRPCTestModuleAdditionMethodLogicSync4: true,
+            testRPCTestModuleAdditionMethodLogicSync5: true,
+            testRPCTestModuleAdditionMethodLogicSync6: true,
+            testRPCTestModuleMirrorMethodLogicSync5: true,
+            testRPCTestModuleMirrorMethodLogicSync6: true,
+            testRPCTestModuleAdditionMethodLogicAsync4: true,
+            testRPCTestModuleAdditionMethodLogicAsync5: true,
+            testRPCTestModuleAdditionMethodLogicAsync6: true,
+            testRPCTestModuleAdditionMethodLogicAsync7: true,
+            testRPCTestModuleMirrorMethodLogicAsync5: true,
+            testRPCTestModuleMirrorMethodLogicAsync6: true,
+            testRPCTestModuleMirrorMethodLogicAsync7: true,
+            testRPCTestModuleMirrorMethodLogicSyncEqualsAsync6: true,
+            testRPCErrorHandlingSync1: true,
+            testRPCErrorHandlingAsync1: true,
+            testRPCInputTypeUndefinedSync1: true,
+            testRPCInputTypeUndefinedAsync1: true,
+            testRPCInputTypeUndefinedAsync2: true,
+            testRPCOutputTypeFunctionAsync1: true 
+        }
+    },
 	
     testRPCTestModuleExists: function () {
 		Y.Assert.areNotSame('undefined', typeof test);  

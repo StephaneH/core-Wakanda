@@ -16,27 +16,4 @@
 #ifndef __VJSRPCCatalog__
 #define __VJSRPCCatalog__
 
-
-
-class VRPCCatalog;
-
-
-
-class VJSRPCCatalog : public XBOX::VJSClass<VJSRPCCatalog, VRPCCatalog>
-{
-public:
-	typedef XBOX::VJSClass<VJSRPCCatalog, VRPCCatalog>	inherited;
-
-	static	void			Initialize( const XBOX::VJSParms_initialize& inParms, VRPCCatalog *inCatalog);
-	static	void			Finalize( const XBOX::VJSParms_finalize& inParms, VRPCCatalog *inCatalog);
-	static	void			GetDefinition( ClassDefinition& outDefinition);
-
-	// Functions
-	static	void			_getCatalog( XBOX::VJSParms_callStaticFunction& ioParms, VRPCCatalog *inCatalog);
-	static	void			_getCatalogByName( XBOX::VJSParms_callStaticFunction& ioParms, VRPCCatalog *inCatalog);
-	static	void			_getCatalogByFile( XBOX::VJSParms_callStaticFunction& ioParms, VRPCCatalog *inCatalog);
-	static	void			_getMethodFile( XBOX::VJSParms_callStaticFunction& ioParms, VRPCCatalog *inCatalog);
-};
-
-
 #endif

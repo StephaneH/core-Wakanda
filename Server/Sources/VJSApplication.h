@@ -68,7 +68,6 @@ public:
 	static	void			_getDirectory( XBOX::VJSParms_getProperty& ioParms, XBOX::VJSGlobalObject* inGlobalObject);
 	static	void			_getInternal( XBOX::VJSParms_getProperty& ioParms, XBOX::VJSGlobalObject* inGlobalObject);
 	static	void			_getPermissions( XBOX::VJSParms_getProperty& ioParms, XBOX::VJSGlobalObject* inGlobalObject);
-	static	void			_getRPCCatalog( XBOX::VJSParms_getProperty& ioParms, XBOX::VJSGlobalObject* inGlobalObject);
 	static	void			_getWildChar( XBOX::VJSParms_getProperty& ioParms, XBOX::VJSGlobalObject* inGlobalObject);
 	
 	
@@ -130,7 +129,6 @@ public:
 	static	void			_getDirectory( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication);
 	static	void			_getInternal( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication);
 	static	void			_getPermissions( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication);
-	static	void			_getRPCCatalog( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication);
 	static	void			_getWildChar( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication);
 	
 };

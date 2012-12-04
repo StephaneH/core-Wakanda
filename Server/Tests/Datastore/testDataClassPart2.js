@@ -6,103 +6,43 @@
 var orderByError;
 
 
-function orderByAscendingTestDateValues_Btree(thisArg, iterator)
-{
-    switch(iterator+1)
-    {
-	    case 1:
-            //Y.Assert.areSame(7,thisArg.ID , "orderBy failed.");
-            if ((4 !== thisArg.ID) && orderByError=="")
-                orderByError = "orderBy failed.";
-          break;
-        case 2:
-            //Y.Assert.areSame(2, thisArg.ID, "orderBy failed.");
-            if ((2 !== thisArg.ID) && orderByError == "")
-                orderByError = "orderBy failed.";
-          break;
-        case 3:
-            //Y.Assert.areSame(6, thisArg.ID, "orderBy failed.");
-            if ((1 !== thisArg.ID) && orderByError == "")
-                orderByError = "orderBy failed.";
-          break;
-        case 4:
-            //Y.Assert.areSame(3, thisArg.ID, "orderBy failed.");
-            if ((6 !== thisArg.ID) && orderByError == "")
-                orderByError = "orderBy failed.";
-          break;
-        case 5:
-            //Y.Assert.areSame(4, thisArg.ID, "orderBy failed.");
-            if ((5 !== thisArg.ID) && orderByError == "")
-                orderByError = "orderBy failed.";
-          break;
-        case 6:
-            //Y.Assert.areSame(1, thisArg.ID, "orderBy failed.");
-            if ((3 !== thisArg.ID) && orderByError == "")
-                orderByError = "orderBy failed.";
-          break;
-        case 7:
-            //Y.Assert.areSame(5, thisArg.ID, "orderBy failed.");
-            if ((8 !== thisArg.ID) && orderByError == "")
-                orderByError = "orderBy failed.";
-          break;
-        case 8:
-            //Y.Assert.areSame(8, thisArg.ID, "orderBy failed.");
-            if ((7  !== thisArg.ID) && orderByError == "")
-                orderByError = "orderBy failed.";
-          break;
-		 case 9:
-            //Y.Assert.areSame(8, thisArg.ID, "orderBy failed.");
-            if ((10 !== thisArg.ID) && orderByError == "")
-                orderByError = "orderBy failed.";
-          break;
-		 case 10:
-            //Y.Assert.areSame(8, thisArg.ID, "orderBy failed.");
-            if ((9 !== thisArg.ID) && orderByError == "")
-                orderByError = "orderBy failed.";
-          break;
-        default:
-            //Y.Assert.fail("orderBy failed.");
-            if (orderByError == "")
-                orderByError = "orderBy failed.";
-    }
-};
 function orderByDescendingTestDateValues_Btree(thisArg, iterator)
 {
     switch(iterator+1)
     {
 	    case 1:
             //Y.Assert.areSame(7,thisArg.ID , "orderBy failed.");
-            if ((9 !== thisArg.ID) && orderByError=="")
+            if ((8 !== thisArg.ID) && orderByError=="")
                 orderByError = "orderBy failed.";
           break;
         case 2:
             //Y.Assert.areSame(2, thisArg.ID, "orderBy failed.");
-            if ((10 !== thisArg.ID) && orderByError == "")
+            if ((6 !== thisArg.ID) && orderByError == "")
                 orderByError = "orderBy failed.";
           break;
         case 3:
             //Y.Assert.areSame(6, thisArg.ID, "orderBy failed.");
-            if ((7 !== thisArg.ID) && orderByError == "")
+            if ((9 !== thisArg.ID) && orderByError == "")
                 orderByError = "orderBy failed.";
           break;
         case 4:
             //Y.Assert.areSame(3, thisArg.ID, "orderBy failed.");
-            if ((8 !== thisArg.ID) && orderByError == "")
+            if ((10 !== thisArg.ID) && orderByError == "")
                 orderByError = "orderBy failed.";
           break;
         case 5:
             //Y.Assert.areSame(4, thisArg.ID, "orderBy failed.");
-            if ((3 !== thisArg.ID) && orderByError == "")
+            if (4 !== thisArg.ID && 1 !== thisArg.ID && orderByError == "")
                 orderByError = "orderBy failed.";
           break;
         case 6:
             //Y.Assert.areSame(1, thisArg.ID, "orderBy failed.");
-            if ((5 !== thisArg.ID) && orderByError == "")
+            if (7 !== thisArg.ID && 6 !== thisArg.ID && orderByError == "")
                 orderByError = "orderBy failed.";
           break;
         case 7:
             //Y.Assert.areSame(5, thisArg.ID, "orderBy failed.");
-            if ((6 !== thisArg.ID) && orderByError == "")
+            if ((3 !== thisArg.ID) && orderByError == "")
                 orderByError = "orderBy failed.";
           break;
         case 8:
@@ -117,7 +57,67 @@ function orderByDescendingTestDateValues_Btree(thisArg, iterator)
           break;
 		 case 10:
             //Y.Assert.areSame(8, thisArg.ID, "orderBy failed.");
-            if ((4 !== thisArg.ID) && orderByError == "")
+            if ((5 !== thisArg.ID) && orderByError == "")
+                orderByError = "orderBy failed.";
+          break;
+        default:
+            //Y.Assert.fail("orderBy failed.");
+            if (orderByError == "")
+                orderByError = "orderBy failed.";
+    }
+};
+function orderByAscendingTestDateValues_Btree(thisArg, iterator)
+{
+    switch(iterator+1)
+    {
+	    case 1:
+            //Y.Assert.areSame(7,thisArg.ID , "orderBy failed.");
+            if ((5 !== thisArg.ID) && orderByError=="")
+                orderByError = "orderBy failed.";
+          break;
+        case 2:
+            //Y.Assert.areSame(2, thisArg.ID, "orderBy failed.");
+            if ((2 !== thisArg.ID) && orderByError == "")
+                orderByError = "orderBy failed.";
+          break;
+        case 3:
+            //Y.Assert.areSame(6, thisArg.ID, "orderBy failed.");
+            if ((1 !== thisArg.ID) && orderByError == "")
+                orderByError = "orderBy failed.";
+          break;
+        case 4:
+            //Y.Assert.areSame(3, thisArg.ID, "orderBy failed.");
+            if ((3 !== thisArg.ID) && orderByError == "")
+                orderByError = "orderBy failed.";
+          break;
+        case 5:
+            //Y.Assert.areSame(4, thisArg.ID, "orderBy failed.");
+            if (7 !== thisArg.ID && 6 !== thisArg.ID && orderByError == "")
+                orderByError = "orderBy failed.";
+          break;
+        case 6:
+            //Y.Assert.areSame(1, thisArg.ID, "orderBy failed.");
+            if (4 !== thisArg.ID && 1 !== thisArg.ID && orderByError == "")
+                orderByError = "orderBy failed.";
+          break;
+        case 7:
+            //Y.Assert.areSame(5, thisArg.ID, "orderBy failed.");
+            if ((10 !== thisArg.ID) && orderByError == "")
+                orderByError = "orderBy failed.";
+          break;
+        case 8:
+            //Y.Assert.areSame(8, thisArg.ID, "orderBy failed.");
+            if ((9  !== thisArg.ID) && orderByError == "")
+                orderByError = "orderBy failed.";
+          break;
+		 case 9:
+            //Y.Assert.areSame(8, thisArg.ID, "orderBy failed.");
+            if ((6 !== thisArg.ID) && orderByError == "")
+                orderByError = "orderBy failed.";
+          break;
+		 case 10:
+            //Y.Assert.areSame(8, thisArg.ID, "orderBy failed.");
+            if ((8 !== thisArg.ID) && orderByError == "")
                 orderByError = "orderBy failed.";
           break;
         default:
@@ -1510,6 +1510,126 @@ function orderByDescendingTestDurationValues_BTree(thisArg, iterator)
 //orderByAscendingTestByteValues_Cluster
 //orderByDescendingTestByteValues_Btree
 //orderByDescendingTestByteValues_Cluster
+function orderByAscendingTestDurationValues_Keywords(thisArg, iterator)
+{
+    switch(iterator+1)
+    {
+        case 1:
+            //Y.Assert.areSame(7,thisArg.ID , "orderBy failed.");
+            if ((4 !== thisArg.ID) && orderByError=="")
+                orderByError = "orderBy failed.";
+          break;
+        case 2:
+            //Y.Assert.areSame(2, thisArg.ID, "orderBy failed.");
+            if ((6 !== thisArg.ID) && orderByError == "")
+                orderByError = "orderBy failed.";
+          break;
+        case 3:
+            //Y.Assert.areSame(6, thisArg.ID, "orderBy failed.");
+            if ((9 !== thisArg.ID) && orderByError == "")
+                orderByError = "orderBy failed.";
+          break;
+        case 4:
+            //Y.Assert.areSame(3, thisArg.ID, "orderBy failed.");
+            if ((7 !== thisArg.ID) && orderByError == "")
+                orderByError = "orderBy failed.";
+          break;
+        case 5:
+            //Y.Assert.areSame(4, thisArg.ID, "orderBy failed.");
+            if ((2 !== thisArg.ID) && orderByError == "")
+                orderByError = "orderBy failed.";
+          break;
+        case 6:
+            //Y.Assert.areSame(1, thisArg.ID, "orderBy failed.");
+            if ((1 !== thisArg.ID) && orderByError == "")
+                orderByError = "orderBy failed.";
+          break;
+        case 7:
+            //Y.Assert.areSame(5, thisArg.ID, "orderBy failed.");
+            if ((10 !== thisArg.ID) && orderByError == "")
+                orderByError = "orderBy failed.";
+          break;
+        case 8:
+            //Y.Assert.areSame(8, thisArg.ID, "orderBy failed.");
+            if ((3 !== thisArg.ID) && orderByError == "")
+                orderByError = "orderBy failed.";
+          break;
+		 case 9:
+            //Y.Assert.areSame(8, thisArg.ID, "orderBy failed.");
+            if ((5 !== thisArg.ID) && orderByError == "")
+                orderByError = "orderBy failed.";
+          break;
+		 case 10:
+            //Y.Assert.areSame(8, thisArg.ID, "orderBy failed.");
+            if ((8 !== thisArg.ID) && orderByError == "")
+                orderByError = "orderBy failed.";
+          break;
+        default:
+            //Y.Assert.fail("orderBy failed.");
+            if (orderByError == "")
+                orderByError = "orderBy failed.";
+    }
+};
+function orderByDescendingTestDurationValues_Keywords(thisArg, iterator)
+{
+    switch(iterator+1)
+    {
+        case 1:
+            //Y.Assert.areSame(7,thisArg.ID , "orderBy failed.");
+            if ((8 !== thisArg.ID) && orderByError=="")
+                orderByError = "orderBy failed.";
+          break;
+        case 2:
+            //Y.Assert.areSame(2, thisArg.ID, "orderBy failed.");
+            if ((5 !== thisArg.ID) && orderByError == "")
+                orderByError = "orderBy failed.";
+          break;
+        case 3:
+            //Y.Assert.areSame(6, thisArg.ID, "orderBy failed.");
+            if ((3 !== thisArg.ID) && orderByError == "")
+                orderByError = "orderBy failed.";
+          break;
+        case 4:
+            //Y.Assert.areSame(3, thisArg.ID, "orderBy failed.");
+            if ((10 !== thisArg.ID) && orderByError == "")
+                orderByError = "orderBy failed.";
+          break;
+        case 5:
+            //Y.Assert.areSame(4, thisArg.ID, "orderBy failed.");
+            if ((1 !== thisArg.ID) && orderByError == "")
+                orderByError = "orderBy failed.";
+          break;
+        case 6:
+            //Y.Assert.areSame(1, thisArg.ID, "orderBy failed.");
+            if ((2 !== thisArg.ID) && orderByError == "")
+                orderByError = "orderBy failed.";
+          break;
+        case 7:
+            //Y.Assert.areSame(5, thisArg.ID, "orderBy failed.");
+            if ((7 !== thisArg.ID) && orderByError == "")
+                orderByError = "orderBy failed.";
+          break;
+        case 8:
+            //Y.Assert.areSame(8, thisArg.ID, "orderBy failed.");
+            if ((9 !== thisArg.ID) && orderByError == "")
+                orderByError = "orderBy failed.";
+          break;
+		 case 9:
+            //Y.Assert.areSame(8, thisArg.ID, "orderBy failed.");
+            if ((6 !== thisArg.ID) && orderByError == "")
+                orderByError = "orderBy failed.";
+          break;
+		 case 10:
+            //Y.Assert.areSame(8, thisArg.ID, "orderBy failed.");
+            if ((4 !== thisArg.ID) && orderByError == "")
+                orderByError = "orderBy failed.";
+          break;
+        default:
+            //Y.Assert.fail("orderBy failed.");
+            if (orderByError == "")
+                orderByError = "orderBy failed.";
+    }
+};
 function orderByAscendingTestDurationValues_BTree(thisArg, iterator)
 {
     switch(iterator+1)
@@ -1562,6 +1682,126 @@ function orderByAscendingTestDurationValues_BTree(thisArg, iterator)
 		 case 10:
             //Y.Assert.areSame(8, thisArg.ID, "orderBy failed.");
             if ((5 !== thisArg.ID) && orderByError == "")
+                orderByError = "orderBy failed.";
+          break;
+        default:
+            //Y.Assert.fail("orderBy failed.");
+            if (orderByError == "")
+                orderByError = "orderBy failed.";
+    }
+};
+function orderByAscendingTestDurationValues_Cluster(thisArg, iterator)
+{
+    switch(iterator+1)
+    {
+        case 1:
+            //Y.Assert.areSame(7,thisArg.ID , "orderBy failed.");
+            if ((4 !== thisArg.ID) && orderByError=="")
+                orderByError = "orderBy failed.";
+          break;
+        case 2:
+            //Y.Assert.areSame(2, thisArg.ID, "orderBy failed.");
+            if ((5 !== thisArg.ID) && orderByError == "")
+                orderByError = "orderBy failed.";
+          break;
+        case 3:
+            //Y.Assert.areSame(6, thisArg.ID, "orderBy failed.");
+            if ((3 !== thisArg.ID) && orderByError == "")
+                orderByError = "orderBy failed.";
+          break;
+        case 4:
+            //Y.Assert.areSame(3, thisArg.ID, "orderBy failed.");
+            if ((2 !== thisArg.ID) && orderByError == "")
+                orderByError = "orderBy failed.";
+          break;
+        case 5:
+            //Y.Assert.areSame(4, thisArg.ID, "orderBy failed.");
+            if ((8 !== thisArg.ID) && orderByError == "")
+                orderByError = "orderBy failed.";
+          break;
+        case 6:
+            //Y.Assert.areSame(1, thisArg.ID, "orderBy failed.");
+            if ((9 !== thisArg.ID) && orderByError == "")
+                orderByError = "orderBy failed.";
+          break;
+        case 7:
+            //Y.Assert.areSame(5, thisArg.ID, "orderBy failed.");
+            if ((7 !== thisArg.ID) && orderByError == "")
+                orderByError = "orderBy failed.";
+          break;
+        case 8:
+            //Y.Assert.areSame(8, thisArg.ID, "orderBy failed.");
+            if ((6 !== thisArg.ID) && orderByError == "")
+                orderByError = "orderBy failed.";
+          break;
+		 case 9:
+            //Y.Assert.areSame(8, thisArg.ID, "orderBy failed.");
+            if ((10 !== thisArg.ID) && orderByError == "")
+                orderByError = "orderBy failed.";
+          break;
+		 case 10:
+            //Y.Assert.areSame(8, thisArg.ID, "orderBy failed.");
+            if ((1 !== thisArg.ID) && orderByError == "")
+                orderByError = "orderBy failed.";
+          break;
+        default:
+            //Y.Assert.fail("orderBy failed.");
+            if (orderByError == "")
+                orderByError = "orderBy failed.";
+    }
+};
+function orderByDescendingTestDurationValues_Cluster(thisArg, iterator)
+{
+    switch(iterator+1)
+    {
+        case 1:
+            //Y.Assert.areSame(7,thisArg.ID , "orderBy failed.");
+            if ((1 !== thisArg.ID) && orderByError=="")
+                orderByError = "orderBy failed.";
+          break;
+        case 2:
+            //Y.Assert.areSame(2, thisArg.ID, "orderBy failed.");
+            if ((10 !== thisArg.ID) && orderByError == "")
+                orderByError = "orderBy failed.";
+          break;
+        case 3:
+            //Y.Assert.areSame(6, thisArg.ID, "orderBy failed.");
+            if ((6 !== thisArg.ID) && orderByError == "")
+                orderByError = "orderBy failed.";
+          break;
+        case 4:
+            //Y.Assert.areSame(3, thisArg.ID, "orderBy failed.");
+            if ((7 !== thisArg.ID) && orderByError == "")
+                orderByError = "orderBy failed.";
+          break;
+        case 5:
+            //Y.Assert.areSame(4, thisArg.ID, "orderBy failed.");
+            if ((9 !== thisArg.ID) && orderByError == "")
+                orderByError = "orderBy failed.";
+          break;
+        case 6:
+            //Y.Assert.areSame(1, thisArg.ID, "orderBy failed.");
+            if ((8 !== thisArg.ID) && orderByError == "")
+                orderByError = "orderBy failed.";
+          break;
+        case 7:
+            //Y.Assert.areSame(5, thisArg.ID, "orderBy failed.");
+            if ((2 !== thisArg.ID) && orderByError == "")
+                orderByError = "orderBy failed.";
+          break;
+        case 8:
+            //Y.Assert.areSame(8, thisArg.ID, "orderBy failed.");
+            if ((3!== thisArg.ID) && orderByError == "")
+                orderByError = "orderBy failed.";
+          break;
+		 case 9:
+            //Y.Assert.areSame(8, thisArg.ID, "orderBy failed.");
+            if ((5 !== thisArg.ID) && orderByError == "")
+                orderByError = "orderBy failed.";
+          break;
+		 case 10:
+            //Y.Assert.areSame(8, thisArg.ID, "orderBy failed.");
+            if ((4 !== thisArg.ID) && orderByError == "")
                 orderByError = "orderBy failed.";
           break;
         default:
@@ -2045,7 +2285,7 @@ function orderByDescendingTestNumberValues_Automatic(thisArg, iterator)
                 orderByError = "orderBy failed.";
           break;
         default:
-            //Y.Assert.fail("orderBy failed.");
+            //Y.Assert.fail("orderBy failed.");testOrderBy_TypeDurationAsc_ClusterIndexedAttribute
             if (orderByError == "")
                 orderByError = "orderBy failed.";
     }
@@ -2190,7 +2430,7 @@ var testCase = {
     },
 	//type Date
 	testOrderBy_TypeDateAsc_BTreeIndexedAttribute: function() {
-        var entityColAsc = ds.MyClass_IndexedAttributes.orderBy('cdate_Btree asc');
+        var entityColAsc = ds.IndexedDate.orderBy('cdate_Btree asc');
 
         orderByError = "";
         entityColAsc.forEach(orderByAscendingTestDateValues_Btree);
@@ -2198,7 +2438,7 @@ var testCase = {
             Y.Assert.fail(orderByError);
     },
     testOrderBy_TypeDateDesc_BTreeIndexedAttribute: function() {
-        var entityColDesc = ds.MyClass_IndexedAttributes.orderBy('cdate_Btree desc');
+        var entityColDesc = ds.IndexedDate.orderBy('cdate_Btree desc');
 
         orderByError = "";
         entityColDesc.forEach(orderByDescendingTestDateValues_Btree);
@@ -2206,50 +2446,50 @@ var testCase = {
             Y.Assert.fail(orderByError);
     },
 	testOrderBy_TypeDateAsc_ClusterIndexedAttribute: function() {
-        var entityColAsc = ds.MyClass_IndexedAttributes.orderBy('cdate_Cluster asc');
+        var entityColAsc = ds.IndexedDate.orderBy('cdate_Cluster asc');
 
         orderByError = "";
-        entityColAsc.forEach(orderByAscendingTestDateValues_Cluster);
+        entityColAsc.forEach(orderByAscendingTestDateValues_Btree);
         if (orderByError != "")
             Y.Assert.fail(orderByError);
     },
     testOrderBy_TypeDateDesc_ClusterIndexedAttribute: function() {
-        var entityColDesc = ds.MyClass_IndexedAttributes.orderBy('cdate_Cluster desc');
+        var entityColDesc = ds.IndexedDate.orderBy('cdate_Cluster desc');
 
         orderByError = "";
-        entityColDesc.forEach(orderByDescendingTestDateValues_Cluster);
+        entityColDesc.forEach(orderByDescendingTestDateValues_Btree);
         if (orderByError != "")
             Y.Assert.fail(orderByError);
     },
 	testOrderBy_TypeDateAsc_KeywordsIndexedAttribute: function() {
-        var entityColAsc = ds.MyClass_IndexedAttributes.orderBy('cdate_Keywords asc');
+        var entityColAsc = ds.IndexedDate.orderBy('cdate_Keywords asc');
 
         orderByError = "";
-        entityColAsc.forEach(orderByAscendingTestDateValues_Keywords);
+        entityColAsc.forEach(orderByAscendingTestDateValues_Btree);
         if (orderByError != "")
             Y.Assert.fail(orderByError);
     },
     testOrderBy_TypeDateDesc_KeywordsIndexedAttribute: function() {
-        var entityColDesc = ds.MyClass_IndexedAttributes.orderBy('cdate_Keywords desc');
+        var entityColDesc = ds.IndexedDate.orderBy('cdate_Keywords desc');
 
         orderByError = "";
-        entityColDesc.forEach(orderByDescendingTestDateValues_Keywords);
+        entityColDesc.forEach(orderByDescendingTestDateValues_Btree);
         if (orderByError != "")
             Y.Assert.fail(orderByError);
     },
 	testOrderBy_TypeDateAsc_AutomaticIndexedAttribute: function() {
-        var entityColAsc = ds.MyClass_IndexedAttributes.orderBy('cdate_Automatic asc');
+        var entityColAsc = ds.IndexedDate.orderBy('cdate_Automatic asc');
 
         orderByError = "";
-        entityColAsc.forEach(orderByAscendingTestDateValues_Automatic);
+        entityColAsc.forEach(orderByAscendingTestDateValues_Btree);
         if (orderByError != "")
             Y.Assert.fail(orderByError);
     },
     testOrderBy_TypeDateDesc_AutomaticIndexedAttribute: function() {
-        var entityColDesc = ds.MyClass_IndexedAttributes.orderBy('cdate_Automatic desc');
+        var entityColDesc = ds.IndexedDate.orderBy('cdate_Automatic desc');
 
         orderByError = "";
-        entityColDesc.forEach(orderByDescendingTestDateValues_Automatic);
+        entityColDesc.forEach(orderByDescendingTestDateValues_Btree);
         if (orderByError != "")
             Y.Assert.fail(orderByError);
     },
@@ -2274,7 +2514,7 @@ var testCase = {
         var entityColAsc = ds.MyClass_IndexedAttributes.orderBy('cduration_Cluster asc');
 
         orderByError = "";
-        entityColAsc.forEach(orderByAscendingTestNumberValues_Cluster);
+        entityColAsc.forEach(orderByAscendingTestDurationValues_Cluster);
         if (orderByError != "")
             Y.Assert.fail(orderByError);
     },
@@ -2282,7 +2522,7 @@ var testCase = {
         var entityColDesc = ds.MyClass_IndexedAttributes.orderBy('cduration_Cluster desc');
 
         orderByError = "";
-        entityColDesc.forEach(orderByDescendingTestNumberValues_Cluster);
+        entityColDesc.forEach(orderByDescendingTestDurationValues_Cluster);
         if (orderByError != "")
             Y.Assert.fail(orderByError);
     },
@@ -2290,7 +2530,7 @@ var testCase = {
         var entityColAsc = ds.MyClass_IndexedAttributes.orderBy('cduration_Keywords asc');
 
         orderByError = "";
-        entityColAsc.forEach(orderByAscendingTestNumberValues_Keywords);
+        entityColAsc.forEach(orderByAscendingTestDurationValues_Keywords);
         if (orderByError != "")
             Y.Assert.fail(orderByError);
     },
@@ -2298,7 +2538,7 @@ var testCase = {
         var entityColDesc = ds.MyClass_IndexedAttributes.orderBy('cduration_Keywords desc');
 
         orderByError = "";
-        entityColDesc.forEach(orderByDescendingTestNumberValues_Keywords);
+        entityColDesc.forEach(orderByDescendingTestDurationValues_Keywords);
         if (orderByError != "")
             Y.Assert.fail(orderByError);
     },

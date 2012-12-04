@@ -2223,6 +2223,12 @@ VError VProject::BuildFileURLString(VString &outFileURL, VProjectItem* inProject
 					{
 						if ( outFileURL [ outFileURL. GetLength ( ) - 1 ] != '/')
 							outFileURL += '/';
+
+						VString extension = "." + RIAFileKind::kPageFolderExtension + "/";
+
+						if ( relativePath.EndsWith( extension ) )
+							relativePath.Remove( relativePath.GetLength() - extension.GetLength() + 1, extension.GetLength() - 1 );
+
 						outFileURL += relativePath;
 					}
 					else

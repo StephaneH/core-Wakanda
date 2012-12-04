@@ -1,18 +1,3 @@
-/*
-* This file is part of Wakanda software, licensed by 4D under
-*  (i) the GNU General Public License version 3 (GNU GPL v3), or
-*  (ii) the Affero General Public License version 3 (AGPL v3) or
-*  (iii) a commercial license.
-* This file remains the exclusive property of 4D and/or its licensors
-* and is protected by national and international legislations.
-* In any event, Licensee's compliance with the terms and conditions
-* of the applicable license constitutes a prerequisite to any use of this file.
-* Except as otherwise expressly stated in the applicable license,
-* such license does not include any other license or rights on this file,
-* 4D's and/or its licensors' trademarks and/or other proprietary rights.
-* Consequently, no title, copyright or other proprietary rights
-* other than those specified in the applicable license is granted.
-*/
 /**
  *
  * Updated September 28, 2011 - High-level client-side JavaScript API for managing datasources based on the server or locally.
@@ -35,7 +20,7 @@ WAF.DataSource = function WAF_DataSource() {
     
     
     /**
-     * returns the current element of the datasource to which it is applied
+     * returns the current element of the datasource
      *
      * @method getCurrentElement
      * @return {Entity | Object}
@@ -43,7 +28,7 @@ WAF.DataSource = function WAF_DataSource() {
     this.getCurrentElement = function getCurrentElement() {        return new Entity( ) || {};     };
     
     /**
-     * declares the relation attribute(s) of the datasource whose  values you want to precalculate when creating or updating its current  entity or entity collection from the server (always Undefined for local datasources)
+     * declares the datasource&#39;s relation attribute(s) whose  values you want to precalculate when creating or updating the current  entity or entity collection from the server (always Undefined for local datasources)
      *
      * @method declareDependencies
      * @param {String} attributePath
@@ -51,35 +36,32 @@ WAF.DataSource = function WAF_DataSource() {
     this.declareDependencies = function declareDependencies(attributePath) {             };
     
     /**
-     * selects the previous element (if any) in the datasource to which it is applied
+     * selects the previous element (if any) in the datasource
      *
      * @method selectPrevious
      * @param {Object} options
-     * @param {Object} userData
      */
-    this.selectPrevious = function selectPrevious(options, userData) {             };
+    this.selectPrevious = function selectPrevious(options) {             };
     
     /**
-     * selects the next element (if any) in the datasource to which it is applied
+     * selects the next element (if any) in the datasource
      *
      * @method selectNext
      * @param {Object} options
-     * @param {Object} userData
      */
-    this.selectNext = function selectNext(options, userData) {             };
+    this.selectNext = function selectNext(options) {             };
     
     /**
-     * selects the element whose position is passed in the position parameter in the datasource to which it is applied
+     * selects the element whose position in the datasource is passed in the position parameter
      *
      * @method select
      * @param {Number} position
      * @param {Object} options
-     * @param {Object} userData
      */
-    this.select = function select(position, options, userData) {             };
+    this.select = function select(position, options) {             };
     
     /**
-     * returns the position of the current entity within the current entity collection for a server datasource or returns the position of the current element within a local datasource of the Array type
+     * returns the position of the current entity in the entity collection for a server datasource or the position of the current element in a local datasource of type Array
      *
      * @method getPosition
      * @return {Number}
@@ -87,7 +69,7 @@ WAF.DataSource = function WAF_DataSource() {
     this.getPosition = function getPosition() {        return 0;     };
     
     /**
-     * retrieves the element whose position is passed in the position parameter in the datasource to which it is applied but without changing the current element
+     * retrieves the element whose position in the datasource is passed in the position parameter while leaving the current element unchanged
      *
      * @method getElement
      * @param {Number} position
@@ -97,15 +79,16 @@ WAF.DataSource = function WAF_DataSource() {
     this.getElement = function getElement(position, options, userData) {             };
     
     /**
-     * simulates the generation of an event that did not occur for the datasource to which it is applied
+     * simulates the generation of an event that did not occur for the datasource
      *
      * @method dispatch
      * @param {String} eventKind
+     * @param {Object} options
      */
-    this.dispatch = function dispatch(eventKind) {             };
+    this.dispatch = function dispatch(eventKind, options) {             };
     
     /**
-     * calls the datasource manager which looks for any values modified in the datasource and then generates the corresponding events so as to notify any listeners and widgets that are subscribed to them
+     * calls the datasource manager that looks for any values modified in the datasource and then generates the corresponding events so as to notify any listeners and widgets that are subscribed to them
      *
      * @method autoDispatch
      * @param {Object} options
@@ -113,7 +96,7 @@ WAF.DataSource = function WAF_DataSource() {
     this.autoDispatch = function autoDispatch(options) {             };
     
     /**
-     * adds a new listener to a specific event of the datasource to which it is applied
+     * adds a new listener to a specific datasource event
      *
      * @method addListener
      * @param {String} eventKind
@@ -124,7 +107,7 @@ WAF.DataSource = function WAF_DataSource() {
     this.addListener = function addListener(eventKind, eventHandler, userData) {        return 0;     };
     
     /**
-     * returns the ID (i.e., the name) of the datasource as it is defined in the GUI Designer
+     * returns the ID (i.e., the name) of the datasource as it was defined in the GUI Designer
      *
      * @method getID
      * @return {String}
@@ -132,7 +115,7 @@ WAF.DataSource = function WAF_DataSource() {
     this.getID = function getID() {        return '';     };
     
     /**
-     * returns an object containing the datasource attribute whose name or path is passed in the attributeName parameter as well as its properties
+     * returns an object containing the datasource&#39;s attribute (and its properties) whose name or path is passed in the attributeName parameter
      *
      * @method getAttribute
      * @param {String} attributeName
@@ -141,16 +124,15 @@ WAF.DataSource = function WAF_DataSource() {
     this.getAttribute = function getAttribute(attributeName) {        return new DatasourceAttribute( );     };
     
     /**
-     * gets the values of the current entity from the server as they  will be (or have been) saved in the end in the datastore (always Undefined for local datasources)
+     * retrieves the values of the current entity from the server as they  will be (or have been) saved in the datastore (always Undefined for local datasources)
      *
      * @method serverRefresh
      * @param {Object} options
-     * @param {Object} userData
      */
-    this.serverRefresh = function serverRefresh(options, userData) {             };
+    this.serverRefresh = function serverRefresh(options) {             };
     
     /**
-     * returns True when the current element of the datasource is new and has never been saved on the server; or False othewise (always False for local datasources)
+     * returns True when the datasource&#39;s current element is new and has not been saved on the server. Otherwise, it returns False (always False for local datasources)
      *
      * @method isNewElement
      * @return {Boolean}
@@ -158,14 +140,14 @@ WAF.DataSource = function WAF_DataSource() {
     this.isNewElement = function isNewElement() {        return true;     };
     
     /**
-     * removes all the listeners set for the datasource to which it is applied
+     * removes all the listeners for the datasource
      *
      * @method removeAllListeners
      */
     this.removeAllListeners = function removeAllListeners() {             };
     
     /**
-     * removes the listener whose ID number you passed in the&amp;nbsp;params parameter
+     * removes the listener whose ID you passed in the&amp;nbsp;params parameter
      *
      * @method removeListener
      * @param {Object} params
@@ -189,7 +171,7 @@ WAF.DataSourceEm = function WAF_DataSourceEm() {
     
     
     /**
-     * changes the current entity in the datasource to which it is applied to the entity passed in the entity parameter
+     * changes the datasource&#39;s current entity to the entity passed in the entity parameter
      *
      * @method setCurrentEntity
      * @param {Entity} entity
@@ -202,22 +184,20 @@ WAF.DataSourceEm = function WAF_DataSourceEm() {
      * @method toArray
      * @param {String} attributeList
      * @param {Object} options
-     * @param {Object} userData
      */
-    this.toArray = function toArray(attributeList, options, userData) {             };
+    this.toArray = function toArray(attributeList, options) {             };
     
     /**
-     * replaces the current entity collection of the datasource to which it is applied by the one passed in the newCollection parameter.
+     * replaces the datasource&#39;s current entity collection by the one passed in the newCollection parameter.
      *
      * @method setEntityCollection
      * @param {EntityCollection} newCollection
      * @param {Object} options
-     * @param {Object} userData
      */
-    this.setEntityCollection = function setEntityCollection(newCollection, options, userData) {             };
+    this.setEntityCollection = function setEntityCollection(newCollection, options) {             };
     
     /**
-     * executes a datastore class method on the server datasource where it is defined
+     * executes a datastore class method defined for a server datasource
      *
      * @method callMethod
      * @param {Object} options
@@ -227,34 +207,31 @@ WAF.DataSourceEm = function WAF_DataSourceEm() {
     this.callMethod = function callMethod(options, params) {        return 0 || '' || true || {} || null;     };
     
     /**
-     * returns an array containing all the distinct values stored in the attribute attribute for the current entity collection of the datasource to which it is applied
+     * returns an array containing all the distinct values stored in attribute for the datasource&#39;s current entity collection
      *
      * @method distinctValues
      * @param {DatasourceAttribute} attributeName
      * @param {Object} options
-     * @param {Object} userData
      */
-    this.distinctValues = function distinctValues(attributeName, options, userData) {             };
+    this.distinctValues = function distinctValues(attributeName, options) {             };
     
     /**
-     * searches for entities meeting the search criteria specified in queryString among all the entities of the datastore class for the datasource to which it is applied
+     * searches for entities meeting the search criteria specified in queryString among all the entities in the datasource&#39;s datastore class
      *
      * @method query
      * @param {String} queryString
      * @param {Object} options
-     * @param {Object} userData
      */
-    this.query = function query(queryString, options, userData) {             };
+    this.query = function query(queryString, options) {             };
     
     /**
-     * sorts the current entity collection of the datasource to which it is applied
+     * sorts the datasource&#39;s current entity collection
      *
      * @method orderBy
      * @param {String} sortOrder
      * @param {Object} options
-     * @param {Object} userData
      */
-    this.orderBy = function orderBy(sortOrder, options, userData) {             };
+    this.orderBy = function orderBy(sortOrder, options) {             };
     
     /**
      * same as query() method except it restricts the  search to the current entity collection of the datasource to which it is  applied
@@ -262,21 +239,19 @@ WAF.DataSourceEm = function WAF_DataSourceEm() {
      * @method filterQuery
      * @param {String} queryString
      * @param {Object} options
-     * @param {Object} userData
      */
-    this.filterQuery = function filterQuery(queryString, options, userData) {             };
+    this.filterQuery = function filterQuery(queryString, options) {             };
     
     /**
-     * returns in the current entity collection of the datasource to which it is applied, all the entities of the datastore class of the datasource
+     * returns all the server datasource&#39;s entities in its current entity collection
      *
      * @method allEntities
      * @param {Object} options
-     * @param {Object} userData
      */
-    this.allEntities = function allEntities(options, userData) {             };
+    this.allEntities = function allEntities(options) {             };
     
     /**
-     * returns the title (i.e. the name) of the datastore class to which the server datasource is attached in the form of a String.
+     * returns the title (i.e., the name) of the datastore class to which the server datasource is attached.
      *
      * @method getClassTitle
      * @return {String}
@@ -284,7 +259,7 @@ WAF.DataSourceEm = function WAF_DataSourceEm() {
     this.getClassTitle = function getClassTitle() {        return '';     };
     
     /**
-     * returns an object containing the attribute whose name or path (relation attribute) is passed in the attributeName parameter and its properties
+     * returns an object containing the attribute along with its properties whose name or path (relation attribute) is passed in the attributeName parameter
      *
      * @method getClassAttributeByName
      * @param {String} attributeName
@@ -293,7 +268,7 @@ WAF.DataSourceEm = function WAF_DataSourceEm() {
     this.getClassAttributeByName = function getClassAttributeByName(attributeName) {        return new DatastoreClassAttribute( );     };
     
     /**
-     * returns the datastore class from which the server datasource comes
+     * returns the datastore class of the server datasource
      *
      * @method getDataClass
      * @return {DatastoreClass}
@@ -301,7 +276,7 @@ WAF.DataSourceEm = function WAF_DataSourceEm() {
     this.getDataClass = function getDataClass() {        return new DatastoreClass( );     };
     
     /**
-     * returns the current entity collection of the datasource to which it is applied
+     * returns the datasource&#39;s current entity collection
      *
      * @method getEntityCollection
      * @return {EntityCollection}
@@ -326,43 +301,39 @@ WAF.DataSourceEm = function WAF_DataSourceEm() {
     this.getAttributeNames = function getAttributeNames() {        return [];     };
     
     /**
-     * saves, on the server, the current entity of the datasource to which it is applied
+     * saves the datasource&#39;s current entity on the server
      *
      * @method save
      * @param {Object} options
-     * @param {Object} userData
      */
-    this.save = function save(options, userData) {             };
+    this.save = function save(options) {             };
     
     /**
      * creates a new blank entity in the datasource to which it is applied and makes it the new current entity
      *
      * @method newEntity
      * @param {Object} options
-     * @param {Object} userData
      */
-    this.newEntity = function newEntity(options, userData) {             };
+    this.newEntity = function newEntity(options) {             };
     
     /**
-     * deletes the current element of the datasource to which it is applied
+     * deletes the current element of the datasource
      *
      * @method removeCurrent
      * @param {Object} options
-     * @param {Object} userData
      */
-    this.removeCurrent = function removeCurrent(options, userData) {             };
+    this.removeCurrent = function removeCurrent(options) {             };
     
     /**
-     * adds a new blank element locally to the datasource to which it is applied
+     * adds a new blank element locally to the datasource
      *
      * @method addNewElement
      * @param {Object} options
-     * @param {Object} userData
      */
-    this.addNewElement = function addNewElement(options, userData) {             };
+    this.addNewElement = function addNewElement(options) {             };
     
     /**
-     * adds the entity passed as parameter to the current entity collection of the datasource to which it is applied
+     * adds the entity passed as the parameter to the current entity collection of the datasource
      *
      * @method addEntity
      * @param {Entity} entity
@@ -370,14 +341,22 @@ WAF.DataSourceEm = function WAF_DataSourceEm() {
     this.addEntity = function addEntity(entity) {             };
     
     /**
-     * replaces the current entity collection of the datasource to which it is applied by the Selection you passed in the entitySelection parameter
+     * replaces the datasource&#39;s current entity collection with the Selection passed in the entitySelection parameter
      *
      * @method buildFromSelection
      * @param {Selection} entitySelection
      * @param {Object} options
-     * @param {Object} userData
      */
-    this.buildFromSelection = function buildFromSelection(entitySelection, options, userData) {             };
+    this.buildFromSelection = function buildFromSelection(entitySelection, options) {             };
+    
+    /**
+     * sets the current element of the datasource to the entity whose primary key is passed in the key parameter
+     *
+     * @method selectByKey
+     * @param {Number | String} key
+     * @param {Object} options
+     */
+    this.selectByKey = function selectByKey(key, options) {             };
     
 
 };
@@ -388,14 +367,14 @@ WAF.DataSourceVar = function WAF_DataSourceVar() {
     
     
     /**
-     * synchronizes a local datasource with the variable, array or object on which it is based
+     * synchronizes a local datasource with the Variable, Array, or Object to which it is based
      *
      * @method sync
      */
     this.sync = function sync() {             };
     
     /**
-     * returns the name of the JavaScript variable, array or object to which the local datasource is binded
+     * returns the name of the JavaScript variable, array or object to which the local datasource is bound
      *
      * @method getClassTitle
      * @return {String}
@@ -417,7 +396,7 @@ WAF.DataSourceVar = function WAF_DataSourceVar() {
     this.resolveSource = function resolveSource() {             };
     
     /**
-     * returns an object containing the attribute whose name or path (relation attribute) is passed in the attributeName parameter and its properties
+     * returns an object containing the attribute along with its properties whose name or path (relation attribute) is passed in the attributeName parameter
      *
      * @method getClassAttributeByName
      * @param {String} attributeName
@@ -426,7 +405,7 @@ WAF.DataSourceVar = function WAF_DataSourceVar() {
     this.getClassAttributeByName = function getClassAttributeByName(attributeName) {        return new DatastoreClassAttribute( );     };
     
     /**
-     * returns an object containing the attributes of the JavaScript variable to which the local datasource is binded
+     * returns an object containing the attributes of the JavaScript variable to which the local datasource is bound
      *
      * @method getDataClass
      * @return {Object}
@@ -441,7 +420,7 @@ WAF.DataSourceVar = function WAF_DataSourceVar() {
     this.save = function save() {             };
     
     /**
-     * returns the current value of the attribute named attributeName in the local datasource of the Array type to which it is applied
+     * returns the current value of the attribute attributeName in the local datasource of type Array
      *
      * @method getAttributeValue
      * @param {String} attributeName
@@ -450,7 +429,7 @@ WAF.DataSourceVar = function WAF_DataSourceVar() {
     this.getAttributeValue = function getAttributeValue(attributeName) {        return 0 || '' || true || {} || null;     };
     
     /**
-     * returns in a string array the names of all the attributes for the local datasource of the Array type to which it is applied
+     * returns the names of all the attributes for the local datasource of type Array in an Array of type String
      *
      * @method getAttributeNames
      * @return {Array}
@@ -458,16 +437,15 @@ WAF.DataSourceVar = function WAF_DataSourceVar() {
     this.getAttributeNames = function getAttributeNames() {        return [];     };
     
     /**
-     * deletes the current element of the datasource to which it is applied
+     * deletes the current element of the datasource
      *
      * @method removeCurrent
      * @param {Object} options
-     * @param {Object} userData
      */
-    this.removeCurrent = function removeCurrent(options, userData) {             };
+    this.removeCurrent = function removeCurrent(options) {             };
     
     /**
-     * adds a new blank element locally to the datasource to which it is applied
+     * adds a new blank element locally to the datasource
      *
      * @method addNewElement
      * @param {Object} options
@@ -483,16 +461,15 @@ WAF.DataSourceEmRelatedAttributeValue = function WAF_DataSourceEmRelatedAttribut
     
     
     /**
-     * retrieves the related entity of the relation attribute for the current entity of the datasource to which it is applied
+     * retrieves the entity for the relation attribute in the datasource&#39;s current entity
      *
      * @method load
      * @param {Object} options
-     * @param {Object} userData
      */
-    this.load = function load(options, userData) {             };
+    this.load = function load(options) {             };
     
     /**
-     * assigns the entity to the relation attribute of the current entity of the datasource to which it is applied
+     * assigns the entity to the relation attribute of the datasource&#39;s current entity
      *
      * @method set
      * @param {DataSource | Entity | Null} entity
@@ -508,7 +485,7 @@ WAF.DataSourceEmSimpleAttribute = function WAF_DataSourceEmSimpleAttribute() {
     
     
     /**
-     * installs a listener on the attribute of the datasource to which it is applied
+     * installs a listener on the datasource&#39;s attribute
      *
      * @method addListener
      * @param {Function} eventHandler
@@ -534,7 +511,7 @@ WAF.DataSourceEmSimpleAttribute = function WAF_DataSourceEmSimpleAttribute() {
     this. = function (value) {        return 0 || '' || true || {} || null;     };
     
     /**
-     * returns the current value of the attribute to which it is applied in a form compatible with input in a widget
+     * returns the current value of the attribute in a form compatible with input in a widget
      *
      * @method getValueForInput
      * @return {String}
@@ -542,7 +519,7 @@ WAF.DataSourceEmSimpleAttribute = function WAF_DataSourceEmSimpleAttribute() {
     this.getValueForInput = function getValueForInput() {        return '';     };
     
     /**
-     * returns the previous value of the datasource attribute to which it is applied
+     * returns the previous value of the datasource attribute
      *
      * @method getOldValue
      * @return {Mixed}
@@ -550,7 +527,7 @@ WAF.DataSourceEmSimpleAttribute = function WAF_DataSourceEmSimpleAttribute() {
     this.getOldValue = function getOldValue() {        return 0 || '' || true || {} || null;     };
     
     /**
-     * returns the current value of the datastore class type datasource attribute to which it is applied
+     * returns the current value of the datasource&#39;s attribute (from a datastore class)
      *
      * @method getValue
      * @return {Mixed}

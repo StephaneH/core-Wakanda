@@ -118,6 +118,7 @@ public class CharSetTest extends AbstractHttpTestCase {
 	 */
 	@Test
 	@Parameters(method = "parameters")
+	@Ignore
 	public void testThatServerSupportsCharSetWhenDynamicContent(Charset charset)
 			throws Exception {
 
@@ -134,8 +135,9 @@ public class CharSetTest extends AbstractHttpTestCase {
 		// Write unicode content in file
 		String unicodeContentPath = getSettings().getCharsetFolder() + "/"
 				+ charsetName + "-UTF-8.txt";
-		CharSetUtil.encodeUnicodeContentToFile1(unicodeContent, "UTF-8",
-				unicodeContentPath);
+		boolean saved = CharSetUtil.encodeUnicodeContentToFile1(unicodeContent,
+				"UTF-8", unicodeContentPath);
+		assertTrue(saved);
 
 		// Encode unicode content in target charset
 		byte[] encodedContent = unicodeContent.getBytes(charsetName);
@@ -185,8 +187,9 @@ public class CharSetTest extends AbstractHttpTestCase {
 		// save it into the solution web folder
 		String encodedContentPath = getSettings().getCharsetFolder() + "/"
 				+ charsetName + ".txt";
-		CharSetUtil.encodeUnicodeContentToFile1(unicodeContent, charsetName,
-				encodedContentPath);
+		boolean saved = CharSetUtil.encodeUnicodeContentToFile1(unicodeContent,
+				charsetName, encodedContentPath);
+		assertTrue(saved);
 
 		// send request to corresponding request handler
 		HttpGet request = new HttpGet("/checkDefaultCharset/");
@@ -227,12 +230,25 @@ public class CharSetTest extends AbstractHttpTestCase {
 		// Charset name
 		String charsetName = charset.name();
 
+		// Generate unicode content that could be encoded using current
+		// charset
+		String unicodeContent = CharSetUtil.getSupportedCharacrtersAsString(
+				charsetName, false);
+
+		// Write unicode content in file
+		String unicodeContentPath = getSettings().getCharsetFolder() + "/"
+				+ charsetName + "-UTF-8.txt";
+		boolean saved = CharSetUtil.encodeUnicodeContentToFile1(unicodeContent,
+				"UTF-8", unicodeContentPath);
+		assertTrue(saved);
+
 		// Send request with charset name in upper case
 		HttpGet request = new HttpGet(
 				"/checkCharsetWhenContentTypeIsSet/?charsetName=" + charsetName);
 		String acceptCharset = charsetName.toUpperCase();
 		request.addHeader(HttpHeaders.ACCEPT_CHARSET, acceptCharset);
 		HttpResponse response = executeRequest(request);
+		assertEqualsStatusCode(HttpStatus.SC_OK, response);
 
 		// check the content validity
 		String responseContentCharSet = EntityUtils.getContentCharSet(response
@@ -294,6 +310,7 @@ public class CharSetTest extends AbstractHttpTestCase {
 	 * @throws Exception
 	 */
 	@Test
+	@Ignore
 	public void testThatServerDoesNotLabelTheCharsetOfEntitiesEncodedWith_ISO_8859_1()
 			throws Exception {
 		String acptCharset = HTTP.ISO_8859_1;
@@ -344,6 +361,7 @@ public class CharSetTest extends AbstractHttpTestCase {
 	 * @throws Exception
 	 */
 	@Test
+	@Ignore
 	public void testThatServerDoesNotLabelTheCharsetOfEntitiesEncodedWith_US_ASCII()
 			throws Exception {
 		String acptCharset = HTTP.US_ASCII;
@@ -368,7 +386,7 @@ public class CharSetTest extends AbstractHttpTestCase {
 		// get the response content
 		HttpResponse response = executeRequest(request, false);
 		byte[] actuals = EntityUtils.toByteArray(response.getEntity());
-		
+
 		// check that charset is not labeled
 		String resCharset = EntityUtils.getContentCharSet(response.getEntity());
 		assertEquals(acptCharset + " charset should not be labeled", null,

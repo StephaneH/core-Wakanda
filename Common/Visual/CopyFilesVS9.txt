@@ -258,6 +258,3 @@ LA______mAsA %Depot%Wakanda\%Branch%\Common\Resources\
 LA______mAs_ %Depot%CoreRuntime\%Branch%\Resources\gram.4dsyntax
 LA______mAs_ %Depot%CoreRuntime\%Branch%\Resources\default.4DSettings
 LA______mAs_ [%Target%Resources\Templates\Blank\WebFolder\images\]
-
-LA______m_sA [%Target%Resources\wkhtmltopdf\]
-L*______m_sA %Depot%Wakanda\%Branch%\Server\Resources\wkhtmltopdf.WIN\

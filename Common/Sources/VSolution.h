@@ -44,7 +44,7 @@ class ISolutionMessageManager : public XBOX::IRefCountable
 public:
 	virtual void CheckErrorStack() const = 0;
 	virtual void DisplayMessage(const XBOX::VString& inMessage) const = 0;
-	virtual bool DisplayOkCancelMessage(const XBOX::VString& inTitle, const XBOX::VString& inMessage) const = 0;
+	virtual bool DisplayOkCancelMessage(const XBOX::VString& inMessage) const = 0;
 	virtual void GetLocalizedStringFromError(const XBOX::VError inError, XBOX::VString& outLocalizedString) const = 0;
 	virtual void GetLocalizedStringFromResourceName(const XBOX::VString& inResName, XBOX::VString& outLocalizedString) const = 0;
 };

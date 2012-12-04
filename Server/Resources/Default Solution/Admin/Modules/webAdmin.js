@@ -32,7 +32,8 @@ exports.Files = function files(option) {
 		folderlog,
 		recentSolution,
 		newSolutionOpen,
-		logFilePathHash;
+		logFilePathHash,
+                dataFolderName;
 	
 	sol = null;
 	
@@ -51,16 +52,23 @@ exports.Files = function files(option) {
 		}
 		
 		if((sol != null) && ( typeof sol != 'undefined')) {
+                    
 			app = sol.getApplicationByName(option.applicationName);
-
-			if((app.getItemsWithRole("data") == null) || ( typeof app.getItemsWithRole("data") == 'undefined')) {
+                        //data folder in wak2 called data and in wak3 called dataFolder 
+                        if(Folder.isFolder(app.getFolder().path+"DataFolder")){
+                           dataFolderName =  "dataFolder";
+                        } else {
+                           dataFolderName =  "data"; 
+                        }
+                        
+			if((app.getItemsWithRole(dataFolderName) == null) || ( typeof app.getItemsWithRole(dataFolderName) == 'undefined')) {
 
 				obj = {};
 				obj.files = [];
 			} else {
 
-				dataPath = app.getItemsWithRole("data").path;
-				dataPath = dataPath.replace(app.getItemsWithRole("data").name, "");
+				dataPath = app.getItemsWithRole(dataFolderName).path;
+				dataPath = dataPath.replace(app.getItemsWithRole(dataFolderName).name+"/", "");
 	
 				folderlog = Folder(dataPath + 'Logs');
 	
@@ -166,7 +174,7 @@ exports.setService = function set_service(applicationName, serviceName, enable) 
 		application;
 	
 	application = solution.getApplicationByName(applicationName);
-	service = application[serviceName]; (enable) ? service.enable() : service.disable();
+	service = application[serviceName];(enable) ? service.enable() : service.disable();
 
 	return service.enabled;
 }
@@ -354,13 +362,16 @@ exports.getSettingsFilesForApp = function get_settings_files_for_app(appName) {
 
 exports.getSolution = function get_solution() {
 	var i,
-		app,
-		obj,
-		dataPath,
-		folderlog,
-		rpcService,
-		webAppService,
-		dataStoreService;
+        app,
+        obj,
+        dataPath,
+        folderlog,
+        rpcService,
+        webAppService,
+        dataStoreService,
+        dataFolderName; // this var is created to maintain a compatibily between WAK3 and WAK2
+        
+        
 	
 	obj = {};
 	obj.name = solution.name;
@@ -370,6 +381,12 @@ exports.getSolution = function get_solution() {
 	obj.applications = [];
 
 	for(i = 0; i < solution.applications.length; i++) {
+            //data folder in wak2 called data and in wak3 called dataFolder 
+            if(Folder.isFolder(solution.applications[i].getFolder().path+"DataFolder")){
+               dataFolderName =  "dataFolder";
+            } else {
+               dataFolderName =  "data"; 
+            }
 		
 		app = {};
 		app.name = solution.applications[i].name;
@@ -386,12 +403,12 @@ exports.getSolution = function get_solution() {
 			app.waModelshort = "";
 		}
 		
-		if((solution.applications[i].getItemsWithRole("data") != null) && ( typeof solution.applications[i].getItemsWithRole("data") != 'undefined')) {
+		if((solution.applications[i].getItemsWithRole(dataFolderName) != null) && ( typeof solution.applications[i].getItemsWithRole(dataFolderName) != 'undefined')) {
 			
-			app.waData = solution.applications[i].getItemsWithRole("data").path;
+			app.waData = solution.applications[i].getItemsWithRole(dataFolderName).path;
 
 			dataPath = app.waData;
-			dataPath = dataPath.replace(solution.applications[i].getItemsWithRole("data").name, "");
+			dataPath = dataPath.replace(solution.applications[i].getItemsWithRole(dataFolderName).name+"/", "");
 
 			app.files = [];
 
@@ -469,159 +486,166 @@ exports.getSolution = function get_solution() {
 
 exports.getSolutionMaintenance = function get_solution_maintenance(hash) {
 	
-	var i,
-		sol,
-		obj,
-		app,
-		dataPath,
-		folderlog,
-		rpcService,
-		application,
-		webAppService,
-		recentSolution,
-		recentSolutions,
-		dataStoreService;
+    var i,
+    sol,
+    obj,
+    app,
+    dataPath,
+    folderlog,
+    rpcService,
+    application,
+    webAppService,
+    recentSolution,
+    recentSolutions,
+    dataStoreService,
+    dataFolderName;
 	
-	try {
+    try {
 		
-		sol = null;
-		recentSolution = null;
-		recentSolutions = storage.recentSolutions;
+        sol = null;
+        recentSolution = null;
+        recentSolutions = storage.recentSolutions;
 		
-		if(recentSolutions.hasOwnProperty(hash)) {
-			recentSolution = recentSolutions[hash];
-		}
+        if(recentSolutions.hasOwnProperty(hash)) {
+            recentSolution = recentSolutions[hash];
+        }
 		
-		obj = {};
+        obj = {};
 		
-		if(recentSolution !== null) {
-			sol = internal.openSolution(recentSolution.path, 2);
+        if(recentSolution !== null) {
+            sol = internal.openSolution(recentSolution.path, 2);
 			
-			if((sol !== null) && ( typeof sol !== 'undefined')) {
+            if((sol !== null) && ( typeof sol !== 'undefined')) {
 	
-				obj.name = sol.name;
-				obj.hash = hex_md5(recentSolution.path);
-				obj.applications = [];
-				obj.settings = getSettingsFromSolution(sol);
+                obj.name = sol.name;
+                obj.hash = hex_md5(recentSolution.path);
+                obj.applications = [];
+                obj.settings = getSettingsFromSolution(sol);
 	
-				for(i = 0; i < sol.applications.length; i++) {
+                for(i = 0; i < sol.applications.length; i++) {
 					
-					application = sol.applications[i];
+                    application = sol.applications[i];
+                    
+                    if(Folder.isFolder(application.getFolder().path+"DataFolder")){
+                        dataFolderName =  "dataFolder";
+                    } else {
+                        dataFolderName =  "data"; 
+                    }
 					
-					app = {};
-					app.name = application.name;
-					app.path = application.getFolder('path');
-					app.admin = application.administrator;
-					app.pattern = application.pattern;
+                    app = {};
+                    app.name = application.name;
+                    app.path = application.getFolder('path');
+                    app.admin = application.administrator;
+                    app.pattern = application.pattern;
 					
-					if((application.getItemsWithRole("catalog") != null) && ( typeof application.getItemsWithRole("catalog") != 'undefined')) {
+                    if((application.getItemsWithRole("catalog") != null) && ( typeof application.getItemsWithRole("catalog") != 'undefined')) {
 						
-						app.waModel = application.getItemsWithRole("catalog").path;
+                        app.waModel = application.getItemsWithRole("catalog").path;
 	
-					} else {
+                    } else {
 	
-						app.waModel = "";
-						app.waModelshort = "";
+                        app.waModel = "";
+                        app.waModelshort = "";
 	
-					}
+                    }
 					
-					if((application.getItemsWithRole("data") != null) && ( typeof application.getItemsWithRole("data") != 'undefined')) {
+                    if((application.getItemsWithRole(dataFolderName) != null) && ( typeof application.getItemsWithRole(dataFolderName) != 'undefined')) {
 						
-						app.waData = application.getItemsWithRole("data").path;
+                        app.waData = application.getItemsWithRole(dataFolderName).path;
 	
-						dataPath = app.waData;
-						dataPath = dataPath.replace(application.getItemsWithRole("data").name, "");
+                        dataPath = app.waData;
+                        dataPath = dataPath.replace(application.getItemsWithRole(dataFolderName).name+"/", "");
 	
-						app.files = [];
+                        app.files = [];
 	
-						folderlog = Folder(dataPath + 'Logs');
+                        folderlog = Folder(dataPath + 'Logs');
 	
-						folderlog.forEachFile(function(file) {
-							var f;
+                        folderlog.forEachFile(function(file) {
+                            var f;
 	
-							f = {};
-							f.name = file.name
-							f.date = file.creationDate
-							f.path = file.path
-							app.files.push(f);
-							// store the file path
-						});
+                            f = {};
+                            f.name = file.name
+                            f.date = file.creationDate
+                            f.path = file.path
+                            app.files.push(f);
+                        // store the file path
+                        });
 						
-					} else {
+                    } else {
 	
-						app.waData = "";
-						app.waDatashort = "";
-						app.files = [];
-					}
+                        app.waData = "";
+                        app.waDatashort = "";
+                        app.files = [];
+                    }
 	
-					app.http = {
-						enabled : application.httpServer.started,
-						ip : application.httpServer.ipAddress,
-						port : application.httpServer.port,
-						hostName : application.httpServer.hostName
-					};
+                    app.http = {
+                        enabled : application.httpServer.started,
+                        ip : application.httpServer.ipAddress,
+                        port : application.httpServer.port,
+                        hostName : application.httpServer.hostName
+                    };
 	
-					app.webApp = {
-						enabled : false,
-						directoryIndex : ''
-					};
+                    app.webApp = {
+                        enabled : false,
+                        directoryIndex : ''
+                    };
 					
-					webAppService = require('services/webApp').getInstanceFor(application);
+                    webAppService = require('services/webApp').getInstanceFor(application);
 					
-					if((webAppService != null) && ( typeof webAppService != 'undefined')) {
+                    if((webAppService != null) && ( typeof webAppService != 'undefined')) {
 						
-						app.webApp.enabled = webAppService.isStarted();
-						app.webApp.directoryIndex = application.settings.getItem( 'services')['webApp'].directoryIndex;
-					}
+                        app.webApp.enabled = webAppService.isStarted();
+                        app.webApp.directoryIndex = application.settings.getItem( 'services')['webApp'].directoryIndex;
+                    }
 	
-					app.dataService = {
-						enabled : false
-					};
+                    app.dataService = {
+                        enabled : false
+                    };
 					
-					dataStoreService = require('services/dataStore').getInstanceFor(application);
+                    dataStoreService = require('services/dataStore').getInstanceFor(application);
 					
-					if((dataStoreService != null) && ( typeof dataStoreService != 'undefined')) {
+                    if((dataStoreService != null) && ( typeof dataStoreService != 'undefined')) {
 						
-						app.dataService.enabled = dataStoreService.isStarted();
-					}
+                        app.dataService.enabled = dataStoreService.isStarted();
+                    }
 	
-					app.rpcService = {
-						enabled : false
-					};
+                    app.rpcService = {
+                        enabled : false
+                    };
 					
-					rpcService = require('services/rpc').getInstanceFor(application);
+                    rpcService = require('services/rpc').getInstanceFor(application);
 					
-					if((rpcService != null) && ( typeof rpcService != 'undefined')) {
+                    if((rpcService != null) && ( typeof rpcService != 'undefined')) {
 						
-						app.rpcService.enabled = rpcService.isStarted();
-					}
+                        app.rpcService.enabled = rpcService.isStarted();
+                    }
 					
-					app.fileService = {
-						enabled : false
-					};
+                    app.fileService = {
+                        enabled : false
+                    };
 	
-					obj.applications.push(app);
-				}
-			} else {
-				console.log("Error : cannot open " + recentSolution.name + " solution");
-				sol = null;
-			}
+                    obj.applications.push(app);
+                }
+            } else {
+                console.log("Error : cannot open " + recentSolution.name + " solution");
+                sol = null;
+            }
 
-		}
-	} catch (e) {
+        }
+    } catch (e) {
 		
-		sol = null;
-		console.log("Error : ", e);
+        sol = null;
+        console.log("Error : ", e);
 		
-	} finally {
+    } finally {
 		
-		if(sol !== null) {
-			sol.close();
-			sol = null;
-		}
-	}
+        if(sol !== null) {
+            sol.close();
+            sol = null;
+        }
+    }
 	
-	return obj;
+    return obj;
 }
 
 exports.getRecentSolutions = function get_recent_solutions() {
@@ -963,7 +987,7 @@ exports.getSettingJsonData = function getSettingJsonData(solutionHash, applicati
 		
 		return settingXml;
 	} catch(e) {
-		//something shit don't know what to do
+		
 		return;
 	} finally {
 		if(settingSolution !== null) {

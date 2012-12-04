@@ -21,12 +21,12 @@ class IHTTPResponse;
 class XBOX::VHTTPHeader;
 class IHTTPRequest;
 class VRIAServerProject;
+class XBOX::VMIMEMailHeader;
 class XBOX::VMIMEMessage;
 class XBOX::VMIMEMessagePart;
 class XBOX::VMIMEWriter;
 class VRIAServerSolution;
 class VRIAServerApplication;
-
 
 
 // Classes names constants
@@ -66,7 +66,6 @@ extern const char kSSJS_PROPERTY_NAME_Directory[];
 extern const char kSSJS_PROPERTY_NAME_OS[];
 extern const char kSSJS_PROPERTY_NAME_Permissions[];
 extern const char kSSJS_PROPERTY_NAME_Process[];
-extern const char kSSJS_PROPERTY_NAME_RPCCatalog[];
 extern const char kSSJS_PROPERTY_NAME_wildchar[];
 extern const char kSSJS_PROPERTY_NAME_backupSettings[];
 
@@ -251,13 +250,17 @@ public:
 private:
 
 	static void	_ParseMail (XBOX::VJSParms_callStaticFunction &ioParms, void *);
+	static void _ParseEncodedWords (XBOX::VJSParms_callStaticFunction &ioParms, void *);
 
-	static bool _ParseMailHeader (XBOX::VJSContext inContext, XBOX::VJSObject &inMailObject, XBOX::VMemoryBufferStream *inStream, bool *outIsMIME, XBOX::VString *outBoundary);
+	static bool _ParseMailHeader (XBOX::VJSContext inContext, 
+									XBOX::VJSObject &inMailObject, XBOX::VMemoryBufferStream *inStream, 
+									bool *outIsMIME, XBOX::VMIMEMailHeader *outHeader);
 
 	static bool	_ParseTextBody (XBOX::VJSContext inContext, XBOX::VJSObject &inMailObject, XBOX::VMemoryBufferStream *inStream);
-	static bool _ParseMIMEBody (XBOX::VJSContext inContext, XBOX::VJSObject &inMailObject, XBOX::VMemoryBufferStream *inStream, const XBOX::VString &inBoundary);
+	static bool _ParseMIMEBody (XBOX::VJSContext inContext, XBOX::VJSObject &inMailObject, XBOX::VMemoryBufferStream *inStream, const XBOX::VMIMEMailHeader *inHeader);
 
 	static bool _GetLine (XBOX::VString *outString, XBOX::VMemoryBufferStream *inStream, bool inUnfoldLines);
+	static bool _IsMultiPart (const XBOX::VString &inContentTypeBody);
 	static void _ParseBoundary (const XBOX::VString &inContentTypeBody, XBOX::VString *outBoundary);
 };
 

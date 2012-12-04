@@ -1532,13 +1532,14 @@ const VRIASettingsFile* VRIAServerProject::RetainSettingsFile( const RIASettings
 }
 
 
-VError VRIAServerProject::GetPublicationSettings( VString& outHostName, VString& outIP, sLONG& outPort, VString& outPattern, VString& outPublishName) const
+VError VRIAServerProject::GetPublicationSettings( VString& outHostName, VString& outIP, sLONG& outPort, sLONG& outSSLPort, VString& outPattern, VString& outPublishName) const
 {
 	VError err = VE_OK;
 
 	outHostName.Clear();
 	outIP.Clear();
 	outPort = 0;
+	outSSLPort = 0;
 	outPattern.Clear();
 	
 	if (!fSettings.HasProjectSettings())
@@ -1558,9 +1559,13 @@ VError VRIAServerProject::GetPublicationSettings( VString& outHostName, VString&
 	if (err == VE_OK )
 	{
 		bool done = false;
+		bool sslDone = false;
 
 		if (fOpeningParameters != NULL)
+		{
 			done = fOpeningParameters->GetCustomHttpPort( outPort);
+			sslDone = fOpeningParameters->GetCustomSSLPort( outSSLPort);
+		}
 
 		if (!done)
 		{
@@ -1568,6 +1573,16 @@ VError VRIAServerProject::GetPublicationSettings( VString& outHostName, VString&
 				err = VE_RIA_CANNOT_LOAD_HTTP_SETTINGS;
 			else
 				outPort = fSettings.GetListeningPort();
+		}
+
+		if (!sslDone)
+		{
+			if (!fSettings.HasHTTPServerSettings())
+				err = VE_RIA_CANNOT_LOAD_HTTP_SETTINGS;
+			else
+			{
+				outSSLPort = fSettings.GetListeningSSLPort();
+			}
 		}
 	}
 
@@ -2214,7 +2229,7 @@ VError VRIAServerProject::_Open( VProject* inDesignProject, VRIAServerProjectOpe
 							// VRoutingPreProcessingHandler
 
 							XBOX::VFilePath path;
-							bool found = _FindExistingFileInProjectHierarchy (this, CVSTR ("routing.json"), path);
+							bool found = _FindExistingFileInProjectHierarchy (this, CVSTR ("targets.json"), path);
 
 							if (found)
 							{
@@ -2689,14 +2704,23 @@ CDB4DBase* VRIAServerProject::_OpenDatabase( VError& outError, bool inCreateEmpt
 		VFilePath structurePath;
 		sLONG flags = DB4D_Open_WithSeparateIndexSegment | DB4D_Open_Convert_To_Higher_Version;
 
-		// sc 06/06/2012, even if the tagged item exists, the model file may not exist. In this case, none error is returned
 		VProjectItem *catalogItem = fDesignProject->GetProjectItemFromTag( kCatalogTag);
-		if ((catalogItem != NULL) && (catalogItem->ContentExists()))
+		if (catalogItem != NULL)
 		{
-			catalogItem->GetFilePath( structurePath);
-			flags |= DB4D_Open_As_XML_Definition;
-			flags |= DB4D_Open_No_Respart;
-			found = true;
+			if (!catalogItem->ContentExists())
+			{
+				// sc 15/10/2012 WAK0078042, if the tagged item doesnt exist, returns an error
+				VString modelFileName;
+				catalogItem->GetName( modelFileName);
+				outError = ThrowError( VE_RIA_MODEL_FILE_NOT_FOUND, &modelFileName, NULL);
+			}
+			else
+			{
+				catalogItem->GetFilePath( structurePath);
+				flags |= DB4D_Open_As_XML_Definition;
+				flags |= DB4D_Open_No_Respart;
+				found = true;
+			}
 		}
 
 		if (found)
@@ -2717,32 +2741,46 @@ CDB4DBase* VRIAServerProject::_OpenDatabase( VError& outError, bool inCreateEmpt
 					newDataFolderItem->GetFilePath( dataPath);
 					dataPath.SetFileName( L"data.waData");
 				}
-				else // new "DataFolder" does not exist - backward compatibility
+				else
 				{
-					VProjectItem *oldDataItem = fDesignProject->GetProjectItemFromTag( kDataTag);
+					// try to get "DataFolder" - which could exist but its role has been disabled
+					VFilePath dataFolderPath;
+					fDesignProject->GetProjectFolderPath(dataFolderPath);
+					dataFolderPath.ToSubFolder( "DataFolder");
 
-					// the data file with active role found
-					if (oldDataItem != NULL)
+					VProjectItem *newDataFolderItemNoTag = fDesignProject->GetProjectItemFromFilePath(dataFolderPath);
+					if (newDataFolderItemNoTag != NULL)
 					{
-						oldDataItem->GetFilePath( dataPath);
+						newDataFolderItemNoTag->GetFilePath( dataPath);
+						dataPath.SetFileName( L"data.waData");
 					}
-					else // the data file with active role NOT found, build wak2 compatible data path, ie. "data\structureName.waData"
+					else // new "DataFolder" does not exist - backward compatibility
 					{
-						VString oldDefaultDataFolder;
-						VFilePath oldDataFolderPath;
-						VProjectItemTagManager::Get()->GetPreferedDefaultFolder( kDataTag, oldDefaultDataFolder);
-						BuildPathFromRelativePath( oldDataFolderPath, oldDefaultDataFolder, FPS_POSIX);
+						VProjectItem *oldDataItem = fDesignProject->GetProjectItemFromTag( kDataTag);
 
-						VFolder oldDataFolder( oldDataFolderPath);
+						// the data file with active role found
+						if (oldDataItem != NULL)
+						{
+							oldDataItem->GetFilePath( dataPath);
+						}
+						else // the data file with active role NOT found, build wak2 compatible data path, ie. "data\structureName.waData"
+						{
+							VString oldDefaultDataFolder;
+							VFilePath oldDataFolderPath;
+							VProjectItemTagManager::Get()->GetPreferedDefaultFolder( kDataTag, oldDefaultDataFolder);
+							BuildPathFromRelativePath( oldDataFolderPath, oldDefaultDataFolder, FPS_POSIX);
 
-						//old folder "data" exist, now check if structureName.waData exist
-						VString name;
-						structurePath.GetFileName( name, false);
-						oldDataFolderPath.SetFileName( name, false);
-						oldDataFolderPath.SetExtension( RIAFileKind::kDataFileExtension);
-						VFile oldDataFile(oldDataFolderPath);
-						
-						dataPath = oldDataFolderPath;
+							VFolder oldDataFolder( oldDataFolderPath);
+
+							//old folder "data" exist, now check if structureName.waData exist
+							VString name;
+							structurePath.GetFileName( name, false);
+							oldDataFolderPath.SetFileName( name, false);
+							oldDataFolderPath.SetExtension( RIAFileKind::kDataFileExtension);
+							VFile oldDataFile(oldDataFolderPath);
+							
+							dataPath = oldDataFolderPath;
+						}
 					}
 				}
 	
@@ -4265,6 +4303,23 @@ private:
 };
 
 
+struct _FindRuleSuffixFunctor
+{
+	_FindRuleSuffixFunctor (const XBOX::VString& inString)
+		: fString (inString)
+	{
+	}
+
+	bool operator() (const VRoutingRuleRefPtr& inRoutingRule) const
+	{
+		return fString.EqualToString ((inRoutingRule)->GetSuffix());
+	}
+
+private:
+	const XBOX::VString&	fString;
+};
+
+
 //--------------------------------------------------------------------------------------------------
 
 
@@ -4322,6 +4377,17 @@ bool VRoutingRulesList::FindMatchingRule (const XBOX::VString& inString, XBOX::V
 	}
 
 	return isOK;
+}
+
+
+bool VRoutingRulesList::AcceptRuleSuffix (const XBOX::VString& inString)
+{
+	XBOX::VTaskLock		lock (&fLock);
+	VRoutingRulesVector::const_iterator it = std::find_if (fRoutingRulesList.begin(), fRoutingRulesList.end(), _FindRuleSuffixFunctor (inString));
+	if (it != fRoutingRulesList.end())
+		return true;
+
+	return false;
 }
 
 
@@ -4654,7 +4720,7 @@ XBOX::VError VRoutingPreProcessingHandler::HandleRequest (IHTTPResponse *ioRespo
 			bool			waPlatformCookieExists = false;
 
 			waPlatformCookieExists = ioResponse->GetRequest().GetCookie (CONST_WAPLATFORM_COOKIE, platformValue);
-			if (!waPlatformCookieExists || platformValue.IsEmpty())
+			if (!waPlatformCookieExists || platformValue.IsEmpty() || (!platformValue.IsEmpty() && !fRoutingRulesList->AcceptRuleSuffix (platformValue)))
 			{
 				XBOX::VString	userAgent;
 				ioResponse->GetRequestHeader().GetHeaderValue (CONST_USER_AGENT, userAgent);

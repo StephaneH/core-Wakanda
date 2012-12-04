@@ -114,6 +114,15 @@ Solution = function Solution() {
      */
     this.getDebuggerPort = function getDebuggerPort() {        return 0;     };
     
+    /**
+     * returns the solution-level file associated with the role you passed as a parameter
+     *
+     * @method getItemsWithRole
+     * @param {String} role
+     * @return {File}
+     */
+    this.getItemsWithRole = function getItemsWithRole(role) {        return new File( );     };
+    
 
 };
 
@@ -287,7 +296,7 @@ Application = function Application() {
      *
      * @method SystemWorker
      * @param {String} commandLine
-     * @param {String} executionPath
+     * @param {String | Folder} executionPath
      */
     this.SystemWorker = function SystemWorker(commandLine, executionPath) {             };
     
@@ -390,10 +399,10 @@ Application = function Application() {
      * returns a reference to the current datastore of the project whose name you passed in projectName
      *
      * @method getDataStore
-     * @param {} 
+     * @param {String} projectName
      * @return {Datastore}
      */
-    this.getDataStore = function getDataStore() {        return new Datastore( );     };
+    this.getDataStore = function getDataStore(projectName) {        return new Datastore( );     };
     
     /**
      * launches the garbage collector on all sleeping contexts
@@ -406,11 +415,11 @@ Application = function Application() {
      * allows you to display a system notification window on the server machine
      *
      * @method displayNotification
-     * @param {} 
-     * @param {} 
+     * @param {} projectName
+     * @param {} projectName
      * @param {Boolean} critical
      */
-    this.displayNotification = function displayNotification(critical) {             };
+    this.displayNotification = function displayNotification(projectName, projectName, critical) {             };
     
     /**
      * converts the ISO date string passed in the isoDate parameter into a standard JavaScript format
@@ -444,19 +453,19 @@ Application = function Application() {
      * returns in an object the contents of the url&#39;s&quot;query string&quot;, which was passed as a parameter
      *
      * @method getURLQuery
-     * @param {} 
+     * @param {} projectName
      * @return {Object}
      */
-    this.getURLQuery = function getURLQuery() {        return {};     };
+    this.getURLQuery = function getURLQuery(projectName) {        return {};     };
     
     /**
      * returns the url passed in the parameter as an array of strings
      *
      * @method getURLPath
-     * @param {} 
+     * @param {} projectName
      * @return {Array}
      */
-    this.getURLPath = function getURLPath() {        return [];     };
+    this.getURLPath = function getURLPath(projectName) {        return [];     };
     
     /**
      * returns a JSON string converted into an XML string
@@ -680,14 +689,15 @@ Application = function Application() {
     this.Folder = function Folder(path) {        return new Folder( );     };
     
     /**
-     * 
+     * Constructor method: creates a new BinaryStream object
      *
      * @method BinaryStream
-     * @param {String | File} file
-     * @param {} 
+     * @param {String | File | SocketSync | Socket} binary
+     * @param {String} readMode
+     * @param {Number} timeOut
      * @return {BinaryStream}
      */
-    this.BinaryStream = function BinaryStream(file, ) {        return new BinaryStream( );     };
+    this.BinaryStream = function BinaryStream(binary, readMode, timeOut) {        return new BinaryStream( );     };
     
     /**
      * creates a new TextStream object

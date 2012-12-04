@@ -158,10 +158,10 @@ bool VJSDebuggerSettings::UserCanDebug ( const UniChar* inUserName, const UniCha
 	
 	if ( cSession != 0 && vError  == VE_OK )
 	{
-		VUUID			vuuidDebuggerGroup;
-		bool			bOK = uagDirectory-> GetSpecialGroupID ( CUAGDirectory::DebuggerGroup, vuuidDebuggerGroup );
+		VUUID			vuuidAdminGroup;
+		bool			bOK = uagDirectory-> GetSpecialGroupID ( CUAGDirectory::AdminGroup, vuuidAdminGroup );
 		xbox_assert ( bOK );
-		if ( cSession-> BelongsTo ( vuuidDebuggerGroup ) )
+		if ( cSession-> BelongsTo ( vuuidAdminGroup ) )
 			bCanDebug = true;
 	}
 
@@ -190,10 +190,10 @@ bool VJSDebuggerSettings::NeedsAuthentication ( ) const
 		VError							vError = VE_OK;
 		CUAGSession*					cSession = uagDirectory-> MakeDefaultSession ( &vError );
 		xbox_assert ( vError == VE_OK );
-		VUUID							vuuidDebuggerGroup;
-		bool							bOK = uagDirectory-> GetSpecialGroupID ( CUAGDirectory::DebuggerGroup, vuuidDebuggerGroup );
+		VUUID							vuuidAdminGroup;
+		bool							bOK = uagDirectory-> GetSpecialGroupID ( CUAGDirectory::AdminGroup, vuuidAdminGroup );
 		xbox_assert ( bOK );
-		if ( cSession-> BelongsTo ( vuuidDebuggerGroup ) )
+		if ( cSession-> BelongsTo ( vuuidAdminGroup ) )
 			bResult = false;
 
 		ReleaseRefCountable ( &cSession );
@@ -214,7 +214,7 @@ bool VJSDebuggerSettings::HasDebuggerUsers ( ) const
 		return false;
 
 	VError								vError = VE_OK;
-	CUAGGroup*							groupDebuggers = uagDirectory-> RetainSpecialGroup ( CUAGDirectory::DebuggerGroup, &vError );
+	CUAGGroup*							groupDebuggers = uagDirectory-> RetainSpecialGroup ( CUAGDirectory::AdminGroup, &vError );
 	xbox_assert ( vError == VE_OK );
 	if ( vError == VE_OK && groupDebuggers != 0 )
 	{

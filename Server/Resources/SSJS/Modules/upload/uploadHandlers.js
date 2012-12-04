@@ -13,6 +13,76 @@
 * Consequently, no title, copyright or other proprietary rights
 * other than those specified in the applicable license is granted.
 */
+
+
+/*
+function _CurrentModel(){
+    this.file       = File(ds.getModelFolder() , ds.getName() + '.waModel');
+    this.path       = this.file.path;
+    this.xml        = loadText(this.file);
+    this.json       = JSON.parse(XmlToJSON(this.xml, "json-bag", "EntityModelCatalog"));
+    this.dataClasses= this.getDataClasses();
+}
+
+_CurrentModel.prototype = {
+    getDataClasses : function(){
+        var
+        modelObj    = this.json,
+        dataClasses = modelObj.dataClasses,
+        result      = {};
+        
+        for(var _i = 0 , dataClass; dataClass = dataClasses[_i] ; _i++ ){
+            result[dataClass.className] = new _DataClass(dataClass);
+        }
+        
+        return result;
+    },
+    getDataClass: function(name){
+        return this.dataClasses[name];
+    }
+}
+
+function _DataClass(obj){
+    this._private = {
+        attributes  : {},
+        key         : ''
+    }
+    
+    if(obj){
+        for(var attr in obj){
+            if(attr == 'attributes'){
+                this._initAttrsFromArray(obj[attr]);
+                
+                for(var _att in this._private.attributes){
+                	if(this._private.attributes[_att].hasOwnProperty('primKey') && this._private.attributes[_att]['primKey'] == 'true'){
+                		this._private.key = _att;
+                	}
+            	}
+                
+                continue;
+            }
+            
+            this[attr] = obj[attr];
+        }
+    }
+}
+
+_DataClass.prototype = {
+    getAttribute : function(attrName){
+        return this._private.attributes[attrName];
+    },
+    getKeyName: function(){
+        return this._private.key;
+    },
+    _initAttrsFromArray: function(array){
+        for(var _i = 0 , item ; item = array[_i] ; _i++ ){
+            this._private.attributes[item.name] = item;
+        }
+    }
+}
+
+*/
+
 function _upload(request, response) {
     response.contentType = 'application/json';
     var 
@@ -82,7 +152,18 @@ function _upload(request, response) {
     });
     
     if(datasource){
-        var mypict;
+        var
+        mypict,
+        entity,
+        //curModel,
+        theDataClass,
+        theKey;
+        
+        //curModel        = new _CurrentModel();
+        //theDataClass    = curModel.getDataClass(datasource.dsname);
+		theDataClass	= ds[datasource.dsname];
+        //theKey          = theDataClass.getKeyName();
+        
         if(!datasource.saveOnDS){
             mypict = files[0].path;
         }
@@ -94,17 +175,29 @@ function _upload(request, response) {
             if(folder.files.length == 0 && folder.folders.length == 0){
                 folder.remove();
             }
-        }            
-
-        var entity = ds[datasource.dsname].query("ID = " + datasource.id).first();
-        entity[datasource.field] = mypict;
-        entity.save();
-        obj[0] = {
-            saved       : true,
-            filename    : null,
-            path        : null
         }
-    }
+
+        //entity = ds[datasource.dsname].find(theKey + " = " + datasource.id);
+		var isSaved = false;
+		entity = theDataClass(datasource.id);
+		if (entity != null) {
+			entity[datasource.field] = mypict;
+			try
+			{
+				entity.save();
+				isSaved = true;
+			}
+			catch (err)
+			{
+				isSaved = false; // maybe put a break here
+			}
+		}
+		obj[0] = {
+				saved       : isSaved,
+				filename    : null,
+				path        : null
+			}    
+		}
     
     return JSON.stringify(obj);
 }

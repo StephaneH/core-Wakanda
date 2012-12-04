@@ -175,7 +175,7 @@ public:
 			/** @brief	Returns the settings file which contains the setting. */
 			const VRIASettingsFile*		RetainSettingsFile( const RIASettingsID& inSettingsID) const;
 
-			XBOX::VError				GetPublicationSettings( XBOX::VString& outHostName, XBOX::VString& outIP, sLONG& outPort, XBOX::VString& outPattern, XBOX::VString &outPublishName) const;
+			XBOX::VError				GetPublicationSettings( XBOX::VString& outHostName, XBOX::VString& outIP, sLONG& outPort, sLONG& outSSLPort, XBOX::VString& outPattern, XBOX::VString &outPublishName) const;
 
 			VRIAHTTPSessionManager*		RetainSessionMgr() const;
 
@@ -414,6 +414,7 @@ public:
 	XBOX::VError				LoadFromJSONValue (const XBOX::VJSONValue& inJSONValue);
 
 	bool						FindMatchingRule (const XBOX::VString& inString, XBOX::VString& outMatchingRuleSuffix);
+	bool						AcceptRuleSuffix (const XBOX::VString& inString);
 
 private:
 	typedef std::vector<VRoutingRuleRefPtr>	VRoutingRulesVector;	

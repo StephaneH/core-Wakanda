@@ -16,6 +16,8 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.RandomStringUtils;
@@ -37,6 +39,7 @@ import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.wakanda.qa.http.Settings;
@@ -705,6 +708,7 @@ public class ContentCodingTest extends AbstractHttpTestCase {
 	 * @throws Exception
 	 */
 	@Test
+	@Ignore
 	public void testThatServerRespondsWith415ForCompressFormat()
 			throws Exception {
 		String ce = "compress";
@@ -715,6 +719,59 @@ public class ContentCodingTest extends AbstractHttpTestCase {
 
 		HttpResponse response = executeRequest(request);
 		assertEqualsStatusCode(HttpStatus.SC_UNSUPPORTED_MEDIA_TYPE, response);
+	}
+	
+	@Test
+	@Ignore
+	public void testThatServerRecognizesCompressEncodedRequestEntity()
+			throws Exception {
+
+		String ce = "compress";
+		String charset = HTTP.UTF_8;
+		String mt = HTTP.PLAIN_TEXT_TYPE;
+		String ct = mt + HTTP.CHARSET_PARAM + charset;
+
+		byte[] expecteds = "Hello".getBytes();// RandomStringUtils.random(125).getBytes(charset);
+
+		// logger.debug("Origin data length: " + expecteds.length);
+
+		// Create an expandable byte array to hold the compressed data.
+		ByteArrayOutputStream bos = new ByteArrayOutputStream(expecteds.length);
+
+		// Compress the data
+		ZipOutputStream zipper = new ZipOutputStream(bos);
+		zipper.putNextEntry(new ZipEntry("Hello"));
+		zipper.write(expecteds);
+		zipper.closeEntry();
+		zipper.close();
+
+		// Get the compressed data
+		byte[] compressedData = bos.toByteArray();
+
+		// logger.debug("Compressed data length: " + compressedData.length);
+		// logger.debug("Compressed data as string: "
+		// + new String(compressedData, "UTF-8"));
+
+		// entity
+		ByteArrayEntity reqEntity = new ByteArrayEntity(compressedData);
+		reqEntity.setContentType(ct);
+		reqEntity.setContentEncoding(ce);
+
+		// request
+		HttpPost request = new HttpPost("/checkPostMethod/");
+		request.setEntity(reqEntity);
+
+		// response
+		HttpResponse response = executeRequest(request, false);
+		HttpEntity resEntity = response.getEntity();
+		byte[] actuals = EntityUtils.toByteArray(resEntity);
+
+		assertEqualsStatusCode(HttpStatus.SC_OK, response);
+		// logger.debug("Response data length: " + actuals.length);
+		// logger.debug("Response data as string: " + new String(actuals,
+		// "UTF-8"));
+		Assert.assertArrayEquals("Wrong response content", expecteds, actuals);
+
 	}
 
 	/**
@@ -729,6 +786,7 @@ public class ContentCodingTest extends AbstractHttpTestCase {
 	 * @throws Exception
 	 */
 	@Test
+	@Ignore
 	public void testThatServerRespondsWith415ForXCompressFormat()
 			throws Exception {
 		String ce = "x-compress";

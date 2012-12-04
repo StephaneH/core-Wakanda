@@ -30,16 +30,16 @@
 
 #LE SERVEUR#######################
 LAsA [%TARGET%%PRODUCT_NAME%]
-LAsA %DEPOT%Wakanda/main/Server/Projet/CMake/Build/%LibMode%/Wakanda
+LAsA %DEPOT%Wakanda/%branch%/Server/Projet/CMake/Build/%LibMode%/Wakanda
 
 #LES FRAMEWORKS#######################
 LAsA [%TARGET%%PRODUCT_NAME%/Libs]
-LAsA %DEPOT%XToolbox/Main/JSDebugger/Projects/CMake/Build/%LibMode%/JsDebugger%LibMode_SR%.so
-LAsA %DEPOT%XToolbox/Main/Kernel/Projects/CMake/Build/%LibMode%/Kernel%LibMode_SR%.so
-LAsA %DEPOT%XToolbox/Main/KernelIPC/Projects/CMake/Build/%LibMode%/KernelIPC%LibMode_SR%.so
-LAsA %DEPOT%XToolbox/Main/ServerNet/Projects/CMake/Build/%LibMode%/ServerNet%LibMode_SR%.so
-LAsA %DEPOT%XToolbox/Main/XML/Projects/CMake/Build/%LibMode%/Xml%LibMode_SR%.so
-LAsA %DEPOT%XToolbox/Main/JavaScript/Projects/CMake/Build/%LibMode%/JavaScript%LibMode_SR%.so
+LAsA %DEPOT%XToolbox/%BRANCH%/JSDebugger/Projects/CMake/Build/%LibMode%/JsDebugger%LibMode_SR%.so
+LAsA %DEPOT%XToolbox/%BRANCH%/Kernel/Projects/CMake/Build/%LibMode%/Kernel%LibMode_SR%.so
+LAsA %DEPOT%XToolbox/%BRANCH%/KernelIPC/Projects/CMake/Build/%LibMode%/KernelIPC%LibMode_SR%.so
+LAsA %DEPOT%XToolbox/%BRANCH%/ServerNet/Projects/CMake/Build/%LibMode%/ServerNet%LibMode_SR%.so
+LAsA %DEPOT%XToolbox/%BRANCH%/XML/Projects/CMake/Build/%LibMode%/Xml%LibMode_SR%.so
+LAsA %DEPOT%XToolbox/%BRANCH%/JavaScript/Projects/CMake/Build/%LibMode%/JavaScript%LibMode_SR%.so
 
 LAsA %DEPOT%webkit/534.53/JavaScriptCore/CMake/Build/%LibMode%/JsCore%LibMode_SR%.so
 LAsA %DEPOT%curl/7.19.7/CMake/Build/%LibMode%/Curl%LibMode_SR%.so
@@ -58,68 +58,65 @@ LAsA %DEPOT%zlib/1.2.5/projects/CMake/Build/%LibMode%/ZLib%LibMode_SR%.so
 
 #LES COMPOSANTS INTERNES#######################
 LAsA [%TARGET%%DIR_COMPONENT%Native Components/DB4D%LibMode_SR%.bundle/Contents/Linux]
-LAsA %DEPOT%Components/Main/DB4D/projects/CMake/Build/%LibMode%/DB4D%LibMode_SR%.so
+LAsA %DEPOT%Components/%BRANCH%/DB4D/projects/CMake/Build/%LibMode%/DB4D%LibMode_SR%.so
 
 LAsA [%TARGET%%DIR_COMPONENT%Native Components/HTTPServer%LibMode_SR%.bundle/Contents/Linux]
-LAsA %DEPOT%Components/Main/HTTPServer/Projects/CMake/Build/%LibMode%/HTTPServer%LibMode_SR%.so
+LAsA %DEPOT%Components/%BRANCH%/HTTPServer/Projects/CMake/Build/%LibMode%/HTTPServer%LibMode_SR%.so
 
 LAsA [%TARGET%%DIR_COMPONENT%Native Components/LanguageSyntax%LibMode_SR%.bundle/Contents/Linux]
-LAsA %DEPOT%Components/Main/Language Syntax/Projects/CMake/Build/%LibMode%/LanguageSyntax%LibMode_SR%.so
+LAsA %DEPOT%Components/%BRANCH%/Language Syntax/Projects/CMake/Build/%LibMode%/LanguageSyntax%LibMode_SR%.so
 
 LAsA [%TARGET%%DIR_COMPONENT%Native Components/UsersAndGroups%LibMode_SR%.bundle/Contents/Linux]
-LAsA %DEPOT%Components/Main/UsersAndGroups/projects/CMake/Build/%LibMode%/UsersAndGroups%LibMode_SR%.so
+LAsA %DEPOT%Components/%BRANCH%/UsersAndGroups/projects/CMake/Build/%LibMode%/UsersAndGroups%LibMode_SR%.so
 
 LAsA [%TARGET%%DIR_COMPONENT%Native Components/SecurityManager%LibMode_SR%.bundle/Contents/Linux]
-LAsA %DEPOT%Components/Main/Security Manager/Projects/CMake/Build/%LibMode%/SecurityManager%LibMode_SR%.so
+LAsA %DEPOT%Components/%BRANCH%/Security Manager/Projects/CMake/Build/%LibMode%/SecurityManager%LibMode_SR%.so
 
 LAsA [%TARGET%%DIR_COMPONENT%Native Components/Zip%LibMode_SR%.bundle/Contents/Linux]
-LAsA %DEPOT%Components/Main/Zip/Projects/CMake/Build/%LibMode%/Zip%LibMode_SR%.so
+LAsA %DEPOT%Components/%BRANCH%/Zip/Projects/CMake/Build/%LibMode%/Zip%LibMode_SR%.so
 
 #LES XLIFF COMPOSANTS#######################
 LAsA [%TARGET%%DIR_COMPONENT%Native Components/DB4D%LibMode_SR%.bundle/Contents/]
-LAsA %DEPOT%Components/Main/DB4D/Resources
+LAsA %DEPOT%Components/%BRANCH%/DB4D/Resources
 
 LAsA [%TARGET%%DIR_COMPONENT%Native Components/HTTPServer%LibMode_SR%.bundle/Contents/]
-LAsA %DEPOT%Components/Main/HTTPServer/Resources
+LAsA %DEPOT%Components/%BRANCH%/HTTPServer/Resources
 
 LAsA [%TARGET%%DIR_COMPONENT%Native Components/LanguageSyntax%LibMode_SR%.bundle/Contents/]
-LAsA %DEPOT%Components/Main/Language Syntax/Resources
+LAsA %DEPOT%Components/%BRANCH%/Language Syntax/Resources
 
 LAsA [%TARGET%%DIR_COMPONENT%Native Components/UsersAndGroups%LibMode_SR%.bundle/Contents/]
-LAsA %DEPOT%Components/Main/UsersAndGroups/Resources
+LAsA %DEPOT%Components/%BRANCH%/UsersAndGroups/Resources
 
 LAsA [%TARGET%%DIR_COMPONENT%Native Components/Zip%LibMode_SR%.bundle/Contents/]
-LAsA %DEPOT%Components/Main/Zip/Resources
+LAsA %DEPOT%Components/%BRANCH%/Zip/Resources
 
 #LES RESSOURCES#######################
 LAsA [%TARGET%%PRODUCT_NAME%/Resources]
-LAsA %DEPOT%Wakanda/main/Server/Resources/Info.plist
-LAsA %DEPOT%Wakanda/main/Server/Resources/Default Solution
-LAsA %DEPOT%Wakanda/main/Server/Resources/debugger
-LAsA %DEPOT%Wakanda/main/Server/Resources/%LibLangueLproj%
-LAsA %DEPOT%Wakanda/main/Server/Resources/Templates
+LAsA %DEPOT%Wakanda/%branch%/Server/Resources/Info.plist
+LAsA %DEPOT%Wakanda/%branch%/Server/Resources/Default Solution
+LAsA %DEPOT%Wakanda/%branch%/Server/Resources/debugger
+LAsA %DEPOT%Wakanda/%branch%/Server/Resources/%LibLangueLproj%
+LAsA %DEPOT%Wakanda/%branch%/Server/Resources/Templates
 #jmo - Build fixFaut-il supprimer ce rep ou a-t-il simplement bouge ?
-#LAsA %DEPOT%Wakanda/main/Studio/Resources/JavaScript Support Files
-LAsA %DEPOT%Wakanda/main/Common/Resources/
+#LAsA %DEPOT%Wakanda/%branch%/Studio/Resources/JavaScript Support Files
+LAsA %DEPOT%Wakanda/%branch%/Common/Resources/
 
-LAsA %DEPOT%XToolbox/Main/Kernel/Resources/BasicUTIs.WIN.plist
+LAsA %DEPOT%XToolbox/%BRANCH%/Kernel/Resources/BasicUTIs.WIN.plist
 
 LAsA [%TARGET%%PRODUCT_NAME%/Resources/Templates/Blank/WebFolder/images]
 
 LAsA [%TARGET%%PRODUCT_NAME%/walib]
-LAsA %DEPOT%Wakanda/main/walib/WAF
-LAsA %DEPOT%Wakanda/main/walib/dataBrowser
+LAsA %DEPOT%Wakanda/%branch%/walib/WAF
+LAsA %DEPOT%Wakanda/%branch%/walib/dataBrowser
 
 LAsA [%TARGET%%PRODUCT_NAME%]
-L*sA %DEPOT%Wakanda/main/Server/Resources/SSJS/Modules
+L*sA %DEPOT%Wakanda/%branch%/Server/Resources/SSJS/Modules
 
 LAsA [%TARGET%%PRODUCT_NAME%/Resources/Templates]
-LAsA %DEPOT%Wakanda/main/Server/Resources/Default Solution/Admin
+LAsA %DEPOT%Wakanda/%branch%/Server/Resources/Default Solution/Admin
 
 LAsA [%TARGET%%PRODUCT_NAME%/Resources/%LibLangueLproj%]
-LAsA %DEPOT%XToolbox/Main/Kernel/Resources/%LibLangueLproj%/Errors_xbox_%Lib2Langue%.xlf
-LAsA %DEPOT%XToolbox/Main/JavaScript/Resources/%LibLangueLproj%/Errors_javascript_%Lib2Langue%.xlf
-LAsA %DEPOT%XToolbox/Main/ServerNet/Resources/%LibLangueLproj%/ServerNet%Lib2Langue%.xlf
-
-LAsA [%TARGET%%PRODUCT_NAME%/Resources/wkhtmltopdf]
-LAsA %DEPOT%Wakanda/main/Server/Resources/wkhtmltopdf.LINUX/
+LAsA %DEPOT%XToolbox/%BRANCH%/Kernel/Resources/%LibLangueLproj%/Errors_xbox_%Lib2Langue%.xlf
+LAsA %DEPOT%XToolbox/%BRANCH%/JavaScript/Resources/%LibLangueLproj%/Errors_javascript_%Lib2Langue%.xlf
+LAsA %DEPOT%XToolbox/%BRANCH%/ServerNet/Resources/%LibLangueLproj%/ServerNet%Lib2Langue%.xlf

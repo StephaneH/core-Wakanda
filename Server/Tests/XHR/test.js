@@ -15,7 +15,9 @@
 */
 var testCase = {
 	name: "XHRBasicTest",
-	
+	_wait: {
+		after: 5000
+	},
 	_should: {
         ignore: {
 

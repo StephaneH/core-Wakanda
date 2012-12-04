@@ -1,10 +1,8 @@
 package com.wakanda.qa.http.test.messages;
 
 import static com.wakanda.qa.http.HttpRegEx.RFC1123_DATE;
-import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeThat;
 
 import java.util.Date;
 
@@ -14,6 +12,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.cookie.DateUtils;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.wakanda.qa.http.test.extend.AbstractHttpTestCase;
@@ -95,6 +94,7 @@ public class DateFormatTest extends AbstractHttpTestCase {
 	 * @throws Exception
 	 */
 	@Test
+	@Ignore
 	public void testThatRFC1123DateFormatIsSupportedUsingIfUnmodifiedSinceHeader() throws Exception {
 		testDateFormatUsingIfUnmodifiedSince(DateUtils.PATTERN_RFC1123,
 				HttpStatus.SC_PRECONDITION_FAILED);
@@ -110,6 +110,7 @@ public class DateFormatTest extends AbstractHttpTestCase {
 	 * @throws Exception
 	 */
 	@Test
+	@Ignore
 	public void testThatRFC1036DateFormatIsUnrecognizedUsingIfUnmodifiedSinceHeader() throws Exception {
 		testDateFormatUsingIfUnmodifiedSince(DateUtils.PATTERN_RFC1036, HttpStatus.SC_OK);
 	}
@@ -124,6 +125,7 @@ public class DateFormatTest extends AbstractHttpTestCase {
 	 * @throws Exception
 	 */
 	@Test
+	@Ignore
 	public void testThatANSIDateFormatIsUnrecognizedUsingIfUnodifiedSinceHeader() throws Exception {
 		testDateFormatUsingIfUnmodifiedSince(DateUtils.PATTERN_ASCTIME, HttpStatus.SC_OK);
 	}
@@ -138,6 +140,7 @@ public class DateFormatTest extends AbstractHttpTestCase {
 	 * @throws Exception
 	 */
 	@Test
+	@Ignore
 	public void testThatServerDoesNotInterpretDateInWrongFormatUsingIfUnmodifiedSinceHeader() throws Exception {
 		String wrongFormat = "HH:mm:ss dd MMM yyyy";
 		testDateFormatUsingIfUnmodifiedSince(wrongFormat, HttpStatus.SC_OK);
@@ -245,14 +248,16 @@ public class DateFormatTest extends AbstractHttpTestCase {
 		String dToSend = DateUtils.formatDate(dLmd, dateFormat);
 		request.addHeader(HttpHeaders.IF_MODIFIED_SINCE, dToSend);
 		HttpResponse response = executeRequest(request);
+		
+		assertEqualsStatusCode(expectedSC, response);
 
-		if(assume){
+		/*if(assume){
 			int actualsc = response.getStatusLine().getStatusCode();
 			assumeThat(actualsc, is(expectedSC));
 		}
 		else{
 			assertEqualsStatusCode(expectedSC, response);
-		}
+		}*/
 	}
 	
 	private void testThatIfUnmodifiedSinceLogicWorks(String dateFormat, int expectedSC, boolean assume) throws Exception{
@@ -265,13 +270,15 @@ public class DateFormatTest extends AbstractHttpTestCase {
 		request.addHeader(HttpHeaders.IF_UNMODIFIED_SINCE, sCond);
 		HttpResponse response = executeRequest(request);
 		
-		if(assume){
-			int actualsc = response.getStatusLine().getStatusCode();
-			assumeThat(actualsc, is(expectedSC));
+		assertEqualsStatusCode(expectedSC, response);
+		
+		/*if(assume){
+			int actualSC = response.getStatusLine().getStatusCode();
+			assumeThat(actualSC, is(expectedSC));
 		}
 		else{
 			assertEqualsStatusCode(expectedSC, response);
-		}
+		}*/
 	}
 
 }

@@ -431,6 +431,7 @@ static const char* arProjectItemsIcons2[] = {
 			"file:Images/SolutionManager/xml.png",
 			"file:Images/SolutionManager/image.png",
 			"file:Images/SolutionManager/web.png",
+			"file:Images/SolutionManager/data.png",
 			"file:Images/SolutionManager/permissions.png",
 			"file:Images/SolutionManager/directory.png",
 			"file:Images/SolutionManager/webComponent.png",

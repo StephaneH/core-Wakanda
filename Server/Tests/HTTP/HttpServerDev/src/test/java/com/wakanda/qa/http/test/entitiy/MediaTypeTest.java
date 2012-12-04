@@ -33,7 +33,6 @@ import org.apache.log4j.Logger;
 import org.hamcrest.core.Is;
 import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -210,28 +209,31 @@ public class MediaTypeTest extends AbstractHttpTestCase {
 		if (!file.exists()) {
 			file.createNewFile();
 		}
-		HttpGet request = new HttpGet("/mediaType/" + filename);
+		String url = "/mediaType/" + filename;
+		HttpGet request1 = new HttpGet(url);
 
 		// assume that server replay with 406 when media type is not acceptable
-		request.addHeader(HttpHeaders.ACCEPT, "text/html");
-		HttpResponse response = executeRequest(request);
-		int actual = response.getStatusLine().getStatusCode();
-		Assume.assumeThat(actual, Is.is(HttpStatus.SC_NOT_ACCEPTABLE));
+		request1.addHeader(HttpHeaders.ACCEPT, "text/html");
+		HttpResponse response1 = executeRequest(request1);
+		int actual = response1.getStatusLine().getStatusCode();
+		//Assume.assumeThat(actual, Is.is(HttpStatus.SC_NOT_ACCEPTABLE));
+		Assert.assertThat(actual, Is.is(HttpStatus.SC_NOT_ACCEPTABLE));
 
 		// add Accept header with the upper case value of the media type
-		String expectedMimeType = "TExT/XmL";
-		request.addHeader(HttpHeaders.ACCEPT, expectedMimeType);
+		String mimeType = "ApPlIcAtIoN/XmL";
+		HttpGet request2 = new HttpGet(url);
+		request2.addHeader(HttpHeaders.ACCEPT, mimeType);
 
 		// Sending request for current extension
-		response = executeRequest(request);
-		assertEqualsStatusCode(HttpStatus.SC_OK, response);
+		HttpResponse response2 = executeRequest(request2);
+		assertEqualsStatusCode(HttpStatus.SC_OK, response2);
 
 		// check the returned content-type
-		String actualContentType = EntityUtils.getContentMimeType(response
+		String actualContentType = EntityUtils.getContentMimeType(response2
 				.getEntity());
-		assertEquals("[" + expectedMimeType
-				+ "] Media type should be case-insensitive", expectedMimeType,
-				actualContentType);
+		assertEquals("[" + mimeType
+				+ "] Media type should be case-insensitive", mimeType.toLowerCase(),
+				actualContentType.toLowerCase());
 
 	}
 
@@ -245,6 +247,7 @@ public class MediaTypeTest extends AbstractHttpTestCase {
 	 * @throws Exception
 	 */
 	@Test
+	@Ignore
 	public void testThatServerHandlesMultipartContent() throws Exception {
 		// Build the multipost request
 		HttpPost httppost = new HttpPost("/checkMultipart");
@@ -359,6 +362,7 @@ public class MediaTypeTest extends AbstractHttpTestCase {
 	 * @throws Exception
 	 */
 	@Test
+	@Ignore
 	public void testThat_ISO_8859_1_IsDefaultForTextType() throws Exception {
 		String charset = HTTP.ISO_8859_1;
 		String mt = HTTP.PLAIN_TEXT_TYPE;

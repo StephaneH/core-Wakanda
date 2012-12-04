@@ -86,7 +86,7 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = F4EBB37E131E9D260005EDB8 /* Dll - XBox - JavaScript */;
 			proxyType = 1;
-			remoteGlobalIDString = F46437CB113E9F6000639653 /* 4DJavaScript x64 */;
+			remoteGlobalIDString = F46437CB113E9F6000639653;
 			remoteInfo = "4DJavaScript x64";
 		};
 		E4612324153856BA009B648D /* PBXContainerItemProxy */ = {
@@ -1713,7 +1713,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "echo \"Versionning ...\"\nperl \"${DEPOT_ROOT}/Tools/Versionning/Wakanda_versionning_mac.pl\"\nif [ \"$?\" != \"0\" ] ; then\n \techo \"error: Erreur versionning\"\n\texit 2; \nelse \n\tFicLoaderJs=\"${PROJECT_DIR}/../../../walib/WAF/Loader.js\"\n\tchangelist=`cat ${DEPOT_ROOT}/Tools/Versionning/version.txt | cut -d. -f3 `\n\tcp \"${FicLoaderJs}\" \"${OBJROOT}/Loader.js\"\n\tcat \"${OBJROOT}/Loader.js\" | sed \"s/\\('BUILD'\\ *:\\ *\\)'[0-9]*'/\\1'${changelist}'/\" > \"${FicLoaderJs}\"\nfi\n\necho \"Copying resources files ...\"\n\"${DEPOT_ROOT}/Tools/BuildMac/scripts_compil_${BRANCH_NAME_l}/Scripts/CopyFiles_Mac.sh\" \"$BUILT_PRODUCTS_DIR/$FULL_PRODUCT_NAME\" \"E\"\nif [ \"$?\" != \"0\" ] ; then\n \texit 1; \nfi\n\nexit 0";
+			shellScript = "echo \"Versionning ...\"\nperl \"${DEPOT_ROOT}/Tools/Versionning/Wakanda_versionning_mac.pl\"\nif [ \"$?\" != \"0\" ] ; then\n \techo \"error: Erreur versionning\"\n\texit 2; \nfi\n\nperl \"${DEPOT_ROOT}/Tools/Versionning/versionning_waf.pl\" \"${PROJECT_DIR}/../../../walib/WAF/Loader.js\"\nif [ \"$?\" != \"0\" ] ; then\n \techo \"error: Erreur versionning waf\"\n\texit 2; \nfi\n\necho \"Copying resources files ...\"\n\"${DEPOT_ROOT}/Tools/BuildMac/scripts_compil_${BRANCH_NAME_l}/Scripts/CopyFiles_Mac.sh\" \"$BUILT_PRODUCTS_DIR/$FULL_PRODUCT_NAME\" \"E\"\nif [ \"$?\" != \"0\" ] ; then\n \texit 1; \nfi\n\nexit 0";
 		};
 /* End PBXShellScriptBuildPhase section */
 

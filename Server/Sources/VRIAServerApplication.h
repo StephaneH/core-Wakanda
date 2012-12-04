@@ -229,7 +229,7 @@ private:
 			void							_FlushDataCache();
 	
 			void							_PublishServiceRecord (const XBOX::VString &inServiceName);
-			void							_WithdrawServiceRecord (const XBOX::VString &inServiceName);
+			void							_WithdrawServiceRecord (const XBOX::VString &inServiceName, const XBOX::VString& inProviderName);
 
 	static	VRIAServerApplication*			sCurrentApplication;
 

@@ -97,7 +97,9 @@ EntityAttribute = function EntityAttribute() {
      * @method toString
      * @return {String}
      */
-    this.toString = function toString() {        return '';     };
+    this.toString = function toString() {
+        return ''; 
+    };
     
     /**
      * returns the name of the EntityAttribute object as a string
@@ -105,7 +107,9 @@ EntityAttribute = function EntityAttribute() {
      * @method getName
      * @return {String}
      */
-    this.getName = function getName() {        return '';     };
+    this.getName = function getName() {
+        return ''; 
+    };
     
 
 };
@@ -130,7 +134,9 @@ Datastore = function Datastore() {
      * @method getTempFolder
      * @return {Folder}
      */
-    this.getTempFolder = function getTempFolder() {        return new Folder( );     };
+    this.getTempFolder = function getTempFolder() {
+        return new Folder( ); 
+    };
     
     /**
      * returns the name of the current datastore
@@ -138,7 +144,9 @@ Datastore = function Datastore() {
      * @method getName
      * @return {String}
      */
-    this.getName = function getName() {        return '';     };
+    this.getName = function getName() {
+        return ''; 
+    };
     
     /**
      * replaces the name of the current datastore with the one you pass in name
@@ -146,7 +154,9 @@ Datastore = function Datastore() {
      * @method setName
      * @param {String} name
      */
-    this.setName = function setName(name) {             };
+    this.setName = function setName(name) {
+         
+    };
     
     /**
      * returns a reference, Folder, to the folder containing the datastore model file
@@ -154,7 +164,9 @@ Datastore = function Datastore() {
      * @method getModelFolder
      * @return {Folder}
      */
-    this.getModelFolder = function getModelFolder() {        return new Folder( );     };
+    this.getModelFolder = function getModelFolder() {
+        return new Folder( ); 
+    };
     
     /**
      * returns a reference, Folder, to the folder containing the datastore data file
@@ -162,14 +174,18 @@ Datastore = function Datastore() {
      * @method getDataFolder
      * @return {Folder}
      */
-    this.getDataFolder = function getDataFolder() {        return new Folder( );     };
+    this.getDataFolder = function getDataFolder() {
+        return new Folder( ); 
+    };
     
     /**
      * flushes the data cache to disk
      *
      * @method flushCache
      */
-    this.flushCache = function flushCache() {             };
+    this.flushCache = function flushCache() {
+         
+    };
     
     /**
      * close a datastore file previously opened with the open4DBase( ) or openDataStore( ) method
@@ -178,14 +194,18 @@ Datastore = function Datastore() {
      * @param {String} syncEventName
      * @return {Object}
      */
-    this.close = function close(syncEventName) {        return {};     };
+    this.close = function close(syncEventName) {
+        return {}; 
+    };
     
     /**
      * cancels the transaction opened by the startTransaction() method at the corresponding level in the current context
      *
      * @method rollBack
      */
-    this.rollBack = function rollBack() {             };
+    this.rollBack = function rollBack() {
+         
+    };
     
     /**
      * returns the level of the current transaction for the context
@@ -193,21 +213,27 @@ Datastore = function Datastore() {
      * @method transactionLevel
      * @return {Number}
      */
-    this.transactionLevel = function transactionLevel() {        return 0;     };
+    this.transactionLevel = function transactionLevel() {
+        return 0; 
+    };
     
     /**
      * starts a  transaction in the current context
      *
      * @method startTransaction
      */
-    this.startTransaction = function startTransaction() {             };
+    this.startTransaction = function startTransaction() {
+         
+    };
     
     /**
      * accepts the transaction opened by the startTransaction() method  at the corresponding level in the current context
      *
      * @method commit
      */
-    this.commit = function commit() {             };
+    this.commit = function commit() {
+         
+    };
     
     /**
      * carries out a structural check of the objects contained in the Datastore to which it is applied
@@ -215,11 +241,25 @@ Datastore = function Datastore() {
      * @method verify
      * @param {Object} options
      */
-    this.verify = function verify(options) {             };
+    this.verify = function verify(options) {
+         
+    };
+    
+    /**
+     * starts the backup of the current datastore of your application
+     *
+     * @method backup
+     * @param {Object} settings
+     * @param {Object} options
+     * @return {File | Null}
+     */
+    this.backup = function backup(settings, options) {
+        return new File( ) || new Null( ); 
+    };
     
 
 };
-ds = new Datastore();
+//ds = new Datastore();
 
 Entity = function Entity() {
     
@@ -230,21 +270,27 @@ Entity = function Entity() {
      *
      * @method release
      */
-    this.release = function release() {             };
+    this.release = function release() {
+         
+    };
     
     /**
      * reloads the entity as it is stored in the datastore
      *
      * @method refresh
      */
-    this.refresh = function refresh() {             };
+    this.refresh = function refresh() {
+         
+    };
     
     /**
      * saves the changes made to the entity in the datastore
      *
      * @method save
      */
-    this.save = function save() {             };
+    this.save = function save() {
+         
+    };
     
     /**
      * returns a string representation of the entity or entity collection
@@ -252,7 +298,9 @@ Entity = function Entity() {
      * @method toString
      * @return {String}
      */
-    this.toString = function toString() {        return '';     };
+    this.toString = function toString() {
+        return ''; 
+    };
     
     /**
      * returns the datastore class (object of the DatastoreClass type)  of the entity
@@ -260,7 +308,9 @@ Entity = function Entity() {
      * @method getDataClass
      * @return {DatastoreClass}
      */
-    this.getDataClass = function getDataClass() {        return new DatastoreClass( );     };
+    this.getDataClass = function getDataClass() {
+        return new DatastoreClass( ); 
+    };
     
     /**
      * returns the timestamp of the last save of the entity to which it is applied
@@ -268,14 +318,18 @@ Entity = function Entity() {
      * @method getTimeStamp
      * @return {Date}
      */
-    this.getTimeStamp = function getTimeStamp() {        return new Date( );     };
+    this.getTimeStamp = function getTimeStamp() {
+        return new Date( ); 
+    };
     
     /**
      * removes the entity from the datastore
      *
      * @method remove
      */
-    this.remove = function remove() {             };
+    this.remove = function remove() {
+         
+    };
     
     /**
      * returns True or False depending on whether the entity to which it is applied has just been created in the datastore
@@ -283,7 +337,9 @@ Entity = function Entity() {
      * @method isNew
      * @return {Boolean}
      */
-    this.isNew = function isNew() {        return true;     };
+    this.isNew = function isNew() {
+        return true; 
+    };
     
     /**
      * returns True or False depending on whether the entity to which it is applied has been  modified since the last time it was loaded from the datastore
@@ -291,7 +347,9 @@ Entity = function Entity() {
      * @method isModified
      * @return {Boolean}
      */
-    this.isModified = function isModified() {        return true;     };
+    this.isModified = function isModified() {
+        return true; 
+    };
     
     /**
      * returns True or False depending on whether the entity iterator points to an entity that is currently loaded in memory
@@ -299,7 +357,9 @@ Entity = function Entity() {
      * @method isLoaded
      * @return {Boolean}
      */
-    this.isLoaded = function isLoaded() {        return true;     };
+    this.isLoaded = function isLoaded() {
+        return true; 
+    };
     
     /**
      * checks the validity of the pointer to the current entity within an iteration of entities
@@ -307,7 +367,9 @@ Entity = function Entity() {
      * @method valid
      * @return {Boolean}
      */
-    this.valid = function valid() {        return true;     };
+    this.valid = function valid() {
+        return true; 
+    };
     
     /**
      * puts the entity pointer on the next entity within an iteration of entities
@@ -315,7 +377,19 @@ Entity = function Entity() {
      * @method next
      * @return {Entity | Null}
      */
-    this.next = function next() {        return new Entity( ) || new Null( );     };
+    this.next = function next() {
+        return new Entity( ) || new Null( ); 
+    };
+    
+    /**
+     * returns an array containing the names of attributes that have been modified in the entity
+     *
+     * @method getModifiedAttributes
+     * @return {Array}
+     */
+    this.getModifiedAttributes = function getModifiedAttributes() {
+        return []; 
+    };
     
     /**
      * passes the entity through the validation process
@@ -323,7 +397,9 @@ Entity = function Entity() {
      * @method validate
      * @return {Boolean}
      */
-    this.validate = function validate() {        return true;     };
+    this.validate = function validate() {
+        return true; 
+    };
     
     /**
      * returns the current value of the internal stamp of the entity to which it is applied
@@ -331,7 +407,9 @@ Entity = function Entity() {
      * @method getStamp
      * @return {Number}
      */
-    this.getStamp = function getStamp() {        return 0;     };
+    this.getStamp = function getStamp() {
+        return 0; 
+    };
     
     /**
      * 
@@ -339,7 +417,9 @@ Entity = function Entity() {
      * @method 
      * @return {Number | String}
      */
-    this. = function () {        return 0 || '';     };
+    this. = function () {
+        return 0 || ''; 
+    };
     
 
 };
@@ -381,7 +461,9 @@ EntityCollection = function EntityCollection() {
      *
      * @method remove
      */
-    this.remove = function remove() {             };
+    this.remove = function remove() {
+         
+    };
     
     /**
      * returns a string representation of the entity or entity collection
@@ -389,7 +471,9 @@ EntityCollection = function EntityCollection() {
      * @method toString
      * @return {String}
      */
-    this.toString = function toString() {        return '';     };
+    this.toString = function toString() {
+        return ''; 
+    };
     
     /**
      * creates an array and returns in it all the distinct values stored in attribute for the entity collection or datastore class
@@ -398,7 +482,9 @@ EntityCollection = function EntityCollection() {
      * @param {DatastoreClassAttribute | String} attribute
      * @return {Array}
      */
-    this.distinctValues = function distinctValues(attribute) {        return [];     };
+    this.distinctValues = function distinctValues(attribute) {
+        return []; 
+    };
     
     /**
      * performs, in a single call, all the statistical calculations on the attribute or list of attributes passed as the parameter for the datastore class or entity collection
@@ -408,7 +494,9 @@ EntityCollection = function EntityCollection() {
      * @param {Boolean | String} distinct
      * @return {Object}
      */
-    this.compute = function compute(attribute, distinct) {        return {};     };
+    this.compute = function compute(attribute, distinct) {
+        return {}; 
+    };
     
     /**
      * returns the arithmetic average of all the non-null values of attribute for the datastore class or entity collection
@@ -418,7 +506,9 @@ EntityCollection = function EntityCollection() {
      * @param {Boolean | String} distinct
      * @return {Number}
      */
-    this.average = function average(attribute, distinct) {        return 0;     };
+    this.average = function average(attribute, distinct) {
+        return 0; 
+    };
     
     /**
      * returns the maximum value among all the values of attribute in the entity collection or datastore class
@@ -427,7 +517,9 @@ EntityCollection = function EntityCollection() {
      * @param {DatastoreClassAttribute | String} attribute
      * @return {Number}
      */
-    this.max = function max(attribute) {        return 0;     };
+    this.max = function max(attribute) {
+        return 0; 
+    };
     
     /**
      * returns the lowest (or minimum) value among all the values of attribute in the entity collection or datastore class
@@ -436,7 +528,9 @@ EntityCollection = function EntityCollection() {
      * @param {DatastoreClassAttribute | String} attribute
      * @return {Number}
      */
-    this.min = function min(attribute) {        return 0;     };
+    this.min = function min(attribute) {
+        return 0; 
+    };
     
     /**
      * searches all the entities in the datastore class or entity collection using the search criteria specified in queryString and returns a new collection containing the entities found
@@ -445,7 +539,9 @@ EntityCollection = function EntityCollection() {
      * @param {String} queryString
      * @return {EntityCollection}
      */
-    this.query = function query(queryString) {        return new EntityCollection( );     };
+    this.query = function query(queryString) {
+        return new EntityCollection( ); 
+    };
     
     /**
      * applies the search criteria specified in queryString to all the entities of the DatastoreClass or EntityCollection and returns the first entity found in an object of type Entity
@@ -454,7 +550,9 @@ EntityCollection = function EntityCollection() {
      * @param {String} queryString
      * @return {Entity}
      */
-    this.find = function find(queryString) {        return new Entity( );     };
+    this.find = function find(queryString) {
+        return new Entity( ); 
+    };
     
     /**
      * creates and returns a JavaScript array where each element is an object containing a set of properties and values corresponding to the attribute names and values for a datastore class or an entity collection
@@ -467,7 +565,9 @@ EntityCollection = function EntityCollection() {
      * @param {Number} top
      * @return {Array}
      */
-    this.toArray = function toArray(attributeList, sortList, key, skip, top) {        return [];     };
+    this.toArray = function toArray(attributeList, sortList, key, skip, top) {
+        return []; 
+    };
     
     /**
      * returns the sum (i.e., total of all the values) of attribute for the datastore class or entity collection
@@ -477,7 +577,9 @@ EntityCollection = function EntityCollection() {
      * @param {Boolean | String} distinct
      * @return {Number}
      */
-    this.sum = function sum(attribute, distinct) {        return 0;     };
+    this.sum = function sum(attribute, distinct) {
+        return 0; 
+    };
     
     /**
      * executes the callbackFn function on each entity in the entity collection in ascending order
@@ -485,7 +587,9 @@ EntityCollection = function EntityCollection() {
      * @method forEach
      * @param {Function} callbackFn
      */
-    this.forEach = function forEach(callbackFn) {             };
+    this.forEach = function forEach(callbackFn) {
+         
+    };
     
     /**
      * returns the datastore class (object of the&amp;nbsp;DatastoreClass type) of the entity collection
@@ -493,7 +597,9 @@ EntityCollection = function EntityCollection() {
      * @method getDataClass
      * @return {DatastoreClass}
      */
-    this.getDataClass = function getDataClass() {        return new DatastoreClass( );     };
+    this.getDataClass = function getDataClass() {
+        return new DatastoreClass( ); 
+    };
     
     /**
      * adds the entity or entity collection passed in the toAdd parameter to the entity collection
@@ -502,7 +608,9 @@ EntityCollection = function EntityCollection() {
      * @param {EntityCollection | Entity} toAdd
      * @param {String | Boolean} atTheEnd
      */
-    this.add = function add(toAdd, atTheEnd) {             };
+    this.add = function add(toAdd, atTheEnd) {
+         
+    };
     
     /**
      * sorts the entities in the entity collection or datastore class and returns a new sorted entity collection
@@ -512,7 +620,9 @@ EntityCollection = function EntityCollection() {
      * @param {String} sortOrder
      * @return {EntityCollection}
      */
-    this.orderBy = function orderBy(attributeList, sortOrder) {        return new EntityCollection( );     };
+    this.orderBy = function orderBy(attributeList, sortOrder) {
+        return new EntityCollection( ); 
+    };
     
     /**
      * returns the number of entities contained in the entity collection or datastore class
@@ -522,7 +632,9 @@ EntityCollection = function EntityCollection() {
      * @param {Boolean | String} distinct
      * @return {Number}
      */
-    this.count = function count(attribute, distinct) {        return 0;     };
+    this.count = function count(attribute, distinct) {
+        return 0; 
+    };
     
     /**
      * returns the entity in the first position of the entity collection or datastore class
@@ -530,7 +642,9 @@ EntityCollection = function EntityCollection() {
      * @method first
      * @return {Entity}
      */
-    this.first = function first() {        return new Entity( );     };
+    this.first = function first() {
+        return new Entity( ); 
+    };
     
     /**
      * creates a new entity collection that contains all the entities from the entity collection to which it is applied and all the entities from the collection2 entity collection
@@ -539,7 +653,9 @@ EntityCollection = function EntityCollection() {
      * @param {EntityCollection} collection2
      * @return {EntityCollection}
      */
-    this.or = function or(collection2) {        return new EntityCollection( );     };
+    this.or = function or(collection2) {
+        return new EntityCollection( ); 
+    };
     
     /**
      * compares the entity collection to  which it is applied and the collection2 and returns a new entity collection that contains only the entities that are referenced in both collections
@@ -548,7 +664,9 @@ EntityCollection = function EntityCollection() {
      * @param {EntityCollection} collection2
      * @return {EntityCollection}
      */
-    this.and = function and(collection2) {        return new EntityCollection( );     };
+    this.and = function and(collection2) {
+        return new EntityCollection( ); 
+    };
     
     /**
      * excludes from the entity collection to  which it is applied the entities that are in the collection2 and returns the resulting entity collection
@@ -557,7 +675,9 @@ EntityCollection = function EntityCollection() {
      * @param {EntityCollection} collection2
      * @return {EntityCollection}
      */
-    this.minus = function minus(collection2) {        return new EntityCollection( );     };
+    this.minus = function minus(collection2) {
+        return new EntityCollection( ); 
+    };
     
 
 };
@@ -583,14 +703,18 @@ dataClass = function dataClass() {
      * @param {String | Boolean} keepSorted
      * @return {EntityCollection}
      */
-    this.createEntityCollection = function createEntityCollection(keepSorted) {        return new EntityCollection( );     };
+    this.createEntityCollection = function createEntityCollection(keepSorted) {
+        return new EntityCollection( ); 
+    };
     
     /**
      * permanently removes entities from the datastore
      *
      * @method remove
      */
-    this.remove = function remove() {             };
+    this.remove = function remove() {
+         
+    };
     
     /**
      * returns the name of the datastore class as a string
@@ -598,7 +722,9 @@ dataClass = function dataClass() {
      * @method toString
      * @return {String}
      */
-    this.toString = function toString() {        return '';     };
+    this.toString = function toString() {
+        return ''; 
+    };
     
     /**
      * creates an array and returns in it all the distinct values stored in attribute for the entity collection or datastore class
@@ -607,7 +733,9 @@ dataClass = function dataClass() {
      * @param {DatastoreClassAttribute | String} attribute
      * @return {Array}
      */
-    this.distinctValues = function distinctValues(attribute) {        return [];     };
+    this.distinctValues = function distinctValues(attribute) {
+        return []; 
+    };
     
     /**
      * performs, in a single call, all the statistical calculations on the attribute or list of attributes passed as the parameter for the datastore class or entity collection
@@ -617,7 +745,9 @@ dataClass = function dataClass() {
      * @param {Boolean | String} distinct
      * @return {Object}
      */
-    this.compute = function compute(attribute, distinct) {        return {};     };
+    this.compute = function compute(attribute, distinct) {
+        return {}; 
+    };
     
     /**
      * returns the arithmetic average of all the non-null values of attribute for the datastore class or entity collection
@@ -627,7 +757,9 @@ dataClass = function dataClass() {
      * @param {Boolean | String} distinct
      * @return {Number}
      */
-    this.average = function average(attribute, distinct) {        return 0;     };
+    this.average = function average(attribute, distinct) {
+        return 0; 
+    };
     
     /**
      * returns the maximum value among all the values of attribute in the entity collection or datastore class
@@ -636,7 +768,9 @@ dataClass = function dataClass() {
      * @param {DatastoreClassAttribute | String} attribute
      * @return {Number}
      */
-    this.max = function max(attribute) {        return 0;     };
+    this.max = function max(attribute) {
+        return 0; 
+    };
     
     /**
      * returns the lowest (or minimum) value among all the values of attribute in the entity collection or datastore class
@@ -645,7 +779,9 @@ dataClass = function dataClass() {
      * @param {DatastoreClassAttribute | String} attribute
      * @return {Number}
      */
-    this.min = function min(attribute) {        return 0;     };
+    this.min = function min(attribute) {
+        return 0; 
+    };
     
     /**
      * executes the callbackFn function on each entity in the entity collection in ascending order
@@ -653,7 +789,9 @@ dataClass = function dataClass() {
      * @method forEach
      * @param {Function} callbackFn
      */
-    this.forEach = function forEach(callbackFn) {             };
+    this.forEach = function forEach(callbackFn) {
+         
+    };
     
     /**
      * sorts the entities in the entity collection or datastore class and returns a new sorted entity collection
@@ -663,7 +801,9 @@ dataClass = function dataClass() {
      * @param {String} sortOrder
      * @return {EntityCollection}
      */
-    this.orderBy = function orderBy(attributeList, sortOrder) {        return new EntityCollection( );     };
+    this.orderBy = function orderBy(attributeList, sortOrder) {
+        return new EntityCollection( ); 
+    };
     
     /**
      * returns the number of entities contained in the entity collection or datastore class
@@ -673,7 +813,9 @@ dataClass = function dataClass() {
      * @param {Boolean | String} distinct
      * @return {Number}
      */
-    this.count = function count(attribute, distinct) {        return 0;     };
+    this.count = function count(attribute, distinct) {
+        return 0; 
+    };
     
     /**
      * returns the entity in the first position of the entity collection or datastore class
@@ -681,7 +823,9 @@ dataClass = function dataClass() {
      * @method first
      * @return {Entity}
      */
-    this.first = function first() {        return new Entity( );     };
+    this.first = function first() {
+        return new Entity( ); 
+    };
     
     /**
      * returns the sum (i.e., total of all the values) of attribute for the datastore class or entity collection
@@ -691,7 +835,9 @@ dataClass = function dataClass() {
      * @param {Boolean | String} distinct
      * @return {Number}
      */
-    this.sum = function sum(attribute, distinct) {        return 0;     };
+    this.sum = function sum(attribute, distinct) {
+        return 0; 
+    };
     
     /**
      * creates and returns a JavaScript array where each element is an object containing a set of properties and values corresponding to the attribute names and values for a datastore class or an entity collection
@@ -704,7 +850,9 @@ dataClass = function dataClass() {
      * @param {Number} top
      * @return {Array}
      */
-    this.toArray = function toArray(attributeList, sortList, key, skip, top) {        return [];     };
+    this.toArray = function toArray(attributeList, sortList, key, skip, top) {
+        return []; 
+    };
     
     /**
      * (re)sets the start value for the autosequence number of the datastore class
@@ -712,7 +860,9 @@ dataClass = function dataClass() {
      * @method setAutoSequenceNumber
      * @param {Number} counter
      */
-    this.setAutoSequenceNumber = function setAutoSequenceNumber(counter) {             };
+    this.setAutoSequenceNumber = function setAutoSequenceNumber(counter) {
+         
+    };
     
     /**
      * generates entities in the datastore class where it is applied
@@ -720,7 +870,9 @@ dataClass = function dataClass() {
      * @method fromArray
      * @param {Array} arrayValues
      */
-    this.fromArray = function fromArray(arrayValues) {             };
+    this.fromArray = function fromArray(arrayValues) {
+         
+    };
     
     /**
      * creates a new blank object of type Entity based on the datastore class to which it is applied
@@ -728,7 +880,9 @@ dataClass = function dataClass() {
      * @method createEntity
      * @return {Entity}
      */
-    this.createEntity = function createEntity() {        return new Entity( );     };
+    this.createEntity = function createEntity() {
+        return new Entity( ); 
+    };
     
     /**
      * applies the search criteria specified in queryString to all the entities of the DatastoreClass or EntityCollection and returns the first entity found in an object of type Entity
@@ -737,7 +891,9 @@ dataClass = function dataClass() {
      * @param {String} queryString
      * @return {Entity}
      */
-    this.find = function find(queryString) {        return new Entity( );     };
+    this.find = function find(queryString) {
+        return new Entity( ); 
+    };
     
     /**
      * searches all the entities in the datastore class or entity collection using the search criteria specified in queryString and returns a new collection containing the entities found
@@ -746,7 +902,9 @@ dataClass = function dataClass() {
      * @param {String} queryString
      * @return {EntityCollection}
      */
-    this.query = function query(queryString) {        return new EntityCollection( );     };
+    this.query = function query(queryString) {
+        return new EntityCollection( ); 
+    };
     
     /**
      * returns an object of type EntityCollection containing all the entities in the datastore class to which it was applied
@@ -754,7 +912,9 @@ dataClass = function dataClass() {
      * @method all
      * @return {EntityCollection}
      */
-    this.all = function all() {        return new EntityCollection( );     };
+    this.all = function all() {
+        return new EntityCollection( ); 
+    };
     
     /**
      * returns the name of the datastore class to which it is applied in a string
@@ -762,7 +922,9 @@ dataClass = function dataClass() {
      * @method getName
      * @return {String}
      */
-    this.getName = function getName() {        return '';     };
+    this.getName = function getName() {
+        return ''; 
+    };
     
     /**
      * returns the current scope property value of the datastore class
@@ -770,7 +932,9 @@ dataClass = function dataClass() {
      * @method getScope
      * @return {String}
      */
-    this.getScope = function getScope() {        return '';     };
+    this.getScope = function getScope() {
+        return ''; 
+    };
     
     /**
      * returns the percentage of logical fragmentation for the entities of the datastore class
@@ -778,7 +942,27 @@ dataClass = function dataClass() {
      * @method getFragmentation
      * @return {Number}
      */
-    this.getFragmentation = function getFragmentation() {        return 0;     };
+    this.getFragmentation = function getFragmentation() {
+        return 0; 
+    };
+    
+
+};
+
+
+Application = function Application() {
+    
+    
+    
+    /**
+     * returns an Object containing the default backup settings for the solution
+     *
+     * @method getBackupSettings
+     * @return {Object}
+     */
+    this.getBackupSettings = function getBackupSettings() {
+        return {}; 
+    };
     
 
 };

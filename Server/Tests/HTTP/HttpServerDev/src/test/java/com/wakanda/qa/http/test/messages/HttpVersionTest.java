@@ -21,6 +21,7 @@ import org.junit.runner.RunWith;
 
 import com.wakanda.qa.http.Utils;
 import com.wakanda.qa.http.test.extend.AbstractHttpTestCase;
+import com.wakanda.qa.utils.Requestor.HttpSimpleBufferedResponse;
 
 /**
  * This class manages all tests related with the HTTP version parameter.
@@ -47,11 +48,11 @@ public class HttpVersionTest extends AbstractHttpTestCase {
 					+ "Host:" + getDefaultHostHeaderValue() + CRLF 
 					+ CRLF;
 		
-		HttpResponse response = executeRawRequest(request);
+		HttpSimpleBufferedResponse response = executeRawRequest(request);
 		assertEqualsStatusCode(HttpStatus.SC_OK, response);
 		
 		HttpVersion exVersion = HttpVersion.HTTP_1_1;
-		ProtocolVersion acVersion = response.getStatusLine()
+		ProtocolVersion acVersion = response.getOriginalResponse().getStatusLine()
 				.getProtocolVersion();
 		
 		assertTrue("Leading zeros of HTTP version parameter are not ignored.", acVersion.equals(exVersion));
@@ -80,7 +81,7 @@ public class HttpVersionTest extends AbstractHttpTestCase {
 		String request = "GET / HTTP/" + version + CRLF
 				+ Utils.getDefaultHeadersFieldsAsString()	+ CRLF
 				+ CRLF;
-		HttpResponse response = executeRawRequest(request);
+		HttpSimpleBufferedResponse response = executeRawRequest(request);
 		assertEqualsStatusCode(HttpStatus.SC_HTTP_VERSION_NOT_SUPPORTED, response);
 	}
 	@SuppressWarnings("unused")
@@ -103,7 +104,7 @@ public class HttpVersionTest extends AbstractHttpTestCase {
 	public void testHostHeaderIsMandatoryIn_1_1_HttpVersion() throws Exception {
 		String request = "GET / HTTP/1.1" + CRLF
 						+ CRLF;
-		HttpResponse response = executeRawRequest(request);
+		HttpSimpleBufferedResponse response = executeRawRequest(request);
 		assertEqualsStatusCode(HttpStatus.SC_BAD_REQUEST, response);
 	}
 
@@ -174,7 +175,7 @@ public class HttpVersionTest extends AbstractHttpTestCase {
 		String request = "GET / HTTP/1.0" + CRLF
 						+ CRLF;
 		long start = GregorianCalendar.getInstance().getTimeInMillis();
-		HttpResponse response = executeRawRequest(request);
+		HttpSimpleBufferedResponse response = executeRawRequest(request);
 		long duration = GregorianCalendar.getInstance().getTimeInMillis() - start;
 		logger.debug("Duration: " + duration + " ms");
 		assertEqualsStatusCode(HttpStatus.SC_OK, response);

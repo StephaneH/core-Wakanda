@@ -129,5 +129,10 @@ public class Settings extends BasicSettings {
 	public String getCacheFolder() {
 		return getOrCreateFolderInSolutionWebFolder("cache");
 	}
+	
+	@Override
+	public String getServerPath() {
+		return super.getServerPath();
+	}
 
 }

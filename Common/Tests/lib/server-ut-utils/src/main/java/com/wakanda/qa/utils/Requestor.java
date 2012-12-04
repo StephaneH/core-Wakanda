@@ -12,6 +12,7 @@ import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
+import org.apache.http.StatusLine;
 import org.apache.http.auth.MalformedChallengeException;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.HttpClient;
@@ -27,6 +28,7 @@ import org.apache.http.client.protocol.ResponseProcessCookies;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.entity.BufferedHttpEntity;
 import org.apache.http.impl.auth.AuthSchemeBase;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.auth.DigestScheme;
@@ -206,6 +208,39 @@ public class Requestor {
 	public HttpResponse executeURL(String url) throws Exception {
 		return execute(new HttpGet(url));
 	}
+	
+	public static class HttpSimpleBufferedResponse{
+
+		private HttpResponse originalResponse;
+		private BufferedHttpEntity entity;
+		
+		public HttpSimpleBufferedResponse(HttpResponse response){
+			this.originalResponse = response;
+			try {
+				this.entity = new BufferedHttpEntity(response.getEntity());
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		public BufferedHttpEntity getEntity() {
+			return entity;
+		}
+
+		public HttpResponse getOriginalResponse() {
+			return originalResponse;
+		}
+
+		public int getStatusCode() {
+			return getStatusLine().getStatusCode();
+		}
+		
+		public StatusLine getStatusLine() {
+			return originalResponse.getStatusLine();
+		}
+		
+		
+	}
 
 	/**
 	 * Executes an http request string and returns its response as an instance
@@ -217,7 +252,7 @@ public class Requestor {
 	 * @throws IOException
 	 * @throws HttpException
 	 */
-	public static HttpResponse executeRaw(HttpHost host, String request)
+	public static HttpSimpleBufferedResponse executeRaw(HttpHost host, String request)
 			throws Exception {
 
 		// Create an HTTP scheme
@@ -244,7 +279,9 @@ public class Requestor {
 			HttpResponse response = cnx.receiveResponseHeader();
 			cnx.receiveResponseEntity(response);
 
-			return response;
+			// build the HttpRawResponse
+			return new HttpSimpleBufferedResponse(response);
+			
 		} finally {
 			cnx.close();
 		}
@@ -258,7 +295,7 @@ public class Requestor {
 	 * @return
 	 * @throws Exception
 	 */
-	public HttpResponse executeRaw(String request) throws Exception {
+	public HttpSimpleBufferedResponse executeRaw(String request) throws Exception {
 		return executeRaw(getSetting().getDefaultTarget(), request);
 	}
 

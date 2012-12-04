@@ -1,4 +1,4 @@
-/*
+﻿/*
 * This file is part of Wakanda software, licensed by 4D under
 *  (i) the GNU General Public License version 3 (GNU GPL v3), or
 *  (ii) the Affero General Public License version 3 (AGPL v3) or
@@ -33,8 +33,6 @@
 #include "VJSSolution.h"
 #include "VRIAPermissions.h"
 #include "VJSPermissions.h"
-#include "VRPCCatalog.h"
-#include "VJSRPCCatalog.h"
 #include "VRIAServerComponentBridge.h"
 #include "VRIAServerHTTPSession.h"
 
@@ -725,27 +723,6 @@ void VJSApplicationGlobalObject::_getPermissions( XBOX::VJSParms_getProperty& io
 }
 
 
-void VJSApplicationGlobalObject::_getRPCCatalog( XBOX::VJSParms_getProperty& ioParms, XBOX::VJSGlobalObject* inGlobalObject)
-{
-	bool done = false;
-	VRIAJSRuntimeContext *rtContext = VRIAJSRuntimeContext::GetFromJSGlobalObject( inGlobalObject);
-	if (rtContext != NULL)
-	{
-		VRIAServerProject *application = rtContext->GetRootApplication();
-		if (application != NULL)
-		{
-			VJSApplication::_getRPCCatalog( ioParms, application);
-			done = true;
-		}
-	}
-
-	if (!done)
-	{
-		ioParms.ReturnUndefinedValue();
-	}
-}
-
-
 
 // ----------------------------------------------------------------------------
 
@@ -855,7 +832,6 @@ void VJSApplication::GetDefinition( ClassDefinition& outDefinition)
 		{ kSSJS_PROPERTY_NAME_Directory, js_getProperty<_getDirectory>, NULL, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
 		{ kSSJS_PROPERTY_NAME_Internal, js_getProperty<_getInternal>, NULL, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontEnum | JS4D::PropertyAttributeDontDelete },
 		{ kSSJS_PROPERTY_NAME_Permissions, js_getProperty<_getPermissions>, NULL, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontEnum | JS4D::PropertyAttributeDontDelete },
-		{ kSSJS_PROPERTY_NAME_RPCCatalog, js_getProperty<_getRPCCatalog>, NULL, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontEnum | JS4D::PropertyAttributeDontDelete },
 		{ kSSJS_PROPERTY_NAME_wildchar, js_getProperty<_getWildChar>, NULL, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
 		{ 0, 0, 0}
 	};
@@ -1396,10 +1372,16 @@ void VJSApplication::_backupDataStore( XBOX::VJSParms_callStaticFunction& ioParm
 		for(sLONG count = db4D->CountBases();count>0 && !dbIsOpened;--count)
 		{
 			CDB4DBase* enumeratedBase = db4D->RetainNthBase(count);
-			VFolder* dataFolder = enumeratedBase->RetainDataFolder();
-			const VFilePath& dataFolderPath = dataFolder->GetPath();
-			dbIsOpened = (dataFolderPath == path);
-			XBOX::ReleaseRefCountable(&dataFolder);
+			if(enumeratedBase)
+			{
+				VFolder* dataFolder = enumeratedBase->RetainDataFolder();
+				if(dataFolder)
+				{
+					const VFilePath& dataFolderPath = dataFolder->GetPath();
+					dbIsOpened = (dataFolderPath == path);
+				}
+				XBOX::ReleaseRefCountable(&dataFolder);
+			}
 			XBOX::ReleaseRefCountable(&enumeratedBase);
 		}
 
@@ -2094,22 +2076,6 @@ void VJSApplication::_getPermissions( XBOX::VJSParms_getProperty& ioParms, VRIAS
 	{
 		ioParms.ReturnValue( VJSPermissions::CreateInstance( ioParms.GetContext(), permissions));
 		permissions->Release();
-	}
-	else
-	{
-		ioParms.ReturnUndefinedValue();
-	}
-}
-
-
-void VJSApplication::_getRPCCatalog( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication)
-{
-	VRIAContext *riaContext = VRIAJSRuntimeContext::GetApplicationContextFromJSContext( ioParms.GetContext(), inApplication);
-	VRPCCatalog *rpcCatalog = inApplication->RetainRPCCatalog( riaContext, NULL, NULL, NULL);
-	if (rpcCatalog != NULL)
-	{
-		ioParms.ReturnValue( VJSRPCCatalog::CreateInstance( ioParms.GetContext(), rpcCatalog));
-		rpcCatalog->Release();
 	}
 	else
 	{

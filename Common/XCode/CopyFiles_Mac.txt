@@ -182,6 +182,3 @@ LA______mAs_ %DEPOT%CoreRuntime/%branch%/Resources/%LibLangueLproj%/4DDebugger%L
 LA______mAs_ %DEPOT%CoreRuntime/%branch%/Resources/%LibLangueLproj%/Common%Lib2Langue%.xlf
 LA______mAs_ %DEPOT%CoreRuntime/%branch%/Resources/%LibLangueLproj%/Errors_4d_%Lib2Langue%.xlf
 LA______mAs_ %DEPOT%CoreRuntime/%branch%/Resources/%LibLangueLproj%/ToolBox%Lib2Langue%.xlf
-
-LA______m_sA [%TARGET%%PRODUCT_NAME%.app/Contents/Resources/wkhtmltopdf]
-LA______m_sA %DEPOT%Wakanda/%branch%/Server/Resources/wkhtmltopdf.MAC/

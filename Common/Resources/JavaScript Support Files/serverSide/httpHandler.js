@@ -6,86 +6,6 @@
  * @extends Object
  *
  */
-HTMLFormPart = function HTMLFormPart() {
-    
-    
-    /**
-     * 
-     *
-     * @property asBlob
-     * @attributes ReadOnly
-     * @type Blob
-     */
-    this.asBlob =  new Blob( ); 
-    
-    /**
-     * 
-     *
-     * @property asPicture
-     * @attributes ReadOnly
-     * @type Image | Undefined
-     */
-    this.asPicture =  new Image( ) || new Undefined( ); 
-    
-    /**
-     * 
-     *
-     * @property asText
-     * @attributes ReadOnly
-     * @type String | Undefined
-     */
-    this.asText =  '' || new Undefined( ); 
-    
-    /**
-     * 
-     *
-     * @property size
-     * @attributes ReadOnly
-     * @type Number
-     */
-    this.size =  0; 
-    
-    /**
-     * 
-     *
-     * @property mediaType
-     * @attributes ReadOnly
-     * @type String
-     */
-    this.mediaType =  ''; 
-    
-    /**
-     * returns the name of the uploaded file
-     *
-     * @property fileName
-     * @attributes ReadOnly
-     * @type String
-     */
-    this.fileName =  ''; 
-    
-    /**
-     * 
-     *
-     * @property name
-     * @attributes ReadOnly
-     * @type String
-     */
-    this.name =  ''; 
-    
-    
-    /**
-     * saves the body of the part in the file whose path is passed in filePath
-     *
-     * @method save
-     * @param {String} filePath
-     * @param {Boolean} overWrite
-     */
-    this.save = function save(filePath, overWrite) {             };
-    
-
-};
-
-
 HTTPResponse = function HTTPResponse() {
     
     
@@ -150,50 +70,6 @@ HTTPResponse = function HTTPResponse() {
      * @param {Number} maxThreshold
      */
     this.allowCompression = function allowCompression(minThreshold, maxThreshold) {             };
-    
-
-};
-
-
-HTMLForm = function HTMLForm() {
-    
-    
-    /**
-     * 
-     *
-     * @property [n]
-     * @attributes ReadOnly
-     * @type HTMLFormPart
-     */
-    this[n] =  new HTMLFormPart( ); 
-    
-    /**
-     * 
-     *
-     * @property encoding
-     * @attributes ReadOnly
-     * @type String
-     */
-    this.encoding =  ''; 
-    
-    /**
-     * 
-     *
-     * @property count
-     * @attributes ReadOnly
-     * @type Number
-     */
-    this.count =  0; 
-    
-    /**
-     * 
-     *
-     * @property boundary
-     * @attributes ReadOnly
-     * @type String
-     */
-    this.boundary =  ''; 
-    
     
 
 };
@@ -440,9 +316,9 @@ HTTPRequest = function HTTPRequest() {
      *
      * @property parts
      * @attributes ReadOnly
-     * @type HTMLForm
+     * @type MIMEMessage
      */
-    this.parts =  new HTMLForm( ); 
+    this.parts =  new MIMEMessage( ); 
     
     /**
      * 
@@ -560,6 +436,51 @@ HTTPRequest = function HTTPRequest() {
      * @type String
      */
     this.urlPath =  ''; 
+    
+    /**
+     * 
+     *
+     * @property isSSL
+     * @attributes 
+     * @type Boolean
+     */
+    this.isSSL =  true; 
+    
+    /**
+     * 
+     *
+     * @property localPort
+     * @attributes 
+     * @type Number
+     */
+    this.localPort =  0; 
+    
+    /**
+     * 
+     *
+     * @property localAddress
+     * @attributes 
+     * @type String
+     */
+    this.localAddress =  ''; 
+    
+    /**
+     * 
+     *
+     * @property remotePort
+     * @attributes 
+     * @type Number
+     */
+    this.remotePort =  0; 
+    
+    /**
+     * 
+     *
+     * @property remoteAddress
+     * @attributes 
+     * @type String
+     */
+    this.remoteAddress =  ''; 
     
     
 

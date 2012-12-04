@@ -9,6 +9,18 @@ if [ "${RepS:0:1}" = "." ] ; then
 	RepS=${RepC}${RepS:1}
 fi
 
+Branch=`echo ${RepS} | awk -F/ '{nb=NF-2; print $nb;}'`
+echo "Repertoire courant $RepS dans $Branch"
+kobranch=`ls ./../../.. | grep -v "$Branch" `
+KOBRANCH=`echo $kobranch| awk '{print toupper(substr($0,1,1))substr($0,2); }'`
+cmdKoBranch="cat lstFic.txt "
+for i in $kobranch $KOBRANCH
+do
+	cmdKoBranch=${cmdKoBranch}"| grep -v \"$i\" "
+done
+cmdKoBranch=${cmdKoBranch}" > lstFic2.txt"
+echo $cmdKoBranch > ficcmd
+
 #Initialisation de la commande CMake
 if [ -x "${HOME}/local/bin/cmake" ]
 then
@@ -48,7 +60,9 @@ else
     echo "Repository root is ${repo}"
 fi
 
-find "${repo}" -ipath "*/CMake/Build/*" -prune -exec rm -Rf "{}"  \;
+find "${repo}" -ipath "*/CMake/Build/*" -prune -exec echo rm -Rf \"{}\"  \; > lstFic.txt
+. ficcmd #Filte la liste des fichiers en retirant les autres branches 
+. lstFic2.txt
 
 log="cmake.log"
 

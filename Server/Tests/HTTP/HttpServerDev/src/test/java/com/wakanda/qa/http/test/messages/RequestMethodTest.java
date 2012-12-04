@@ -46,6 +46,7 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestExecutor;
 import org.apache.http.util.EntityUtils;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -354,6 +355,7 @@ public class RequestMethodTest extends AbstractHttpTestCase {
 	 * @throws Exception
 	 */
 	@Test
+	@Ignore
 	public void testThatDELETEIsNotAllowed() throws Exception {
 		String url = "/toCheckDeleteMethod.tmp";
 		// create resource with random content

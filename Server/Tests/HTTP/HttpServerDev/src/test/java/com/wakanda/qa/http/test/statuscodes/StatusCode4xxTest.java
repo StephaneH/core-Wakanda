@@ -2,6 +2,8 @@ package com.wakanda.qa.http.test.statuscodes;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.Date;
+
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -10,9 +12,12 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.EnglishReasonPhraseCatalog;
+import org.apache.http.impl.cookie.DateUtils;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.wakanda.qa.http.test.extend.AbstractHttpTestCase;
+import com.wakanda.qa.utils.Requestor.HttpSimpleBufferedResponse;
 
 /**
  * This class manages all test cases related with status codes that begin with
@@ -37,9 +42,8 @@ public class StatusCode4xxTest extends AbstractHttpTestCase {
 		int expected = HttpStatus.SC_BAD_REQUEST;
 		String badRequest = "GET " + CRLF
 							+ CRLF;
-		HttpResponse response = executeRawRequest(badRequest);
-		assertEquals("Wrong status code", expected, response
-				.getStatusLine().getStatusCode());
+		HttpSimpleBufferedResponse response = executeRawRequest(badRequest);
+		assertEqualsStatusCode(expected, response);
 
 		assertEquals("Wrong reason phrase",
 				EnglishReasonPhraseCatalog.INSTANCE.getReason(
@@ -137,6 +141,36 @@ public class StatusCode4xxTest extends AbstractHttpTestCase {
 		assertEquals("Wrong staus code",
 				expected, response.getStatusLine()
 						.getStatusCode());
+		assertEquals("Wrong reason phrase",
+				EnglishReasonPhraseCatalog.INSTANCE.getReason(
+						expected, null), response
+						.getStatusLine().getReasonPhrase());
+	}
+	
+	/**
+	 * <b>Implements:</b> StatusCode412
+	 * <p/>
+	 * Check 412 Precondition Failed
+	 * <p/>
+	 * <b>Reference:</b> SPEC695 = RFC2616 10.4.13
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	@Ignore
+	public void testStatusCode412PreconditionFailed() throws Exception {
+		int expected = HttpStatus.SC_PRECONDITION_FAILED;
+		HttpGet request = new HttpGet("/");
+		String slmd = executeRequest(request).getFirstHeader(HttpHeaders.LAST_MODIFIED)
+				.getValue();
+		Date lmd = DateUtils.parseDate(slmd);
+		Date cond = org.apache.commons.lang.time.DateUtils.addSeconds(lmd, -1);
+		String sCond = DateUtils.formatDate(cond, DateUtils.PATTERN_RFC1123);
+		request.addHeader(HttpHeaders.IF_UNMODIFIED_SINCE, sCond);
+		HttpResponse response = executeRequest(request);
+		
+		assertEqualsStatusCode(expected, response);
+		
 		assertEquals("Wrong reason phrase",
 				EnglishReasonPhraseCatalog.INSTANCE.getReason(
 						expected, null), response

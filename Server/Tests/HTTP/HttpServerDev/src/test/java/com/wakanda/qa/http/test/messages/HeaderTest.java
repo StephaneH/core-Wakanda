@@ -33,11 +33,13 @@ import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicHttpRequest;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import com.wakanda.qa.http.Settings;
 import com.wakanda.qa.http.test.extend.AbstractHttpTestCase;
+import com.wakanda.qa.utils.Requestor.HttpSimpleBufferedResponse;
 
 /**
  * This class manages all test cases related with headers.
@@ -63,11 +65,11 @@ public class HeaderTest extends AbstractHttpTestCase {
 		String request = "GET / HTTP/1.1" + CRLF + HttpHeaders.HOST + ":"
 				+ getDefaultHostHeaderValue() + CRLF + header + CRLF + CRLF;
 
-		HttpResponse response = executeRawRequest(request);
+		HttpSimpleBufferedResponse response = executeRawRequest(request);
 		// The server must respond with 200 OK
 		assertEqualsStatusCode(HttpStatus.SC_OK, response);
 
-		Header cnxHeader = response.getFirstHeader(HTTP.CONN_DIRECTIVE);
+		Header cnxHeader = response.getOriginalResponse().getFirstHeader(HTTP.CONN_DIRECTIVE);
 		// The server should not interpret the header sent so either the
 		// connection header is not sent or its value equals Keep-Alive
 		// otherwise it will send Close token instead.
@@ -109,9 +111,9 @@ public class HeaderTest extends AbstractHttpTestCase {
 				+ getDefaultHostHeaderValue() + CRLF + HTTP.CONN_DIRECTIVE
 				+ ":" + headerFieldValue + CRLF + CRLF;
 		// response
-		HttpResponse response = executeRawRequest(request);
+		HttpSimpleBufferedResponse response = executeRawRequest(request);
 		assertEqualsStatusCode(HttpStatus.SC_OK, response);
-		Header cnxHeader = response.getFirstHeader(HTTP.CONN_DIRECTIVE);
+		Header cnxHeader = response.getOriginalResponse().getFirstHeader(HTTP.CONN_DIRECTIVE);
 		assertNotNull(cnxHeader);
 		String expected = HTTP.CONN_CLOSE;
 		String actual = cnxHeader.getValue();
@@ -138,6 +140,7 @@ public class HeaderTest extends AbstractHttpTestCase {
 	 * @throws Exception
 	 */
 	@Test
+	@Ignore
 	public void testHeaderValueCouldBeExtendedOverMultipleLine()
 			throws Exception {
 
@@ -146,7 +149,7 @@ public class HeaderTest extends AbstractHttpTestCase {
 				+ HttpHeaders.HOST + ":" + getDefaultHostHeaderValue() + CRLF
 				+ HttpHeaders.ACCEPT_ENCODING
 				+ ": deflate;q=0.5,identity;q=0.1,gzip" + CRLF + CRLF;
-		HttpResponse response0 = executeRawRequest(request0);
+		HttpSimpleBufferedResponse response0 = executeRawRequest(request0);
 
 		// check the status code
 		assertEqualsStatusCode(HttpStatus.SC_OK, response0);
@@ -158,7 +161,7 @@ public class HeaderTest extends AbstractHttpTestCase {
 				+ HttpHeaders.HOST + ":" + getDefaultHostHeaderValue() + CRLF
 				+ HttpHeaders.ACCEPT_ENCODING + ": deflate;q=0.5," + CRLF
 				+ " identity;q=0.1," + CRLF + " gzip" + CRLF + CRLF;
-		HttpResponse response1 = executeRawRequest(request1);
+		HttpSimpleBufferedResponse response1 = executeRawRequest(request1);
 
 		// check the status code
 		assertEqualsStatusCode(HttpStatus.SC_OK, response1);
@@ -186,6 +189,7 @@ public class HeaderTest extends AbstractHttpTestCase {
 	 * @throws Exception
 	 */
 	@Test
+	@Ignore
 	public void testThatMultipleHeaderFieldsAreCombinedIntoOneHeaderFieldsPair()
 			throws Exception {
 		String aeName = HttpHeaders.ACCEPT_ENCODING;
@@ -230,10 +234,10 @@ public class HeaderTest extends AbstractHttpTestCase {
 		// assume that the standard behavior is true
 		String request00 = "GET / HTTP/1.1" + CRLF + HttpHeaders.HOST + ":"
 				+ getDefaultHostHeaderValue() + CRLF + CRLF;
-		HttpResponse response = executeRawRequest(request00);
-		int actualsc = response.getStatusLine().getStatusCode();
+		HttpSimpleBufferedResponse response00 = executeRawRequest(request00);
+		int actualsc = response00.getStatusCode();
 		assumeThat(actualsc, is(HttpStatus.SC_OK));
-		Header cnxHeader = response.getFirstHeader(HTTP.CONN_DIRECTIVE);
+		Header cnxHeader = response00.getOriginalResponse().getFirstHeader(HTTP.CONN_DIRECTIVE);
 		if (cnxHeader != null) {
 			String actualCnxVal = cnxHeader.getValue();
 			String expectedCnxVal = HTTP.CONN_KEEP_ALIVE;
@@ -246,10 +250,10 @@ public class HeaderTest extends AbstractHttpTestCase {
 		HttpGet request01 = new HttpGet("/");
 		request01.addHeader(headerName, expected);
 
-		response = executeRequest(request01);
-		assertEqualsStatusCode(HttpStatus.SC_OK, response);
+		HttpResponse response01 = executeRequest(request01);
+		assertEqualsStatusCode(HttpStatus.SC_OK, response01);
 
-		cnxHeader = response.getFirstHeader(HTTP.CONN_DIRECTIVE);
+		cnxHeader = response01.getFirstHeader(HTTP.CONN_DIRECTIVE);
 		assertNotNull(cnxHeader);
 		String actual = cnxHeader.getValue();
 		assertTrue("Headers value must be case insensitive",
@@ -423,10 +427,10 @@ public class HeaderTest extends AbstractHttpTestCase {
 				+ CRLF + HttpHeaders.CONTENT_TYPE + ":" + HTTP.PLAIN_TEXT_TYPE
 				+ CRLF + headerName + ":" + "5" + CRLF + CRLF + "123456789";
 
-		HttpResponse response = executeRawRequest(request00, false);
+		HttpSimpleBufferedResponse response = executeRawRequest(request00);
 		HttpEntity entity = response.getEntity();
 		try {
-			int actualsc = response.getStatusLine().getStatusCode();
+			int actualsc = response.getStatusCode();
 			assumeThat(actualsc, is(HttpStatus.SC_OK));
 			assumeNotNull(entity);
 
@@ -444,7 +448,7 @@ public class HeaderTest extends AbstractHttpTestCase {
 					+ ":" + HTTP.PLAIN_TEXT_TYPE + CRLF + headerName + ":"
 					+ "5" + CRLF + CRLF + "123456789";
 
-			response = executeRawRequest(request01, false);
+			response = executeRawRequest(request01);
 			assertEqualsStatusCode(HttpStatus.SC_OK, response);
 			entity = response.getEntity();
 			assertNotNull(entity);
@@ -475,8 +479,8 @@ public class HeaderTest extends AbstractHttpTestCase {
 				+ HttpHeaders.CONTENT_TYPE + ":" + mt + CRLF
 				+ HttpHeaders.CONTENT_LENGTH + ":" + "5" + CRLF + CRLF
 				+ "12345";
-		HttpResponse response = executeRawRequest(request00);
-		int actualsc = response.getStatusLine().getStatusCode();
+		HttpSimpleBufferedResponse response = executeRawRequest(request00);
+		int actualsc = response.getStatusCode();
 		assumeThat(actualsc, is(HttpStatus.SC_UNSUPPORTED_MEDIA_TYPE));
 
 		// check now the case-sensitivity
@@ -503,8 +507,8 @@ public class HeaderTest extends AbstractHttpTestCase {
 	public void testThatHostHeaderFieldNameIsCaseInsensitive() throws Exception {
 		// assume that the next passes
 		String request = "GET / HTTP/1.1" + CRLF + CRLF;
-		HttpResponse response = executeRawRequest(request);
-		int actualsc = response.getStatusLine().getStatusCode();
+		HttpSimpleBufferedResponse response = executeRawRequest(request);
+		int actualsc = response.getStatusCode();
 		assumeThat(actualsc, is(HttpStatus.SC_BAD_REQUEST));
 
 		// check now the case-sensitivity

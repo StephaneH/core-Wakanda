@@ -23,9 +23,9 @@ var testCase = {
     },
     
     setUp : function () {
-    	if (os.isWindows || os.isLinux) {
-    		this._should.ignore.testVisibleValue2 = true;
-    	}
+        if (os.isWindows || os.isLinux) {
+            this._should.ignore.testVisibleValue2 = true;
+        }
         if (typeof this.creationDone === 'undefined') {
             this.creationDone = true;
             var appPath = application.getFolder("path");
@@ -70,7 +70,7 @@ var testCase = {
         var result = new Date(obj.creationDate);
         var expected = this.creationDate.toISOString();
         var actual = result.toISOString()
-        Y.Assert.areSame(expected.substr(0, expected.lastIndexOf('.')), actual.substr(0, actual.lastIndexOf('.')));
+        Y.Assert.areSame(expected.substr(0, expected.lastIndexOf(':')), actual.substr(0, actual.lastIndexOf(':')));
     },
     
     //4- Attribut lastModifiedDate exist
@@ -335,7 +335,7 @@ var testCase = {
         } catch (error) {
             var obj2 = File(appPath + 'Dest/file_copy_no_overwrite');
             if (os.isMac) Y.Assert.areSame(72, obj2.size);
-        	if (os.isWindows) Y.Assert.areSame(80, obj2.size);
+            if (os.isWindows) Y.Assert.areSame(80, obj2.size);
         }
     },
 

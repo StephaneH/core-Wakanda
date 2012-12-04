@@ -20,6 +20,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import com.wakanda.qa.http.test.extend.AbstractHttpTestCase;
+import com.wakanda.qa.utils.Requestor.HttpSimpleBufferedResponse;
 /**
  * @author Ouissam
  * 
@@ -77,8 +78,8 @@ public class MessageLengthTest extends AbstractHttpTestCase {
 		String request = "POST /checkPostMethod/ HTTP/1.1" + CRLF + "Host: "
 				+ getDefaultTarget().toHostString() + CRLF + CRLF + "Hello!";
 
-		HttpResponse response = executeRawRequest(request);
-		int actual = response.getStatusLine().getStatusCode();
+		HttpSimpleBufferedResponse response = executeRawRequest(request);
+		int actual = response.getStatusCode();
 		assertEquals(
 				"Server should respond with 400 or 411 if a request contains a message-body and a Content-Length is not given",
 				true, actual == HttpStatus.SC_BAD_REQUEST
@@ -199,11 +200,10 @@ public class MessageLengthTest extends AbstractHttpTestCase {
 				+ "3;\n" + "123\n" + "2;\n" + "45\n" + "4;\n" + "6789\n"
 				+ "0;\n" + "\n";
 
-		HttpResponse response = executeRawRequest(request, false);
+		HttpSimpleBufferedResponse response = executeRawRequest(request);
 		assertEqualsStatusCode(HttpStatus.SC_OK, response);
 
 		HttpEntity entity = response.getEntity();
-		assertNotNull(entity);
 
 		String expected = "123456789";
 		String actual = EntityUtils.toString(entity);
@@ -231,13 +231,13 @@ public class MessageLengthTest extends AbstractHttpTestCase {
 			throws Exception {
 		String request = "POST /checkPostMethod/ HTTP/1.1" + CRLF
 				+ HttpHeaders.HOST + ":" + getDefaultHostHeaderValue() + CRLF
-				+ HttpHeaders.TRANSFER_ENCODING + ":" + HTTP.IDENTITY_CODING
-				+ CRLF + HttpHeaders.CONTENT_TYPE + ":" + HTTP.PLAIN_TEXT_TYPE
-				+ CRLF + HttpHeaders.CONTENT_LENGTH + ":" + "5" + CRLF 
+				+ HttpHeaders.TRANSFER_ENCODING + ":" + HTTP.IDENTITY_CODING + CRLF 
+				+ HttpHeaders.CONTENT_TYPE + ":" + HTTP.PLAIN_TEXT_TYPE + CRLF 
+				+ HttpHeaders.CONTENT_LENGTH + ":" + "5" + CRLF 
 				+ CRLF
 				+ "123456789";
 
-		HttpResponse response = executeRawRequest(request, false);
+		HttpSimpleBufferedResponse response = executeRawRequest(request);
 		assertEqualsStatusCode(HttpStatus.SC_OK, response);
 
 		HttpEntity entity = response.getEntity();

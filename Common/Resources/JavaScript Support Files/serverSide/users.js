@@ -326,11 +326,11 @@ User = function User() {
     /**
      * 
      *
-     * @property 
+     * @property storage
      * @attributes 
-     * @type String
+     * @type Storage
      */
-    this. =  ''; 
+    this.storage =  new Storage( ); 
     
     
     /**

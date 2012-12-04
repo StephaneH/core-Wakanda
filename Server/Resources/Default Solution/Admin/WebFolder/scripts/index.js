@@ -239,7 +239,7 @@ Admin.prototype = {
 				}
 				
 				ui.element.css("top", "");
-			},
+			}
 		});
 		
 		$("#adminCancelSettingsButton").bind("click", function(event) {
@@ -571,10 +571,10 @@ Admin.prototype = {
 			'<div>Datastore cache size: <span class="settings-value"><span class="setting-value-label">'+settings.database.fixedSize+'</span><input class="settings-value-input" name="fixedSize" id="fixedSize" value="'+settings.database.fixedSize+'"/> MB</span></div>'+
 			'<div>Flush data buffers every: <span class="settings-value"><span class="setting-value-label">'+settings.database.flushDataCacheInterval+'</span><input class="settings-value-input" name="flushDataInterval" id="flushDataInterval" value="'+settings.database.flushDataInterval+'"/> seconds</span></div>'+
 			'<div>Authentification type: <span class="settings-value"><span class="setting-value-label">'+settings.solution.directory.authenticationType+'</span><input class="settings-value-input" name="flushDataInterval" id="flushDataInterval" value="'+settings.solution.directory.authenticationType+'"/></span></div>'+
-			'<div>Allocated for other application: <span class="settings-value"><span class="setting-value-label">'+settings.database.memoryForOtherApplications+'</span><input class="settings-value-input" name="flushDataInterval" id="flushDataInterval" value="'+settings.database.memoryForOtherApplications+'"/> MB</span></div>'+
-			'<div>Datastore Cache adoptive: <span class="settings-value"><span class="setting-value-label">'+(settings.database.adaptiveCache ? 'yes' : 'no')+'</span><input class="settings-value-input" name="fixedSize" id="fixedSize" type="checkbox" value="1" '+
-			(settings.database.adaptiveCache ? 'checked="checked"' : '')+'/></span></div>'+
-			'<input type="button" value="Settings" onclick="adminObject.openSettings(event, false);">'+
+//			'<div>Allocated for other application: <span class="settings-value"><span class="setting-value-label">'+settings.database.memoryForOtherApplications+'</span><input class="settings-value-input" name="flushDataInterval" id="flushDataInterval" value="'+settings.database.memoryForOtherApplications+'"/> MB</span></div>'+
+//			'<div>Datastore Cache adoptive: <span class="settings-value"><span class="setting-value-label">'+(settings.database.adaptiveCache ? 'yes' : 'no')+'</span><input class="settings-value-input" name="fixedSize" id="fixedSize" type="checkbox" value="1" '+
+//			(settings.database.adaptiveCache ? 'checked="checked"' : '')+'/></span></div>'+
+//			'<input type="button" value="Settings" onclick="adminObject.openSettings(event, false);">'+
 		'</div>';
 	},
 	
@@ -597,8 +597,8 @@ Admin.prototype = {
 				html += '<div class="">'+
 					'<div class="title">'+
 						'<h1>'+application.name+'</h1>'+
-						' - '+
-						'<span class="application-settings" data-application-name="'+application.name+'" onclick="adminObject.openSettings(event, true);">[settings]</span>'+
+//						' - '+
+//						'<span class="application-settings" data-application-name="'+application.name+'" onclick="adminObject.openSettings(event, true);">[settings]</span>'+
 					'</div>'+
 					// getServiceStateHtml(application)+
 				'</div>';

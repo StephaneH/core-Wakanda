@@ -11,7 +11,9 @@
  */
 exports.Verify = function verify(option) {
 	
-	var app,
+	var 
+	i,
+	app,
 		log,
 		res,
 		sol,
@@ -26,7 +28,9 @@ exports.Verify = function verify(option) {
 		currentDate,
 		solutionOpened,
 		progressIndicator,
-		currentProgressTitle;
+		currentProgressTitle,
+                dataFolderName,
+                dataFolder;
 	
 	progressIndicator = null;
 	if(!option.hasOwnProperty("progressName")) {
@@ -86,8 +90,14 @@ exports.Verify = function verify(option) {
 		if((sol !== null) && ( typeof sol !== 'undefined')) {
 			
 			app = sol.getApplicationByName(option.applicationName);
+                        //data folder in wak2 called data and in wak3 called dataFolder 
+                        if(Folder.isFolder(app.getFolder().path+"DataFolder")){
+                           dataFolderName =  "dataFolder";
+                        } else {
+                           dataFolderName =  "data"; 
+                        }
 
-			if((app.getItemsWithRole("data") == null) || ( typeof app.getItemsWithRole("data") == 'undefined')) {
+			if((app.getItemsWithRole(dataFolderName) == null) || ( typeof app.getItemsWithRole(dataFolderName) == 'undefined')) {
 
 				options = {
 					'storedProblems' : []
@@ -97,11 +107,21 @@ exports.Verify = function verify(option) {
 			}
 			
 			modelFile = File(app.getItemsWithRole("catalog").path);
-			
-			modelData = File(app.getItemsWithRole("data").path);
+			if( dataFolderName === "dataFolder" ){
+				dataFolder = app.getItemsWithRole(dataFolderName).files;
+				for(i=0 ; i<dataFolder.length ; i++)
+				{
+					if( dataFolder[i].name === "data.waData"){
+						modelData = File(dataFolder[i].path);
+						break;
+					}
+				}
+			} else {
+			modelData = File(app.getItemsWithRole(dataFolderName).path);
+			}
 
-			dataPath = app.getItemsWithRole("data").path;
-			dataPath = dataPath.replace(app.getItemsWithRole("data").name, "");
+			dataPath = app.getItemsWithRole(dataFolderName).path;
+			dataPath = dataPath.replace(app.getItemsWithRole(dataFolderName).name+"/", "");
 
 			folderLog = Folder(dataPath + 'Logs');
 
@@ -194,7 +214,9 @@ exports.Verify = function verify(option) {
  */
 exports.Repair = function repair(option) {
 	
-	var app,
+	var 
+	i,
+	app,
 		log,
 		res,
 		sol,
@@ -214,7 +236,9 @@ exports.Repair = function repair(option) {
 		progressIndicator,
 		currentProgressTitle,
 		modeleIndexRepairedFile,
-		modeleMatchRepairedFile;
+		modeleMatchRepairedFile,
+                dataFolderName,
+                dataFolder;
 
 	progressIndicator = null;
 	if(!option.hasOwnProperty("progressName")) {
@@ -263,8 +287,15 @@ exports.Repair = function repair(option) {
 		sol = internal.openSolution(option.solutionPath, 2);
 		if((sol != null) && ( typeof sol != 'undefined')) {
 			app = sol.getApplicationByName(option.applicationName);
+                        //data folder in wak2 called data and in wak3 called dataFolder 
+                        if(Folder.isFolder(app.getFolder().path+"DataFolder")){
+                           dataFolderName =  "dataFolder";
+                        } else {
+                           dataFolderName =  "data"; 
+                        }
 
-			if((app.getItemsWithRole("data") == null) || ( typeof app.getItemsWithRole("data") == 'undefined')) {
+
+			if((app.getItemsWithRole(dataFolderName) == null) || ( typeof app.getItemsWithRole(dataFolderName) == 'undefined')) {
 
 				options = {
 					'storedProblems' : []
@@ -272,13 +303,25 @@ exports.Repair = function repair(option) {
 				return options.storedProblems;
 
 			}
+			
 			modelFile = File(app.getItemsWithRole("catalog").path);
+			// compatibility issue between wak2 and wak3 
+			if( dataFolderName === "dataFolder" ){
+				dataFolder = app.getItemsWithRole(dataFolderName).files;
+				for(i=0 ; i<dataFolder.length ; i++)
+				{
+					if( dataFolder[i].name === "data.waData"){
+						modelData = File(dataFolder[i].path);
+						break;
+					}
+				}
+			} else {
+			modelData = File(app.getItemsWithRole(dataFolderName).path);
+			}
 			
-			modelData = File(app.getItemsWithRole("data").path);
-			
-			dataPath = app.getItemsWithRole("data").path;
-			dataPath = dataPath.replace(app.getItemsWithRole("data").name, "");
-			dataName = app.getItemsWithRole("data").name.replace(".waData", "");
+			dataPath = app.getItemsWithRole(dataFolderName).path;
+			dataPath = dataPath.replace(app.getItemsWithRole(dataFolderName).name+"/", "");
+			dataName = app.getItemsWithRole(dataFolderName).name.replace(".waData", "");
 
 
 			folderLog = Folder(dataPath + 'Logs');
@@ -315,7 +358,7 @@ exports.Repair = function repair(option) {
 			logName = 'repair ' + app.name + ' ' + currentDate + '.waLog';
 			log = new Log(dataPath + 'Logs/' + logName);
 			
-			repairDest = File(dataPath + 'Replaced files (repairing) ' + currentDate +'/repaired_' + app.getItemsWithRole("data").name);
+			repairDest = File(dataPath + 'Replaced files (repairing) ' + currentDate +'/repaired_' + app.getItemsWithRole(dataFolderName).name);
 
 			options = {
 				'openProgress' : myOpenProgress,
@@ -348,7 +391,7 @@ exports.Repair = function repair(option) {
 			}
 				
 			//Replace Data file
-			modelData.copyTo(dataPath + 'Replaced files (repairing) ' + currentDate +'/' + app.getItemsWithRole("data").name);
+			modelData.copyTo(dataPath + 'Replaced files (repairing) ' + currentDate +'/' + app.getItemsWithRole(dataFolderName).name);
 			repairDest.moveTo(modelData, true);
 			
 			//Replace Index File
@@ -409,7 +452,9 @@ exports.Repair = function repair(option) {
  */
 exports.Compact = function compact(option) {
 	
-	var app,
+	var 
+	i,
+	app,
 		log,
 		res,
 		sol,
@@ -429,7 +474,9 @@ exports.Compact = function compact(option) {
 		progressIndicator,
 		currentProgressTitle,
 		modeleIndexCompactedFile,
-		modeleMatchCompactedFile;
+		modeleMatchCompactedFile,
+                dataFolderName,
+                dataFolder;
 	
 	progressIndicator = null;
 	if(!option.hasOwnProperty("progressName")) {
@@ -480,8 +527,15 @@ exports.Compact = function compact(option) {
 		
 		if((sol != null) && ( typeof sol != 'undefined')) {
 			app = sol.getApplicationByName(option.applicationName);
+                        //data folder in wak2 called data and in wak3 called dataFolder 
+                        if(Folder.isFolder(app.getFolder().path+"DataFolder")){
+                           dataFolderName =  "dataFolder";
+                        } else {
+                           dataFolderName =  "data"; 
+                        }
 
-			if((app.getItemsWithRole("data") == null) || ( typeof app.getItemsWithRole("data") == 'undefined')) {
+
+			if((app.getItemsWithRole(dataFolderName) == null) || ( typeof app.getItemsWithRole(dataFolderName) == 'undefined')) {
 
 				options = {
 					'storedProblems' : []
@@ -492,11 +546,24 @@ exports.Compact = function compact(option) {
 			
 			modelFile = File(app.getItemsWithRole("catalog").path);
 			
-			modelData = File(app.getItemsWithRole("data").path);
+			
+			// compatibility issue between wak2 and wak3 
+			if( dataFolderName === "dataFolder" ){
+				dataFolder = app.getItemsWithRole(dataFolderName).files;
+				for(i=0 ; i<dataFolder.length ; i++)
+				{
+					if( dataFolder[i].name === "data.waData"){
+						modelData = File(dataFolder[i].path);
+						break;
+					}
+				}
+			} else {
+			modelData = File(app.getItemsWithRole(dataFolderName).path);
+			}
 
-			dataPath = app.getItemsWithRole("data").path;
-			dataPath = dataPath.replace(app.getItemsWithRole("data").name, "");
-			dataName = app.getItemsWithRole("data").name.replace(".waData", "");
+			dataPath = app.getItemsWithRole(dataFolderName).path;
+			dataPath = dataPath.replace(app.getItemsWithRole(dataFolderName).name+"/", "");
+			dataName = app.getItemsWithRole(dataFolderName).name.replace(".waData", "");
 
 			folderLog = Folder(dataPath + 'Logs');
 
@@ -532,7 +599,7 @@ exports.Compact = function compact(option) {
 			logName = 'compact ' + app.name + ' ' + currentDate + '.waLog';
 			log = new Log(dataPath + 'Logs/' + logName);
 
-			compactDest = File(dataPath + 'Replaced files (compacting) ' + currentDate + '/compacted_' + app.getItemsWithRole("data").name);
+			compactDest = File(dataPath + 'Replaced files (compacting) ' + currentDate + '/compacted_' + app.getItemsWithRole(dataFolderName).name);
 			
 			options = {
 				'openProgress' : myOpenProgress,
@@ -564,7 +631,7 @@ exports.Compact = function compact(option) {
 			}
 				
 			//Replace Data file
-			modelData.copyTo(dataPath + 'Replaced files (compacting) ' + currentDate + '/' + app.getItemsWithRole("data").name, true);
+			modelData.copyTo(dataPath + 'Replaced files (compacting) ' + currentDate + '/' + app.getItemsWithRole(dataFolderName).name, true);
 			compactDest.moveTo(modelData, true);
 			
 			//Replace Index File

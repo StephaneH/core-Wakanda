@@ -677,7 +677,7 @@ DataBrowser.prototype = {
 				$("#"+tabViewContainer.id+"_splitter").bind("dblclick", {"containerId" : tabViewContainer.id}, this.dblClickSplitter);
 			}
 			
-			dataGrid.gridController.onRowRightClick = function onRowRightClick_dataBrowser_dataGrid(position, rightClickEvent) {
+			dataGrid.gridController.onRowRightClick = function onRowRightClick_dataBrowser_dataGrid(rightClickEvent) {
 				
 				var parameters;
 				
@@ -695,7 +695,7 @@ DataBrowser.prototype = {
 				return false;
 			};
 			
-			dataGrid.gridController.onRowClick = function onRowClick_dataBrowser_dataGrid(position) {
+			dataGrid.gridController.onRowClick = function onRowClick_dataBrowser_dataGrid(event) {
 				var parameters;
 				
 				parameters = {

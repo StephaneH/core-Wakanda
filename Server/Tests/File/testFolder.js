@@ -18,12 +18,19 @@ var testCase = {
     
     _should: {
         ignore: {
-
+            testObjectFolderReadonlyAttributeValueTrue: true, // not supported by XToolbox
+            testObjectFolderSetNameMethodFailsReadOnly: true, // not supported by XToolbox
+            testObjectFolderVisibleAttributeValueFalse: true, // not supported by XToolbox
+            testObjectFolderCreateMethodReadonlyFolder: true, // not supported by XToolbox
+            testObjectFolderRemoveMethodErrorReadonly: true, // not supported by XToolbox
+            testObjectFolderDropMethodErrorReadonly: true, // not supported by XToolbox
+            testObjectFolderRemoveContentMethodErrorReadonly: true, // not supported by XToolbox
+            testObjectFolderDropContentMethodErrorReadonly: true // not supported by XToolbox
         }
     },
     
     setUp : function () {
-    	if (typeof this.creationDone === 'undefined') {
+        if (typeof this.creationDone === 'undefined') {
             this.creationDone = true;
             var appPath = application.getFolder("path");
             this.creationDate = new Date();
@@ -180,7 +187,7 @@ var testCase = {
         var result = new Date(obj.creationDate);
         var expected = this.creationDate.toISOString();
         var actual = result.toISOString()
-        Y.Assert.areSame(expected.substr(0, expected.lastIndexOf('.')), actual.substr(0, actual.lastIndexOf('.')));
+        Y.Assert.areSame(expected.substr(0, expected.lastIndexOf(':')), actual.substr(0, actual.lastIndexOf(':')));
     },
     
     //7 - Attribute modificationDate exists
@@ -196,7 +203,7 @@ var testCase = {
         var result = new Date(obj.modificationDate);
         var expected = this.creationDate.toISOString();
         var actual = result.toISOString()
-        Y.Assert.areSame(expected.substr(0, expected.lastIndexOf('.')), actual.substr(0, actual.lastIndexOf('.')));
+        Y.Assert.areSame(expected.substr(0, expected.lastIndexOf(':')), actual.substr(0, actual.lastIndexOf(':')));
     },
 
     //9 - Attribute exists exists
@@ -251,7 +258,7 @@ var testCase = {
     //16 - Attribute name exists
     testObjectFolderNameAttributeExists: function () {
         var appPath = application.getFolder("path");
-       	var obj = Folder(appPath + "Src/Folder");
+        var obj = Folder(appPath + "Src/Folder");
         Y.Assert.isString(obj.name);
     },
 
@@ -266,28 +273,28 @@ var testCase = {
     testObjectFolderNameNoExtAttributeExists: function () {
         var appPath = application.getFolder("path");
         var obj = Folder(appPath + "Src/FolderWith.ext");
-       	Y.Assert.isString(obj.nameNoExt);
+        Y.Assert.isString(obj.nameNoExt);
     },
 
     //19 - Attribute nameNoExt value
     testObjectFolderNameNoExtAttributeValue: function () {
         var appPath = application.getFolder("path");
         var obj = Folder(appPath + "Src/FolderWith.ext");
-       	Y.Assert.areSame("FolderWith", obj.nameNoExt);
+        Y.Assert.areSame("FolderWith", obj.nameNoExt);
     },
     
     //20 - Attribute nameNoExt value on sub-folder (parent folder having an extension)
     testObjectFolderNameNoExtAttributeSubFolderValue: function () {
         var appPath = application.getFolder("path");
         var obj = Folder(appPath + "Src/FolderWith.ext/SubFolder");
-       	Y.Assert.areSame("SubFolder", obj.nameNoExt);
+        Y.Assert.areSame("SubFolder", obj.nameNoExt);
     },
 
     //21 - Attribute parent exists
     testObjectFolderParentAttributeExists: function () {
         var appPath = application.getFolder("path");
         var obj = Folder(appPath + "Src/Folder");
-       	Y.Assert.isObject(obj.parent);
+        Y.Assert.isObject(obj.parent);
     },
     
     //22 - Attribute parent value
@@ -296,7 +303,7 @@ var testCase = {
         var obj = Folder(appPath + "Src/Folder");
         Y.Assert.isObject(obj.parent);
         Y.Assert.isString(obj.parent.name);
-       	Y.Assert.areSame("Src", obj.parent.name);
+        Y.Assert.areSame("Src", obj.parent.name);
     },
     
     //23 - Attribute files exists
@@ -364,10 +371,10 @@ var testCase = {
         var fileIter = obj.firstFile;
         var result = new Array();
         Y.Assert.isObject(fileIter);
-		while (fileIter.valid()) {
-		    result.push(fileIter.name);
-		    fileIter.next();
-		}
+        while (fileIter.valid()) {
+            result.push(fileIter.name);
+            fileIter.next();
+        }
         Y.Assert.areSame(2, result.length);
         if (os.isMac) Y.Assert.areSame("second_file_empty", result[0]);
         else Y.Assert.areSame("file_empty", result[0]);
@@ -411,10 +418,10 @@ var testCase = {
         var folderIter = obj.firstFolder;
         var result = new Array();
         Y.Assert.isObject(folderIter);
-		while (folderIter.valid()) {
-		    result.push(folderIter.name);
-		    folderIter.next();
-		}
+        while (folderIter.valid()) {
+            result.push(folderIter.name);
+            folderIter.next();
+        }
         Y.Assert.areSame(2, result.length);
         if (os.isMac) Y.Assert.areSame("SubFolderToo", result[0]);
         else Y.Assert.areSame("SubFolder", result[0]);
@@ -534,8 +541,8 @@ var testCase = {
         var obj = Folder(appPath + "Src/Folder");
         var result = new Array();
         obj.forEachFile(function (file) {
-     		result.push(file.name);
- 		});
+            result.push(file.name);
+        });
         Y.Assert.areSame(2, result.length);
         if (os.isMac) Y.Assert.areSame("second_file_empty", result[0]);
         else Y.Assert.areSame("file_empty", result[0]);
@@ -549,10 +556,10 @@ var testCase = {
         var obj = Folder(appPath + "Src/Folder");
         var result = new Array();
         obj.forEachFile(function (file) {
-     		if (file.name === this.filter) {
-     			result.push(file.name);
-     		}
- 		}, {filter: "file_empty"});
+            if (file.name === this.filter) {
+                result.push(file.name);
+            }
+        }, {filter: "file_empty"});
         Y.Assert.areSame(1, result.length);
         Y.Assert.areSame("file_empty", result[0]);
     },
@@ -581,8 +588,8 @@ var testCase = {
         var obj = Folder(appPath + "Src/Folder");
         var result = new Array();
         obj.forEachFolder(function (folder) {
-     		result.push(folder.name);
- 		});
+            result.push(folder.name);
+        });
         Y.Assert.areSame(2, result.length);
         if (os.isMac) Y.Assert.areSame("SubFolderToo", result[0]);
         else Y.Assert.areSame("SubFolder", result[0]);
@@ -596,10 +603,10 @@ var testCase = {
         var obj = Folder(appPath + "Src/Folder");
         var result = new Array();
         obj.forEachFolder(function (folder) {
-     		if (folder.name === this.filter) {
-     			result.push(folder.name);
-     		}
- 		}, {filter: "SubFolderToo"});
+            if (folder.name === this.filter) {
+                result.push(folder.name);
+            }
+        }, {filter: "SubFolderToo"});
         Y.Assert.areSame(1, result.length);
         Y.Assert.areSame("SubFolderToo", result[0]);
     },
@@ -714,17 +721,17 @@ var testCase = {
         var appPath = application.getFolder("path");
         var obj = Folder(appPath + "Src/Folder");
         var result = { fileCount: 0, fileNames: [], filePositions: [], parentFolders: [] };
-		obj.parse(function(item, position, folder) 
-		{
-		    result.fileCount++;
-		    result.fileNames.push(item.name);
-		    result.filePositions.push(position);
-		    result.parentFolders.push(folder.name);
-		});
-		Y.Assert.areSame(4, result.fileCount);
-		Y.ArrayAssert.itemsAreEqual(["file_empty", "file_empty", "file_empty", "second_file_empty"], result.fileNames);
-		Y.ArrayAssert.itemsAreEqual([0, 1, 2, 3], result.filePositions, "Wrong positions: " + JSON.stringify(result.filePositions));
-		Y.ArrayAssert.itemsAreEqual(["SubFolder", "SubFolderToo", "Folder", "Folder"], result.parentFolders, "Wrong parent folders: " + JSON.stringify(result.parentFolders));
+        obj.parse(function(item, position, folder) 
+        {
+            result.fileCount++;
+            result.fileNames.push(item.name);
+            result.filePositions.push(position);
+            result.parentFolders.push(folder.name);
+        });
+        Y.Assert.areSame(4, result.fileCount);
+        Y.ArrayAssert.itemsAreEqual(["file_empty", "file_empty", "file_empty", "second_file_empty"], result.fileNames);
+        Y.ArrayAssert.itemsAreEqual([0, 1, 2, 3], result.filePositions, "Wrong positions: " + JSON.stringify(result.filePositions));
+        Y.ArrayAssert.itemsAreEqual(["SubFolder", "SubFolderToo", "Folder", "Folder"], result.parentFolders, "Wrong parent folders: " + JSON.stringify(result.parentFolders));
     },
     
     //59 - Method parse() value on empty folder
@@ -788,10 +795,10 @@ var testCase = {
         var appPath = application.getFolder("path");
         var obj = Folder(appPath + "Src/UnknownFolder");
         try {
-        	obj.remove();
-        	Y.Assert.fail("Should throw an error.");
+            obj.remove();
+            Y.Assert.fail("Should throw an error.");
         } catch (e) {
-        	Y.Assert.isTrue(true);
+            Y.Assert.isTrue(true);
         }
     },
     
@@ -800,10 +807,10 @@ var testCase = {
         var appPath = application.getFolder("path");
         var obj = Folder(appPath + "Src/UnknownFolder");
         try {
-        	obj.drop();
-        	Y.Assert.fail("Should throw an error.");
+            obj.drop();
+            Y.Assert.fail("Should throw an error.");
         } catch (e) {
-        	Y.Assert.isTrue(true);
+            Y.Assert.isTrue(true);
         }
     },
     
@@ -839,9 +846,9 @@ var testCase = {
         var obj = Folder(appPath + "Src/FolderToRemove/SubFolder");
         var done = false;
         try {
-        	done = obj.remove();
+            done = obj.remove();
         } catch (e) {
-        	Y.Assert.fail("Should not throw an error: " + JSON.stringify(e));
+            Y.Assert.fail("Should not throw an error: " + JSON.stringify(e));
         }
         Y.Assert.isTrue(done);
         var objremoved = Folder(appPath + "Src/FolderToRemove/SubFolder");
@@ -853,10 +860,10 @@ var testCase = {
         var appPath = application.getFolder("path");
         var obj = Folder(appPath + "Src/FolderToRemoveToo/SubFolder");
         var done = false;
-		try {
-        	done = obj.drop();
+        try {
+            done = obj.drop();
         } catch (e) {
-        	Y.Assert.fail("Should not throw an error: " + JSON.stringify(e));
+            Y.Assert.fail("Should not throw an error: " + JSON.stringify(e));
         }
         Y.Assert.isTrue(done);
         var objremoved = Folder(appPath + "Src/FolderToRemoveToo/SubFolder");
@@ -869,9 +876,9 @@ var testCase = {
         var obj = Folder(appPath + "Src/FolderToRemove/SubFolderToo");
         var done = false;
         try {
-        	done = obj.remove();
+            done = obj.remove();
         } catch (e) {
-        	Y.Assert.fail("Should not throw an error: " + JSON.stringify(e));
+            Y.Assert.fail("Should not throw an error: " + JSON.stringify(e));
         }
         Y.Assert.isTrue(done);
         var objremoved = Folder(appPath + "Src/FolderToRemove/SubFolderToo/SubFolder");
@@ -886,9 +893,9 @@ var testCase = {
         var obj = Folder(appPath + "Src/FolderToRemoveToo/SubFolderToo");
         var done = false;
         try {
-        	done = obj.drop();
+            done = obj.drop();
         } catch (e) {
-        	Y.Assert.fail("Should not throw an error: " + JSON.stringify(e));
+            Y.Assert.fail("Should not throw an error: " + JSON.stringify(e));
         }
         Y.Assert.isTrue(done);
         var objremoved = Folder(appPath + "Src/FolderToRemoveToo/SubFolderToo/SubFolder");
@@ -916,10 +923,10 @@ var testCase = {
         var appPath = application.getFolder("path");
         var obj = Folder(appPath + "Src/UnknownFolder");
         try {
-        	obj.removeContent();
-        	Y.Assert.fail("Should throw an error.");
+            obj.removeContent();
+            Y.Assert.fail("Should throw an error.");
         } catch (e) {
-        	Y.Assert.isTrue(true);
+            Y.Assert.isTrue(true);
         }
     },
     
@@ -928,10 +935,10 @@ var testCase = {
         var appPath = application.getFolder("path");
         var obj = Folder(appPath + "Src/UnknownFolder");
         try {
-        	obj.dropContent();
-        	Y.Assert.fail("Should throw an error.");
+            obj.dropContent();
+            Y.Assert.fail("Should throw an error.");
         } catch (e) {
-        	Y.Assert.isTrue(true);
+            Y.Assert.isTrue(true);
         }
     },
     
@@ -967,9 +974,9 @@ var testCase = {
         var obj = Folder(appPath + "Src/FolderToRemove");
         var done = false;
         try {
-        	done = obj.removeContent();
+            done = obj.removeContent();
         } catch (e) {
-        	Y.Assert.fail("Should not throw an error: " + JSON.stringify(e));
+            Y.Assert.fail("Should not throw an error: " + JSON.stringify(e));
         }
         Y.Assert.isTrue(done, "The removeContent() method should return true");
         var objnotremoved = Folder(appPath + "Src/FolderToRemove");
@@ -986,17 +993,17 @@ var testCase = {
         var obj = Folder(appPath + "Src/FolderToRemoveToo");
         var done = false;
         try {
-        	done = obj.dropContent();
+            done = obj.dropContent();
         } catch (e) {
-        	Y.Assert.fail("Should not throw an error: " + JSON.stringify(e));
+            Y.Assert.fail("Should not throw an error: " + JSON.stringify(e));
         }
         Y.Assert.isTrue(done, "The dropContent() method should return true");
-       	var objnotremoved = Folder(appPath + "Src/FolderToRemoveToo");
-       	Y.Assert.isTrue(objnotremoved.exists, "The Src/FolderToRemoveToo folder should still exist");
-       	var objremoved = File(appPath + "Src/FolderToRemoveToo/file_empty");
-       	Y.Assert.isFalse(objremoved.exists, "The Src/FolderToRemoveToo/file_empty file should have been removed");
-       	var objremovedtoo = File(appPath + "Src/FolderToRemoveToo/second_file_empty");
-       	Y.Assert.isFalse(objremovedtoo.exists, "The Src/FolderToRemoveToo/second_file_empty file should have been removed");
+        var objnotremoved = Folder(appPath + "Src/FolderToRemoveToo");
+        Y.Assert.isTrue(objnotremoved.exists, "The Src/FolderToRemoveToo folder should still exist");
+        var objremoved = File(appPath + "Src/FolderToRemoveToo/file_empty");
+        Y.Assert.isFalse(objremoved.exists, "The Src/FolderToRemoveToo/file_empty file should have been removed");
+        var objremovedtoo = File(appPath + "Src/FolderToRemoveToo/second_file_empty");
+        Y.Assert.isFalse(objremovedtoo.exists, "The Src/FolderToRemoveToo/second_file_empty file should have been removed");
     },
     
     //84 - Method setName() exists

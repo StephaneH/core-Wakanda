@@ -56,6 +56,15 @@ Blob = function Blob() {
      */
     this.toString = function toString(stringFormat) {        return '';     };
     
+    /**
+     * copies the Blob referenced in the BLOB object (the source object) into the specified destination file
+     *
+     * @method copyTo
+     * @param {File | String} destination
+     * @param {Boolean | String} overwrite
+     */
+    this.copyTo = function copyTo(destination, overwrite) {             };
+    
 
 };
 

@@ -208,7 +208,7 @@ VError VDebugHTTPRequestHandler::HandleRequest( IHTTPResponse* inResponse)
 
 				if (uagSession != NULL)
 				{
-					CUAGGroup *uagDebuggerGroup = uagDirectory->RetainSpecialGroup( CUAGDirectory::DebuggerGroup);
+					CUAGGroup *uagDebuggerGroup = uagDirectory->RetainSpecialGroup( CUAGDirectory::AdminGroup);
 					if (uagDebuggerGroup != NULL)
 					{
 						accessGranted = uagSession->BelongsTo( uagDebuggerGroup);

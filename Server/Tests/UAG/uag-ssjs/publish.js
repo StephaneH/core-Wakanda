@@ -4,12 +4,14 @@
 
 */
 
+// RH that launches local tests of Directory class
 addHttpRequestHandler(
 	"/testLocalDirectory",
 	"publish.js",
 	"testLocalDirectory"
 );
 
+// RH that launches tests of Directory class as they'll be runned by Jenkins
 addHttpRequestHandler(
 	"/testLikeJenkinsDirectory",
 	"publish.js",

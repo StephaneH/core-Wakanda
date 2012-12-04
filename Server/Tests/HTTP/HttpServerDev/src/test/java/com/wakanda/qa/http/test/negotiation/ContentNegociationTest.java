@@ -1,6 +1,7 @@
 package com.wakanda.qa.http.test.negotiation;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import org.apache.http.Header;
 import org.apache.http.HttpHeaders;
@@ -9,9 +10,11 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.cache.HeaderConstants;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.protocol.HTTP;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.wakanda.qa.http.test.extend.AbstractHttpTestCase;
+//import org.junit.Test;
 
 /**
  * This class manages all tests related with the negociation process.
@@ -22,15 +25,16 @@ import com.wakanda.qa.http.test.extend.AbstractHttpTestCase;
 public class ContentNegociationTest extends AbstractHttpTestCase {
 
 	/**
-	 * Implements: ServerNegot01
+	 * <b>Implements:</b> ServerNegot01
 	 * <p/>
 	 * Check the server driven negotiation for content-coding.
 	 * <p/>
-	 * Reference: SPEC697 = RFC2616 12.1
+	 * <b>Reference:</b> SPEC697 (RFC2616 12.1)
 	 * 
 	 * @throws Exception
 	 */
 	@Test
+	@Ignore
 	public void testContentCodingServerDrivenNegotiation() throws Exception {
 		String accept = "gzip, deflate, identity";
 		String url = "/tocompress.html";

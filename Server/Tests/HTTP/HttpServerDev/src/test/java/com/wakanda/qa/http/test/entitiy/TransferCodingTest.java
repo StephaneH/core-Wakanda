@@ -27,6 +27,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import com.wakanda.qa.http.test.extend.AbstractHttpTestCase;
+import com.wakanda.qa.utils.Requestor.HttpSimpleBufferedResponse;
 
 /**
  * @author Ouissam
@@ -42,7 +43,6 @@ public class TransferCodingTest extends AbstractHttpTestCase {
 	 * Check that when the server receives an entity-body with a transfer-coding
 	 * it does not understand, it should returns 501 (Unimplemented), and closes
 	 * the connection.
-	 * <p/>
 	 * The test is ignored for now because the feature is not yet implemented.
 	 * <p/>
 	 * <b>Reference:</b> SPEC689 (RFC2616) 3.6
@@ -55,15 +55,17 @@ public class TransferCodingTest extends AbstractHttpTestCase {
 			throws Exception {
 
 		String transferCoding = "whatever";
+		String payload = "whatever";
 		String request = "POST /checkPostMethod/ HTTP/1.1" + CRLF
 				+ HttpHeaders.HOST + ":" + getDefaultHostHeaderValue() + CRLF
 				+ HttpHeaders.TRANSFER_ENCODING + ":" + transferCoding + CRLF
-				+ CRLF + "whatever";
+				+ HttpHeaders.CONTENT_LENGTH + ":" + payload.length() + CRLF
+				+ CRLF + payload;
 
-		HttpResponse response = executeRawRequest(request);
+		HttpSimpleBufferedResponse response = executeRawRequest(request);
 		assertEqualsStatusCode(HttpStatus.SC_NOT_IMPLEMENTED, response);
-		assertEquals("Server should close the connection", HTTP.CONN_CLOSE,
-				response.getFirstHeader(HTTP.CONN_DIRECTIVE).getValue());
+		assertEquals("Server should close the connection", HTTP.CONN_CLOSE.toLowerCase(),
+				response.getOriginalResponse().getFirstHeader(HTTP.CONN_DIRECTIVE).getValue().toLowerCase());
 
 	}
 
@@ -93,7 +95,7 @@ public class TransferCodingTest extends AbstractHttpTestCase {
 				+ CRLF + "2;\n12\n3;\n345\n0;\n\n";
 
 		// response
-		HttpResponse response = executeRawRequest(request);
+		HttpSimpleBufferedResponse response = executeRawRequest(request);
 		assertEqualsStatusCode(HttpStatus.SC_BAD_REQUEST, response);
 
 	}
@@ -123,7 +125,7 @@ public class TransferCodingTest extends AbstractHttpTestCase {
 				+ CRLF + "2;\n12\n3;\n345\n0;\n\n";
 
 		// response
-		HttpResponse response = executeRawRequest(request);
+		HttpSimpleBufferedResponse response = executeRawRequest(request);
 		assertEqualsStatusCode(HttpStatus.SC_BAD_REQUEST, response);
 
 	}
@@ -152,7 +154,7 @@ public class TransferCodingTest extends AbstractHttpTestCase {
 				+ CRLF + "2;\nab\n3;\ncde\n6;\nfghijk\n0;\n\n";
 
 		// response
-		HttpResponse response = executeRawRequest(request, false);
+		HttpSimpleBufferedResponse response = executeRawRequest(request);
 
 		assertEqualsStatusCode(HttpStatus.SC_OK, response);
 		HttpEntity entity = response.getEntity();

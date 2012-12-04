@@ -8,37 +8,47 @@ var testCase = {
 		after: 5000
 	},
 	testRemoteAddressExists: function () {
-		var url = application.httpServer.ipAddress;
+		var url = application.httpServer.ipAddress + ':8081';
+		if (os.isWindows) url = '192.168.4.14:10081';
+		if (os.isLinux) url = '41.142.248.40:10081';
 		var myXHR = new XMLHttpRequest();
-		myXHR.open('GET', 'http://194.98.194.72/testRequest?url=http://' + url + ':8081/testRemoteAddressExists');
+		myXHR.open('GET', 'http://194.98.194.72/testRequest?url=http://' + url + '/testRemoteAddressExists');
 		myXHR.send();
 		Y.Assert.areSame('string', myXHR.responseText);
 	},
 	testRemotePortExists: function () {
-		var url = application.httpServer.ipAddress;
+		var url = application.httpServer.ipAddress + ':8081';
+		if (os.isWindows) url = '192.168.4.14:10081';
+		if (os.isLinux) url = '41.142.248.40:10081';
 		var myXHR = new XMLHttpRequest();
-		myXHR.open('GET', 'http://194.98.194.72/testRequest?url=http://' + url + ':8081/testRemotePortExists');
+		myXHR.open('GET', 'http://194.98.194.72/testRequest?url=http://' + url + '/testRemotePortExists');
 		myXHR.send();
 		Y.Assert.areSame('number', myXHR.responseText);
 	},
 	testLocalAddressExists: function () {
-		var url = application.httpServer.ipAddress;
+		var url = application.httpServer.ipAddress + ':8081';
+		if (os.isWindows) url = '192.168.4.14:10081';
+		if (os.isLinux) url = '41.142.248.40:10081';
 		var myXHR = new XMLHttpRequest();
-		myXHR.open('GET', 'http://194.98.194.72/testRequest?url=http://' + url + ':8081/testLocalAddressExists');
+		myXHR.open('GET', 'http://194.98.194.72/testRequest?url=http://' + url + '/testLocalAddressExists');
 		myXHR.send();
 		Y.Assert.areSame('string', myXHR.responseText);
 	},
 	testLocalPortExists: function () {
-		var url = application.httpServer.ipAddress;
+		var url = application.httpServer.ipAddress + ':8081';
+		if (os.isWindows) url = '192.168.4.14:10081';
+		if (os.isLinux) url = '41.142.248.40:10081';
 		var myXHR = new XMLHttpRequest();
-		myXHR.open('GET', 'http://194.98.194.72/testRequest?url=http://' + url + ':8081/testLocalPortExists');
+		myXHR.open('GET', 'http://194.98.194.72/testRequest?url=http://' + url + '/testLocalPortExists');
 		myXHR.send();
 		Y.Assert.areSame('number', myXHR.responseText);
 	},
 	testIsSSLExists: function () {
-		var url = application.httpServer.ipAddress;
+		var url = application.httpServer.ipAddress + ':8081';
+		if (os.isWindows) url = '192.168.4.14:10081';
+		if (os.isLinux) url = '41.142.248.40:10081';
 		var myXHR = new XMLHttpRequest();
-		myXHR.open('GET', 'http://194.98.194.72/testRequest?url=http://' + url + ':8081/testIsSSLExists');
+		myXHR.open('GET', 'http://194.98.194.72/testRequest?url=http://' + url + '/testIsSSLExists');
 		myXHR.send();
 		Y.Assert.areSame('boolean', myXHR.responseText);
 	},
@@ -73,11 +83,14 @@ var testCase = {
 		Y.Assert.areSame('boolean', myXHR.responseText);
 	},
 	testRemoteAddressValueRemote: function () {
-		var url = application.httpServer.ipAddress;
+		var url = application.httpServer.ipAddress + ':8081';
+		if (os.isWindows) url = '192.168.4.14:10081';
+		if (os.isLinux) url = '41.142.248.40:10081';
 		var myXHR = new XMLHttpRequest();
-		myXHR.open('GET', 'http://194.98.194.72/testRequest?url=http://' + url + ':8081/testRemoteAddressValue');
+		myXHR.open('GET', 'http://194.98.194.72/testRequest?url=http://' + url + '/testRemoteAddressValue');
 		myXHR.send();
-		Y.Assert.areSame('::ffff:194.98.194.72', myXHR.responseText);
+		if (os.isWindows) Y.Assert.areSame('::ffff:10.0.2.2', myXHR.responseText);
+		else Y.Assert.areSame('::ffff:194.98.194.72', myXHR.responseText);
 	},
 	testRemoteAddressValueLocal: function () {
 		var myXHR = new XMLHttpRequest();
@@ -86,36 +99,42 @@ var testCase = {
 		Y.Assert.areSame('::ffff:127.0.0.1', myXHR.responseText);
 	},
 	testRemotePortValueRemote: function () {
-		var url = application.httpServer.ipAddress;
+		var url = application.httpServer.ipAddress + ':8081';
+		if (os.isWindows) url = '192.168.4.14:10081';
+		if (os.isLinux) url = '41.142.248.40:10081';
 		var myXHR = new XMLHttpRequest();
-		myXHR.open('GET', 'http://194.98.194.72/testRequest?url=http://' + url + ':8081/testRemotePortValue');
+		myXHR.open('GET', 'http://194.98.194.72/testRequest?url=http://' + url + '/testRemotePortValue');
 		myXHR.send();
-		Y.Assert.isTrue(parseInt(myXHR.responseText) >= 40000, 'remotePort should be >= 40000, actual value: ' + myXHR.responseText);
+		Y.Assert.isTrue(parseInt(myXHR.responseText) >= 10000, 'remotePort should be >= 10000, actual value: ' + myXHR.responseText);
 	},
 	testRemotePortValueLocal: function () {
 		var myXHR = new XMLHttpRequest();
 		myXHR.open('GET', 'http://127.0.0.1:8081/testRemotePortValue');
 		myXHR.send();
-		Y.Assert.isTrue(parseInt(myXHR.responseText) >= 40000, 'remotePort should be >= 40000, actual value: ' + myXHR.responseText);
+		Y.Assert.isTrue(parseInt(myXHR.responseText) >= 10000, 'remotePort should be >= 10000, actual value: ' + myXHR.responseText);
 	},
 	testLocalAddressValueRemote: function () {
-		var url = application.httpServer.ipAddress;
+		var url = application.httpServer.ipAddress + ':8081';
+		if (os.isWindows) url = '192.168.4.14:10081';
+		if (os.isLinux) url = '41.142.248.40:10081';
 		var myXHR = new XMLHttpRequest();
-		myXHR.open('GET', 'http://194.98.194.72/testRequest?url=http://' + url + ':8081/testLocalAddressValue');
+		myXHR.open('GET', 'http://194.98.194.72/testRequest?url=http://' + url + '/testLocalAddressValue');
 		myXHR.send();
-		Y.Assert.areSame('::ffff:' + url, myXHR.responseText);
+		Y.Assert.areSame('::ffff:' + application.httpServer.ipAddress, myXHR.responseText);
 	},
 	testLocalAddressValueLocal: function () {
-		var url = application.httpServer.ipAddress;
+		var url = application.httpServer.ipAddress + ':8081';
 		var myXHR = new XMLHttpRequest();
 		myXHR.open('GET', 'http://127.0.0.1:8081/testLocalAddressValue');
 		myXHR.send();
 		Y.Assert.areSame('::ffff:127.0.0.1', myXHR.responseText);
 	},
 	testLocalPortValueRemote: function () {
-		var url = application.httpServer.ipAddress;
+		var url = application.httpServer.ipAddress + ':8081';
+		if (os.isWindows) url = '192.168.4.14:10081';
+		if (os.isLinux) url = '41.142.248.40:10081';
 		var myXHR = new XMLHttpRequest();
-		myXHR.open('GET', 'http://194.98.194.72/testRequest?url=http://' + url + ':8081/testLocalPortValue');
+		myXHR.open('GET', 'http://194.98.194.72/testRequest?url=http://' + url + '/testLocalPortValue');
 		myXHR.send();
 		Y.Assert.areSame(8081, parseInt(myXHR.responseText));
 	},
@@ -126,9 +145,11 @@ var testCase = {
 		Y.Assert.areSame(8081, parseInt(myXHR.responseText));
 	},
 	testIsSSLValueRemoteUnsecured: function () {
-		var url = application.httpServer.ipAddress;
+		var url = application.httpServer.ipAddress + ':8081';
+		if (os.isWindows) url = '192.168.4.14:10081';
+		if (os.isLinux) url = '41.142.248.40:10081';
 		var myXHR = new XMLHttpRequest();
-		myXHR.open('GET', 'http://194.98.194.72/testRequest?url=http://' + url + ':8081/testIsSSLValue');
+		myXHR.open('GET', 'http://194.98.194.72/testRequest?url=http://' + url + '/testIsSSLValue');
 		myXHR.send();
 		Y.Assert.areSame('false', myXHR.responseText);
 	},
@@ -139,9 +160,11 @@ var testCase = {
 		Y.Assert.areSame('false', myXHR.responseText);
 	},
 	testIsSSLValueRemoteSecured: function () {
-		var url = application.httpServer.ipAddress;
+		var url = application.httpServer.ipAddress + ':8082';
+		if (os.isWindows) url = '192.168.4.14:10082'
+		if (os.isLinux) url = '41.142.248.40:10082'
 		var myXHR = new XMLHttpRequest();
-		myXHR.open('GET', 'http://194.98.194.72/testRequest?url=https://' + url + ':8082/testIsSSLValue');
+		myXHR.open('GET', 'http://194.98.194.72/testRequest?url=https://' + url + '/testIsSSLValue');
 		myXHR.send();
 		Y.Assert.areSame('true', myXHR.responseText);
 	},

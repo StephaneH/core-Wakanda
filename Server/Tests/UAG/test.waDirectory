@@ -10,6 +10,8 @@
 
 <group ID="1C7501B13C28594D9ADF3DEF14C2569E" name="GroupFilter3"/>
 
+<group ID="FD208032751A944D9A36D8BF1DCD7134" name="Default"/>
+
 <user ID="16576BA2BC7DA84D85C729301E190C65" name="user1" fullName=""/>
 
 <user ID="0C4C54DB5956B048AF50682B1D0DF461" name="user2" fullName=""/>

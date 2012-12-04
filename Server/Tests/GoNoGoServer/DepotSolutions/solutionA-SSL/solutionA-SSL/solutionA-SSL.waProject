@@ -1,2 +1,2 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project><folder path="./WebFolder/"><tag name="webFolder"/></folder><file path="./solutionA-SSL.waModel"><tag name="catalog"/></file><file path="./solutionA-SSL.waSettings"><tag name="settings"/></file><file path="./solutionA-SSL.waPerm"><tag name="permissions"/></file></project>
+<project><folder path="./WebFolder/"><tag name="webFolder"/></folder><file path="./Model.waModel"><tag name="catalog"/></file><file path="./Settings.waSettings"><tag name="settings"/></file><file path="./Permission.waPerm"><tag name="permissions"/></file></project>

@@ -61,9 +61,9 @@ BinaryStream = function BinaryStream() {
      * writes the string value you passed as the parameter in the BinaryStream  object at the current cursor location
      *
      * @method putString
-     * @param {} 
+     * @param {} projectName
      */
-    this.putString = function putString() {             };
+    this.putString = function putString(projectName) {             };
     
     /**
      * writes the real value you passed as the parameter in the BinaryStream  object at the current cursor location
@@ -382,15 +382,6 @@ File = function File() {
      * @return {Boolean}
      */
     this.isFile = function isFile(path) {        return true;     };
-    
-    /**
-     * copies the file referenced in the File object (the source object) into the specified destination
-     *
-     * @method copyTo
-     * @param {File | String} destination
-     * @param {Boolean | String} overwrite
-     */
-    this.copyTo = function copyTo(destination, overwrite) {             };
     
     /**
      * stores the file referenced in the File on disk

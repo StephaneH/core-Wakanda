@@ -5,12 +5,13 @@ import static org.junit.Assert.assertTrue;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
-import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.util.EntityUtils;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.wakanda.qa.http.test.extend.AbstractHttpTestCase;
+import com.wakanda.qa.utils.Requestor.HttpSimpleBufferedResponse;
 
 /**
  * This class manages all test cases related with resource identifing.
@@ -35,7 +36,7 @@ public class ResourceTest extends AbstractHttpTestCase {
 			throws Exception {
 
 		String request = "GET / HTTP/1.1" + CRLF + CRLF;
-		HttpResponse response = executeRawRequest(request);
+		HttpSimpleBufferedResponse response = executeRawRequest(request);
 		assertEqualsStatusCode(HttpStatus.SC_BAD_REQUEST, response);
 
 		request = "GET / HTTP/1.1" + CRLF + "Host:"
@@ -58,7 +59,7 @@ public class ResourceTest extends AbstractHttpTestCase {
 	public void testThatHostHeaderIsOptionalIn_HTTP_1_0_Request()
 			throws Exception {
 		String request = "GET / HTTP/1.0" + CRLF + CRLF;
-		HttpResponse response = executeRawRequest(request);
+		HttpSimpleBufferedResponse response = executeRawRequest(request);
 		assertEqualsStatusCode(HttpStatus.SC_OK, response);
 
 	}
@@ -73,6 +74,7 @@ public class ResourceTest extends AbstractHttpTestCase {
 	 * @throws Exception
 	 */
 	@Test
+	@Ignore
 	public void testThatServerAcceptsAbsoluteURI() throws Exception {
 
 		// Request with absolute path
@@ -82,7 +84,7 @@ public class ResourceTest extends AbstractHttpTestCase {
 		logger.debug(request);
 
 		// Response
-		HttpResponse response = executeRawRequest(request);
+		HttpSimpleBufferedResponse response = executeRawRequest(request);
 		// Should get 200 OK
 		assertEqualsStatusCode(HttpStatus.SC_OK, response);
 		HttpEntity entity = response.getEntity();
@@ -104,6 +106,7 @@ public class ResourceTest extends AbstractHttpTestCase {
 	 * @throws Exception
 	 */
 	@Test
+	@Ignore
 	public void testThatHostHeaderValueIsIgnoredWhenRequestURIIsAbsolute()
 			throws Exception {
 		// Host
@@ -120,7 +123,7 @@ public class ResourceTest extends AbstractHttpTestCase {
 		// Target
 		HttpHost target = getMultiHostTarget();
 		// Response
-		HttpResponse response = executeRawRequest(target, request, false);
+		HttpSimpleBufferedResponse response = executeRawRequest(target, request);
 		HttpEntity entity = response.getEntity();
 		try {
 			// Should be 200 OK
@@ -146,6 +149,7 @@ public class ResourceTest extends AbstractHttpTestCase {
 	 * @throws Exception
 	 */
 	@Test
+	@Ignore
 	public void testThatServerReports400BadRequestWhenRequestURIIsAbsoluteAndTheDeterminedHostIsNotvalid()
 			throws Exception {
 
@@ -161,7 +165,7 @@ public class ResourceTest extends AbstractHttpTestCase {
 		// Target
 		HttpHost target = getMultiHostTarget();
 		// Response
-		HttpResponse response = executeRawRequest(target, request, false);
+		HttpSimpleBufferedResponse response = executeRawRequest(target, request);
 		// Should get 400
 		assertEqualsStatusCode(HttpStatus.SC_BAD_REQUEST, response);
 	}
@@ -179,6 +183,7 @@ public class ResourceTest extends AbstractHttpTestCase {
 	 */
 
 	@Test
+	@Ignore
 	public void testThatHostHeaderValueIsUsedWhenRequestURIIsNotAbsolute()
 			throws Exception {
 		// Request with non absolute path
@@ -191,7 +196,7 @@ public class ResourceTest extends AbstractHttpTestCase {
 		// Target
 		HttpHost target = getMultiHostTarget();
 		// Response
-		HttpResponse response = executeRawRequest(target, request, false);
+		HttpSimpleBufferedResponse response = executeRawRequest(target, request);
 		HttpEntity entity = response.getEntity();
 		try {
 			// Should be 200 OK
@@ -219,6 +224,7 @@ public class ResourceTest extends AbstractHttpTestCase {
 	 * @throws Exception
 	 */
 	@Test
+	@Ignore
 	public void testThatServerReports400BadRequestWhenTheRequestURIIsNotAbsoluteAndHostHeaderValueIsNotValid()
 			throws Exception {
 		// Not absolute URI and invalid host
@@ -229,9 +235,8 @@ public class ResourceTest extends AbstractHttpTestCase {
 		logger.debug(request);
 		// Target
 		HttpHost target = getMultiHostTarget();
-		HttpResponse response = executeRawRequest(
+		HttpSimpleBufferedResponse response = executeRawRequest(
 				target, request);
-		logger.debug(response.getStatusLine());
 		// Should get 400
 		assertEqualsStatusCode(HttpStatus.SC_BAD_REQUEST, response);
 	}
@@ -246,6 +251,7 @@ public class ResourceTest extends AbstractHttpTestCase {
 	 * @throws Exception
 	 */
 	@Test
+	@Ignore
 	public void testThatHostHeaderValueIsCaseInsensitive() throws Exception {
 		// Request with non absolute path
 		HttpHost host = new HttpHost("host2", getMultiHostPort());
@@ -258,7 +264,7 @@ public class ResourceTest extends AbstractHttpTestCase {
 		// Target
 		HttpHost target = getMultiHostTarget();
 		// Response
-		HttpResponse response = executeRawRequest(target, request, false);
+		HttpSimpleBufferedResponse response = executeRawRequest(target, request);
 		HttpEntity entity = response.getEntity();
 		try {
 			// Should get 200 OK

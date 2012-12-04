@@ -924,9 +924,10 @@ VError VRIAServerSolution::_Open( VSolution* inDesignSolution, VRIAServerSolutio
 										VString			vstrHostName;
 										VString			vstrIP;
 										sLONG			nPort = 0;
+										sLONG			nSSLPort = 0;
 										VString			vstrPattern;
 										VString			vstrPublishName;
-										VError			vErrorS = application-> GetPublicationSettings ( vstrHostName, vstrIP, nPort, vstrPattern, vstrPublishName );
+										VError			vErrorS = application-> GetPublicationSettings ( vstrHostName, vstrIP, nPort, nSSLPort, vstrPattern, vstrPublishName );
 										xbox_assert ( vErrorS == VE_OK );
 										vstrPublishName. Clear ( );
 										application-> GetName ( vstrPublishName );

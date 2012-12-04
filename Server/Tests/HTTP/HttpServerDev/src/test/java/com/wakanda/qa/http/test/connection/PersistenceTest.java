@@ -449,6 +449,7 @@ public class PersistenceTest extends AbstractHttpTestCase {
 	 * @throws Exception
 	 */
 	@Test
+	@Ignore
 	public void testThatServerIgnoresHeadersListedInConnectionHeaderFieldOfAn_HTTP_1_0_Request()
 			throws Exception {
 		String url = "/";

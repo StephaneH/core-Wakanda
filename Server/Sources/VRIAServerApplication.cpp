@@ -1263,8 +1263,10 @@ VError VRIAServerApplication::_OpenSolutionAsCurrentSolution( VSolutionStartupPa
 		{
 			if (fSolution != NULL)
 			{
+				VString solutionName;
+				fSolution->GetName( solutionName );
 				err = fSolution->Close();
-				_WithdrawServiceRecord(DEFAULT_SERVICE_NAME);
+				_WithdrawServiceRecord(DEFAULT_SERVICE_NAME, solutionName);
 				xbox_assert(err == VE_OK);
 				ReleaseRefCountable( &fSolution);
 			}
@@ -1382,8 +1384,10 @@ VError VRIAServerApplication::_CloseCurrentSolution()
 		{
 			if (fSolution != NULL)
 			{
+				VString solutionName;
+				fSolution->GetName( solutionName );
 				err = fSolution->Close();
-				_WithdrawServiceRecord(DEFAULT_SERVICE_NAME);
+				_WithdrawServiceRecord(DEFAULT_SERVICE_NAME, solutionName);
 				xbox_assert(err == VE_OK);
 				ReleaseRefCountable( &fSolution);
 			}
@@ -1453,12 +1457,13 @@ void VRIAServerApplication::_PublishServiceRecord (const XBOX::VString &inServic
 			VectorOfApplication appCollection;
 			VString				adminIP, adminPattern, adminHostName, publishName;
 			sLONG				adminPort = 0;
+			sLONG				adminSSLPort = 0;
 
 			fSolution->GetApplications(appCollection);
 			for (VectorOfApplication_iter iter = appCollection.begin() ; iter != appCollection.end() ; ++iter)
 			{
 				if ((*iter)->IsAdministrator())
-					(*iter)->GetPublicationSettings( adminHostName, adminIP, adminPort, adminPattern, publishName);
+					(*iter)->GetPublicationSettings( adminHostName, adminIP, adminPort, adminSSLPort, adminPattern, publishName);
 			}
 
 			// Construct a service record
@@ -1531,6 +1536,9 @@ void VRIAServerApplication::_PublishServiceRecord (const XBOX::VString &inServic
 				VValueBag::StKey	httpPath(CVSTR("path"));
 
 				serviceRecord.fValueBag.SetString("path", "index.html");
+				VString adminSSLPortStr;
+				adminSSLPortStr.FromLong( adminSSLPort );
+				serviceRecord.fValueBag.SetString("_SSLPORT", adminSSLPortStr );	
 
 				fServiceDiscoveryServer->AddServiceRecord(serviceRecord);	
 				
@@ -1542,8 +1550,11 @@ void VRIAServerApplication::_PublishServiceRecord (const XBOX::VString &inServic
 				address.FillIpV4((IP4 *) &binaryAddress);
 
 				serviceRecord.fValueBag.SetLong("_ADDRESS", binaryAddress);	
-				serviceRecord.fValueBag.SetString("_ADDRESS_IPV6", serviceRecord.fIPv6Address );	
-				serviceRecord.fValueBag.SetLong("_PORT", serviceRecord.fPort);	
+				serviceRecord.fValueBag.SetString("_ADDRESS_IPV6", serviceRecord.fIPv6Address );
+
+				VString adminPortStr;
+				adminPortStr.FromLong( serviceRecord.fPort );
+				serviceRecord.fValueBag.SetString("_PORT", adminPortStr );	
 				serviceRecord.fValueBag.SetString("_NAME", serviceRecord.fProviderName);
 
 				// DB index and flush infos
@@ -1589,16 +1600,26 @@ void VRIAServerApplication::_PublishServiceRecord (const XBOX::VString &inServic
 	}
 }
 
-void VRIAServerApplication::_WithdrawServiceRecord (const XBOX::VString &inServiceName)
+void VRIAServerApplication::_WithdrawServiceRecord (const XBOX::VString &inServiceName, const XBOX::VString &inProviderName)
 {
-	VString	providerName;
+	VString	providerName( inProviderName );
 	VFile	*file;
 
 	if (NULL != fSolution)
 	{
-		fSolution->GetName(providerName);
 		if (providerName.IsEmpty())
 			providerName = DEFAULT_NAME;
+
+		if (providerName.EqualToString("DefaultSolution", true))
+		{
+			VServiceRecord serviceRecord;
+			serviceRecord.SetHostName();
+			XBOX::VString	suffix;
+
+			serviceRecord.fHostName.GetSubString(1, serviceRecord.fHostName.GetLength() - 6, suffix);
+			providerName.AppendString("-");							
+			providerName.AppendString(suffix);
+		}				
 
 		fServiceDiscoveryServer->RemoveServiceRecord(inServiceName, providerName);	//** Check successful completion.
 		

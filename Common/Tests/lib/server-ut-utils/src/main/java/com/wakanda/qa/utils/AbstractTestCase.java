@@ -24,6 +24,8 @@ import org.junit.rules.Timeout;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
+import com.wakanda.qa.utils.Requestor.HttpSimpleBufferedResponse;
+
 /**
  * @author ouissam.gouni@4d.com
  *
@@ -159,19 +161,11 @@ public abstract class AbstractTestCase {
 	 * 
 	 * @param target
 	 * @param request
-	 * @param discardEntity
-	 *            when true, discards the response entity and so releases the
-	 *            system resources.
 	 * @return
 	 * @throws Exception
 	 */
-	protected HttpResponse executeRawRequest(HttpHost target, String request,
-			boolean discardEntity) throws Exception {
-		HttpResponse response = Requestor.executeRaw(target, request);
-		if (discardEntity) {
-			EntityUtils.consume(response.getEntity());
-		}
-		return response;
+	protected HttpSimpleBufferedResponse executeRawRequest(HttpHost target, String request) throws Exception {
+		return Requestor.executeRaw(target, request);
 	}
 
 	
@@ -182,6 +176,16 @@ public abstract class AbstractTestCase {
 	}
 
 	protected void assertEqualsStatusCode(int expectedSC, HttpResponse response) {
+		assertEqualsStatusCode("Wrong Status code", expectedSC, response);
+	}
+	
+	protected void assertEqualsStatusCode(String message, int expectedSC,
+			HttpSimpleBufferedResponse response) {
+		int actualStatusCode = response.getStatusCode();
+		assertEquals(message, expectedSC, actualStatusCode);
+	}
+
+	protected void assertEqualsStatusCode(int expectedSC, HttpSimpleBufferedResponse response) {
 		assertEqualsStatusCode("Wrong Status code", expectedSC, response);
 	}
 

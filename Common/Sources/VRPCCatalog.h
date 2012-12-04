@@ -124,45 +124,6 @@ typedef std::map< VRPCSchemaIdentifier, XBOX::VRefPtr<VRPCSchema> >::const_itera
 
 
 
-class VRPCMethodsFile : public XBOX::VObject, public XBOX::IRefCountable
-{
-public:
-			/** @brief	The file is retained */
-			VRPCMethodsFile( const XBOX::VFile* inFile);
-	virtual	~VRPCMethodsFile();
-
-			/** @brief	Parse the JavaScript file and extract the RPC method names and the RPC schemas from ScriptDoc comments */
-			XBOX::VError				Update( bool inForceUpdate, bool *outUpdateRequired, CLanguageSyntaxComponent* inLanguageSyntax, ISymbolTable* inSymbolsTable);
-					
-			const MapOfRPCSchema&		GetSchemas() const;
-
-			void						SetProxy( const XBOX::VString& inProxy);
-			void						GetProxy( XBOX::VString& outProxy) const;
-
-			const XBOX::VFile*			GetFile() const;
-
-			/** @brief	Call Touch() when the file which contains the RPC methods has been modified */
-			void						Touch();
-
-private:
-			/** @brief	Append the RPC schema from the given symbol. */
-			void						_AppendSchemaFromSymbol( Symbols::ISymbol* inSymbol, CLanguageSyntaxComponent* inLanguageSyntax, const XBOX::VString& inNamespace);
-
-			const XBOX::VFile			*fFile;
-			uLONG						fFileStamp;
-
-			MapOfRPCSchema				fSchemas;
-			uLONG						fSchemasStamp;
-
-			XBOX::VString				fProxy;
-};
-
-
-
-// ----------------------------------------------------------------------------
-
-
-
 class VRPCCatalogFile : public XBOX::VObject, public XBOX::IRefCountable
 {
 public:
@@ -218,10 +179,6 @@ private:
 
 
 
-typedef std::vector< XBOX::VRefPtr<VRPCMethodsFile> >					VectorOfRPCMethodsFile;
-typedef std::vector< XBOX::VRefPtr<VRPCMethodsFile> >::iterator			VectorOfRPCMethodsFile_iter;
-typedef std::vector< XBOX::VRefPtr<VRPCMethodsFile> >::const_iterator	VectorOfRPCMethodsFile_citer;
-
 typedef std::vector< XBOX::VRefPtr<VRPCCatalogFile> >					VectorOfRPCCatalogFile;
 typedef std::vector< XBOX::VRefPtr<VRPCCatalogFile> >::iterator			VectorOfRPCCatalogFile_iter;
 typedef std::vector< XBOX::VRefPtr<VRPCCatalogFile> >::const_iterator	VectorOfRPCCatalogFile_citer;
@@ -243,9 +200,6 @@ public:
 			/** @brief	Update the list of catalog files of the RPC catalog: some catalog files may be added, removed or updated */
 			XBOX::VError				SetCatalogFilesList( const XBOX::VectorOfVFile& inFiles);
 
-			/** @brief	Update the list of methods files of the RPC catalog: some methods files may be added, removed or updated */
-			XBOX::VError				SetMethodsFilesList( const XBOX::VectorOfVFile& inFiles, CLanguageSyntaxComponent* inLanguageSyntax, ISymbolTable* inSymbolsTable);
-
 			// RPC Modules support
 			
 			/** @brief	Create a schema for each functions of the module */
@@ -257,30 +211,10 @@ public:
 
 			// RPC Schemas high level accessors
 
-			/** @brief	Returns the schemas for all available methods */
-			XBOX::VError				RetainAllSchemas( MapOfRPCSchema& outSchemas) const;
-
-			/** @brief	Returns the schema of the named method */
-			VRPCSchema*					RetainSchemaByName( const VRPCSchemaIdentifier& inIdentifier) const;
-
-			/** @brief	Returns the schemas of the named methods */
-			XBOX::VError				RetainSchemasByNames( const std::vector<VRPCSchemaIdentifier>& inIdentifiers, MapOfRPCSchema& outSchemas) const;
-			
-			/** @brief	Returns the schemas of the methods which are implemented in the specified file */
-			XBOX::VError				RetainSchemasByFile( const XBOX::VFile* inFile, MapOfRPCSchema& outSchemas) const;
-
-			/** @brief	Returns the schemas of the methods which are implemented in the specified files */
-			XBOX::VError				RetainSchemasByFiles( const XBOX::VectorOfVFile& inFiles, MapOfRPCSchema& outSchemas) const;
-
-			/** @brief	Returns the methods file which implement the method */
-			const XBOX::VFile*			RetainFileByMethodName( const VRPCSchemaIdentifier& inIdentifier) const;
-
 			/** @brief	Clear the list of catalog files and the list of methods files */
 			void						Clear();
 
 			// Methods and catalog files low level accessors
-
-			VRPCMethodsFile*			RetainMethodsFile( const XBOX::VFile* inFile) const;
 			VRPCCatalogFile*			RetainCatalogFile( const XBOX::VFile* inFile) const;
 
 			// Utilities
@@ -290,18 +224,14 @@ public:
 	static	void						BuildCatalog( const MapOfRPCSchema& inSchemas, XBOX::VString& outCatalog);
 
 private:
-			/** @brief	Returns the schema of the named method which is implemented in a methods file */
-			VRPCSchema*					_GetSchemaFromMethodsFile( const VRPCSchemaIdentifier& inIdentifier) const;
 			/** @brief	Returns the schema of the named method which is defined in a catalog file */
 			VRPCSchema*					_GetSchemaFromCatalogFile( const VRPCSchemaIdentifier& inIdentifier) const;
 
-			VRPCMethodsFile*			_GetMethodsFileByFile( const XBOX::VFile* inFile) const;
 			VRPCCatalogFile*			_GetCatalogFileByFile( const XBOX::VFile* inFile) const;
 
 			/** @brief	Overrride the schemas list with the content of catalog files */
 			void						_OverrideSchemasFromCatalogFiles( MapOfRPCSchema& inSchemas) const;
 
-			VectorOfRPCMethodsFile		fMethodsFiles;
 			VectorOfRPCCatalogFile		fCatalogFiles;
 			MapOfRPCModule				fModules;
 	mutable	XBOX::VCriticalSection		fMutex;

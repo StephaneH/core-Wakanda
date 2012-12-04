@@ -12,6 +12,7 @@ import com.wakanda.qa.http.Utils;
 import com.wakanda.qa.utils.AbstractTestCase;
 import com.wakanda.qa.utils.IBasicSettings;
 import com.wakanda.qa.utils.Requestor;
+import com.wakanda.qa.utils.Requestor.HttpSimpleBufferedResponse;
 
 /**
  * Abstract class that provides common test cases utilities.
@@ -80,43 +81,13 @@ public class AbstractHttpTestCase extends AbstractTestCase {
 	}
 
 	/**
-	 * Executes a raw request to the default target.
-	 * 
-	 * @param request
-	 * @param discardEntity
-	 *            when true, discards the response entity and so releases the
-	 *            system resources.
-	 * @return
-	 * @throws Exception
-	 */
-	protected HttpResponse executeRawRequest(String request,
-			boolean discardEntity) throws Exception {
-		return executeRawRequest(getDefaultTarget(), request, discardEntity);
-	}
-
-	/**
-	 * Executes a raw request to the given target and discards the response
-	 * entity in order to release system resources.
-	 * 
-	 * @param target
-	 * @param request
-	 * @return
-	 * @throws Exception
-	 */
-	protected HttpResponse executeRawRequest(HttpHost target, String request)
-			throws Exception {
-		return executeRawRequest(target, request, true);
-	}
-
-	/**
-	 * Executes a raw request to the default target and discards the response
-	 * entity in order to release system resources.
+	 * Executes a raw request to the default target
 	 * 
 	 * @param request
 	 * @return
 	 * @throws Exception
 	 */
-	protected HttpResponse executeRawRequest(String request) throws Exception {
+	protected HttpSimpleBufferedResponse executeRawRequest(String request) throws Exception {
 		return executeRawRequest(getDefaultTarget(), request);
 	}
 
@@ -130,15 +101,16 @@ public class AbstractHttpTestCase extends AbstractTestCase {
 			throws Exception {
 		return getRequestor().executeAuthenticated(request, "admin", "");
 	}
-
-	protected void assertEqualsStatusCode(int expectedStatusCode,
-			HttpResponse response) {
-		int actualStatusCode = response.getStatusLine().getStatusCode();
-		assertEquals("Wrong Status code", expectedStatusCode, actualStatusCode);
-	}
-
+	
 	protected void assertEqualsReasonPhrase(String expectedReasonPhrase,
 			HttpResponse response) {
+		String actualReasonPhrase = response.getStatusLine().getReasonPhrase();
+		assertEquals("Wrong Reason Phrase", expectedReasonPhrase,
+				actualReasonPhrase);
+	}
+	
+	protected void assertEqualsReasonPhrase(String expectedReasonPhrase,
+			HttpSimpleBufferedResponse response) {
 		String actualReasonPhrase = response.getStatusLine().getReasonPhrase();
 		assertEquals("Wrong Reason Phrase", expectedReasonPhrase,
 				actualReasonPhrase);

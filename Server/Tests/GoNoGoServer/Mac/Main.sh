@@ -458,7 +458,7 @@ DEFAULT_RESOURCES=/walib/
 #[INFO]-----------Local Variable---------
 
 echo "Go to Solution A..."
-cd ${SolutionsTest}/${Solution[0]}/
+cd ${SolutionsTest}/${Solution[0]}/${Solution[0]}/
 
 echo "[INFO]-------------------Section Default XML Settings : Project | Port :---------------------"
 
@@ -2805,7 +2805,7 @@ then
 #Wrote in the Junit File
 cat >> ${HomeDirectory}${Directory}Junit-report/$(date +%d-%m-%Y)-GoNoGo-Server-Junit-file.xml <<EOF
   <testcase name="${TESTCASE36}-[Passed]" passed="true" time="DV">
-     <success message="Test Passed, We have a responce from 127.0.0.1:443 in SSL mode : Version Release"><![CDATA[Test passed,  We have a responce from 127.0.0.1:443 in SSL mode : Version Release]]></success>
+     <success message="Test Passed, We have a responce from 127.0.0.1:${port[3]} in SSL mode : Version Release"><![CDATA[Test passed,  We have a responce from 127.0.0.1:${port[3]} in SSL mode : Version Release]]></success>
   </testcase>
 EOF
 
@@ -2846,7 +2846,7 @@ then
 #Wrote in the Junit File
 cat >> ${HomeDirectory}${Directory}Junit-report/$(date +%d-%m-%Y)-GoNoGo-Server-Junit-file.xml <<EOF
   <testcase name="${TESTCASE36}-[Failed]" passed="false" time="DV">
-     <failure message="Test Failed, We have no responce from 127.0.0.1:443 : Version Release"><![CDATA[Test Failed, Re-execution : We have no responce from 127.0.0.1:443 : Version Release]]></failure>
+     <failure message="Test Failed, We have no responce from 127.0.0.1:${port[3]} : Version Release"><![CDATA[Test Failed, Re-execution : We have no responce from 127.0.0.1:${port[3]} : Version Release]]></failure>
   </testcase>
 EOF
 
@@ -3057,7 +3057,7 @@ then
 #Wrote in the Junit File
 cat >> ${HomeDirectory}${Directory}Junit-report/$(date +%d-%m-%Y)-GoNoGo-Server-Junit-file.xml <<EOF
   <testcase name="${TESTCASE38}-[Passed]" passed="true" time="DV">
-     <success message="Test Passed, We got a responce from 127.0.0.1:443 : Version Release"><![CDATA[Test passed, We got a responce from 127.0.0.1:443 : Version Release]]></success>
+     <success message="Test Passed, We got a responce from 127.0.0.1:${port[3]} : Version Release"><![CDATA[Test passed, We got a responce from 127.0.0.1:${port[3]} : Version Release]]></success>
   </testcase>
 EOF
 
@@ -3098,7 +3098,7 @@ then
 #Wrote in the Junit File
 cat >> ${HomeDirectory}${Directory}Junit-report/$(date +%d-%m-%Y)-GoNoGo-Server-Junit-file.xml <<EOF
   <testcase name="${TESTCASE38}-[Failed]" passed="false" time="DV">
-     <failure message="Test Failed, We didn't get a responce from 127.0.0.1:443 : Version Release"><![CDATA[Test Failed, We didn't get a responce from 127.0.0.1:443 : Version Release]]></failure>
+     <failure message="Test Failed, We didn't get a responce from 127.0.0.1:${port[3]} : Version Release"><![CDATA[Test Failed, We didn't get a responce from 127.0.0.1:${port[3]} : Version Release]]></failure>
   </testcase>
 EOF
 
@@ -3154,7 +3154,7 @@ cURL_RPC_OPEN_Wakanda_Solution 0 3
 
 echo "[INFO]-------------------Wakanda Execution : Launch Solution------------------------"
 
-echo "Checking if the adress ${PRIVATE_IP} is running well on port 443"
+echo "Checking if the adress ${PRIVATE_IP} is running well on port ${port[3]}"
 echo "[INFO]------------------------------SimpleGETServer-------------------------------------"
 
 . ${HomeDirectory}${Directory}Functions 

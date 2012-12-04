@@ -114,11 +114,11 @@ add_custom_target(unlink
 ################################################################################
 
 set(4DRoot		${Depot}/4eDimension/WAK3/4D)
-set(WakandaRoot		${Depot}/Wakanda/main)
-set(CopyFilesRoot	${Depot}/Tools/BuildLinux/scripts_compil_main/Scripts)
+set(WakandaRoot		${Depot}/Wakanda/WAK3)
+set(CopyFilesRoot	${Depot}/Tools/BuildLinux/scripts_compil_WAK3/Scripts)
 set(AppRoot		${WakandaRoot}/Apps/Linux/${CMAKE_BUILD_TYPE})
-set(ComponentsRoot	${Depot}/Components/Main)
-set(XBoxRoot		${Depot}/XToolbox/Main)
+set(ComponentsRoot	${Depot}/Components/WAK3)
+set(XBoxRoot		${Depot}/XToolbox/WAK3)
 
 
 ################################################################################

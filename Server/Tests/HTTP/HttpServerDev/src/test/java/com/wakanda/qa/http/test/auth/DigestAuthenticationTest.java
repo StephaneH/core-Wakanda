@@ -12,6 +12,7 @@ import org.apache.http.auth.MalformedChallengeException;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.auth.DigestScheme;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.wakanda.qa.http.test.extend.AbstractHttpTestCase;
@@ -92,6 +93,7 @@ public class DigestAuthenticationTest extends AbstractHttpTestCase {
 	 * @throws Exception
 	 */
 	@Test
+	@Ignore
 	public void testDigestAuthShouldSuccess() throws Exception {
 		// get the chalenge
 		String url = "/authDigest/";

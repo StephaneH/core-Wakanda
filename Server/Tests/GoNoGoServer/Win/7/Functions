@@ -79,7 +79,7 @@ do
     sleep 5
 
 done <<EOF
-{"jsonrpc":"2.0","id":1234,"module":"admin","method":"openSolution","params":["${SolutionsRelease}${SolutionName[${2}]}/${SolutionName[${2}]}.waSolution"]}
+{"jsonrpc":"2.0","id":1234,"module":"admin","method":"openSolution","params":["${SolutionsRelease}${SolutionName[${2}]}/${Solution[${2}]}.waSolution"]}
 EOF
    
 }
@@ -100,7 +100,7 @@ do
     sleep 5
 
 done <<EOF
-{"jsonrpc":"2.0","id":1234,"module":"admin","method":"closeSolution","params":["${SolutionsRelease}${SolutionName[${2}]}/${SolutionName[${2}]}.waSolution"]}
+{"jsonrpc":"2.0","id":1234,"module":"admin","method":"closeSolution","params":["${SolutionsRelease}${SolutionName[${2}]}/${Solution[${2}]}.waSolution"]}
 EOF
 
 }
@@ -121,7 +121,7 @@ do
     sleep 5
 
 done <<EOF
-{"jsonrpc":"2.0","id":1234,"module":"admin","method":"closeSolution","params":["${SolutionsRelease}${SolutionName[${2}]/${SolutionName[${2}]}.waSolution"]}
+{"jsonrpc":"2.0","id":1234,"module":"admin","method":"closeSolution","params":["${SolutionsRelease}${SolutionName[${2}]/${Solution[${2}]}.waSolution"]}
 EOF
 
 }
