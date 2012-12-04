@@ -13,15 +13,26 @@
 * Consequently, no title, copyright or other proprietary rights
 * other than those specified in the applicable license is granted.
 */
-// Check if dedicated workers can be created recursively.
-
-if (typeof Worker == "undefined")
-
-    throw new String("Worker() is undefined (no recursive dedicated workers).");
-
-else {
-
-    new Worker('doNothingDedicatedWorker.js');
-    postMessage("Ok.");
-
+// Check if dedicated workers can be created recursively.
+
+
+
+if (typeof Worker == "undefined")
+
+
+
+    throw new String("Worker() is undefined (no recursive dedicated workers).");
+
+
+
+else {
+
+
+
+    new Worker('doNothingWorker.js');
+
+    postMessage("Ok.");
+
+
+
 }   

@@ -113,19 +113,25 @@ VError VRIAServerJSContextMgr::ReleaseJSContext( VJSGlobalContext* inContext)
 
 	if (inContext != NULL)
 	{
-		VJSContext jsContext( inContext);
-		VRIAJSRuntimeContext *runtimeContext = VRIAJSRuntimeContext::GetFromJSContext( jsContext);
-		if (runtimeContext != NULL)
+		VRIAServerProject *application = NULL;
+
+		// sc 28/05/2012, ensure the VJSContext object is destroyed before release the context
 		{
-			VRIAServerProject *application = runtimeContext->GetRootApplication();
-			if (application != NULL)
+			VJSContext jsContext( inContext);
+			VRIAJSRuntimeContext *runtimeContext = VRIAJSRuntimeContext::GetFromJSContext( jsContext);
+			if (runtimeContext != NULL)
 			{
-				application->ReleaseJSContext( inContext, NULL);
+				application = runtimeContext->GetRootApplication();
 			}
-			else
-			{
-				err = VRIAServerApplication::Get()->ReleaseJSContext( inContext);
-			}
+		}
+
+		if (application != NULL)
+		{
+			application->ReleaseJSContext( inContext, NULL);
+		}
+		else
+		{
+			err = VRIAServerApplication::Get()->ReleaseJSContext( inContext);
 		}
 	}
 
@@ -1112,12 +1118,22 @@ void VJSContextPool::_InitGlobalClasses()
 		VJSGlobalClass::AddStaticFunction( kSSJS_PROPERTY_NAME_GetWalibFolder, VJSGlobalClass::js_callStaticFunction<VJSApplicationGlobalObject::_getWalibFolder>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete);
 
 		VJSGlobalClass::AddStaticFunction( kSSJS_PROPERTY_NAME_GetItemsWithRole, VJSGlobalClass::js_callStaticFunction<VJSApplicationGlobalObject::_getItemsWithRole>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete);
+
+		VJSGlobalClass::AddStaticFunction( "reloadModel", VJSGlobalClass::js_callStaticFunction<VJSApplicationGlobalObject::_reloadModel>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete);
 	
 		VJSGlobalClass::AddStaticFunction( kSSJS_PROPERTY_NAME_verifyDataStore, VJSGlobalClass::js_callStaticFunction<VJSApplicationGlobalObject::_verifyDataStore>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete);
 
 		VJSGlobalClass::AddStaticFunction( kSSJS_PROPERTY_NAME_repairDataStore, VJSGlobalClass::js_callStaticFunction<VJSApplicationGlobalObject::_repairInto>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete);
 
 		VJSGlobalClass::AddStaticFunction( kSSJS_PROPERTY_NAME_compactDataStore, VJSGlobalClass::js_callStaticFunction<VJSApplicationGlobalObject::_compactInto>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete);
+
+		VJSGlobalClass::AddStaticFunction( kSSJS_PROPERTY_NAME_backupDataStore, VJSGlobalClass::js_callStaticFunction<VJSApplicationGlobalObject::_backupDataStore>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete);
+
+		VJSGlobalClass::AddStaticFunction( "getLastBackups", VJSGlobalClass::js_callStaticFunction<VJSApplicationGlobalObject::_getLastBackups>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete);
+		VJSGlobalClass::AddStaticFunction( "integrateDataStoreJournal", VJSGlobalClass::js_callStaticFunction<VJSApplicationGlobalObject::_integrateDataStoreJournal>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete);
+		VJSGlobalClass::AddStaticFunction( "restoreDataStore", VJSGlobalClass::js_callStaticFunction<VJSApplicationGlobalObject::_restoreDataStore>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete);
+		VJSGlobalClass::AddStaticFunction( "getBackupRegistry", VJSGlobalClass::js_callStaticFunction<VJSApplicationGlobalObject::_getBackupRegistry>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete);
+		VJSGlobalClass::AddStaticFunction( "getBackupSettings", VJSGlobalClass::js_callStaticFunction<VJSApplicationGlobalObject::_getBackupSettings>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete);
 
 		VJSGlobalClass::AddStaticFunction( kSSJS_PROPERTY_NAME_loginByKey, VJSGlobalClass::js_callStaticFunction<VJSApplicationGlobalObject::_login>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete);
 
@@ -1136,12 +1152,6 @@ void VJSContextPool::_InitGlobalClasses()
 		VJSGlobalClass::AddStaticValue( kSSJS_PROPERTY_NAME_Administrator, VJSGlobalClass::js_getProperty<VJSApplicationGlobalObject::_getIsAdministrator>, NULL, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete);
 
 		VJSGlobalClass::AddStaticValue( kSSJS_PROPERTY_NAME_HTTPServer, VJSGlobalClass::js_getProperty<VJSApplicationGlobalObject::_getHttpServer>, NULL, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete);
-
-		VJSGlobalClass::AddStaticValue( kSSJS_PROPERTY_NAME_WebAppService, VJSGlobalClass::js_getProperty<VJSApplicationGlobalObject::_getWebAppService>, NULL, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete);
-
-		VJSGlobalClass::AddStaticValue( kSSJS_PROPERTY_NAME_DataService, VJSGlobalClass::js_getProperty<VJSApplicationGlobalObject::_getDataService>, NULL, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete);
-
-		VJSGlobalClass::AddStaticValue( kSSJS_PROPERTY_NAME_RPCService, VJSGlobalClass::js_getProperty<VJSApplicationGlobalObject::_getRPCService>, NULL, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete);
 
 		VJSGlobalClass::AddStaticValue( kSSJS_PROPERTY_NAME_Console, VJSGlobalClass::js_getProperty<VJSApplicationGlobalObject::_getConsole>, NULL, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete);
 
@@ -1167,16 +1177,19 @@ void VJSContextPool::_InitGlobalClasses()
 		VJSHTTPResponseHeader::Class();
 		VJSHTTPRequest::Class();
 		VJSHTTPResponse::Class();
-		VJSHTMLForm::Class();
-		VJSHTMLFormPart::Class();
+		VJSMIMEMessage::Class();
+		VJSMIMEMessagePart::Class();
+		VJSMIMEWriter::Class();
+		VJSMIMEReader::Class();
 		VJSSolution::Class();
 		VJSApplication::Class();
 		VJSHTTPServer::Class();
-		VJSWebAppService::Class();
-		VJSDataService::Class();
 		VRIAServerJSCore::Class();
 		VJSRPCServiceCore::Class();
 		VRIAServerJSCore::Class();
+
+		VJSGlobalClass::AddConstructorObjectStaticValue ("MIMEWriter", VJSParms_construct::Callback<VJSMIMEWriter::_Construct>);
+		VJSGlobalClass::AddConstructorObjectStaticValue("MIMEReader", VJSParms_construct::Callback<VJSMIMEReader::Construct>);
 	}
 }
 

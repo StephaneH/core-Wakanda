@@ -315,7 +315,38 @@ uLONG VProjectItem::GetStamp() const
 
 void VProjectItem::SetURL( const XBOX::VURL& inURL)
 {
-	fURL = inURL;
+	if (testAssert(fRelativePath.IsEmpty()))
+		fURL = inURL;
+}
+
+
+bool VProjectItem::GetURL( XBOX::VURL& outURL) const
+{
+	bool done = false;
+	
+	if (!fURL.IsEmpty())
+	{
+		outURL.FromURL( fURL);
+		done = true;
+	}
+	else
+	{
+		VFilePath path;
+		if (GetFilePath( path))
+		{
+			outURL.FromFilePath( path);
+			done = true;
+		}
+	}
+	return done;
+}
+
+
+VURL VProjectItem::GetURL() const
+{
+	VURL url;
+	GetURL( url);
+	return url;
 }
 
 
@@ -362,10 +393,7 @@ VProject* VProjectItem::GetProjectOwner()
 
 VProjectItem* VProjectItem::GetProjectItemProjectOwner()
 {
-	if (fParent == NULL)
-		return NULL;
-
-	if ((fProjectItemProjectOwner == NULL) && (GetKind() != eSOLUTION))
+	if (fProjectItemProjectOwner == NULL)
 	{
 		VProjectItem* projectItem = this;
 		while (projectItem && projectItem->GetKind() != ePROJECT)
@@ -394,10 +422,7 @@ VSolution* VProjectItem::GetSolutionOwner()
 
 VProjectItem* VProjectItem::GetProjectItemSolutionOwner()
 {
-	if (fParent == NULL)
-		return NULL;
-
-	if ((fProjectItemSolutionOwner == NULL) && (GetKind() != eSOLUTION))
+	if (fProjectItemSolutionOwner == NULL)
 	{
 		VProjectItem* projectItem = this;
 		while (projectItem && projectItem->GetKind() != eSOLUTION)
@@ -577,6 +602,10 @@ void VProjectItem::_CreateItemBehaviour( e_ProjectItemKind inKind)
 
 		case ePROJECT:
 			fBehaviour = new VProjectItemProject( this);
+			break;
+
+		case eMEDIA_LIBRARY:
+			fBehaviour = new VMediaLibraryFolder( this);
 			break;
 
 		case eFOLDER:
@@ -1674,8 +1703,11 @@ VProjectItem* VProjectItemTools::GetFirstCommonParent( const VectorOfProjectItem
 // ----------------------------------------------------------------------------
 const VProjectItemTag kSettingTag( "settings");
 const VProjectItemTag kCatalogTag( "catalog");
+const VProjectItemTag kBackupsTag( "Backups");
+
 // const VProjectItemTag kEntityModelScriptTag( "EMScripts");	// sc 30/09/2010 unused
 const VProjectItemTag kDataTag( "data");
+const VProjectItemTag kDataFolderTag( "dataFolder");
 const VProjectItemTag kDocumentationTag( "documentation");
 const VProjectItemTag kExternalLibraryTag( "libraries");
 const VProjectItemTag kRPCMethodTag( "rpc");
@@ -1685,9 +1717,10 @@ const VProjectItemTag kUAGDirectoryTag( "directory");
 const VProjectItemTag kPermissionsTag( "permissions");
 const VProjectItemTag kIndexPageTag( "indexPage");
 const VProjectItemTag kWebFolderTag( "webFolder");
-const VProjectItemTag kMobileFolderTag( "smartphone");
-const VProjectItemTag kTabletFolderTag( "tablet");
 const VProjectItemTag kWebComponentFolderTag( "webComponent" );
+const VProjectItemTag kPageFolderTag( "pageFolder" );
+const VProjectItemTag kProjectCertificatesFolderTag( "projectCertificatesFolder");
+const VProjectItemTag kSolutionCertificatesFolderTag( "solutionCertificatesFolder");
 
 
 namespace ProjectItemTagBagKeys
@@ -1736,6 +1769,15 @@ bool VProjectItemTagManager::Init()
 												ePITP_ApplyToSingleFile | ePITP_ApplyToFolderContent,
 												&defaultFolders,
 												NULL );
+			
+			//kBackupsTag
+			defaultFolders.clear();
+			defaultFolders.push_back( L"Backups/");
+			sManager->RegisterProjectItemTag(	kBackupsTag,
+												L"",
+												ePITP_ApplyToSingleFolder,
+												&defaultFolders,
+												NULL );
 
 		#if 0 // sc 30/09/2010 unused
 			// kEntityModelScriptTag
@@ -1755,6 +1797,16 @@ bool VProjectItemTagManager::Init()
 			sManager->RegisterProjectItemTag(	kDataTag,
 												RIAFileKind::kDataFileKind,
 												ePITP_ApplyToSingleFile | ePITP_ApplyToFolderContent,
+												&defaultFolders,
+												NULL );
+
+			// kDataFolderTag
+			defaultFolders.clear();
+			// No default Data folder name - to check with SC
+			//defaultFolders.push_back( L"DataFolder/");
+			sManager->RegisterProjectItemTag(	kDataFolderTag,
+												L"",
+												ePITP_ApplyToSingleFolder,
 												&defaultFolders,
 												NULL );
 
@@ -1842,24 +1894,6 @@ bool VProjectItemTagManager::Init()
 												&defaultFolders,
 												NULL );
 
-			// kMobileFolderTag
-			defaultFolders.clear();
-			defaultFolders.push_back( L"smartphone/");
-			sManager->RegisterProjectItemTag(	kMobileFolderTag,
-												L"",
-												ePITP_ApplyToSingleFolder,
-												&defaultFolders,
-												NULL );
-
-			// kTabletFolderTag
-			defaultFolders.clear();
-			defaultFolders.push_back( L"tablet/");
-			sManager->RegisterProjectItemTag(	kTabletFolderTag,
-												L"",
-												ePITP_ApplyToSingleFolder,
-												&defaultFolders,
-												NULL );
-
 			// kWebComponentFolderTag
 			defaultFolders.clear();
 			defaultFolders.push_back( L"webComponent.WebComponent/");
@@ -1869,6 +1903,31 @@ bool VProjectItemTagManager::Init()
 												&defaultFolders,
 												NULL );
 
+			// kPageFolderTag
+			defaultFolders.clear();
+			defaultFolders.push_back( L"pages/");
+			sManager->RegisterProjectItemTag(	kWebComponentFolderTag,
+												RIAFileKind::kPageFolderExtension,
+												ePITP_ApplyToSingleFolder,
+												&defaultFolders,
+												NULL );
+			// kProjectCertificatesFolderTag
+			defaultFolders.clear();
+			defaultFolders.push_back( L"Certificates/");
+			sManager->RegisterProjectItemTag(	kProjectCertificatesFolderTag,
+												L"",
+												ePITP_ApplyToSingleFolder,
+												&defaultFolders,
+												NULL );
+
+			// kSolutionCertificatesFolderTag
+			defaultFolders.clear();
+			defaultFolders.push_back( L"Certificates/");
+			sManager->RegisterProjectItemTag(	kSolutionCertificatesFolderTag,
+												L"",
+												ePITP_ApplyToSingleFolder,
+												&defaultFolders,
+												NULL );
 		}
 	}
 	return  sManager != NULL;

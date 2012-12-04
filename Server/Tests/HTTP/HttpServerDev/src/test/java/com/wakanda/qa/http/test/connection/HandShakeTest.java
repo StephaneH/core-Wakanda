@@ -8,9 +8,7 @@ import static org.junit.Assert.fail;
 import java.io.File;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.http.Header;
 import org.apache.http.HttpHost;
@@ -19,12 +17,10 @@ import org.apache.http.HttpStatus;
 import org.apache.http.HttpVersion;
 import org.apache.http.NoHttpResponseException;
 import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.DefaultHttpClientConnection;
 import org.apache.http.impl.auth.BasicScheme;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicHttpEntityEnclosingRequest;
 import org.apache.http.params.SyncBasicHttpParams;
 import org.apache.http.protocol.HTTP;
@@ -36,26 +32,14 @@ import com.wakanda.qa.http.test.extend.AbstractHttpTestCase;
 
 public class HandShakeTest extends AbstractHttpTestCase {
 
-	@Override
 	protected HttpHost getDefaultTarget() {
 		//return new HttpHost("localhost", 80);// Apache
 		return super.getDefaultTarget();
 	}
 
-	@Override
 	protected String getDefaultUrl() {
 		//return "/";// Apache
 		return "/checkPostMethod/";
-	}
-
-	@Override
-	protected Map<String, Long> getUnitTestsTimeout() {
-		Map<String, Long> timeout = new HashMap<String, Long>();
-		timeout.put(
-				"testThatServerRespondsWith100ContinueUponReceivingExpect100ContinueWhenTheRequestIsAcceptedAndContinueToReadFromInputStream",
-				new Long(30000));
-		timeout.put("testThatServerDoesNotPerformRequestedMethodIfItReturnsFinalStatusCode", new Long(30000));
-		return timeout;
 	}
 
 	@Override
@@ -73,11 +57,14 @@ public class HandShakeTest extends AbstractHttpTestCase {
 	 * request with "100-continue" expectation and continue to read from the
 	 * input stream when the request is accepted.
 	 * <p/>
+	 * The test is ignored for now because the feature is expected in WAK3.
+	 * <p/>
 	 * <B>Reference:</b> SPEC693 (RFC1616 8.2.3)
 	 * 
 	 * @throws Exception
 	 */
 	@Test
+	@Ignore
 	public void testThatServerRespondsWith100ContinueUponReceivingExpect100ContinueAndContinueToReadFromInputStreamWhenTheRequestIsAccepted()
 			throws Exception {
 		DefaultHttpClientConnection conn = new DefaultHttpClientConnection();
@@ -93,7 +80,7 @@ public class HandShakeTest extends AbstractHttpTestCase {
 		req.addHeader(HTTP.EXPECT_DIRECTIVE, HTTP.EXPECT_CONTINUE);
 		req.addHeader(HTTP.CONTENT_TYPE, HTTP.PLAIN_TEXT_TYPE);
 		req.addHeader(HTTP.CONN_DIRECTIVE, HTTP.CONN_KEEP_ALIVE);
-		req.addHeader(HTTP.USER_AGENT, getDefaultUserAgent());
+		req.addHeader(HTTP.USER_AGENT, getSettings().getUserAgent());
 		// req.addHeader(HTTP.CONTENT_LEN, "5");
 		req.addHeader(HTTP.TRANSFER_ENCODING, HTTP.CHUNK_CODING);
 
@@ -140,11 +127,14 @@ public class HandShakeTest extends AbstractHttpTestCase {
 	 * the client is unauthorized to execute the request or 400 Bad Request when
 	 * the Host header field is missing.
 	 * <p/>
+	 * The test is ignored for now because the feature is expected in WAK3.
+	 * <p/>
 	 * <B>Reference:</b> SPEC693 (RFC1616 8.2.3)
 	 * 
 	 * @throws Exception
 	 */
 	@Test
+	@Ignore
 	public void testThatServerRespondsWithFinalStatusCodeUponReceivingExpect100ContinueWhenRequestIsRejected()
 			throws Exception {
 		DefaultHttpClientConnection conn = new DefaultHttpClientConnection();
@@ -160,7 +150,7 @@ public class HandShakeTest extends AbstractHttpTestCase {
 		req.addHeader(HTTP.EXPECT_DIRECTIVE, HTTP.EXPECT_CONTINUE);
 		req.addHeader(HTTP.CONTENT_TYPE, HTTP.PLAIN_TEXT_TYPE);
 		req.addHeader(HTTP.CONN_DIRECTIVE, HTTP.CONN_KEEP_ALIVE);
-		req.addHeader(HTTP.USER_AGENT, getDefaultUserAgent());
+		req.addHeader(HTTP.USER_AGENT, getSettings().getUserAgent());
 		// req.addHeader(HTTP.CONTENT_LEN, "5");
 		req.addHeader(HTTP.TRANSFER_ENCODING, HTTP.CHUNK_CODING);
 
@@ -197,11 +187,14 @@ public class HandShakeTest extends AbstractHttpTestCase {
 	 * Check that the server closes the connection or continue to read and
 	 * discard the rest of the request if it responds with a final status code.
 	 * <p/>
+	 * The test is ignored for now because the feature is expected in WAK3.
+	 * <p/>
 	 * <B>Reference:</b> SPEC693 (RFC1616 8.2.3)
 	 * 
 	 * @throws Exception
 	 */
 	@Test
+	@Ignore
 	public void testThatServerDiscardRestOfRequestIfItRespondsWithFinalStatusCode()
 			throws Exception {
 		DefaultHttpClientConnection conn = new DefaultHttpClientConnection();
@@ -218,7 +211,7 @@ public class HandShakeTest extends AbstractHttpTestCase {
 		req.addHeader(HTTP.EXPECT_DIRECTIVE, HTTP.EXPECT_CONTINUE);
 		req.addHeader(HTTP.CONTENT_TYPE, HTTP.PLAIN_TEXT_TYPE);
 		req.addHeader(HTTP.CONN_DIRECTIVE, HTTP.CONN_KEEP_ALIVE);
-		req.addHeader(HTTP.USER_AGENT, getDefaultUserAgent());
+		req.addHeader(HTTP.USER_AGENT, getSettings().getUserAgent());
 		// req.addHeader(HTTP.CONTENT_LEN, "5");
 		req.addHeader(HTTP.TRANSFER_ENCODING, HTTP.CHUNK_CODING);
 
@@ -270,16 +263,19 @@ public class HandShakeTest extends AbstractHttpTestCase {
 	 * Check that the server does not perform the requested method if it returns
 	 * a final status code.
 	 * <p/>
+	 * The test is ignored for now because the feature is expected in WAK3.
+	 * <p/>
 	 * <B>Reference:</b> SPEC693 (RFC1616 8.2.3)
 	 * 
 	 * @throws Exception
 	 */
 	@Test
+	@Ignore
 	public void testThatServerDoesNotPerformRequestedMethodIfItReturnsFinalStatusCode() throws Exception{
 		
 		// temp file that the request is supposed to create
 		String fileName = "toCheck100Continue.tmp";
-		File file = new File(getDefaultProjectWebFolderPath() + "/" + fileName);
+		File file = new File(getSettings().getDefaultProjectWebFolderPath() + "/" + fileName);
 		// delete the file if it exists
 		if(file.exists()) {
 			if(!file.delete()){
@@ -298,9 +294,8 @@ public class HandShakeTest extends AbstractHttpTestCase {
 		request.addHeader(authResponse);
 		
 		// server should return a final status code (401)
-		HttpClient client=new DefaultHttpClient();
 		HttpHost target = getDefaultTarget();
-		HttpResponse response = client.execute(target, request);
+		HttpResponse response = executeRequest(target, request);
 		logger.debug(response.getStatusLine());
 		int actual = response.getStatusLine().getStatusCode();
 		assertEquals(HttpStatus.SC_UNAUTHORIZED, actual);
@@ -317,11 +312,14 @@ public class HandShakeTest extends AbstractHttpTestCase {
 	 * request message does not include an Expect request-header field with the
 	 * "100-continue" expectation.
 	 * <p/>
+	 * The test is ignored for now because the feature is expected in WAK3.
+	 * <p/>
 	 * <B>Reference:</b> SPEC693 (RFC1616 8.2.3)
 	 * 
 	 * @throws Exception
 	 */
 	@Test
+	@Ignore
 	public void testThatServerDoesNotSend100ContinueIfRequestDoesNotInclude100ContinueExpectation()
 			throws Exception {
 		DefaultHttpClientConnection conn = new DefaultHttpClientConnection();
@@ -340,7 +338,7 @@ public class HandShakeTest extends AbstractHttpTestCase {
 
 		req.addHeader(HTTP.CONTENT_TYPE, HTTP.PLAIN_TEXT_TYPE);
 		req.addHeader(HTTP.CONN_DIRECTIVE, HTTP.CONN_KEEP_ALIVE);
-		req.addHeader(HTTP.USER_AGENT, getDefaultUserAgent());
+		req.addHeader(HTTP.USER_AGENT, getSettings().getUserAgent());
 		// req.addHeader(HTTP.CONTENT_LEN, "5");
 		req.addHeader(HTTP.TRANSFER_ENCODING, HTTP.CHUNK_CODING);
 
@@ -390,11 +388,14 @@ public class HandShakeTest extends AbstractHttpTestCase {
 	 * Check that the server does not send a 100 (Continue) response if the
 	 * request comes from an HTTP/1.0 (or earlier) client.
 	 * <p/>
+	 * The test is ignored for now because the feature is expected in WAK3.
+	 * <p/>
 	 * <B>Reference:</b> SPEC693 (RFC1616 8.2.3)
 	 * 
 	 * @throws Exception
 	 */
 	@Test
+	@Ignore
 	public void testThatServerDoesNotSend100ContinueWhen_HTTP_1_0()
 			throws Exception {
 		DefaultHttpClientConnection conn = new DefaultHttpClientConnection();
@@ -411,7 +412,7 @@ public class HandShakeTest extends AbstractHttpTestCase {
 		req.addHeader(HTTP.EXPECT_DIRECTIVE, HTTP.EXPECT_CONTINUE);
 		req.addHeader(HTTP.CONTENT_TYPE, HTTP.PLAIN_TEXT_TYPE);
 		req.addHeader(HTTP.CONN_DIRECTIVE, HTTP.CONN_KEEP_ALIVE);
-		req.addHeader(HTTP.USER_AGENT, getDefaultUserAgent());
+		req.addHeader(HTTP.USER_AGENT, getSettings().getUserAgent());
 		req.addHeader(HTTP.CONTENT_LEN, "5");
 
 		String content = "Hello";
@@ -463,10 +464,12 @@ public class HandShakeTest extends AbstractHttpTestCase {
 	 * received some or all the request body.
 	 * <p/>
 	 * <B>Reference:</b> SPEC693 (RFC1616 8.2.3)
-	 * 
+	 * The test is ignored for now because the feature is expected in WAK3.
+	 * <p/>
 	 * @throws Exception
 	 */
 	@Test
+	@Ignore
 	public void testThatServerMayOmit100ContinueIfItHasAlreadyReceivedRequestBody()
 			throws Exception {
 		DefaultHttpClientConnection conn = new DefaultHttpClientConnection();
@@ -482,7 +485,7 @@ public class HandShakeTest extends AbstractHttpTestCase {
 		req.addHeader(HTTP.EXPECT_DIRECTIVE, HTTP.EXPECT_CONTINUE);
 		req.addHeader(HTTP.CONTENT_TYPE, HTTP.PLAIN_TEXT_TYPE);
 		req.addHeader(HTTP.CONN_DIRECTIVE, HTTP.CONN_KEEP_ALIVE);
-		req.addHeader(HTTP.USER_AGENT, getDefaultUserAgent());
+		req.addHeader(HTTP.USER_AGENT, getSettings().getUserAgent());
 		// req.addHeader(HTTP.CONTENT_LEN, "50000");
 		req.addHeader(HTTP.TRANSFER_ENCODING, HTTP.CHUNK_CODING);
 
@@ -528,11 +531,14 @@ public class HandShakeTest extends AbstractHttpTestCase {
 	 * Check that the server responds with a final status code after it sent a
 	 * 100 (Continue) response once the request body is received and processed.
 	 * <p/>
+	 * The test is ignored for now because the feature is expected in WAK3.
+	 * <p/>
 	 * <B>Reference:</b> SPEC693 (RFC1616 8.2.3)
 	 * 
 	 * @throws Exception
 	 */
 	@Test
+	@Ignore
 	public void testThatServerRespondsWithFinalStatusCodeAfterItSent100ContinueOnceRequestBodyReceivedAndProcessed()
 			throws Exception {
 		DefaultHttpClientConnection conn = new DefaultHttpClientConnection();
@@ -548,7 +554,7 @@ public class HandShakeTest extends AbstractHttpTestCase {
 		req.addHeader(HTTP.EXPECT_DIRECTIVE, HTTP.EXPECT_CONTINUE);
 		req.addHeader(HTTP.CONTENT_TYPE, HTTP.PLAIN_TEXT_TYPE);
 		req.addHeader(HTTP.CONN_DIRECTIVE, HTTP.CONN_KEEP_ALIVE);
-		req.addHeader(HTTP.USER_AGENT, getDefaultUserAgent());
+		req.addHeader(HTTP.USER_AGENT, getSettings().getUserAgent());
 		// req.addHeader(HTTP.CONTENT_LEN, "5");
 		req.addHeader(HTTP.TRANSFER_ENCODING, HTTP.CHUNK_CODING);
 
@@ -592,11 +598,14 @@ public class HandShakeTest extends AbstractHttpTestCase {
 	 * Check that the server responds with a 417 (Expectation Failed) status if
 	 * the expectation cannot be met.
 	 * <p/>
+	 * The test is ignored for now because the feature is expected in WAK3.
+	 * <p/>
 	 * <B>Reference:</b> SPEC693 (RFC1616 8.2.3)
 	 * 
 	 * @throws Exception
 	 */
 	@Test
+	@Ignore
 	public void testThatServerRespondsWith417ExpectationFailedIfExpectationCannotBeMet()
 			throws Exception {
 		
@@ -611,7 +620,7 @@ public class HandShakeTest extends AbstractHttpTestCase {
 		req.addHeader(HTTP.EXPECT_DIRECTIVE, "whatever");
 		req.addHeader(HTTP.CONTENT_TYPE, HTTP.PLAIN_TEXT_TYPE);
 		req.addHeader(HTTP.CONN_DIRECTIVE, HTTP.CONN_KEEP_ALIVE);
-		req.addHeader(HTTP.USER_AGENT, getDefaultUserAgent());
+		req.addHeader(HTTP.USER_AGENT, getSettings().getUserAgent());
 
 		try {
 			// create and bind the socket
@@ -638,11 +647,14 @@ public class HandShakeTest extends AbstractHttpTestCase {
 	 * <p/>
 	 * Check that the server is case-insensitive toward 100-continue token.
 	 * <p/>
+	 * The test is ignored for now because the feature is expected in WAK3.
+	 * <p/>
 	 * <B>Reference:</b> SPEC698 (RFC2616 14.20)
 	 * 
 	 * @throws Exception
 	 */
 	@Test
+	@Ignore
 	public void testThatServerIsCaseInsensToward100ContinueToken()
 			throws Exception {
 		DefaultHttpClientConnection conn = new DefaultHttpClientConnection();
@@ -659,7 +671,7 @@ public class HandShakeTest extends AbstractHttpTestCase {
 		
 		req.addHeader(HTTP.CONTENT_TYPE, HTTP.PLAIN_TEXT_TYPE);
 		req.addHeader(HTTP.CONN_DIRECTIVE, HTTP.CONN_KEEP_ALIVE);
-		req.addHeader(HTTP.USER_AGENT, getDefaultUserAgent());
+		req.addHeader(HTTP.USER_AGENT, getSettings().getUserAgent());
 		req.addHeader(HTTP.TRANSFER_ENCODING, HTTP.CHUNK_CODING);
 
 		String content = "Hello";
@@ -702,7 +714,7 @@ public class HandShakeTest extends AbstractHttpTestCase {
 		req.addHeader(HTTP.TARGET_HOST, target.toHostString());
 		req.addHeader(HTTP.CONTENT_TYPE, "application/x-www-form-urlencoded");
 		req.addHeader(HTTP.CONN_DIRECTIVE, HTTP.CONN_KEEP_ALIVE);
-		req.addHeader(HTTP.USER_AGENT, getDefaultUserAgent());
+		req.addHeader(HTTP.USER_AGENT, getSettings().getUserAgent());
 		req.addHeader(HTTP.TRANSFER_ENCODING, HTTP.CHUNK_CODING);
 		req.addHeader(HTTP.EXPECT_DIRECTIVE, HTTP.EXPECT_CONTINUE);
 

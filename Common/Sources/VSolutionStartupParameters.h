@@ -47,11 +47,15 @@ public:
 
 			XBOX::VValueBag&			GetExtraData() { return fBag; }
 
+			void						SetOpenProjectSymbolsTable( bool inOpenProjectSymbolsTable)		{ fOpenProjectSymbolsTable = inOpenProjectSymbolsTable; }
+			bool						GetOpenProjectSymbolsTable() const								{ return fOpenProjectSymbolsTable; }
+
 private:
 
 			XBOX::VFile*				fSolutionFileToOpen;
 			bool						fStoreInLinkFile;
 			XBOX::VValueBag				fBag;
+			bool						fOpenProjectSymbolsTable;
 };
 
 /* Solution link files utilities

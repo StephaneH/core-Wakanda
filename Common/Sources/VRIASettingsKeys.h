@@ -25,7 +25,10 @@ namespace RIASettingID
 	EXTERN_BAGKEY( project);
 	EXTERN_BAGKEY( http);
 	EXTERN_BAGKEY( database);
+	EXTERN_BAGKEY( backup);
 	EXTERN_BAGKEY( javaScript);
+	EXTERN_BAGKEY( databaseJournal);
+	EXTERN_BAGKEY( databaseRecovery);
 	EXTERN_BAGKEY( service);
 	EXTERN_BAGKEY( resources);
 	EXTERN_BAGKEY( virtualFolder);
@@ -46,13 +49,14 @@ namespace RIASettingsKeys
 		EXTERN_BAGKEY( serverStartup);
 		EXTERN_BAGKEY_WITH_DEFAULT_SCALAR( stopIfProjectFails, XBOX::VBoolean, bool);
 
-		EXTERN_BAGKEY( display );
-		EXTERN_BAGKEY_WITH_DEFAULT_SCALAR( hideExtensions, XBOX::VBoolean, bool);
-
 		EXTERN_BAGKEY_WITH_DEFAULT_SCALAR( garbageCollect, XBOX::VBoolean, bool);
 
 		EXTERN_BAGKEY( directory);
 		EXTERN_BAGKEY_WITH_DEFAULT( authenticationType, XBOX::VString);
+		EXTERN_BAGKEY_WITH_DEFAULT( cacheFolderPath, XBOX::VString);
+
+		EXTERN_BAGKEY( log);
+		EXTERN_BAGKEY_WITH_DEFAULT( folderPath, XBOX::VString);
 	}
 
 	// Project settings
@@ -65,7 +69,26 @@ namespace RIASettingsKeys
 		EXTERN_BAGKEY_WITH_DEFAULT( listen, XBOX::VString);
 		EXTERN_BAGKEY_WITH_DEFAULT( responseFormat, XBOX::VString);
 		EXTERN_BAGKEY_NO_DEFAULT( authType, XBOX::VString);
+		EXTERN_BAGKEY(database);
+
+		namespace Database
+		{
+			EXTERN_BAGKEY(journal);
+			namespace Journal
+			{
+				EXTERN_BAGKEY_WITH_DEFAULT_SCALAR( enabled, XBOX::VBoolean, bool);//whether journaling is enabled
+				EXTERN_BAGKEY_WITH_DEFAULT( journalFolder, XBOX::VString);		//Journal folder path
+			}
+
+			EXTERN_BAGKEY(autoRecovery);
+			namespace AutoRecovery
+			{
+				EXTERN_BAGKEY_WITH_DEFAULT_SCALAR( integrateJournal, XBOX::VBoolean, bool);		 //Automatically integrate journal when db opening fails
+				EXTERN_BAGKEY_WITH_DEFAULT_SCALAR( restoreFromLastBackup, XBOX::VBoolean, bool); //Automatically recover from lastBackup when db opening fails
+			}
+		}
 	}
+
 
 	// HTTP Server settings
 	namespace HTTP
@@ -75,7 +98,7 @@ namespace RIASettingsKeys
 
 		EXTERN_BAGKEY_WITH_DEFAULT_SCALAR( autoStart, XBOX::VBoolean, bool);
 		EXTERN_BAGKEY_WITH_DEFAULT_SCALAR( port, XBOX::VLong, sLONG);
-		EXTERN_BAGKEY_WITH_DEFAULT( SSLCertificatePath, XBOX::VString);
+		EXTERN_BAGKEY_NO_DEFAULT( SSLCertificatePath, XBOX::VString);			// DEPRECATED, replaced by a project item tag
 		EXTERN_BAGKEY_WITH_DEFAULT_SCALAR( allowSSL, XBOX::VBoolean, bool);
 		EXTERN_BAGKEY_WITH_DEFAULT_SCALAR( SSLMandatory, XBOX::VBoolean, bool);		
 		EXTERN_BAGKEY_WITH_DEFAULT_SCALAR( SSLPort, XBOX::VLong, sLONG);
@@ -88,7 +111,7 @@ namespace RIASettingsKeys
 		EXTERN_BAGKEY_WITH_DEFAULT_SCALAR( keepAliveTimeOut, XBOX::VLong, sLONG);
 		EXTERN_BAGKEY_WITH_DEFAULT( logFormat, XBOX::VString);
 		EXTERN_BAGKEY_WITH_DEFAULT( logTokens, XBOX::VString);
-		EXTERN_BAGKEY_WITH_DEFAULT( logFolderPath, XBOX::VString);
+		EXTERN_BAGKEY_WITH_DEFAULT( logPath, XBOX::VString);
 		EXTERN_BAGKEY_WITH_DEFAULT( logFileName, XBOX::VString);
 		EXTERN_BAGKEY_WITH_DEFAULT_SCALAR( logMaxSize, XBOX::VLong, sLONG);
 		EXTERN_BAGKEY_WITH_DEFAULT_SCALAR( allowCompression, XBOX::VBoolean, bool);
@@ -108,6 +131,24 @@ namespace RIASettingsKeys
 		EXTERN_BAGKEY_WITH_DEFAULT_SCALAR( fixedSize, XBOX::VLong, sLONG);						// size un Mo (for non adaptive cache)
 		EXTERN_BAGKEY_WITH_DEFAULT_SCALAR( keepCacheInMemory, XBOX::VBoolean, bool);
 		EXTERN_BAGKEY_WITH_DEFAULT_SCALAR( flushDataCacheInterval, XBOX::VLong, sLONG);
+	}
+	namespace DatabaseJournal
+	{
+		EXTERN_BAGKEY_WITH_DEFAULT_SCALAR( databaseJournalEnabled, XBOX::VBoolean, bool); 
+		EXTERN_BAGKEY_WITH_DEFAULT( databaseJournalFilePath, XBOX::VString);			  //journal folder path  
+	}
+
+	namespace DatabaseRecovery
+	{
+		EXTERN_BAGKEY_WITH_DEFAULT_SCALAR( recoverFromJournal, XBOX::VBoolean, bool);		//integrate journal if database is incomplete
+		EXTERN_BAGKEY_WITH_DEFAULT_SCALAR( recoverFromLastBackup, XBOX::VBoolean, bool);//integrate from last backup if database is corrupted
+	}
+
+	// Backup settings 
+	namespace Backup
+	{
+		//Solution and project-wide settings
+		EXTERN_BAGKEY_WITH_DEFAULT( destination, XBOX::VString);
 	}
 
 	// Resources settings
@@ -150,6 +191,7 @@ namespace RIASettingsKeys
 	{
 		EXTERN_BAGKEY_NO_DEFAULT( name, XBOX::VString);
 		EXTERN_BAGKEY_WITH_DEFAULT_SCALAR( enabled, XBOX::VBoolean, bool);
+		EXTERN_BAGKEY_NO_DEFAULT( modulePath, XBOX::VString);
 	}
 
 	// Web App Service settings
@@ -157,7 +199,6 @@ namespace RIASettingsKeys
 	{
 		EXTERN_BAGKEY_WITH_DEFAULT_SCALAR( enabled, XBOX::VBoolean, bool);	// DEPRECATED
 		EXTERN_BAGKEY_WITH_DEFAULT( documentRoot, XBOX::VString);			// DEPRECATED
-		EXTERN_BAGKEY_WITH_DEFAULT( directoryIndex, XBOX::VString);
 	}
 
 	// Data Service settings - DEPRECATED

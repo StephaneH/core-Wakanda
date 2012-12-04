@@ -35,14 +35,14 @@ public class RequestLineTest extends AbstractHttpTestCase {
 			throws Exception {
 		String request = CRLF + CRLF + CRLF + "GET / HTTP/1.0" + CRLF
 						+ CRLF;
-		HttpResponse response = executeRequestString(request);
+		HttpResponse response = executeRawRequest(request);
 		assertEqualsStatusCode(HttpStatus.SC_OK, response);
 	}
 	
 	/**
 	 * <b>Implements:</b> RequestLine02
 	 * <p/>
-	 * Check that server returns 401 (Bad Request) when URI and protocol version
+	 * Check that server returns 400 (Bad Request) when URI and protocol version
 	 * are missing.
 	 * <p/> 
 	 * <b>Reference:</b> SPEC690 (RFC2616) 5.1
@@ -53,14 +53,14 @@ public class RequestLineTest extends AbstractHttpTestCase {
 	public void testThatServerReturnsBadRequestWhenURIAndProtocolVersionIsMissing() throws Exception {
 		String request = "GET" + CRLF
 						+ CRLF;
-		HttpResponse response = executeRequestString(request);
+		HttpResponse response = executeRawRequest(request);
 		assertEqualsStatusCode(HttpStatus.SC_BAD_REQUEST, response);
 	}
 
 	/**
 	 * <b>Implements:</b> RequestLine03
 	 * <p/>
-	 * Check that server returns 401 (Bad Request) when protocol version is
+	 * Check that server returns 400 (Bad Request) when protocol version is
 	 * missing.
 	 * <p/>
 	 * <b>Reference:</b> SPEC690 (RFC2616) 5.1
@@ -71,14 +71,14 @@ public class RequestLineTest extends AbstractHttpTestCase {
 	public void testThatServerReturnsBadRequestWhenProtocolVersionIsMissing() throws Exception {
 		String request = "GET /whatever " + CRLF
 						+ CRLF;
-		HttpResponse response = executeRequestString(request);
+		HttpResponse response = executeRawRequest(request);
 		assertEqualsStatusCode(HttpStatus.SC_BAD_REQUEST, response);
 	}
 
 	/**
 	 * <b>Implements:</b> RequestLine04
 	 * <p/>
-	 * Check that server returns 401 (Bad Request) when request line contains
+	 * Check that server returns 400 (Bad Request) when request line contains
 	 * more elements than expected.
 	 * <p/>
 	 * <b>Reference:</b> SPEC690 (RFC2616) 5.1
@@ -89,7 +89,7 @@ public class RequestLineTest extends AbstractHttpTestCase {
 	public void testThatServerReturnsBadRequestWhenRequestLineContainsMoreElements() throws Exception {
 		String request = "GET /whatever HTTP/1.1 Ooooops" + CRLF
 						+ CRLF;
-		HttpResponse response = executeRequestString(request);
+		HttpResponse response = executeRawRequest(request);
 		assertEqualsStatusCode(HttpStatus.SC_BAD_REQUEST, response);
 	}
 
@@ -108,7 +108,7 @@ public class RequestLineTest extends AbstractHttpTestCase {
 			throws Exception {
 		String request = "GET\t   /    HTTP/1.0" + CRLF
 						+ CRLF;
-		HttpResponse response = executeRequestString(request);
+		HttpResponse response = executeRawRequest(request);
 		assertEqualsStatusCode(HttpStatus.SC_OK, response);
 	}
 
@@ -126,7 +126,7 @@ public class RequestLineTest extends AbstractHttpTestCase {
 			throws Exception {
 		String request = "GET / HTTP/1.0" +LF
 						+ CRLF;
-		HttpResponse response = executeRequestString(request);
+		HttpResponse response = executeRawRequest(request);
 		assertEqualsStatusCode(HttpStatus.SC_OK, response);
 	}
 
@@ -146,7 +146,7 @@ public class RequestLineTest extends AbstractHttpTestCase {
 		String request = method + " HTTP/1.1 /" + CRLF
 				+ "Host:" + getDefaultHostHeaderValue() + CRLF
 				+ CRLF;
-		HttpResponse response = executeRequestString(request);
+		HttpResponse response = executeRawRequest(request);
 		int unexpected = HttpStatus.SC_OK;
 		int actual = response.getStatusLine().getStatusCode();
 		assertTrue("[" + method + "] The server must not accept inverse position of request line elments", actual!=unexpected);
@@ -169,7 +169,7 @@ public class RequestLineTest extends AbstractHttpTestCase {
 				+ "Host:" + getDefaultHostHeaderValue() + CRLF
 				+ CRLF;
 		
-		HttpResponse response = executeRequestString(request);
+		HttpResponse response = executeRawRequest(request);
 		int unexpected = HttpStatus.SC_OK;
 		int actual = response.getStatusLine().getStatusCode();
 		assertTrue("[" + method + "] There must be spaces between request line elments", actual!=unexpected);
@@ -192,7 +192,7 @@ public class RequestLineTest extends AbstractHttpTestCase {
 				+ "Host:" + getDefaultHostHeaderValue() + CRLF
 				+ CRLF;
 		
-		HttpResponse response = executeRequestString(request);
+		HttpResponse response = executeRawRequest(request);
 		int unexpected = HttpStatus.SC_OK;
 		int actual = response.getStatusLine().getStatusCode();
 		assertTrue("[" + method + "]CRLF are not allowed between request line elments", actual!=unexpected);

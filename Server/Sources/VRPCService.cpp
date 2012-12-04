@@ -72,32 +72,15 @@ public:
 						else
 							lNamespace.Clear();
 
-						// Now, we have a relative path
-						VFile *methodsFile = fService->GetApplication()->RetainRPCMethodsFileFromRelativePath( err, path, FPS_POSIX);
-						if (methodsFile != NULL)
+						// Now, we have a relative  module path
+						VString proxy;
+						err = fService->GetProxy( proxy, path, lNamespace, &inResponse->GetRequest(), inResponse);
+						if (err == VE_OK)
 						{
-							VString proxy;
-							err = fService->GetProxy( proxy, methodsFile, lNamespace);
-							if (err == VE_OK)
-							{
-								VString contentType( L"application/javascript");
-								err = SetHTTPResponseString( inResponse, proxy, &contentType);
-								done = true;
-							}
+							VString contentType( L"application/javascript");
+							err = SetHTTPResponseString( inResponse, proxy, &contentType);
+							done = true;
 						}
-						else
-						{
-							// The relative path may be a module path
-							VString proxy;
-							err = fService->GetProxy( proxy, path, lNamespace, &inResponse->GetRequest(), inResponse);
-							if (err == VE_OK)
-							{
-								VString contentType( L"application/javascript");
-								err = SetHTTPResponseString( inResponse, proxy, &contentType);
-								done = true;
-							}
-						}
-						ReleaseRefCountable( &methodsFile);
 					}
 				}
 				ReleaseRefCountable( &matcher);
@@ -304,135 +287,6 @@ VJSRequestHandler* VRPCService::_CreateRequestHandlerForMethods()
 VProxyRequestHandler* VRPCService::_CreateRequestHandlerForProxy()
 {
 	return new VProxyRequestHandler( fApplication, fPatternForProxy, this);
-}
-
-
-VError VRPCService::GetProxy( VString& outProxy, const VFile* inFile, const VString& inNamespace)
-{
-	VError err = VE_OK;
-
-	outProxy.Clear();
-
-	if (fApplication != NULL)
-	{
-		VRIAContext *riaContext = fApplication->RetainNewContext( err);
-		if (err == VE_OK)
-		{
-			VRPCCatalog *catalog = fApplication->RetainRPCCatalog( riaContext, &err, NULL, NULL);
-			if (err == VE_OK)
-			{
-				if (catalog != NULL)
-				{
-					VRPCMethodsFile *methodsFile = catalog->RetainMethodsFile( inFile);
-					if (methodsFile != NULL)
-					{
-						methodsFile->GetProxy( outProxy);
-
-						if (outProxy.IsEmpty())
-						{
-							// Build the proxy
-							VFile *bodyFile = NULL, *templateFile = NULL;
-							VFilePath path;
-
-							VRIAServerApplication::Get()->GetWAFrameworkFolderPath( path);
-							path.ToSubFolder( L"Core").ToSubFolder( L"Runtime").ToSubFolder( L"rpcService");
-							path.SetFileName( L"proxy-body.js", true);
-
-							bodyFile = new VFile( path);
-							if (bodyFile == NULL)
-								err = ThrowError( VE_MEMORY_FULL);
-							
-							if (err == VE_OK)
-							{
-								path.SetFileName( L"proxy-template.js", true);
-								templateFile = new VFile( path);
-								if (templateFile == NULL)
-									err = ThrowError( VE_MEMORY_FULL);
-							}
-							
-							if (err == VE_OK && bodyFile->Exists() && templateFile->Exists())
-							{
-								VString templateString;
-								VFileStream bodyStream( bodyFile);
-								VFileStream templateStream( templateFile);
-								
-								err = bodyStream.OpenReading();
-								if (err == VE_OK)
-									templateStream.OpenReading();
-								if (err == VE_OK)
-									err = bodyStream.GetText( outProxy);
-								if (err == VE_OK)
-								{
-									VValueBag bag;
-									bag.SetString( L"rpc-pattern", fPatternForMethods);
-									bag.SetString( L"publishInGlobalNamespace", (fPublishInClientGlobalNamespace) ? L"true" : L"false");
-									outProxy.Format( &bag);
-								}
-								if (err == VE_OK)
-									err = templateStream.GetText( templateString);
-								if (err == VE_OK)
-								{
-									MapOfRPCSchema schemas;
-									err = catalog->RetainSchemasByFile( inFile, schemas);
-									if (err == VE_OK)
-									{
-										for (MapOfRPCSchema::const_iterator iter = schemas.begin() ; iter != schemas.end() ; ++iter)
-										{
-											VValueBag bag;
-											bag.SetString( L"function-name", iter->first.GetMethodName());
-											bag.SetString( L"namespace", inNamespace);
-											VString proxy( templateString);
-											proxy.Format( &bag);
-											outProxy.AppendString( proxy);
-										}
-									}
-								}
-
-								bodyStream.CloseReading();
-								templateStream.CloseReading();
-							}
-							else
-							{
-								err = ThrowError( VE_FILE_NOT_FOUND);
-							}
-
-							QuickReleaseRefCountable( bodyFile);
-							QuickReleaseRefCountable( templateFile);
-
-						#if VERSIONDEBUG
-							VString msg, name;
-							inFile->GetName( name);
-							msg.AppendCString( "Build \"");
-							msg.AppendString( name);
-							msg.AppendCString( "\" proxy (");
-							msg.AppendLong( outProxy.GetLength());
-							msg.AppendCString( " bytes)\r\n");
-							DebugMsg( msg);
-						#endif
-
-							if (err == VE_OK)
-							{
-								methodsFile->SetProxy( outProxy);
-							}
-						}
-						methodsFile->Release();
-					}
-					else
-					{
-						err = ThrowError( VE_FILE_NOT_FOUND);
-					}
-					catalog->Release();
-				}
-				else
-				{
-					err = ThrowError( VE_RIA_RPC_CATALOG_NOT_FOUND);
-				}
-			}
-		}
-		ReleaseRefCountable( &riaContext);
-	}
-
-	return err;
 }
 
 

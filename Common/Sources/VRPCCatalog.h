@@ -85,7 +85,7 @@ private:
 /*	The RPC schema identifier is typically the RPC method path which contains a module path and a method name.
 	Examples of method path:	- "moduleName/methodName" if the parent module folder is the modules folder root
 								- "aFolder/moduleName/methodName" if the module is in the folder "aFolder" of the modules folder
-	Examples of method path:	- "moduleName"
+	Examples of module path:	- "moduleName"
 								- "aFolder/moduleName"
 */
 

@@ -22,7 +22,7 @@
 const uLONG kRIA_OSTYPE_SIGNATURE = 'iasv';		// Internet applications server
 
 
-// Errors constants: LAST ID = 1064
+// Errors constants: LAST ID = 1066
 
 // RIA Server application errors
 const XBOX::VError	VE_RIA_HTTP_SERVER_NOT_FOUND					= MAKE_VERROR( kRIA_OSTYPE_SIGNATURE, 1001);
@@ -36,6 +36,8 @@ const XBOX::VError	VE_RIA_CANNOT_LOAD_UAG_DIRECTORY				= MAKE_VERROR( kRIA_OSTYP
 const XBOX::VError	VE_RIA_SYMBOLS_TABLE_NOT_FOUND					= MAKE_VERROR( kRIA_OSTYPE_SIGNATURE, 1010);
 const XBOX::VError	VE_RIA_LOG_FOLDER_NOT_FOUND						= MAKE_VERROR( kRIA_OSTYPE_SIGNATURE, 1047);
 const XBOX::VError	VE_RIA_INVALID_COMMAND_LINE_ARGUMENTS			= MAKE_VERROR( kRIA_OSTYPE_SIGNATURE, 1052);
+const XBOX::VError	VE_RIA_CURRENT_SOLUTION_ALREADY_BEING_OPENED	= MAKE_VERROR( kRIA_OSTYPE_SIGNATURE, 1065);
+const XBOX::VError	VE_RIA_CURRENT_SOLUTION_ALREADY_BEING_CLOSED	= MAKE_VERROR( kRIA_OSTYPE_SIGNATURE, 1066);
 
 
 // Solution errors
@@ -117,11 +119,6 @@ const XBOX::VError	VE_RIA_CANNOT_POST_MESSAGE_TO_SERVICES			= MAKE_VERROR( kRIA_
 
 // Permissions errors
 const XBOX::VError	VE_RIA_CANNOT_LOAD_PERMISSIONS					= MAKE_VERROR( kRIA_OSTYPE_SIGNATURE, 1061);
-
-
-#define USE_JAVASCRIPT_WEBAPP_SERVICE		1	// mean that the webapp service is implemented as a JavaScript service with a commonjs module
-#define USE_JAVASCRIPT_RPC_SERVICE			1	// mean that the rpc service is implemented as a JavaScript service with a commonjs module
-#define USE_JAVASCRIPT_DATASTORE_SERVICE	1	// mean that the datastore service is implemented as a JavaScript service with a commonjs module
 
 
 

@@ -44,7 +44,7 @@
  * @constructor
  * @param {Object} params
  */
-function AssertionError(params) {
+exports.AssertionError = function AssertionError(params) {
     
     this.name = "AssertionError";
 
@@ -58,9 +58,9 @@ function AssertionError(params) {
     this.expected = params.expected;
 
 };
-AssertionError.prototype = Object.create(Error.prototype);
+exports.AssertionError.prototype = new Error();
 //AssertionError.prototype = Object.create(Error.prototype);
-exports.AssertionError = AssertionError;
+
 
 
 /**

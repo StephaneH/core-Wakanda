@@ -21,31 +21,8 @@ var testCase = {
 		
 		_should: {
 			ignore: {
-				testDSCollectionNameExists: true, // Invalid test.
-				testDSCollectionNameValue: true, //  Invalid test.
-				testDSNameExists: true, // Invalid test.
-				testDSNameLogic: true // Invalid test.
+				
 			}
-		},
-
-		/**
-		 * DS-09. test of CollectionName object exists
-		 */
-
-		testDSCollectionNameExists : function() {
-			Y.Assert.areNotSame("undefined", typeof ds.Emp.collectionName,
-			"collectionName is undefined");
-			Y.Assert.areSame("string", typeof ds.Emp.collectionName,
-			"collectionName is not a String");
-		},
-
-		/**
-		 * DS-10. test of CollectionName object value
-		 */
-		testDSCollectionNameValue : function() {
-			Y.Assert
-			.areSame("Emps", ds.Emp.collectionName,
-			"wrong collectionName for Dataclass Emp");
 		},
 
 		/**
@@ -67,24 +44,6 @@ var testCase = {
 
 			Y.Assert.areSame("Emps", ds.Emp.getCollectionName(),
 			"ds.Emp.getCollectionName not match Emps");
-		},
-
-		/**
-		 * DS-13. test of Name exists
-		 */
-
-		testDSNameExists : function() {
-			Y.Assert.areNotSame("undefined", typeof ds.Emp.name,
-			"name is undefined");
-			Y.Assert.areSame("string", typeof ds.Emp.name, "name is not a String");
-		},
-
-		/**
-		 * DS-14. test of Name logic
-		 */
-		testDSNameLogic : function() {
-
-			Y.Assert.areSame("Emp", ds.Emp.name, "wrong value for ds.Emp.name");
 		},
 
 		/**

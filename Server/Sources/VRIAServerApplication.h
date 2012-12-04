@@ -38,7 +38,6 @@ class VRIAServerProgressIndicator;
 class VRIAServerJSRuntimeDelegate;
 
 
-
 // ----------------------------------------------------------------------------
 
 
@@ -56,11 +55,18 @@ public:
 			void								SetAdministratorHttpPort( sLONG inPort);
 			bool								GetAdministratorHttpPort( sLONG& outPort) const;
 
+			void								SetAdministratorSSLPort( sLONG inPort);
+			bool								GetAdministratorSSLPort( sLONG& outPort) const;
+
 			void								SetQuitServerWhenSolutionIsClosed( bool inQuitServer);
 			bool								GetQuitServerWhenSolutionIsClosed( bool& outQuitServer);
 
 			void								SetJavaScriptFileToExecute( XBOX::VFile* inJavaScriptFile);
 			XBOX::VFile*						GetJavaScriptFileToExecute() const;
+			
+			void								SetNetDump(bool inWithServerNetDump);
+			bool								GetNetDump(bool& outWithServerNetDump);
+
 
 private:
 
@@ -238,6 +244,7 @@ private:
 	
 			VRIAServerSolution*				fSolution;
 	mutable	XBOX::VCriticalSection			fSolutionMutex;
+			sLONG							fIsOpeningOrClosingCurrentSolution;
 
 			XBOX::VLocalizationManager*		fLocalizer;
 

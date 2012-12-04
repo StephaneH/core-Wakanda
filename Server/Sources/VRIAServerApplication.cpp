@@ -35,8 +35,16 @@
 
 #include "VRIAServerProgressIndicator.h"
 
+
+
 #if VERSIONMAC
 #include "AuthorizationHelpers.h"
+#endif
+
+
+//#define TEST_MYSQL_CONNECTOR
+#ifdef TEST_MYSQL_CONNECTOR
+#include "testMySQLConnector.h"
 #endif
 
 
@@ -62,7 +70,9 @@ const uLONG kDEFAULT_DATA_CACHE_FLUSH_DELAY		= 900000;	// default delay is 15 mi
 namespace ServerStartupParametersKeys
 {
 	CREATE_BAGKEY_NO_DEFAULT( defaultAdministratorHttpPort, XBOX::VLong);
+	CREATE_BAGKEY_NO_DEFAULT( defaultAdministratorSSLPort, XBOX::VLong);
 	CREATE_BAGKEY_NO_DEFAULT( quitServerWhenSolutionIsClosed, XBOX::VBoolean);
+	CREATE_BAGKEY_NO_DEFAULT( netDump, XBOX::VBoolean);
 }
 
 
@@ -103,6 +113,18 @@ bool VRIAServerStartupParameters::GetAdministratorHttpPort( sLONG& outPort) cons
 }
 
 
+void VRIAServerStartupParameters::SetAdministratorSSLPort( sLONG inPort)
+{
+	fBag.SetLong( ServerStartupParametersKeys::defaultAdministratorSSLPort, inPort);
+}
+
+
+bool VRIAServerStartupParameters::GetAdministratorSSLPort( sLONG& outPort) const
+{
+	return fBag.GetLong( ServerStartupParametersKeys::defaultAdministratorSSLPort, outPort);
+}
+
+
 void VRIAServerStartupParameters::SetQuitServerWhenSolutionIsClosed( bool inQuitServer)
 {
 	fBag.SetBool( ServerStartupParametersKeys::quitServerWhenSolutionIsClosed, inQuitServer);
@@ -126,6 +148,17 @@ XBOX::VFile* VRIAServerStartupParameters::GetJavaScriptFileToExecute() const
 	return fJavaScriptFile;
 }
 
+
+void VRIAServerStartupParameters::SetNetDump(bool inWithServerNetDump)
+{
+	fBag.SetBool( ServerStartupParametersKeys::netDump, inWithServerNetDump);
+}
+
+
+bool VRIAServerStartupParameters::GetNetDump(bool& outWithServerNetDump)
+{
+	return fBag.GetBool( ServerStartupParametersKeys::netDump, outWithServerNetDump);
+}
 
 
 // ----------------------------------------------------------------------------
@@ -246,6 +279,7 @@ VRIAServerApplication::VRIAServerApplication()
 : fInitCalled(false)
 , fInitOK(false)
 , fSolution(NULL)
+, fIsOpeningOrClosingCurrentSolution(0)
 , fLocalizer(NULL)
 , fComponent_DB4D(NULL)
 , fComponent_LanguageSyntax(NULL)
@@ -461,10 +495,12 @@ VSolutionStartupParameters* VRIAServerApplication::RetainDefaultSolutionStartupP
 			{
 				startupParams->SetStoreInLinkFile( false);
 				startupParams->SetSolutionFileToOpen( file);
+				startupParams->SetOpenProjectSymbolsTable( false);	// sc 25/05/2012, on Server, do not use the symbols table anymore
 
 				VRIAServerSolutionOpeningParameters openingParams( startupParams);
 				openingParams.SetOpeningMode( eSOM_FOR_RUNNING);
 				openingParams.SetOpenDefaultSolutionWhenOpeningFails( false);
+				openingParams.SetCustomAdministratorAuthType( L"basic");	// sc 15/06/2012 force basic authentication for admin
 				openingParams.UpdateStartupParameters( startupParams);
 			}
 		}
@@ -492,6 +528,7 @@ XBOX::VError VRIAServerApplication::OpenSolutionAsCurrentSolution( const XBOX::V
 	{
 		VFile *file = new VFile( inDesignSolutionFilePath);
 		startupParams->SetSolutionFileToOpen( file);
+		startupParams->SetOpenProjectSymbolsTable( false);	// sc 25/05/2012, on Server, do not use the symbols table anymore
 		QuickReleaseRefCountable( file);
 	}
 
@@ -802,6 +839,7 @@ bool VRIAServerApplication::_Init()
 					||	libName == CVSTR("UsersAndGroupsDebug.bundle")
 					||	libName == CVSTR("SecurityManagerDebug.bundle")
 					||	libName == CVSTR("ZipDebug.bundle")
+					||	libName == CVSTR("MySQLConnectorDebug.bundle")					
 					||	libName == CVSTR("LanguageSyntaxDebug.bundle") )
 			#endif
 				{
@@ -843,8 +881,8 @@ bool VRIAServerApplication::_Init()
 		
 	// Init ServerNet
 	if (ok)
-		VServerNetManager::Init();
-
+		VServerNetManager::Init(NULL /*ICriticalError*/, IpAnyIsV6 /*IP V4 or V6 policy*/);
+	
 	// Init design solution manager
 	if (ok)
 		VSolutionManager::Init();
@@ -861,9 +899,8 @@ bool VRIAServerApplication::_Init()
 			ok = false;
 
 		else
-			
-			fServiceDiscoveryServer->Start();
 
+			fServiceDiscoveryServer->Start();
 	}
 	
 	if (ok)
@@ -904,18 +941,45 @@ bool VRIAServerApplication::_Init()
 	}
 #endif
 
-	if (ok)
-	{
-		JSWDebuggerFactory	fctry;
+#ifdef TEST_MYSQL_CONNECTOR
 
-#if defined(WKA_USE_CHR_REM_DBG)
-		IJSWChrmDebugger*		jswChrmDebugger = fctry.GetCD();
-		VJSGlobalContext::SetChrmDebuggerServer( jswChrmDebugger );
-#else
-		IJSWDebugger*		jswDebugger = fctry. Get ( );
-		VJSGlobalContext::SetDebuggerServer ( jswDebugger );
+	MySQLConnectorBench();
+
+	testMySQLConnectorCreateSessionWithValidParams();
+
+	testMySQLConnectorCreateSessionWithInCorrectPassword();
+
+	testMySQLConnectorExecuteQuerySelect();
+
+	testMySQLConnectorStatement();
+
+	testMySQLConnectorPreparedStatementWithIntegerParam();
+
+	testMySQLConnectorPreparedStatementWithStringParam();
+
+	testMySQLConnectorPreparedStatementWithDateParam();
+
+	testMySQLConnectorPreparedStatementWithTypeTinyInt();
+
+	testMySQLConnectorPreparedStatementWithTypeSmallInt();
+
+	testMySQLConnectorPreparedStatementWithTypeMediumInt();
+
+	testMySQLConnectorPreparedStatementWithTypeInt();
+
+	testMySQLConnectorPreparedStatementWithTypeBigInt();
+	
+	testMySQLConnectorPreparedStatementWithTypeFloat();
+
+	testMySQLConnectorPreparedStatementWithTypeDouble();
+
+	testMySQLConnectorPreparedStatementWithTypeString();
+
+	testMySQLConnectorPreparedStatementWithTypeDateTime();
+
+	testMySQLConnectorPreparedStatementWithTypeBlob();
+
 #endif
-	}
 
 	return ok;
 }
@@ -938,7 +1002,7 @@ void VRIAServerApplication::_DeInit()
 		fServiceDiscoveryServer = NULL;	
 		
 	}
-
+ 
 	ReleaseRefCountable( &fStartupParameters);
 
 	// DeInit the component bridge
@@ -1022,8 +1086,7 @@ void VRIAServerApplication::_DeInit()
 	flushProgressIndicator->Release();
 
 #if VERSIONMAC && USE_HELPER_TOOLS
-	if (ok)
-		AuthorizationHelpers::DeInit();
+	AuthorizationHelpers::DeInit();
 #endif
 }
 
@@ -1049,6 +1112,7 @@ void VRIAServerApplication::_OnStartup( VRIAServerStartupParameters *inStartupPa
 					openingParams.SetOpeningMode( eSOM_FOR_RUNNING);
 					openingParams.UpdateStartupParameters( solutionStartupParameters);
 					solutionStartupParameters->SetSolutionFileToOpen( solutionFile);
+					solutionStartupParameters->SetOpenProjectSymbolsTable( false);	// sc 25/05/2012, on Server, do not use the symbols table anymore
 				}
 			}
 			else
@@ -1176,98 +1240,112 @@ VError VRIAServerApplication::_OpenSolutionAsCurrentSolution( VSolutionStartupPa
 
 	VError err = VE_OK;
 
-	// first, close previous opened solution
-	// sc 21/01/2010, to avoid dead locks, never lock the solution mutex during the solution stopping.
-	if (fSolution != NULL)
+	if (fIsOpeningOrClosingCurrentSolution == 0)	// sc 21/06/2012 reentrance safeguard
 	{
-		VSolution *designSolution = fSolution->GetDesignSolution();
-		if (designSolution != NULL)
-		{
-			designSolution->StopWatchingFileSystem();
-			designSolution->StopUpdatingSymbolTable();
-		}
+		++fIsOpeningOrClosingCurrentSolution;
 
-		err = fSolution->Stop();
-		xbox_assert(err == VE_OK);
-	}
-
-	if (fSolutionMutex.Lock())
-	{
+		// first, close previous opened solution
+		// sc 21/01/2010, to avoid dead locks, never lock the solution mutex during the solution stopping.
 		if (fSolution != NULL)
 		{
-			err = fSolution->Close();
-			_WithdrawServiceRecord(DEFAULT_SERVICE_NAME);
+			VSolution *designSolution = fSolution->GetDesignSolution();
+			if (designSolution != NULL)
+			{
+				designSolution->StopWatchingFileSystem();
+				designSolution->StopUpdatingSymbolTable();
+			}
+
+			err = fSolution->Stop();
 			xbox_assert(err == VE_OK);
-			ReleaseRefCountable( &fSolution);
 		}
 
-		VRIAServerSolution *solution = NULL;
-		
-		VRIAServerSolutionOpeningParameters openingParams( inStartupParameters);
-		sLONG adminHttpPort = -1;
-		
-		assert(openingParams.GetOpeningMode() == eSOM_FOR_RUNNING);
-		if (fStartupParameters->GetAdministratorHttpPort( adminHttpPort))
-			openingParams.SetCustomAdministratorHttpPort( adminHttpPort);
-		openingParams.UpdateStartupParameters( inStartupParameters);
-
-		solution = VRIAServerSolution::OpenSolution( err, inStartupParameters);
-
-		if (err == VE_OK)
+		if (fSolutionMutex.Lock())
 		{
-			if (solution != NULL)
+			if (fSolution != NULL)
 			{
-				// sc 10/02/2010 keep informations about recent opened solutions: save the startup parameters in the solution link file
-				if ((inStartupParameters != NULL) && inStartupParameters->GetStoreInLinkFile())
-				{
-					VString name;
-					solution->GetName( name);
-					SaveSolutionStartupParametersToLinkFile( name, *inStartupParameters);
-				}
+				err = fSolution->Close();
+				_WithdrawServiceRecord(DEFAULT_SERVICE_NAME);
+				xbox_assert(err == VE_OK);
+				ReleaseRefCountable( &fSolution);
+			}
 
-				VSolution *designSolution = solution->GetDesignSolution();
-				if (designSolution != NULL)
+			VRIAServerSolution *solution = NULL;
+			
+			VRIAServerSolutionOpeningParameters openingParams( inStartupParameters);
+			sLONG adminHttpPort = -1, adminSSLPort = -1;
+			
+			assert(openingParams.GetOpeningMode() == eSOM_FOR_RUNNING);
+			if (fStartupParameters->GetAdministratorHttpPort( adminHttpPort))
+				openingParams.SetCustomAdministratorHttpPort( adminHttpPort);
+			if (fStartupParameters->GetAdministratorSSLPort( adminSSLPort))
+				openingParams.SetCustomAdministratorSSLPort( adminSSLPort);
+			openingParams.UpdateStartupParameters( inStartupParameters);
+
+			solution = VRIAServerSolution::OpenSolution( err, inStartupParameters);
+
+			if (err == VE_OK)
+			{
+				if (solution != NULL)
 				{
-					designSolution->StartWatchingFileSystem();
-					designSolution->StartUpdatingSymbolTable();
-				}
-				
-				err = solution->Start();
-				if (err != VE_OK)
-				{
-					// sc 19/01/2011 if the solution started with errors, the solution must be stopped
-					designSolution->StopWatchingFileSystem();
-					designSolution->StopUpdatingSymbolTable();
-					solution->Stop();
+					// sc 10/02/2010 keep informations about recent opened solutions: save the startup parameters in the solution link file
+					if ((inStartupParameters != NULL) && inStartupParameters->GetStoreInLinkFile())
+					{
+						VString name;
+						solution->GetName( name);
+						SaveSolutionStartupParametersToLinkFile( name, *inStartupParameters);
+					}
+
+					VSolution *designSolution = solution->GetDesignSolution();
+					if (designSolution != NULL)
+					{
+						designSolution->StartWatchingFileSystem();
+						if ((inStartupParameters != NULL) ? inStartupParameters->GetOpenProjectSymbolsTable() : true)
+							designSolution->StartUpdatingSymbolTable();
+					}
+					
+					err = solution->Start();
+					if (err != VE_OK)
+					{
+						// sc 19/01/2011 if the solution started with errors, the solution must be stopped
+						designSolution->StopWatchingFileSystem();
+						designSolution->StopUpdatingSymbolTable();
+						solution->Stop();
+					}
 				}
 			}
-		}
 
-		if (err == VE_OK)
-		{
-			fSolution = solution;
-		}
-		else
-		{
-			if (solution != NULL)
+			if (err == VE_OK)
 			{
-				solution->Close();
-				ReleaseRefCountable( &solution);
+				fSolution = solution;
 			}
+			else
+			{
+				if (solution != NULL)
+				{
+					solution->Close();
+					ReleaseRefCountable( &solution);
+				}
+			}
+
+			if ((fSolution == NULL) && openingParams.GetOpenDefaultSolutionWhenOpeningFails())
+			{
+				VSolutionStartupParameters *startupParams  = RetainDefaultSolutionStartupParameters();
+				OpenSolutionAsCurrentSolution( startupParams);
+				QuickReleaseRefCountable( startupParams);
+			}
+
+			
+			if (fSolution != NULL)
+				_PublishServiceRecord(DEFAULT_SERVICE_NAME);
+
+			fSolutionMutex.Unlock();
 		}
 
-		if ((fSolution == NULL) && openingParams.GetOpenDefaultSolutionWhenOpeningFails())
-		{
-			VSolutionStartupParameters *startupParams  = RetainDefaultSolutionStartupParameters();
-			OpenSolutionAsCurrentSolution( startupParams);
-			QuickReleaseRefCountable( startupParams);
-		}
-
-		
-		if (fSolution != NULL)
-			_PublishServiceRecord(DEFAULT_SERVICE_NAME);
-
-		fSolutionMutex.Unlock();
+		--fIsOpeningOrClosingCurrentSolution;
+	}
+	else
+	{
+		err = vThrowError( VE_RIA_CURRENT_SOLUTION_ALREADY_BEING_OPENED);
 	}
 
 	return err;
@@ -1279,13 +1357,16 @@ VError VRIAServerApplication::_CloseCurrentSolution()
 	
 	VError err = VE_OK;
 
-	if (fSolutionMutex.Lock())
+	if (fIsOpeningOrClosingCurrentSolution == 0)	// sc 21/06/2012 reentrance safeguard
 	{
+		++fIsOpeningOrClosingCurrentSolution;
+
+		// sc 21/06/2012, to avoid dead locks, never lock the solution mutex during the solution stopping.
 		if (fSolution != NULL)
 		{
 			VSolution *designSolution = fSolution->GetDesignSolution();
 			if (designSolution != NULL)
-			{													   
+			{
 				designSolution->StopWatchingFileSystem();
 				designSolution->StopUpdatingSymbolTable();
 			}
@@ -1294,16 +1375,29 @@ VError VRIAServerApplication::_CloseCurrentSolution()
 
 			err = fSolution->Stop();
 
-			if (err == VE_OK)
-				err = fSolution->Close();
-			_WithdrawServiceRecord(DEFAULT_SERVICE_NAME);
-
-			ReleaseRefCountable( &fSolution);
+			xbox_assert(err == VE_OK);
 		}
 
-		
-		fSolutionMutex.Unlock();
+		if (fSolutionMutex.Lock())
+		{
+			if (fSolution != NULL)
+			{
+				err = fSolution->Close();
+				_WithdrawServiceRecord(DEFAULT_SERVICE_NAME);
+				xbox_assert(err == VE_OK);
+				ReleaseRefCountable( &fSolution);
+			}
+
+			fSolutionMutex.Unlock();
+		}
+
+		--fIsOpeningOrClosingCurrentSolution;
 	}
+	else
+	{
+		err = vThrowError( VE_RIA_CURRENT_SOLUTION_ALREADY_BEING_CLOSED);
+	}
+
 	return err;
 }
 
@@ -1369,23 +1463,58 @@ void VRIAServerApplication::_PublishServiceRecord (const XBOX::VString &inServic
 
 			// Construct a service record
 			if (adminPort)
-			{
-				std::vector<IP4>	addresses;
+			{				
 				VString				providerName;
-				IP4					n;
-
+			
 				fSolution->GetName(providerName);
 				if ( providerName.IsEmpty() )
 					providerName = DEFAULT_NAME;
 
-#if WITH_DEPRECATED_IPV4_API
+				// Retrieve first IPv4 and IPv6 address, use them as addresses published by server.
+				// Should actually let user decide which interface to use.
 
-				n = XBOX::ServerNetTools::GetLocalIPv4Addresses(addresses);
+				serviceRecord.fIPv4Address = serviceRecord.fIPv6Address = "";
 
-#elif DEPRECATED_IPV4_API_SHOULD_NOT_COMPILE
-	#error NEED AN IP V6 UPDATE
-#endif
+				VNetAddressList					addressList;
+				VNetAddressList::const_iterator	addressIt;
 				
+				//IPv6-TODO - On ne veut qu'une addresse, et de préférence pas loopback
+
+				addressList.FromLocalInterfaces();
+				for (addressIt = addressList.begin(); addressIt != addressList.end(); addressIt++) {
+
+					
+					if(addressIt->IsLoopBack() /*|| addressIt->IsLocal()*/ )
+						continue;
+					
+					sLONG	version;
+
+					if (addressIt->IsV4()) {
+
+						if (!serviceRecord.fIPv4Address.GetLength()) {
+							
+							serviceRecord.fIPv4Address = addressIt->GetIP(&version);
+							xbox_assert(version == 4);
+
+						}
+
+					} else {
+
+						xbox_assert(addressIt->IsV6());
+						if (!serviceRecord.fIPv6Address.GetLength()) {
+							
+							serviceRecord.fIPv6Address = addressIt->GetIP(&version);
+							xbox_assert(version == 6);
+						}
+
+					}
+
+				}
+
+				xbox_assert(serviceRecord.fIPv4Address.GetLength() || serviceRecord.fIPv6Address.GetLength());
+
+				serviceRecord.fPort = adminPort;
+
 				serviceRecord.fServiceName = inServiceName;
 				serviceRecord.fProviderName = publishName.GetLength() ? publishName : providerName;
 
@@ -1397,18 +1526,7 @@ void VRIAServerApplication::_PublishServiceRecord (const XBOX::VString &inServic
 					serviceRecord.fHostName.GetSubString(1, serviceRecord.fHostName.GetLength() - 6, suffix);
 					serviceRecord.fProviderName.AppendString("-");							
 					serviceRecord.fProviderName.AppendString(suffix);
-				}
-
-				// Keep the first address which isn't 127.0.0.1
-				//** Should let user select network interface.
-				serviceRecord.fAddress = 0;
-				for (int i = 0; i < n; i++)
-					if (addresses[i] != 0x7f000001)
-						serviceRecord.fAddress = addresses[i];
-				if (! serviceRecord.fAddress)
-					serviceRecord.fAddress = 0x7f000001;
-
-				serviceRecord.fPort = adminPort;
+				}				
 
 				VValueBag::StKey	httpPath(CVSTR("path"));
 
@@ -1418,8 +1536,13 @@ void VRIAServerApplication::_PublishServiceRecord (const XBOX::VString &inServic
 				
 				fServiceDiscoveryServer->PublishServiceRecord(serviceRecord.fServiceName, serviceRecord.fProviderName);
 
-				
-				serviceRecord.fValueBag.SetLong("_ADDRESS", serviceRecord.fAddress );	
+				VNetAddress	address(serviceRecord.fIPv4Address);
+				uLONG		binaryAddress;
+
+				address.FillIpV4((IP4 *) &binaryAddress);
+
+				serviceRecord.fValueBag.SetLong("_ADDRESS", binaryAddress);	
+				serviceRecord.fValueBag.SetString("_ADDRESS_IPV6", serviceRecord.fIPv6Address );	
 				serviceRecord.fValueBag.SetLong("_PORT", serviceRecord.fPort);	
 				serviceRecord.fValueBag.SetString("_NAME", serviceRecord.fProviderName);
 

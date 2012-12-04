@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="UTF-8"?><directory>
+
+<group ID="01000000000000000000000000000000" name="Admin"/>
+
+<group ID="02000000000000000000000000000000" name="Debugger"/>
+
+<group ID="83D9074C9AC41948B4265A8B52FD9EE6" name="GroupFilter1"/>
+
+<group ID="AFC2648008ACD34A8D14ED8A419E7BD5" name="GroupFilter2"/>
+
+<group ID="1C7501B13C28594D9ADF3DEF14C2569E" name="GroupFilter3"/>
+
+<user ID="16576BA2BC7DA84D85C729301E190C65" name="user1" fullName=""/>
+
+<user ID="0C4C54DB5956B048AF50682B1D0DF461" name="user2" fullName=""/>
+
+<user ID="B421AF2BC433C44EB5B1B5777431CC05" name="user3" fullName=""/>
+
+<user ID="918F70E95AF9EC42A4A6E08A76F37113" name="default" fullName="" password="ae88412831d12195b26dfabfe4b5572c"/>
+
+<user ID="1092D76D04DED84BBF761BD2312BE140" name="userFilter1" fullName=""/>
+
+<user ID="D77BB7A86C990A4AB0B3A7730801485C" name="userFilter2" fullName=""/>
+
+<user ID="24B20582DF76D74E9BAC2E3406165280" name="userFilter3" fullName=""/>
+</directory>

@@ -94,10 +94,10 @@ var testCase = {
         // undefined if the socket isn't connected).
 
         Y.Assert.isNumber(socket.bufferSize);
-        Y.Assert.isTrue(socket.bufferSize == 0);
+        Y.Assert.areEqual(0, socket.bufferSize);
 
-        Y.Assert.isTrue(typeof socket.remoteAddress == "undefined");
-        Y.Assert.isTrue(typeof socket.remotePort == "undefined");
+        Y.Assert.isUndefined(socket.remoteAddress);
+        Y.Assert.isUndefined(socket.remotePort);
 
     },
 
@@ -111,13 +111,13 @@ var testCase = {
         // note that "localhost" is not a "IPv4 address"
         // even if it is a valid "IP address".
 
-        Y.Assert.isTrue(net.isIP("127.0.0.1") == 4);
-        Y.Assert.isTrue(net.isIP("localhost") == 0);
-        Y.Assert.isTrue(net.isIP("This is definitely not an IP address") == 0);
+        Y.Assert.areEqual(4, net.isIP("127.0.0.1"), 'net.isIP("127.0.0.1") should be 4');
+        Y.Assert.areEqual(0, net.isIP("localhost"), 'net.isIP("localhost") should be 0');
+        Y.Assert.areEqual(0, net.isIP("This is definitely not an IP address"), 'net.isIP("This is definitely not an IP address") should be 0');
 
-        Y.Assert.isTrue(net.isIPv4("127.0.0.1"));
-        Y.Assert.isFalse(net.isIPv4("localhost"));
-        Y.Assert.isFalse(net.isIPv4("This is definitely not an IP address"));
+        Y.Assert.isTrue(net.isIPv4("127.0.0.1"), 'net.isIPv4("127.0.0.1") should be true');
+        Y.Assert.isFalse(net.isIPv4("localhost"), 'net.isIPv4("localhost") should be false');
+        Y.Assert.isFalse(net.isIPv4("This is definitely not an IP address"), 'net.isIPv4("This is definitely not an IP address") should be false');
 
     },
 
@@ -137,13 +137,13 @@ var testCase = {
 
                 var address = socket.address();
 
-                Y.Assert.isTrue(address.address == socket.remoteAddress);
-                Y.Assert.isTrue(address.port == socket.remotePort);
+                Y.Assert.areEqual(socket.remoteAddress, address.address);
+                Y.Assert.areEqual(socket.remotePort, address.port);
 
                 socket.destroy();
 
-                Y.Assert.isTrue(typeof address.remoteAddress == "undefined");
-                Y.Assert.isTrue(typeof address.remotePort == "undefined");
+                Y.Assert.isUndefined(address.remoteAddress);
+                Y.Assert.isUndefined(address.remotePort);
 
             });
 
@@ -171,13 +171,13 @@ var testCase = {
 
                 var address = socket.address();
 
-                Y.Assert.isTrue(address.address == socket.remoteAddress);
-                Y.Assert.isTrue(address.port == socket.remotePort);
+                Y.Assert.areEqual(socket.remoteAddress, address.address);
+                Y.Assert.areEqual(socket.remotePort, address.port);
 
                 socket.destroy();
 
-                Y.Assert.isTrue(typeof address.remoteAddress == "undefined");
-                Y.Assert.isTrue(typeof address.remotePort == "undefined");
+                Y.Assert.isUndefined(address.remoteAddress);
+                Y.Assert.isUndefined(address.remotePort);
 
             });
 
@@ -198,7 +198,9 @@ var testCase = {
 
         socket.addListener('connect', function() {
 
-            test.resume(function() {});
+            test.resume(function() {
+                Y.Assert.isTrue(true);  
+            });
 
         });
         
@@ -263,7 +265,10 @@ var testCase = {
 		    });
     		
         });
-        
+
+		// Do not support "half-close", consider them as "full" closing.
+		
+/*        
         socket.addListener('end', function () {
         	
     	    test.resume(function() {
@@ -275,7 +280,8 @@ var testCase = {
     	    });
         	
         });
-        
+*/	
+
         socket.addListener('close', function (hasError) {
 
     	    test.resume(function () { 
@@ -286,11 +292,16 @@ var testCase = {
         	
         });
         	
-        socket.connect(8080, "127.0.0.1");
-        
-        // Leave more time for connection to be closed by peer.
-    	
-        this.wait(15000);
+        socket.connect(8080, "127.0.0.1", function () {
+		
+			// Write to server. This will trigger an answer from it, and it will then close
+			// the connection.
+		
+			socket.write('get index.html\r\n');
+			
+        });
+            	
+        this.wait(10000);
         
     },    
 
@@ -301,11 +312,12 @@ var testCase = {
         var socket = new net.Socket();
 
         socket.addListener('data', function (data) {
-    	    // Server has replied, ok.
+		
+    	    // Server has replied, this is ok (whatever the content of answer, as long there is one).
 			socket.destroy();
 			
 			test.resume(function () { 
-				Y.Assert.isTrue(data);
+				Y.Assert.isTrue(true);
 			});
         	
         });
@@ -321,7 +333,7 @@ var testCase = {
         });
         	
         socket.connect(8080, "127.0.0.1", function () {
-        	socket.write('get index.html');
+			socket.write('get index.html\r\n');
         });
         
         /*
@@ -342,12 +354,12 @@ var testCase = {
 
 		    // Send bad request to Wakanda server, it will answer with a 400 error.
     		
-		    this.write('get index.html');
+		    this.write('get index.html\r\n');
     		
 	    });
     	*/
     	
-	    test.wait(5000);
+	    this.wait(10000);
     	
     },
 
@@ -366,7 +378,7 @@ var testCase = {
       			    // Because setEncoding() has been called, data is a String
       			    // not a Buffer object.
           			
-      			    Y.Assert.isTrue(typeof data === "string");
+      			    Y.Assert.isString(data);
           			
       		    });
     			
@@ -376,7 +388,7 @@ var testCase = {
     			
 			    // Resume "data" events.
     			
-			    socket.resume();
+				socket.resume();
     			
 		    });
     		
@@ -384,10 +396,10 @@ var testCase = {
 
 		    socket.pause();				
 		    socket.setEncoding("utf8");
-		    socket.write('get index.html');    		
+		    socket.write('get index.html\r\n');    		
 	    });
     	
-	    this.wait(5000);
+	    this.wait(10000);
     	
     },
 

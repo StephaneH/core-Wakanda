@@ -18,7 +18,7 @@ function _upload(request, response) {
     var 
     obj = [],
     config          = JSON.parse(request.parts[request.parts.count-1].asText),
-    folder          = Folder(getFolder('path') + 'data/' + config.folder),
+    folder          = Folder(ds.getDataFolder().path + (config.folder?config.folder:'temp')),
     datasource      = config.datasource,
     replaceIfExist  = config.replace,
     files           = [];
@@ -123,7 +123,7 @@ function _verify(request, response){
     }
     
     info    = JSON.parse(request.parts[0].asText);
-    folder  = Folder(getFolder('path') + 'data/' + info.folder);
+    folder  = Folder(ds.getDataFolder().path + info.folder);
     files   = info.files;
     
     if(!folder.exists){

@@ -80,7 +80,7 @@ then
       "eclipse")
 	  Generator='Eclipse CDT4 - Unix Makefiles'
 	  Defs='-DASSERT_SHOULD_BREAK=Yes'
-	  FixIt=${repo}/depot/CMake/FixEclipse.sh ;;
+	  FixIt=${repo}/depot/Wakanda/main/Common/CMake/FixEclipse.sh ;;
       "codeblocks")
 	  Generator='CodeBlocks - Unix Makefiles' ;;
       "kdevelop")

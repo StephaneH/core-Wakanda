@@ -2,6 +2,8 @@ package com.wakanda.qa.http.test.messages;
 
 import static org.junit.Assert.fail;
 
+import java.io.InputStream;
+
 import org.apache.http.ConnectionClosedException;
 import org.apache.http.Header;
 import org.apache.http.HttpException;
@@ -11,13 +13,14 @@ import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
 import org.apache.http.ParseException;
+import org.apache.http.conn.OperatedClientConnection;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.impl.DefaultHttpResponseFactory;
+import org.apache.http.impl.conn.DefaultClientConnectionOperator;
 import org.apache.http.impl.conn.DefaultResponseParser;
 import org.apache.http.io.HttpMessageParser;
-import org.apache.http.io.SessionInputBuffer;
 import org.apache.http.message.BasicHttpRequest;
 import org.apache.http.message.BasicLineParser;
 import org.apache.http.params.BasicHttpParams;
@@ -30,9 +33,8 @@ import org.apache.http.util.CharArrayBuffer;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.wakanda.qa.http.DefaultClientConnection;
-import com.wakanda.qa.http.DefaultClientConnectionOperator;
 import com.wakanda.qa.http.test.extend.AbstractHttpTestCase;
+import com.wakanda.qa.http.test.extend.SessionInputBufferMockup;
 
 /**
  * This class manages all tests related with the response message.
@@ -53,9 +55,13 @@ public class ResponseTest extends AbstractHttpTestCase {
 	 */
 	@Test
 	public void testStatusLineFormat() throws Exception {
-		SessionInputBuffer in = getResponseSessionInputBuffer();
+		HttpHost target = getDefaultTarget();
+		HttpRequest request = new BasicHttpRequest("GET", "/", HttpVersion.HTTP_1_1);
+		request.addHeader(HttpHeaders.HOST, target.toHostString());
+		InputStream in = getResponseSessionInputStream(target, request);
+		SessionInputBufferMockup sinb = new SessionInputBufferMockup(in, 16);
 		CharArrayBuffer lineBuf = new CharArrayBuffer(128);
-		int i = in.readLine(lineBuf);
+		int i = sinb.readLine(lineBuf);
 		if (i == -1) {
 			throw new ConnectionClosedException("Client closed connection");
 		}
@@ -63,6 +69,8 @@ public class ResponseTest extends AbstractHttpTestCase {
 			BasicLineParser.parseStatusLine(lineBuf.toString(), null);
 		} catch (ParseException e) {
 			fail("Malformed status line: " + e.getMessage());
+		}finally{
+			in.close();
 		}
 	}
 
@@ -77,9 +85,13 @@ public class ResponseTest extends AbstractHttpTestCase {
 	 */
 	@Test
 	public void testProtocolVersionFormat() throws Exception {
-		SessionInputBuffer in = getResponseSessionInputBuffer();
+		HttpHost target = getDefaultTarget();
+		HttpRequest request = new BasicHttpRequest("GET", "/", HttpVersion.HTTP_1_1);
+		request.addHeader(HttpHeaders.HOST, target.toHostString());
+		InputStream in = getResponseSessionInputStream(target, request);
+		SessionInputBufferMockup sinb = new SessionInputBufferMockup(in, 16);
 		CharArrayBuffer lineBuf = new CharArrayBuffer(128);
-		int i = in.readLine(lineBuf);
+		int i = sinb.readLine(lineBuf);
 		if (i == -1) {
 			throw new ConnectionClosedException("Client closed connection");
 		}
@@ -87,6 +99,8 @@ public class ResponseTest extends AbstractHttpTestCase {
 			BasicLineParser.parseProtocolVersion(lineBuf.toString(), null);
 		} catch (ParseException e) {
 			fail("Malformed protocol version: " + e.getMessage());
+		}finally{
+			in.close();
 		}
 	}
 
@@ -103,19 +117,25 @@ public class ResponseTest extends AbstractHttpTestCase {
 	 */
 	@Test
 	public void testResponseHeadersFormat() throws Exception {
-		SessionInputBuffer in = getResponseSessionInputBuffer();
+		HttpHost target = getDefaultTarget();
+		HttpRequest request = new BasicHttpRequest("GET", "/", HttpVersion.HTTP_1_1);
+		request.addHeader(HttpHeaders.HOST, target.toHostString());
+		InputStream in = getResponseSessionInputStream(target, request);
+		SessionInputBufferMockup sinb = new SessionInputBufferMockup(in, 16);
 		CharArrayBuffer lineBuf = new CharArrayBuffer(128);
 		try {
 			// Skip status line
-			int i = in.readLine(lineBuf);
+			int i = sinb.readLine(lineBuf);
 			if (i == -1) {
 				throw new ConnectionClosedException("Client closed connection");
 			}
 			// parse headers
-			DefaultResponseParser.parseHeaders(in, -1, -1,
+			DefaultResponseParser.parseHeaders(sinb, -1, -1,
 					BasicLineParser.DEFAULT);
 		} catch (HttpException e) {
 			fail("Malformed header: " + e.getMessage());
+		}finally{
+			in.close();
 		}
 	}
 
@@ -132,9 +152,13 @@ public class ResponseTest extends AbstractHttpTestCase {
 	 */
 	@Test
 	public void testResponseFormat() throws Exception {
-		SessionInputBuffer in = getResponseSessionInputBuffer();
+		HttpHost target = getDefaultTarget();
+		HttpRequest request = new BasicHttpRequest("GET", "/", HttpVersion.HTTP_1_1);
+		request.addHeader(HttpHeaders.HOST, target.toHostString());
+		InputStream in = getResponseSessionInputStream(target, request);
+		SessionInputBufferMockup sinb = new SessionInputBufferMockup(in, 16);
 		try {
-			HttpMessageParser parser = new DefaultResponseParser(in,
+			HttpMessageParser parser = new DefaultResponseParser(sinb,
 					BasicLineParser.DEFAULT, new DefaultHttpResponseFactory(),
 					new BasicHttpParams());
 
@@ -145,6 +169,8 @@ public class ResponseTest extends AbstractHttpTestCase {
 			Assert.assertNotNull(headers);
 		} catch (HttpException e) {
 			fail("Malformed response: " + e.getMessage());
+		}finally{
+			in.close();
 		}
 
 	}
@@ -154,12 +180,10 @@ public class ResponseTest extends AbstractHttpTestCase {
 	 * @return
 	 * @throws Exception
 	 */
-	private SessionInputBuffer getResponseSessionInputBuffer() throws Exception {
-
-		HttpHost target = getDefaultTarget();
+	private InputStream getResponseSessionInputStream(HttpHost target, HttpRequest request) throws Exception {
 
 		SchemeRegistry supportedSchemes = new SchemeRegistry();
-		supportedSchemes.register(new Scheme("http", getDefaultPort(),
+		supportedSchemes.register(new Scheme("http", getSettings().getDefaultPort(),
 				PlainSocketFactory.getSocketFactory()));
 
 		HttpParams params = new SyncBasicHttpParams();
@@ -170,17 +194,15 @@ public class ResponseTest extends AbstractHttpTestCase {
 		DefaultClientConnectionOperator scop = new DefaultClientConnectionOperator(
 				supportedSchemes);
 
-		HttpRequest req = new BasicHttpRequest("GET", "/", HttpVersion.HTTP_1_1);
-		req.addHeader(HttpHeaders.HOST, target.getHostName());
-
 		HttpContext ctx = new BasicHttpContext();
 
 		try {
-			DefaultClientConnection conn = scop.createConnection();
+			OperatedClientConnection conn = scop.createConnection();
 			scop.openConnection(conn, target, null, ctx, params);
-			conn.sendRequestHeader(req);
+			conn.sendRequestHeader(request);
 			conn.flush();
-			return conn.getInbuffer();
+			InputStream in = conn.getSocket().getInputStream();
+			return in;
 		} catch (Exception e) {
 			return null;
 		}

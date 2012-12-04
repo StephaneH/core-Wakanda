@@ -32,6 +32,15 @@ WAF.onAfterInit = function onAfterInit() {
 		emByName = this.ds.getDataClasses();
 		
 		html = '<table id="dataClassContentTable" class="entityModels">' +
+			'<thead>' +
+				'<tr class="datastore-classes-head">' +
+					'<th>' +
+						// '<div>' +
+						'Datastore Classes' +
+						// '</div>' +
+					'</th>' +
+				'</tr>' +
+			'</thead>' +
 			'<tbody>';
 		
 		if(Object.keys(emByName).length > 0) {
@@ -63,16 +72,19 @@ WAF.onAfterInit = function onAfterInit() {
 			}
 			
 			html += '</tbody>' +
-			'</table>';
+			'</table>'+
+			'<div id="dataClassContextMenuBg"></div>'+
+			'<div id="dataClassContextMenuContainer"></div>';
 			
 			ems.height("100%");
 			ems.html(html);
+			$("#dataClassContextMenuContainer").bind("click", function(event) {
+				event.stopPropagation();
+				return false;
+			})
+			.hide();
+			$("#dataClassContextMenuBg").hide();
 	
-			// $("#dataClassContentTable").bind("contextmenu", function(event) {
-				// event.preventDefault();
-				// return true;
-			// });
-			
 			dataBrowser = new DataBrowser();
 			dataBrowser.init();
 			
@@ -80,20 +92,10 @@ WAF.onAfterInit = function onAfterInit() {
 		} else {
 			
 			$("#container1").hide();
+			$("#loginToDataBrowser").hide();
 			$("#container_dataBrowser").hide();
 			
 			$("body").append('<div id="dataBrowser_error_dialog" class="dataBrowser_error">Datastore is empty</div>');
-			// $("#dataBrowser_error_dialog").dialog({
-				// title : "Error",
-				// modal : true,
-				// width : 200,
-				// height : 100,
-				// resizable : false,
-				// draggable : false,
-				// closeOnEscape : false,
-				// "class" : "dataBrowser_error"
-			// });
-			$("#dataBrowser_error_dialog").prev().children("a").hide();
 			
 			return null;
 		}
@@ -101,13 +103,14 @@ WAF.onAfterInit = function onAfterInit() {
 	
 	$("#waf-splitter-container3").css("visibility", "hidden");
 	
-	$("#loginToDataBrowser").css("z-index", "");
+	$("#loginToDataBrowser").css("z-index", "-1");
 	$("#waf-splitter-container3").css("visibility", "");
 	DataBrowser = loadDataSource();
 
 	if(DataBrowser !== null) {
 		DataBrowser.afterInit();
 	}
+	$("#dataBrowserLoding").hide();
 	
 };
 
@@ -133,7 +136,7 @@ function DataBrowser() {
 }
 
 DataBrowser.prototype = {
-		
+	
 	init : function init_dataClass_event() {
 		
 		var rows,
@@ -146,7 +149,7 @@ DataBrowser.prototype = {
 		
 		this.tabView = $$("databrowser_tabview");
 		this.tabView.onSelect = this.selectTab;
-		this.tabView.beforeRemove = this.deleteTab
+		this.tabView.beforeRemove = this.deleteTab;
 		
 		this.tabViewReference = {};
 		this.dialogReference = {};
@@ -154,7 +157,7 @@ DataBrowser.prototype = {
 		this.modeTabView = true;
 		this.currentDialog = null;
 		this.dialogPositionX = 220;
-		this.dialogPositionY = 105;
+		this.dialogPositionY = 115;
 		this.draggingTabContainer = null;
 		this.draggingTabIndex = null;
 		this.draggingDialogContainerId = null;
@@ -163,9 +166,7 @@ DataBrowser.prototype = {
 			var currentTab;
 			
 			currentTab = this.getSelectedTab();
-			$("#"+currentTab.container.id).height($("#"+currentTab.container.id).parent().height() - 25);
 			$("#"+currentTab.container.id).width("100%");
-			$("#"+currentTab.container.id+" .dataBrowser-dataContainer").height($("#"+currentTab.container.id).height() - 50);
 			$$(currentTab.container.id+'_dataGrid').gridController.gridView.refresh();
 			$("#"+currentTab.container.id+"_autoForm").parent().height("100%");
 			$("#"+currentTab.container.id+"_autoForm").height("100%");
@@ -173,19 +174,15 @@ DataBrowser.prototype = {
 		}
 		
 		rows = $("#dataClassContentTable tr.entityModels");
-				
+		
 		for (i = 0; i < rows.length; i++) {
 			
 			$(rows[i]).bind("click", this.dataClassClickListener);
 			$(rows[i]).bind("contextmenu" , function (event) {
 				event.preventDefault();
+				DataBrowser.dataClassRightClickListener(event);
 				
-				if(event.ctrlKey) {
-					//otherwise ctrl + click doesn't work in not webkit browser on mac 
-					DataBrowser.dataClassClickListener(event);
-				}
-				
-				return true;
+				return false;
 			});
 			$(rows[i]).bind("mouseover", this.dataClassMouseoverListener);
 			$(rows[i]).bind("mouseout", this.dataClassMouseoutListener);
@@ -199,12 +196,34 @@ DataBrowser.prototype = {
 		
 		$(rows[0]).addClass("line-selected");
 		
-		$("#dataBrowserCloseAll").bind("click", function (event) {
-			DataBrowser.closeAll(this);
-		});
-		$("#dataBrowserExportDataClass").bind("click", function (event) {
-			DataBrowser.exportSelectedDataClass();
-		});
+		WAF.addListener("dataBrowserCloseAll", "click", function (event) {
+			DataBrowser.closeAll();
+		}, "WAF");
+		
+		WAF.addListener("dataBrowserExportDataClass", "click", function (event) {
+		
+			$("#confirmExportDialogContent").html("Do you want to export dataclass "+$("#dataClassContentTable tbody").children(".line-selected").data("title")+" ?");
+			
+			$("#confirmExportDialog").dialog({
+				resizable: false,
+				height:90,
+				width:300,
+				modal: true,
+				draggable : false,
+				title:"Export dataclass",
+				buttons: {
+					"No": function() {
+						$(this).dialog("close");
+					},
+					"Yes": function() {
+						DataBrowser.exportSelectedDataClass();
+						$(this).dialog("close");
+					}
+				},
+				open : true
+			});
+		}, "WAF");
+		
 		$("#dataBrowserExportDataClass").bind("mouseover", function (event) {
 			DataBrowser.showImportExportTips(event, "export");
 		});
@@ -269,13 +288,6 @@ DataBrowser.prototype = {
 		this.tabView.removeTab(1);
 		this.initTabDropEvent();
 		
-		//FIXME
-		setTimeout( function () {
-			$(".dataBrowser-dataContainer").each(function(index) {
-				$(this).height($(this).parent().height() - 50);
-			});
-		}, 100);
-		
 	},
 	
 	setViewMode : function set_dataBrowser_viewMode(target) {
@@ -288,7 +300,7 @@ DataBrowser.prototype = {
 		this.modeTabView = !this.modeTabView;
 	},
 	
-	closeAll : function close_dataBrowser_all_containers(target) {
+	closeAll : function close_dataBrowser_all_containers() {
 		
 		var i,
 			windowList,
@@ -299,14 +311,12 @@ DataBrowser.prototype = {
 		 */
 		windowList = this.dialogReference;
 		
-		$(target).addClass("dataBrowser-active-button", 200, function () { $(target).removeClass("dataBrowser-active-button")});
-		
 		for(dialogHash in windowList) {
 			$("#"+windowList[dialogHash]).dialog("close");
 		}
 		
 		this.dialogPositionX = 220;
-		this.dialogPositionY = 105;
+		this.dialogPositionY = 115;
 		
 		
 		/**
@@ -319,16 +329,8 @@ DataBrowser.prototype = {
 		}
 	},
 	
-	dataClassClickListener : function dataClassClick_listener(event) {
-		
-		var targetRow,
-			dataClassOption,
-			dataBrowser;
-		
-		event.preventDefault();
-		
-		targetRow = event.currentTarget;
-		dataClassOption = {};
+	openSelectedDataClass : function open_selected_data_class(targetRow, modeTabView) {
+		var dataClassOption;
 		
 		$(targetRow).parent().children(".line-selected").each(function(index) {
 			$(this).removeClass("line-selected");
@@ -336,14 +338,107 @@ DataBrowser.prototype = {
 		
 		$(targetRow).addClass("line-selected");
 		
+		dataClassOption = {};
+		
 		dataClassOption.name = $(targetRow).data("title");
 		dataClassOption.query = "";
-		dataClassOption.modeTabView = (event.ctrlKey ? false : DataBrowser.modeTabView);
+		dataClassOption.modeTabView = modeTabView;
 		
 		
 		DataBrowser.loadDataClass(dataClassOption);
+	},
+	
+	dataClassClickListener : function dataClassClick_listener(event) {
+		
+		var targetRow,
+			modeTabView;
+		
+		event.preventDefault();
+		
+		targetRow = event.currentTarget;
+		modeTabView = ((event.ctrlKey || event.altKey) ? false : DataBrowser.modeTabView);
+		
+		DataBrowser.openSelectedDataClass(targetRow, modeTabView);
 		
 		event.stopPropagation();
+	},
+	
+	dataClassRightClickListener : function dataClass_right_click_listener(event) {
+		var targetRow,
+			dataClass,
+			contextHtml;
+		
+		targetRow = event.currentTarget;
+		dataClass = $(targetRow).data("title");
+		
+		contextHtml = '<span class="context-menu-header">Open '+dataClass+' in</span>'+
+			'<span class="context-menu-item" id="openTabItem">Tab</span>'+
+			'<span class="context-menu-item" id="openWindowItem">Window</span>';
+	
+		$("#dataClassContextMenuContainer").html(contextHtml);
+		$("#dataClassContextMenuContainer").show();
+		$("#dataClassContextMenuBg").show();
+		
+		if((event.pageY + 10 + $("#dataClassContextMenuContainer").height()) > window.innerHeight) {
+			
+			$("#dataClassContextMenuContainer").css("bottom", "0px");
+			$("#dataClassContextMenuContainer").css("top", "");
+		} else {
+			$("#dataClassContextMenuContainer").css("top", (event.pageY + 10) + "px");
+			$("#dataClassContextMenuContainer").css("bottom", "");
+		}
+		
+		if((event.pageX + $("#dataClassContextMenuContainer").width()) > window.innerWidth) {
+			
+			$("#dataClassContextMenuContainer").css("right", "0px");
+			$("#dataClassContextMenuContainer").css("left", "");
+		} else {
+			$("#dataClassContextMenuContainer").css("left", event.pageX + "px");
+			$("#dataClassContextMenuContainer").css("right", "");
+		}
+		
+		$("#dataClassContextMenuBg").bind("click", DataBrowser.hideDataClassContextMenu)
+			.bind("scroll", DataBrowser.hideDataClassContextMenu)
+			.bind("resize", DataBrowser.hideDataClassContextMenu)
+			.bind("contextmenu", DataBrowser.hideDataClassContextMenu);
+		
+		$("#dataClassContextMenuContainer .context-menu-item").each(function (index) {
+			
+			$(this).bind("mouseout", function(event) {
+				$(this).removeClass("hover");
+			})
+			.bind("mouseover", function(event) {
+				$(this).addClass("hover");
+			});
+		});
+		
+		$("#openTabItem").bind("click", function(event) {
+			DataBrowser.openSelectedDataClass(targetRow, true);
+			DataBrowser.hideDataClassContextMenu(event);
+		});
+		$("#openWindowItem").bind("click", function(event) {
+			DataBrowser.openSelectedDataClass(targetRow, false);
+			DataBrowser.hideDataClassContextMenu(event);
+		});
+		
+		$(targetRow).addClass("line-contexted");
+		
+		event.stopPropagation();
+	},
+	
+	hideDataClassContextMenu : function hide_data_class_context_menu(event) {
+		$("#dataClassContextMenuContainer").hide();
+		$("#dataClassContextMenuBg").hide();
+		
+		$("dataClassContextMenuBg").unbind("click", DataBrowser.hideDataClassContextMenu)
+			.unbind("scroll", DataBrowser.hideDataClassContextMenu)
+			.unbind("resize", DataBrowser.hideDataClassContextMenu);
+		
+		$(".line-contexted").each(function(index) {
+			$(this).removeClass("line-contexted");
+		});
+		
+		return false;
 	},
 	
 	dataClassMouseoverListener : function dataClassMouseover_listener(event) {
@@ -443,11 +538,10 @@ DataBrowser.prototype = {
 						tabViewWidth = $("#menuBarTabView").width();
 						$("#menuBarTabView").css('cssText', 'width:' +  $("#menuBarTabView").parent().width() + 'px !important');
 						tabViewBgColor = $("#menuBarTabView").css("background-color");
-						$("#menuBarTabView").css("background-color", "#eeeeee");
+						$("#menuBarTabView").css("background-color", "#f5f5f5")
+							.css("opacity", "0.5");
 						
 						$("#menuBarTabView").bind("mouseover", function (e) {
-							
-							$(this).css("opacity", "0.75");
 							
 							$(this).append('<li id="windowToTabDraggingLi" class="waf-widget waf-menuItem default inherited waf-menuItem-first waf-menuItem-level-0 waf-menuItem-horizontal waf-menuItem-last waf-tabView-tab waf-state-selected" style="width: 110px; margin-left: 0px; height: 31px; ">'+
 								'<p class="waf-menuItem-text waf-menuItem-icon-top" style="height: 31px; width: 100px; ">'+title+'</p></li>');
@@ -455,7 +549,6 @@ DataBrowser.prototype = {
 						})
 						.bind("mouseout", function (e) {
 							
-							$(this).css("opacity", "");
 							if($("#windowToTabDraggingLi")) {
 								$("#windowToTabDraggingLi").remove();
 							}
@@ -514,7 +607,7 @@ DataBrowser.prototype = {
 				
 				if((this.dialogPositionY + 25 + 400) > document.height) {
 					this.dialogPositionX += 300;
-					this.dialogPositionY = 105;
+					this.dialogPositionY = 115;
 				} else {
 					this.dialogPositionY += 25;
 				}
@@ -539,14 +632,12 @@ DataBrowser.prototype = {
 				this.submitQuery
 			);
 			
-			if(modeTabView) {
+			if(!modeTabView) {
 				
-				$("#"+containerId+" .dataBrowser-autoForm-tabView").height($("#"+containerId).height() -50);
-				
-			} else {
 				$("#"+containerId+" .dataBrowser-dataContainer").height($("#"+containerId).height() - 50);
 				this.currentDialog.dialog("open");
 			}
+			
 			$("#"+containerId+"_query_reset_button").bind("click", function (event) {
 				
 				event.preventDefault();
@@ -580,20 +671,10 @@ DataBrowser.prototype = {
 				});
 			};
 			
-			// if(option.query !== "") {
-				// this.refreshDataClass({
-					// "name" : option.name,
-					// "query" : option.query,
-					// "modeTabView" : option.modeTabView,
-					// "containerId" : containerId
-				// });
-			// }
-			
 			if(modeTabView) {
 				
 				$("#"+tabViewContainer.id+"_splitter").bind("mousedown", {"containerId" : tabViewContainer.id}, this.mousedown_splitter);
 				$("#"+tabViewContainer.id+"_splitter").bind("dblclick", {"containerId" : tabViewContainer.id}, this.dblClickSplitter);
-				$("#"+containerId+" .dataBrowser-dataContainer").height($("#"+containerId).height() -50);
 			}
 			
 			dataGrid.gridController.onRowRightClick = function onRowRightClick_dataBrowser_dataGrid(position, rightClickEvent) {
@@ -625,6 +706,10 @@ DataBrowser.prototype = {
 				
 				DataBrowser.openAutoForm(parameters);
 			};
+			
+			if(option.query !== "") {
+				$("#"+containerId+"_query_form").submit();
+			}
 			
 		} else {
 			
@@ -728,7 +813,7 @@ DataBrowser.prototype = {
 			$("#"+containerId+"_dataTips").html(tipsHtml);
 			$("#"+containerId+"_dataTips").show();
 			
-			if((currentEvent.pageY + 10 + $("#"+containerId+"_dataTips").height()) > screen.availHeight) {
+			if((currentEvent.pageY + 10 + $("#"+containerId+"_dataTips").height()) > window.innerHeight) {
 				
 				$("#"+containerId+"_dataTips").css("bottom", "0px");
 				$("#"+containerId+"_dataTips").css("top", "");
@@ -737,7 +822,7 @@ DataBrowser.prototype = {
 				$("#"+containerId+"_dataTips").css("bottom", "");
 			}
 			
-			if((currentEvent.pageX + $("#"+containerId+"_dataTips").width()) > screen.availWidth) {
+			if((currentEvent.pageX + $("#"+containerId+"_dataTips").width()) > window.innerWidth) {
 				
 				$("#"+containerId+"_dataTips").css("right", "0px");
 				$("#"+containerId+"_dataTips").css("left", "");
@@ -760,6 +845,12 @@ DataBrowser.prototype = {
 					$(this).bind("click", function (event) {
 						$(this).parent().hide();
 						DataBrowser.loadDataClass(relatedDataClass[element]);
+					})
+					.bind("mouseout", function(event) {
+						$(this).removeClass("hover");
+					})
+					.bind("mouseover", function(event) {
+						$(this).addClass("hover");
 					});
 				} else {
 					
@@ -790,7 +881,6 @@ DataBrowser.prototype = {
 			$("#"+containerId+"_autoForm").parent().css("right", "0");
 			$("#"+containerId+"_autoForm").parent().width("50%");
 			$("#"+containerId+"_autoForm").parent().show();
-			$("#"+containerId+"_autoForm").parent().height($("#"+containerId).height() -50);
 			$("#"+containerId+"_dataGrid").width("50%");
 			$("#"+containerId+"_autoForm").height("100%");
 		} else {
@@ -898,7 +988,7 @@ DataBrowser.prototype = {
 	 	 	 	'<label id="'+containerId+'_query_label" for="'+containerId+'_query_input" data-valign="middle" data-type="label" data-lib="WAF" class="waf-widget waf-label default inherited dataBrowser-query-label">Query</label>'+
 				'<input type="text" id="'+containerId+'_query_input" value="'+query+'" class="waf-widget waf-textField default inherited dataBrowser-query-input" placeholder="ID > 0"/>'+
 				'<button id="'+containerId+'_query_submit_button" class="dataBrowser-query-button" data-type="button" data-lib="WAF" data-action="submit" class="waf-widget waf-button"></button>'+
-				'<button id="'+containerId+'_query_reset_button" class="dataBrowser-query-reset-button" data-type="button" data-lib="WAF" data-action="simple" class="waf-widget waf-button" title="Delete query"></button>'+
+				'<button id="'+containerId+'_query_reset_button" class="dataBrowser-query-reset-button" data-type="button" data-lib="WAF" data-action="simple" class="waf-widget waf-button" title="Select All"></button>'+
 				'<button id="'+containerId+'_query_refresh_button" class="dataBrowser-query-refresh-button" data-type="button" data-lib="WAF" data-action="simple" class="waf-widget waf-button" title="Refresh grid"></button>'+
 			'</form>'+
 		'</div>'+
@@ -1073,13 +1163,14 @@ DataBrowser.prototype = {
 		
 		var i,
 			ds,
-			dsDetails,
-			dsAttributes,
 			source,
+			dsDetails,
+			sourceName,
 			modeTabView,
 			containerId,
-			dataSourceName,
-			sourceName;
+			dsAttribute,
+			dsAttributes,
+			dataSourceName;
 		
 		dataSourceName = parameters.name;
 		containerId = parameters.containerId;
@@ -1102,7 +1193,9 @@ DataBrowser.prototype = {
 		
 		for(i = 0; i < dsAttributes.length; i++) {
 			
-			if(dsAttributes[i].kind === "storage") {
+			dsAttribute = dsAttributes[i];
+			
+			if(dsAttribute.kind !== "relatedEntity" && dsAttribute.kind !== "relatedEntities") {
 				
 				if(i !== 0) {
 					if(dsDetails.colNames !== "") {
@@ -1114,10 +1207,10 @@ DataBrowser.prototype = {
 				}
 				
 				dsDetails.columns.push({
-					sourceAttID : dsAttributes[i].name,
-	                title : dsAttributes[i].name,
-	                colID : dsAttributes[i].name,
-					width : this.defaultColumnWidthForType(dsAttributes[i].type)
+					sourceAttID : dsAttribute.name,
+	                title : dsAttribute.name,
+	                colID : dsAttribute.name,
+					width : this.defaultColumnWidthForType(dsAttribute.type)
 				});
 				
 			}
@@ -1346,14 +1439,20 @@ DataBrowser.prototype = {
 
 		$tabDropZone.bind("dragover", function(e) {
 			
+			var $this,
+				$tabToWindowDraggingDiv;
+			
 			e.preventDefault();
 			e.stopPropagation();
 			
-			$(this).css("opacity", "0.5");
-			$(this).css("z-index", "999999");
-			$("#tabToWindowDraggingDiv").show();
-			$("#tabToWindowDraggingDiv").css("top", e.originalEvent.pageY + 20);
-			$("#tabToWindowDraggingDiv").css("left", e.originalEvent.pageX);
+			$tabToWindowDraggingDiv = $("#tabToWindowDraggingDiv");
+			$this = $(this);
+			
+			$this.css("opacity", "0.5");
+			$this.css("z-index", "999999");
+			$tabToWindowDraggingDiv.show();
+			$tabToWindowDraggingDiv.css("top", e.originalEvent.pageY + 20);
+			$tabToWindowDraggingDiv.css("left", e.originalEvent.pageX);
 			
 			return false;
 		})
@@ -1372,6 +1471,7 @@ DataBrowser.prototype = {
 			$(this).css("opacity", "");
 			$(this).css("z-index", "");
 			$("#tabToWindowDraggingDiv").hide();
+			
 			return false;
 		})
 		.bind("drop", function(e) {
@@ -1488,7 +1588,7 @@ DataBrowser.prototype = {
 		dataClassName = dataClass.getName();
 		
 		progressName = "export_"+dataClassName+"_"+(new Date()).toISOString()+"_"+Math.random();
-		requestURL = WAF.dsExport.exportData({ generateRESTRequestOnly:true, callWithGet:true}, {dataClassName: dataClassName, exportType:"csv", progressInfo: progressName});
+		requestURL = WAF.dsExport.exportData({ generateRESTRequestOnly:true, callWithGet:true}, {'dataClassName': dataClassName, exportType:"csv"/*, progressInfo: progressName*/});
 		
 		iframe = $("#iframeexport");
 		if (iframe.length === 0) {
@@ -1503,12 +1603,12 @@ DataBrowser.prototype = {
 		var tipsHtml;
 		
 		if(type === "export") {
-			tipsHtml = "Export Class ";
+			tipsHtml = "Export ";
 		} else {
 			tipsHtml = "Import to ";
 		}
 		
-		tipsHtml += $("#dataClassContentTable tbody").children(".line-selected").data("title");
+		tipsHtml += $("#dataClassContentTable tbody").children(".line-selected").data("title")+" Class";
 		
 		$("#importExportTips").html(tipsHtml);
 		$("#importExportTips").css("top", event.pageY + 10);
@@ -1600,30 +1700,34 @@ DataBrowser.prototype = {
 		errors = event.error;
 		errorsToDisplay = {};
 		
-		for(i = 0; i < errors.length; i++) {
-			
-			error = errors[i];
-			
-			switch(error.errCode) {
-				case this.PERM_TO_READ_ERROR :
-				case this.PERM_TO_CREATE_ERROR :
-				case this.PERM_TO_UPDATE_ERROR :
-				case this.PERM_TO_DELETE_ERROR :
-				case this.PERM_TO_EXECUTE_ERROR :
-					if(!errorsToDisplay.hasOwnProperty("permissionErrors")) {
-						errorsToDisplay.permissionErrors = [];
-					}
-					
-					errorsToDisplay.permissionErrors.push(error.message);
-					
-					returnHandler = false;
-					break;
-				
-			}
-		}
+		if(event.header.search("http-authetificate") === -1) {
 		
-		if(errorsToDisplay.hasOwnProperty("permissionErrors") && errorsToDisplay.permissionErrors.length > 0) {
-			this.showErrorInLoginDialog(errorsToDisplay.permissionErrors, callbackParameters);
+			for(i = 0; i < errors.length; i++) {
+				
+				error = errors[i];
+				
+				switch(error.errCode) {
+					case this.PERM_TO_READ_ERROR :
+					case this.PERM_TO_CREATE_ERROR :
+					case this.PERM_TO_UPDATE_ERROR :
+					case this.PERM_TO_DELETE_ERROR :
+					case this.PERM_TO_EXECUTE_ERROR :
+					
+						if(!errorsToDisplay.hasOwnProperty("permissionErrors")) {
+							errorsToDisplay.permissionErrors = [];
+						}
+						
+						errorsToDisplay.permissionErrors.push(error.message);
+						
+						returnHandler = false;
+						break;
+				}
+			}
+			
+			if(errorsToDisplay.hasOwnProperty("permissionErrors") && errorsToDisplay.permissionErrors.length > 0) {
+				
+				this.showErrorInLoginDialog(errorsToDisplay.permissionErrors, callbackParameters);
+			}
 		}
 		
 		return returnHandler;

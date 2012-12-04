@@ -35,6 +35,9 @@ public:
 	// Functions
 	static	void			_openSolution( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication);
 	static	void			_getRecentSolution( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication);
+	static	void			_setDebuggerServer( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication);
+	static	void			_getDebuggerServer( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication);
+
 };
 
 #endif

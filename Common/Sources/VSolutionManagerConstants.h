@@ -365,19 +365,21 @@ extern const XBOX::VString	kTEMPLATE_SOLUTION_NAME_MACRO;
 extern const char POSIX_FOLDER_SEPARATOR;
 extern const XBOX::VString kSCC_PREFIX;
 
-#define DEFAULT_FILES_PATH	"DefaultFiles"
-#define INTRO_HTML_BASIC	"Standard.html"
-#define INTRO_HTML_FORM		"WakandaForm.html"
-#define INTRO_HTML_MOBILE	"WakandaMobile.html"
-#define INTRO_HTML_TABLET	"WakandaTablet.html"
-#define INTRO_MODEL_JS		"EntityModelEditorScriptTemplate.js"
-#define INTRO_FORM_JS		"GUIDesignerScriptTemplate.js"
-#define INTRO_XML_UTF8		"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-#define INTRO_JAVASCRIPT	"/**\n\r* @author admin\n\r*/"
-#define INTRO_CSS			"body {\n\r}"
-#define INTRO_PHP			"<?php\n\r?>"
-#define INTRO_CATALOG		"<?xml version=\"1.0\" encoding=\"UTF-8\"?><EntityModelCatalog></EntityModelCatalog>"
-#define INTRO_PERM			"<?xml version=\"1.0\" encoding=\"UTF-8\"?><permissions></permissions>"
+#define DEFAULT_FILES_PATH		"DefaultFiles"
+#define INTRO_HTML_BASIC		"Standard.html"
+#define INTRO_HTML_FORM			"WakandaForm.html"
+#define INTRO_JS				"WakandaJavaScript.js"
+#define INTRO_MODULE_JS			"WakandaModule.js"
+#define INTRO_MODULE_RPC		"WakandaRPCModule.js"
+#define INTRO_MODULE_SERVICE	"WakandaServiceModule.js"
+#define INTRO_MODEL_JS			"EntityModelEditorScriptTemplate.js"
+#define INTRO_FORM_JS			"GUIDesignerScriptTemplate.js"
+#define INTRO_XML_UTF8			"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+#define INTRO_JAVASCRIPT		"/**\n\r* @author admin\n\r*/"
+#define INTRO_CSS				"body {\n\r}"
+#define INTRO_PHP				"<?php\n\r?>"
+#define INTRO_CATALOG			"<?xml version=\"1.0\" encoding=\"UTF-8\"?><EntityModelCatalog></EntityModelCatalog>"
+#define INTRO_PERM				"<?xml version=\"1.0\" encoding=\"UTF-8\"?><permissions></permissions>"
 
 // ----------------------------------------------------------------------------
 // Properties :
@@ -417,7 +419,6 @@ static const char* arProjectItemsIcons2[] = {
 			"file:Images/SolutionManager/log.png",
 			"file:Images/SolutionManager/catalog.png",
 			"file:Images/SolutionManager/table.png",
-//			"file:Images/SolutionManager/schema.png",
 			"file:Images/SolutionManager/field.png",
 			"file:Images/SolutionManager/file.png",
 			"file:Images/SolutionManager/css.png",
@@ -430,11 +431,11 @@ static const char* arProjectItemsIcons2[] = {
 			"file:Images/SolutionManager/xml.png",
 			"file:Images/SolutionManager/image.png",
 			"file:Images/SolutionManager/web.png",
-			"file:Images/SolutionManager/mobile.png",
-			"file:Images/SolutionManager/tablet.png",
 			"file:Images/SolutionManager/permissions.png",
 			"file:Images/SolutionManager/directory.png",
-			"file:Images/SolutionManager/webComponent.png"
+			"file:Images/SolutionManager/webComponent.png",
+			"file:Images/SolutionManager/page.png",
+			"file:Images/SolutionManager/media-library.png"
 //		^^ ADD NEW ONES UP THIS LINE ^^
 
 		// !!! CONSERVE CORRESPONDANCE WITH !!!
@@ -475,6 +476,7 @@ const XBOX::VError VE_SOMA_UNKNOWN_PROJECT = MAKE_VERROR(kSOLUTION_MANAGER_SIGNA
 const XBOX::VError VE_SOMA_CANNOT_REMOVE_PROJECT = MAKE_VERROR(kSOLUTION_MANAGER_SIGNATURE, 1020);
 const XBOX::VError VE_SOMA_FAILED_TO_LOAD_SOLUTION_PERMISSIONS = MAKE_VERROR(kSOLUTION_MANAGER_SIGNATURE, 1021);
 const XBOX::VError VE_SOMA_DEBUGGER_GROUP_NOT_DEFINED = MAKE_VERROR(kSOLUTION_MANAGER_SIGNATURE, 1022);
+const XBOX::VError VE_SOMA_DEBUGGER_ACTION_NOT_DEFINED = MAKE_VERROR(kSOLUTION_MANAGER_SIGNATURE, 1023);
 
 
 const XBOX::VString kSOMA_NEW_FOLDER = "new_folder";
@@ -560,7 +562,8 @@ typedef enum
 	eSA_RemoveItem,
 	eSA_ChangeStartupProject,
 	eSA_RenameProject,
-	eSA_BeforeClosing
+	eSA_BeforeClosing,
+	eSA_SynchronizeWithFileSystem
 
 } ESolutionAction;
 

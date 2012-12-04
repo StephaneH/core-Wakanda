@@ -33,6 +33,9 @@ typedef std::set<sLONG>						SetOfProjectItemIndex;
 typedef std::set<sLONG>::iterator			SetOfProjectItemIndexIterator;
 typedef std::set<sLONG>::const_iterator		SetOfProjectItemIndexConstIterator;
 
+// to index the project items by URL
+typedef	XBOX::unordered_map_VString< VProjectItem* >					MapOfProjectItemByURL;
+
 typedef XBOX::VString	VProjectItemTag;
 
 class IEditorManager
@@ -53,15 +56,12 @@ public:
 	virtual void SetSolution(VSolution* inSolution) = 0;
 	virtual XBOX::VError LoadFromUserFile(XBOX::VFile& inUserFile) = 0;
 	virtual XBOX::VError SaveToUserFile(XBOX::VFile& inUserFile) const = 0;
-	virtual void SaveProjectItemPosition( const XBOX::VFilePath& inFilePath, bool inMaximized, sLONG inMaxX, sLONG inMaxY, sLONG inX, sLONG inY, sLONG inWidth, sLONG inHeight ) = 0;
-	virtual bool GetProjectItemPosition( const XBOX::VFilePath& inFilePath, bool& outMaximized, sLONG& outMaxX, sLONG& outMaxY, sLONG& outX, sLONG& outY, sLONG& outWidth, sLONG& outHeight ) = 0;
+	virtual void SaveProjectItemPosition( const XBOX::VFilePath& inFilePath, bool inMaximized, sLONG inX, sLONG inY, sLONG inWidth, sLONG inHeight ) = 0;
+	virtual bool GetProjectItemPosition( const XBOX::VFilePath& inFilePath, bool& outMaximized, sLONG& outX, sLONG& outY, sLONG& outWidth, sLONG& outHeight ) = 0;
 	virtual void GetRIAServerLocation( XBOX::VString& outLocation ) = 0;
 	virtual void SetRIAServerLocation( const XBOX::VString& inLocation ) = 0;
 	virtual void GetRIAServerType( XBOX::VString& outLocation ) = 0;
 	virtual void SetRIAServerType( const XBOX::VString& inLocation ) = 0;
-	virtual XBOX::VError GetDebuggerHash ( const XBOX::VString & inIPAddress, XBOX::VString & outUser, XBOX::VString & outHash ) = 0;
-	virtual XBOX::VError SetDebuggerHash ( const XBOX::VString & inIPAddress, const XBOX::VString & inUser, const XBOX::VString & inHash ) = 0;
-	virtual XBOX::VError DeleteDebuggerHash ( const XBOX::VString & inIPAddress ) = 0;
 
 };
 

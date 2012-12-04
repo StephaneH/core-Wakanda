@@ -20,6 +20,7 @@ import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
 /**
@@ -92,7 +93,7 @@ public class CharSetUtil {
 			CharsetEncoder e = Charset.forName(charsetName).newEncoder();
 			// FileWriter log = new FileWriter(charsetName + ".txt");
 			SortedSet<Integer> codePointSet = new TreeSet<Integer>();
-			int count = 0;
+			//int count = 0;
 			for (int i = Character.MIN_CODE_POINT; i <= Character.MAX_CODE_POINT; i++) {
 				// Character character = Character.toChars(i)[0];
 				String s = new String(Character.toChars(i));
@@ -107,7 +108,7 @@ public class CharSetUtil {
 					 * "\t Hex: " + Integer.toHexString(targetCode) + "\n";
 					 * log.write(out);
 					 */
-					count++;
+					//count++;
 				} else {
 					// log.write("Undefined\n");
 				}
@@ -400,14 +401,14 @@ public class CharSetUtil {
 		Map<Integer, CharSetInfo> iANACharSetsMap = new TreeMap<Integer, CharSetInfo>();
 		String content;
 		try {
-			URL url = Resources.class.getResource("entities/iana_charsets");
+			URL url = Settings.class.getResource("entities/iana_charsets");
 			File file = new File(url.toURI());
-			content = Resources.readFileAsString(file.getCanonicalPath());
+			content = FileUtils.readFileToString(file);
 
 			String[] charsetsContent = content.trim().split("Name:\\s*");
-			int count = 0;
+			//int count = 0;
 			for (int i = 1; i < charsetsContent.length; i++) {
-				count++;
+				//count++;
 				String charsetContent = charsetsContent[i].trim();
 				// logger.debug(charsetContent);
 				String[] charsetLines = charsetContent.split("\n");
@@ -467,9 +468,9 @@ public class CharSetUtil {
 			Map<Integer, CharSetInfo> charSetMap = new TreeMap<Integer, CharSetUtil.CharSetInfo>();
 			String content;
 			try {
-				URL url = Resources.class.getResource("entities/toolbox_charsets");
+				URL url = Settings.class.getResource("entities/toolbox_charsets");
 				File file = new File(url.toURI());
-				content = Resources.readFileAsString(file.getCanonicalPath());
+				content = FileUtils.readFileToString(file);
 
 				String charsets_content = content
 						.split("static VCSNameMap sCharSetNameMap\\[\\] =(\r)?\n\\{")[1]
@@ -478,7 +479,7 @@ public class CharSetUtil {
 				StringTokenizer splitter = new StringTokenizer(
 						charsets_content, ",");
 				int tokensCount = 0;
-				int charSetCount = 0;
+				//int charSetCount = 0;
 
 				while (splitter.hasMoreTokens()) {
 					if (tokensCount % 5 == 0) {
@@ -516,7 +517,7 @@ public class CharSetUtil {
 
 						// flags
 						tokensCount = tokensCount + 5;
-						charSetCount++;
+						//charSetCount++;
 
 					}
 				}

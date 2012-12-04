@@ -1,6 +1,7 @@
-﻿<!DOCTYPE html><html>
+﻿<!DOCTYPE html>
+<html>
 	<head>
-		<title>Server Admin</title>
+		<title>Wakanda Server Administration</title>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 		<meta name="generator" content="Wakanda GUIDesigner"/>
 		<meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
@@ -9,29 +10,36 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=1"/>
 		<meta name="apple-mobile-web-app-capable" content="yes"/>
 		<meta name="WAF.config.loadJS" id="waf-script" content="scripts/index.js"/>
+		<meta name="WAF.config.loadJS" id="waf-script" content="scripts/studio.js"/>
 		<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
 		<meta name="WAF.config.loadCSS" id="waf-palette" content="/walib/WAF/widget/palette/css/widget-palette-default.css"/>
 		<meta name="WAF.config.loadCSS" id="waf-interface-css" content="styles/index.css"/>
 		<meta name="WAF.config.loadCSS" content="/application.css"/>
 		<meta name="WAF.config.loadCSS" content="styles/index-custom.css"/>
 		<meta name="WAF.config.loadCSS" id="waf-project-css" content="/application.css"/>
-		<meta name="WAF.config.rpc.file" content="rpc-proxy/admin?namespace=admin"/>
+		<meta name="WAF.config.rpc.file" content="rpc-proxy/webAdmin?namespace=webAdmin"/>
 </head>
 	
 	<body id="waf-body" data-viewport-width="device-width" data-viewport-user-scalable="1" data-viewport-minimum-scale="1.0" data-viewport-maximum-scale="1.0" data-viewport-initial-scale="1.0" data-viewport-height="device-height" data-type="document" data-theme="default" data-rpc-validation="false" data-rpc-namespace="rpc" data-rpc-activate="false" data-platform="desktop" data-lib="WAF" data-group="[['adminTabView','menuBar1','overviewContainer']]" data-apple-meta-tags-status-bar="default" class="default" style="visibility:hidden;">
-		<div id="logToAdmin" data-user-label="User: " data-user-display="Signed in as " data-type="login" data-password-label="Password: " data-logout-action="Logout" data-login-title="Login to Admin" data-login-button="Login" data-login-action="Login" data-lib="WAF" data-constraint-top="true" data-constraint-right="true" data-constraint-left="true" class="waf-widget waf-login default inherited  ">
-		</div>
+		<!-- <div id="logToAdmin" data-user-label="User: " data-user-display="Signed in as " data-type="login" data-password-label="Password: " data-logout-action="Logout" data-login-title="Login to Admin" data-login-button="Login" data-login-action="Login" data-lib="WAF" data-constraint-top="true" data-constraint-right="true" data-constraint-left="true" class="waf-widget waf-login default inherited  ">
+		</div> -->
 		<div id="adminHeader" data-type="container" data-lib="WAF" data-constraint-top="true" data-constraint-right="true" data-constraint-left="true" class="waf-widget waf-container default inherited  ">
-		 	<ul id="radioSolution" data-type="radioGroup" data-lib="WAF" data-label-position="left" data-label="" data-display="vertical" data-constraint-top="true" data-constraint-right="true" data-constraint-left="false" data-constraint-bottom="false" data-autoDispatch="true" class="waf-widget waf-radioGroup default inherited  "><li><input value="currentSolution" type="radio" name="radioSolution" id="radioSolution-0"/><label for="radioSolution-0">Current Solution</label></li><li><input value="recentSolution" type="radio" name="radioSolution" id="radioSolution-1"/><label for="radioSolution-1">Recent Solution</label></li></ul>
+			<label id="solutionComboboxLabel" data-type="label" data-lib="WAF" for="solutionCombobox" data-valign="middle" data-margin="5" class="waf-widget waf-label default inherited    waf-label-combobox " data-constraint-left="true" data-constraint-top="true">Solutions</label>
 	 		<div id="solutionCombobox" data-type="combobox" data-limit="20" data-lib="WAF" data-label-position="left" data-label="" data-editable="true" data-constraint-top="true" data-constraint-right="true" data-constraint-left="false" data-constraint-bottom="false" data-autoDispatch="true" class="waf-widget waf-combobox default inherited">
 				<select></select>
 			</div>
 	 		<div id="solutionName" data-type="richText" data-target="_blank" data-plainText="false" data-overflow="Hidden" data-lib="WAF" data-label-position="left" data-label="" data-constraint-top="true" data-constraint-right="true" data-constraint-left="true" data-constraint-bottom="false" data-autoWidth="false" class="waf-widget waf-richText default inherited  "></div>
 	 	</div>
-		<div id="adminTabView" data-type="tabView" data-padding="20" data-menu-position="top left" data-linked-tag="menuBar1,overviewContainer,maintenanceContainer" data-lib="WAF" data-constraint-top="true" data-constraint-right="true" data-constraint-left="true" data-constraint-bottom="true" class="waf-widget waf-tabView default inherited  ">
-		 	<ul id="menuBar1" data-type="menuBar" data-tab-margin="5" data-subMenuShow="hover" data-linked-tag="adminTabView" data-lib="WAF" data-level="0" data-display="horizontal" data-constraint-top="true" data-constraint-right="false" data-constraint-left="true" data-constraint-bottom="false" class="waf-widget waf-menuBar default inherited          waf-tabView-menuBar waf-tabView-menuBar-top-left "><li id="overviewTab" data-type="menuItem" data-linked-tag="overviewContainer" data-lib="WAF" class="waf-widget waf-menuItem default inherited"><p class="waf-menuItem-text waf-menuItem-icon-top"><span>Overview</span></p></li><li id="maintenanceTab" data-type="menuItem" data-linked-tag="maintenanceContainer" data-lib="WAF" class="waf-widget waf-menuItem default inherited"><p class="waf-menuItem-text waf-menuItem-icon-top"><span>Maintenance</span></p></li></ul>
-	 		<div id="overviewContainer" data-type="container" data-linked-tag="maintenanceTab" data-lib="WAF" data-constraint-top="true" data-constraint-right="true" data-constraint-left="true" data-constraint-bottom="true" class="waf-widget waf-container default inherited  ">
+		<div id="adminTabView" data-type="tabView" data-padding="20" data-menu-position="top left" data-linked-tag="menuBar1,overviewContainer,maintenanceContainer,directoryContainer" data-lib="WAF" data-constraint-top="true" data-constraint-right="true" data-constraint-left="true" data-constraint-bottom="true" class="waf-widget waf-tabView default inherited  ">
+		 	<ul id="menuBar1" data-type="menuBar" data-tab-margin="5" data-subMenuShow="hover" data-linked-tag="adminTabView" data-lib="WAF" data-level="0" data-display="horizontal" data-constraint-top="true" data-constraint-right="false" data-constraint-left="true" data-constraint-bottom="false" class="waf-widget waf-menuBar default inherited waf-tabView-menuBar waf-tabView-menuBar-top-left ">
+		 		<li id="overviewTab" data-type="menuItem" data-linked-tag="overviewContainer" data-lib="WAF" class="waf-widget waf-menuItem default inherited"><p class="waf-menuItem-text waf-menuItem-icon-top"><span>Overview</span></p></li>
+		 		<li id="maintenanceTab" data-type="menuItem" data-linked-tag="maintenanceContainer" data-lib="WAF" class="waf-widget waf-menuItem default inherited"><p class="waf-menuItem-text waf-menuItem-icon-top"><span>Maintenance</span></p></li>
+<!-- 		 		<li id="directoryTab" data-type="menuItem" data-linked-tag="directoryContainer" data-lib="WAF" class="waf-widget waf-menuItem default inherited"><p class="waf-menuItem-text waf-menuItem-icon-top"><span>Directory</span></p></li> -->
+		 	</ul>
+			<div id="overviewContainer" data-type="container" data-linked-tag="maintenanceTab" data-lib="WAF" data-constraint-top="true" data-constraint-right="true" data-constraint-left="true" data-constraint-bottom="true" class="waf-widget waf-container default inherited  ">
 		 	 	<div id="solutionSettingsOverview" data-type="container" data-lib="WAF" data-constraint-top="true" data-constraint-right="true" data-constraint-left="true" data-constraint-bottom="false" class="waf-widget waf-container default inherited  ">
+	 	 	 	</div>
+	 	 	 	<div id="projectListOverview" data-type="container" data-lib="WAF" data-constraint-top="true" data-constraint-right="true" data-constraint-left="true" data-constraint-bottom="false" class="waf-widget waf-container default inherited  ">
 	 	 	 	</div>
 				<div style="display : none;" id="adminBrowseDialog">
 					<label id="label13" for="adminBrowseInput" data-valign="middle" data-type="label" data-margin="5" data-lib="WAF" data-constraint-top="true" data-constraint-left="true" class="waf-widget waf-label default inherited         waf-label-textField ">Solution Path</label>
@@ -43,8 +51,12 @@
 	 	 	 	</div>
 	 	 		<div id="container4" data-type="container" data-lib="WAF" data-constraint-top="true" data-constraint-right="true" data-constraint-left="true" data-constraint-bottom="true" class="waf-widget waf-container default inherited          waf-split-container ">
 		  	 		<div id="maintenanceContent" data-type="container" data-lib="WAF" data-constraint-top="true" data-constraint-right="true" data-constraint-left="true" data-constraint-bottom="true" class="waf-widget waf-container default inherited  ">
-		  	 			<div id="maintenanceModeleFileDetail"></div>
+		  	 			<div id="maintenanceModelFileDetail"></div>
 		  	 			<div id="maintenanceLogFileDetail"></div>
+						<div id="maintenanceProgress" class="console-progress">
+							<label id="progressLabel" for="adminProgressBar" data-valign="middle" data-type="label" data-margin="5" data-lib="WAF" data-constraint-top="true" data-constraint-left="true" class="waf-widget waf-label default inherited waf-label-progressBar ">Progress on [adminProgress]</label>
+							<div id="adminProgressBar" data-type="progressBar" data-showstop="false" data-no-empty-display="false" data-lib="WAF" data-label-position="top" data-label="" data-constraint-top="true" data-constraint-right="true" data-constraint-left="true" data-constraint-bottom="false" class="waf-widget waf-progressBar default inherited" data-progressinfo="adminProgress"></div>
+						</div>
 		  	 		</div>
 					<div id="wafConsole">
 						<div class="title"><h1>Logs</h1></div>
@@ -52,6 +64,9 @@
 					</div>
 	 	 	 	</div>
 			</div>
+			<div id="directoryContainer" data-type="container" data-linked-tag="directoryTab" data-lib="WAF" data-constraint-top="true" data-constraint-right="true" data-constraint-left="true" data-constraint-bottom="true" class="waf-widget waf-container default inherited  ">
+		 	 	
+	 	 	</div>
 			<div id="loadingContainer" data-type="container" data-lib="WAF" data-constraint-top="true" data-constraint-right="true" data-constraint-left="true" data-constraint-bottom="true" class="waf-widget waf-container default inherited  "></div>
 			<div id="adminSaveButton" data-type="buttonImage" data-target="_blank" data-linked-tag="icon2" data-lib="WAF" data-constraint-top="true" data-constraint-right="false" data-constraint-left="true" data-constraint-bottom="false" data-action="simple" class="waf-widget waf-buttonImage default inherited  ">
 	 	 		<span id="icon2" data-type="icon" data-linked-tag="adminSaveButton" data-lib="WAF" data-label-position="bottom" data-label="Save" data-image-state4="/images/002_07-disabled.png" data-image-state3="/images/002_06.png" data-image-state2="/images/002_07-active.png" data-image-state1="/images/002_05.png" data-icon-type="images" data-constraint-top="true" data-constraint-right="false" data-constraint-left="true" data-constraint-bottom="false" class="waf-widget waf-icon default inherited  "><img src="/images/002_05.png" class="waf-icon-state1"/><img src="/images/002_07-active.png" class="waf-icon-state2"/><img src="/images/002_06.png" class="waf-icon-state3"/><img src="/images/002_07-disabled.png" class="waf-icon-state4"/></span>
@@ -101,6 +116,14 @@
 	 	 		<span id="icon9" data-type="icon" data-linked-tag="adminFlushDataButton" data-lib="WAF" data-label-position="bottom" data-label="Flush Data" data-image-state4="/images/onebit_33.png" data-image-state3="/images/onebit_33.png" data-image-state2="/images/onebit_33.png" data-image-state1="/images/onebit_33.png" data-icon-type="images" data-constraint-top="true" data-constraint-right="false" data-constraint-left="true" data-constraint-bottom="false" class="waf-widget waf-icon default inherited  "><img src="/images/onebit_33.png" class="waf-icon-state1"/><img src="/images/onebit_33.png" class="waf-icon-state2"/><img src="/images/onebit_33.png" class="waf-icon-state3"/><img src="/images/onebit_33.png" class="waf-icon-state4"/></span>
 	 	 		<label id="label11" for="icon9" data-valign="middle" data-type="label" data-margin="5" data-lib="WAF" data-constraint-top="true" data-constraint-right="false" data-constraint-left="true" data-constraint-bottom="false" class="waf-widget waf-label default inherited         waf-label-icon ">Flush Data</label>
  	 	</div>
+	 	</div>
+	 	<div id="adminSettingsContainer" style="display: none; z-index: 999999;">
+	 		<iframe id="adminSettingsIframe"></iframe>
+	 		<div id="adminSettingsActionButton">
+	 			<span id="settingsSetDirty" style="display: none;">*</span>
+	 			<input type="button" id="adminCancelSettingsButton" value="Cancel">
+	 			<input type="button" id="adminSaveSettingsButton" value="Save">
+	 		</div>
 	 	</div>
 		<script type="text/javascript" src="/waLib/WAF/Loader.js"></script>
 	</body>

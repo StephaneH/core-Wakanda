@@ -36,17 +36,17 @@ var checkEntry = function (entry) {
 		index = entry.fullPath.length - entry.name.length;
 		name = entry.fullPath.substr(index);
 		
-		Y.Assert.isTrue(name == entry.name);
+		Y.Assert.areEqual(name, entry.name);
 		
 	} else if (entry.name == '') {
 	
 		// Entry is root directory.
 		
-		Y.Assert.isTrue(entry.fullPath == '/');
+		Y.Assert.areEqual('/', entry.fullPath);
 		
 		// Root entry is unique.
 		
-		Y.Assert.isTrue(entry.filesystem.root == entry);
+		Y.Assert.areEqual(entry, entry.filesystem.root);
 		
 	} else {
 			
@@ -57,7 +57,7 @@ var checkEntry = function (entry) {
 		index = entry.fullPath.length - entry.name.length - 1;
 		name = entry.fullPath.substr(index, entry.name.length);
 			
-		Y.Assert.isTrue(name == entry.name);
+		Y.Assert.areEqual(name, entry.name);
 		
 	}      
 	
@@ -142,7 +142,7 @@ var readDirectory = function (folder)
 		exception = e;
 		
 	}
-	Y.Assert.isTrue(exception == null);
+	Y.Assert.isNull(exception);
 	
 	array = new Array();
 	
@@ -159,7 +159,7 @@ var readDirectory = function (folder)
 			exception = e;
 			
 		}
-		Y.Assert.isTrue(exception == null);
+		Y.Assert.isNull(exception);
 		if (entries.length == 0)
 		
 			break;
@@ -185,7 +185,7 @@ var extractNamesFromEntriesList = function (entries)
 	
 		checkEntry(entries[i]);	
 		
-		Y.Assert.isTrue(array[entries[i].name] != true);
+		Y.Assert.areNotEqual(true, array[entries[i].name]);
 		array[entries[i].name] = true;
 		
 	}
@@ -198,7 +198,7 @@ var extractNamesFromEntriesList = function (entries)
 
 var fileCreationAndDeletionTestSync = function (folder) 
 {	
-	var	exception;
+	var	exception = null;
 	
 	// Check file doesn't exist. Note that before testing start, "toto.txt" must 
 	// not exist on disk.
@@ -212,7 +212,8 @@ var fileCreationAndDeletionTestSync = function (folder)
 		exception = e;
 		
 	}			
-	Y.Assert.isTrue(exception.code == exception.NOT_FOUND_ERR);
+	Y.Assert.isNotNull(exception, 'An exception should have been thrown: "toto.txt" should not exist (1)');		
+	Y.Assert.areEqual(exception.NOT_FOUND_ERR, exception.code);
 	exception = null;
 			
 	var	entry;
@@ -228,7 +229,7 @@ var fileCreationAndDeletionTestSync = function (folder)
 		exception = e;
 						
 	}
-	Y.Assert.isTrue(exception == null);
+	Y.Assert.isNull(exception);
 	checkEntry(entry);
 		
 	// Check file has been created.
@@ -242,9 +243,9 @@ var fileCreationAndDeletionTestSync = function (folder)
 		exception = e;
 		
 	}			
-	Y.Assert.isTrue(exception == null);
+	Y.Assert.isNull(exception);
 	checkEntry(entry);
-	Y.Assert.isTrue(entry.file().size == 0); 
+	Y.Assert.areEqual(0, entry.file().size); 
 		
 	// Fill with garbage.
 		
@@ -267,7 +268,7 @@ var fileCreationAndDeletionTestSync = function (folder)
 		exception = e;
 		
 	}			
-	Y.Assert.isTrue(exception == null);
+	Y.Assert.isNull(exception);
 	
 	// Check file has been deleted indeed.
 
@@ -279,15 +280,16 @@ var fileCreationAndDeletionTestSync = function (folder)
 	
 		exception = e;
 		
-	}			
-	Y.Assert.isTrue(exception.code == exception.NOT_FOUND_ERR);	
+	}
+	Y.Assert.isNotNull(exception, 'An exception should have been thrown: "toto.txt" should not exist (2)');		
+	Y.Assert.areEqual(exception.NOT_FOUND_ERR, exception.code);
 }
 
 // Create folders along with files, then check copy and deletion.
 
 var folderCreationCopyAndDeletionTestSync = function (rootFolder) 
 {
-	var	exception;
+	var	exception = null;
 	
 	// Check folder doesn't exist. For test to succeed, testing must start
 	// after ensuring folder is not on disk. 
@@ -300,8 +302,10 @@ var folderCreationCopyAndDeletionTestSync = function (rootFolder)
 	
 		exception = e;
 		
-	}			
-	Y.Assert.isTrue(exception.code == exception.NOT_FOUND_ERR);
+	}	
+	Y.Assert.isNotNull(exception, 'An exception should have been thrown: "/testdir/" should not exist (1)');
+	Y.Assert.areEqual(exception.NOT_FOUND_ERR, exception.code);
+
 	exception = null;
 		
 	// Try creating folder. Note path given as relative.
@@ -317,7 +321,7 @@ var folderCreationCopyAndDeletionTestSync = function (rootFolder)
 		exception = e;
 						
 	}
-	Y.Assert.isTrue(exception == null);
+	Y.Assert.isNull(exception);
 	checkEntry(folder);
 			
 	// Populate folder, along with a subfolder.
@@ -342,7 +346,7 @@ var folderCreationCopyAndDeletionTestSync = function (rootFolder)
 			exception = e;
 			
 		}		
-		Y.Assert.isTrue(exception == null);
+		Y.Assert.isNull(exception);
 		checkEntry(entry);
 		
 	}
@@ -357,7 +361,7 @@ var folderCreationCopyAndDeletionTestSync = function (rootFolder)
 	
 		if (names[k] != true) 
 		
-			Y.Assert.isTrue(false); 	// Not found!
+			Y.Assert.fail('File not found in "testdir" directory!');
 			
 	// Create subfolder along with files.
 			
@@ -372,7 +376,7 @@ var folderCreationCopyAndDeletionTestSync = function (rootFolder)
 		exception = e;
 			
 	}	
-	Y.Assert.isTrue(exception == null);
+	Y.Assert.isNull(exception);
 	checkEntry(subFolder);
 	
 	for (k in subFolderFilesList) {
@@ -388,7 +392,7 @@ var folderCreationCopyAndDeletionTestSync = function (rootFolder)
 			exception = e;
 			
 		}		
-		Y.Assert.isTrue(exception == null);
+		Y.Assert.isNull(exception);
 		checkEntry(entry);
 		
 	}	
@@ -399,7 +403,7 @@ var folderCreationCopyAndDeletionTestSync = function (rootFolder)
 	
 		if (names[k] != true) 
 		
-			Y.Assert.isTrue(false); 	// Not found!
+			Y.Assert.fail('File not found in "subFolder" directory!');
 			
 	// Try to make a copy of subFolder.
 	
@@ -414,7 +418,7 @@ var folderCreationCopyAndDeletionTestSync = function (rootFolder)
 		exception = e;
 			
 	}		
-	Y.Assert.isTrue(exception == null);
+	Y.Assert.isNull(exception);
 	// checkEntry(copyFolder);
 	copyFolder = folder.getDirectory("copy");
 	
@@ -426,7 +430,7 @@ var folderCreationCopyAndDeletionTestSync = function (rootFolder)
 	
 		if (names[k] != true) 
 		
-			Y.Assert.isTrue(false); 	// Not found!
+			Y.Assert.fail('File not found in "copy" directory!');
 
 	// Check deletion.
 	
@@ -439,7 +443,7 @@ var folderCreationCopyAndDeletionTestSync = function (rootFolder)
 		exception = e;
 			
 	}		
-	Y.Assert.isTrue(exception == null);
+	Y.Assert.isNull(exception);
 	
 	try {
 			
@@ -450,9 +454,9 @@ var folderCreationCopyAndDeletionTestSync = function (rootFolder)
 		exception = e;
 			
 	}		
-	Y.Assert.isTrue(exception == null);
+	Y.Assert.isNull(exception);
 	
-}
+};
 
 var testCase = {
 
@@ -497,7 +501,7 @@ var testCase = {
 		
 		// FileSystemSync objects are unique.
 		
-		Y.Assert.isTrue(fileSystem == fileSystem.root.filesystem);
+		Y.Assert.areEqual(fileSystem, fileSystem.root.filesystem);
     	
     },
     	
@@ -516,7 +520,7 @@ var testCase = {
 		
 		// FileSystemSync objects are unique.
 		
-		Y.Assert.isTrue(fileSystem == fileSystem.root.filesystem);
+		Y.Assert.areEqual(fileSystem, fileSystem.root.filesystem);
       	
     },
 
@@ -534,7 +538,7 @@ var testCase = {
 		
 		// Entries are in the same relative file system.
 		
-		Y.Assert.isTrue(entry1.filesystem == entry2.filesystem);
+		Y.Assert.areEqual(entry1.filesystem, entry2.filesystem);
 		
 	},
 
@@ -602,8 +606,8 @@ var testCase = {
 		root = resolveLocalFileSystemSyncURL("/");
 		folderCreationCopyAndDeletionTestSync(root);
 	
-	},
+	}
 
 };
 
-require("unitTest").run(testCase).getReport();
+// require("unitTest").run(testCase).getReport();

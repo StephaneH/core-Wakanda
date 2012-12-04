@@ -32,7 +32,7 @@ var kSERVICE_NAME	= 'webApp';
 
 /*	Web App Service implementation class
 */
-function webAppImpl() {
+function WebAppImpl() {
  
  	/*	Private members
 	*/
@@ -50,7 +50,9 @@ function webAppImpl() {
 	this._loadContext = function () {
 	
 		var done = false;
-		var servicesModule = require( 'services').getInstanceFor( this._fApplication);
+				
+		var servicesModule = require('services').getInstanceFor( this._fApplication);
+		
 		if (servicesModule.isServiceRegistered( kSERVICE_NAME)) {
 			var servicesData = this._fApplication.storage.getItem( 'services');
 			this._fContext = servicesData[kSERVICE_NAME];
@@ -120,9 +122,11 @@ function webAppImpl() {
 	/*	Start a stopped service
 	*/		
 	this.start = function () {
-		
+
 		if (this._loadContext()) {
+		
 			if (this._fContext.state == kSTATE_STOPPED) {
+			
 				this._loadSettings();
 				this._fApplication.internal.webAppService.setEnabled(true);
 				if (this._fApplication.internal.webAppService.enabled) {
@@ -176,6 +180,7 @@ function webAppImpl() {
 				}
 			}	
 		}
+		
 	};
 
 	/*	Target application accessors
@@ -199,19 +204,24 @@ function webAppImpl() {
 
 /*	Create service implementation
 */
-var impl = new webAppImpl();
+var impl = new WebAppImpl();
 
 
 /*	Handler for service messages
 */
 exports.postMessage = function (message) {
+
    
 	if ((impl != null) && (typeof impl != 'undefined')) {
 		
 		if (message.name === "applicationWillStart") {
+		
 			var serviceSettings = impl.getApplication().settings.getItem('services');
+						
 			if (serviceSettings[kSERVICE_NAME].hasOwnProperty( 'autoStart')) {
-				if (serviceSettings[kSERVICE_NAME].autoStart === "true") {
+							
+				if (serviceSettings[kSERVICE_NAME].autoStart  /*=== "true" */) {
+				
 					impl.start();
 				}
 			}
@@ -223,9 +233,10 @@ exports.postMessage = function (message) {
 			impl.pause();
 		}
 		else if (message.name === "httpServerDidStart") {
+					
 			impl.resume();
 		}
-	}
+	}	
 };
 
 
@@ -259,6 +270,7 @@ exports.isStarted = function () {
 exports.getInstanceFor = function ( inApplication) {
 
 	if ((impl != null) && (typeof impl != 'undefined')) {
+		
 		impl.setApplication( ((inApplication != null) && (typeof inApplication != 'undefined')) ? inApplication : application);
 	}
 	return this;

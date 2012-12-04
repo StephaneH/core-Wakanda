@@ -20,7 +20,8 @@
 		458FC60113E2A75800BB386B /* VProjectItemBehaviour.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 458FC5FE13E2A75800BB386B /* VProjectItemBehaviour.cpp */; };
 		54436FD812A7087700D6BAD1 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 54436FD712A7087700D6BAD1 /* CoreFoundation.framework */; };
 		E46F0B1E138F915B003AACDA /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E46F0B1D138F915B003AACDA /* Security.framework */; };
-		F403B4E215356FFE00966ECB /* libInstallHelperToolDebugx64.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F456C385153564F1001D3475 /* libInstallHelperToolDebugx64.a */; };
+		F4012EAF1504F7C50089DA86 /* 4DJavaScriptCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F434BCEE14FCC7A800FC487C /* 4DJavaScriptCore.framework */; };
+		F403B43615356F5500966ECB /* libInstallHelperToolDebugx64.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F456C36A15356460001D3475 /* libInstallHelperToolDebugx64.a */; };
 		F4041F3014DA911B006902E7 /* VRIAPermissions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F4041F2E14DA911B006902E7 /* VRIAPermissions.cpp */; };
 		F4041FB014DAE4C0006902E7 /* VJSPermissions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F4041FAE14DAE4C0006902E7 /* VJSPermissions.cpp */; };
 		F40ED03B134DA6E00099B3F1 /* VProjectItem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F40ED03A134DA6E00099B3F1 /* VProjectItem.cpp */; };
@@ -41,7 +42,6 @@
 		F442BF5B131E96FB00C72C81 /* VRIAServerSolution.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F442BF47131E96FB00C72C81 /* VRIAServerSolution.cpp */; };
 		F442BF5C131E96FB00C72C81 /* VRIAServerTools.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F442BF49131E96FB00C72C81 /* VRIAServerTools.cpp */; };
 		F442BF5D131E96FB00C72C81 /* VRPCService.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F442BF4C131E96FB00C72C81 /* VRPCService.cpp */; };
-		F4BC321D1554038100D9659A /* 4DJavaScriptCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F4B977ED1552E18100D2EDFD /* 4DJavaScriptCore.framework */; };
 		F4CAA8F9149F7B380042797C /* VProjectSettings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F4CAA8F5149F7B380042797C /* VProjectSettings.cpp */; };
 		F4CAA8FA149F7B380042797C /* VSolutionSettings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F4CAA8F7149F7B380042797C /* VSolutionSettings.cpp */; };
 		F4D7FA2513AA31C200E9CF25 /* commonJSAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F4D7FA2313AA31C200E9CF25 /* commonJSAPI.cpp */; };
@@ -82,23 +82,30 @@
 			remoteGlobalIDString = 42F429F0147E567800B02139;
 			remoteInfo = "Security Manager copy";
 		};
-		E46123CF153856E7009B648D /* PBXContainerItemProxy */ = {
+		D52AFCED15A1D1FC0058855E /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = F456C375153564F1001D3475 /* HelperTools.xcodeproj */;
+			containerPortal = F4EBB37E131E9D260005EDB8 /* Dll - XBox - JavaScript */;
+			proxyType = 1;
+			remoteGlobalIDString = F46437CB113E9F6000639653 /* 4DJavaScript x64 */;
+			remoteInfo = "4DJavaScript x64";
+		};
+		E4612324153856BA009B648D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F456C35415356460001D3475 /* HelperTools.xcodeproj */;
 			proxyType = 1;
 			remoteGlobalIDString = E40614761529EE7A00997846;
 			remoteInfo = InstallTool;
 		};
-		E46123D1153856E7009B648D /* PBXContainerItemProxy */ = {
+		E4612326153856BA009B648D /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = F456C375153564F1001D3475 /* HelperTools.xcodeproj */;
+			containerPortal = F456C35415356460001D3475 /* HelperTools.xcodeproj */;
 			proxyType = 1;
 			remoteGlobalIDString = E40614841529EF7B00997846;
 			remoteInfo = HelperTool;
 		};
-		F403B4E015356FF300966ECB /* PBXContainerItemProxy */ = {
+		F403B43415356F4D00966ECB /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = F456C375153564F1001D3475 /* HelperTools.xcodeproj */;
+			containerPortal = F456C35415356460001D3475 /* HelperTools.xcodeproj */;
 			proxyType = 1;
 			remoteGlobalIDString = E44229E4152B392700E32705;
 			remoteInfo = "libHelperTool x64";
@@ -138,13 +145,6 @@
 			remoteGlobalIDString = F46433EC113E8E9700639653;
 			remoteInfo = "Graphics x64";
 		};
-		F42BBE67131E9BEA00F45C82 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F42BBE15131E9B5400F45C82 /* Dll - XBox - ServerNet */;
-			proxyType = 1;
-			remoteGlobalIDString = F464342D113E8FB200639653;
-			remoteInfo = "ServerNet x64";
-		};
 		F42BBE8C131E9C2700F45C82 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F42BBE3E131E9B8A00F45C82 /* Dll - XBox - Graphics */;
@@ -152,82 +152,96 @@
 			remoteGlobalIDString = F464338C113E8E9700639653;
 			remoteInfo = "Graphics x64";
 		};
-		F456C37E153564F1001D3475 /* PBXContainerItemProxy */ = {
+		F434BCDF14FCC7A800FC487C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = F456C375153564F1001D3475 /* HelperTools.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = E40614771529EE7A00997846;
-			remoteInfo = InstallTool;
-		};
-		F456C380153564F1001D3475 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F456C375153564F1001D3475 /* HelperTools.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = E40614851529EF7B00997846;
-			remoteInfo = HelperTool;
-		};
-		F456C382153564F1001D3475 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F456C375153564F1001D3475 /* HelperTools.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = E40620FF1529FF1B00997846;
-			remoteInfo = libHelperTool;
-		};
-		F456C384153564F1001D3475 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F456C375153564F1001D3475 /* HelperTools.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = E44229F4152B392700E32705;
-			remoteInfo = "libHelperTool x64";
-		};
-		F456C386153564F1001D3475 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F456C375153564F1001D3475 /* HelperTools.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = E44226F1152AF2B000E32705;
-			remoteInfo = SampleShellTool;
-		};
-		F4B977E41552E18100D2EDFD /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F4B977D91552E18100D2EDFD /* 4DJavaScriptCore.xcodeproj */;
+			containerPortal = F434BCD114FCC7A800FC487C /* JavaScriptCore.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 932F5BD90822A1C700736975;
-			remoteInfo = 4DJavaScriptCore;
+			remoteInfo = JavaScriptCore;
 		};
-		F4B977E61552E18100D2EDFD /* PBXContainerItemProxy */ = {
+		F434BCE114FCC7A800FC487C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = F4B977D91552E18100D2EDFD /* 4DJavaScriptCore.xcodeproj */;
+			containerPortal = F434BCD114FCC7A800FC487C /* JavaScriptCore.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = F434BC9314FCBF7700FC487C;
+			remoteInfo = "JavaScriptCore x86_64";
+		};
+		F434BCE314FCC7A800FC487C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F434BCD114FCC7A800FC487C /* JavaScriptCore.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 141211200A48793C00480255;
 			remoteInfo = minidom;
 		};
-		F4B977E81552E18100D2EDFD /* PBXContainerItemProxy */ = {
+		F434BCE514FCC7A800FC487C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = F4B977D91552E18100D2EDFD /* 4DJavaScriptCore.xcodeproj */;
+			containerPortal = F434BCD114FCC7A800FC487C /* JavaScriptCore.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 14BD59BF0A3E8F9000BAF59C;
 			remoteInfo = testapi;
 		};
-		F4B977EA1552E18100D2EDFD /* PBXContainerItemProxy */ = {
+		F434BCE714FCC7A800FC487C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = F4B977D91552E18100D2EDFD /* 4DJavaScriptCore.xcodeproj */;
+			containerPortal = F434BCD114FCC7A800FC487C /* JavaScriptCore.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 932F5BE10822A1C700736975;
 			remoteInfo = jsc;
 		};
-		F4B977EC1552E18100D2EDFD /* PBXContainerItemProxy */ = {
+		F434BCEB14FCC7A800FC487C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = F4B977D91552E18100D2EDFD /* 4DJavaScriptCore.xcodeproj */;
+			containerPortal = F434BCD114FCC7A800FC487C /* JavaScriptCore.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = F47C0CA71403E41800A9348A;
-			remoteInfo = "4DJavaScriptCore x64";
+			remoteGlobalIDString = F45BFAF214F52432008390F1;
+			remoteInfo = 4DJavaScriptCore;
 		};
-		F4B977F21552E18A00D2EDFD /* PBXContainerItemProxy */ = {
+		F434BCED14FCC7A800FC487C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = F4B977D91552E18100D2EDFD /* 4DJavaScriptCore.xcodeproj */;
+			containerPortal = F434BCD114FCC7A800FC487C /* JavaScriptCore.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = F434BCA814FCBFAA00FC487C;
+			remoteInfo = "4DJavaScriptCore x86_64";
+		};
+		F434BCEF14FCC7B300FC487C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F434BCD114FCC7A800FC487C /* JavaScriptCore.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = F47C0A311403E41800A9348A;
-			remoteInfo = "4DJavaScriptCore x64";
+			remoteGlobalIDString = F435DA6315343BFD000CEE94;
+			remoteInfo = "4DJavaScriptCore x86_64";
+		};
+		F456C36315356460001D3475 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F456C35415356460001D3475 /* HelperTools.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = E40614771529EE7A00997846;
+			remoteInfo = InstallTool;
+		};
+		F456C36515356460001D3475 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F456C35415356460001D3475 /* HelperTools.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = E40614851529EF7B00997846;
+			remoteInfo = HelperTool;
+		};
+		F456C36715356460001D3475 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F456C35415356460001D3475 /* HelperTools.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = E40620FF1529FF1B00997846;
+			remoteInfo = libHelperTool;
+		};
+		F456C36915356460001D3475 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F456C35415356460001D3475 /* HelperTools.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = E44229F4152B392700E32705;
+			remoteInfo = "libHelperTool x64";
+		};
+		F456C36B15356460001D3475 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F456C35415356460001D3475 /* HelperTools.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = E44226F1152AF2B000E32705;
+			remoteInfo = SampleShellTool;
 		};
 		F4EBB359131E9C8E0005EDB8 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -425,20 +439,6 @@
 			remoteGlobalIDString = F437D24A113EC706009FE5D8;
 			remoteInfo = "LanguageSyntax x64";
 		};
-		F4EBB4E3131EA0790005EDB8 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F4EBB4D4131EA0790005EDB8 /* Comp - SQL */;
-			proxyType = 2;
-			remoteGlobalIDString = 8D01CCD20486CAD60068D4B7;
-			remoteInfo = SQL;
-		};
-		F4EBB4E5131EA0790005EDB8 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F4EBB4D4131EA0790005EDB8 /* Comp - SQL */;
-			proxyType = 2;
-			remoteGlobalIDString = F44522DB11648C27005984A9;
-			remoteInfo = "SQL x64";
-		};
 		F4EBB4F3131EA0930005EDB8 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F4EBB4E7131EA0930005EDB8 /* Comp - UsersAndGroups */;
@@ -488,13 +488,6 @@
 			remoteGlobalIDString = F437D212113EC706009FE5D8;
 			remoteInfo = "LanguageSyntax x64";
 		};
-		F4EBB511131EA12C0005EDB8 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F4EBB4D4131EA0790005EDB8 /* Comp - SQL */;
-			proxyType = 1;
-			remoteGlobalIDString = F445229B11648C27005984A9;
-			remoteInfo = "SQL x64";
-		};
 		F4EBB513131EA1390005EDB8 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F4EBB4F7131EA0AA0005EDB8 /* Comp - Zip */;
@@ -526,7 +519,7 @@
 /* Begin PBXFileReference section */
 		41D7D5F71459BBAA0048EB45 /* VRIAJSDebuggerSettings.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VRIAJSDebuggerSettings.cpp; path = ../../Sources/VRIAJSDebuggerSettings.cpp; sourceTree = SOURCE_ROOT; };
 		41D7D5F81459BBAA0048EB45 /* VRIAJSDebuggerSettings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VRIAJSDebuggerSettings.h; path = ../../Sources/VRIAJSDebuggerSettings.h; sourceTree = SOURCE_ROOT; };
-		42F42967147E4C0100B02139 /* Comp - Security Manager */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "Comp - Security Manager"; path = "../../../../../Components/WAK2/Security Manager/Projects/XCode/Security Manager.xcodeproj"; sourceTree = SOURCE_ROOT; };
+		42F42967147E4C0100B02139 /* Comp - Security Manager */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "Comp - Security Manager"; path = "../../../../../Components/Main/Security Manager/Projects/XCode/Security Manager.xcodeproj"; sourceTree = SOURCE_ROOT; };
 		4500A9E713B48A66008568E3 /* VDataService.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VDataService.cpp; path = ../../Sources/VDataService.cpp; sourceTree = SOURCE_ROOT; };
 		4500A9E813B48A66008568E3 /* VDataService.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VDataService.h; path = ../../Sources/VDataService.h; sourceTree = SOURCE_ROOT; };
 		455F902013B0EC5800AB12FC /* VJSConsole.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VJSConsole.cpp; path = ../../Sources/VJSConsole.cpp; sourceTree = SOURCE_ROOT; };
@@ -564,8 +557,9 @@
 		F40ED03A134DA6E00099B3F1 /* VProjectItem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VProjectItem.cpp; path = ../../../Common/Sources/VProjectItem.cpp; sourceTree = SOURCE_ROOT; };
 		F4176814131F9EE300106722 /* VRIAServerProgressIndicator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VRIAServerProgressIndicator.cpp; path = ../../Sources/VRIAServerProgressIndicator.cpp; sourceTree = SOURCE_ROOT; };
 		F4176815131F9EE300106722 /* VRIAServerProgressIndicator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VRIAServerProgressIndicator.h; path = ../../Sources/VRIAServerProgressIndicator.h; sourceTree = SOURCE_ROOT; };
-		F42BBE15131E9B5400F45C82 /* Dll - XBox - ServerNet */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "Dll - XBox - ServerNet"; path = ../../../../../XToolbox/WAK2/ServerNet/Projects/XCode/ServerNet.xcodeproj; sourceTree = SOURCE_ROOT; };
-		F42BBE3E131E9B8A00F45C82 /* Dll - XBox - Graphics */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "Dll - XBox - Graphics"; path = ../../../../../XToolbox/WAK2/Graphics/Projects/Xcode/Graphics.xcodeproj; sourceTree = SOURCE_ROOT; };
+		F42BBE15131E9B5400F45C82 /* Dll - XBox - ServerNet */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "Dll - XBox - ServerNet"; path = ../../../../../XToolbox/Main/ServerNet/Projects/XCode/ServerNet.xcodeproj; sourceTree = SOURCE_ROOT; };
+		F42BBE3E131E9B8A00F45C82 /* Dll - XBox - Graphics */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "Dll - XBox - Graphics"; path = ../../../../../XToolbox/Main/Graphics/Projects/Xcode/Graphics.xcodeproj; sourceTree = SOURCE_ROOT; };
+		F434BCD114FCC7A800FC487C /* JavaScriptCore.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = JavaScriptCore.xcodeproj; path = ../../../../../webkit/534.53/JavaScriptCore/JavaScriptCore.xcodeproj; sourceTree = SOURCE_ROOT; };
 		F442BF2E131E96FB00C72C81 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = ../../Sources/main.cpp; sourceTree = SOURCE_ROOT; };
 		F442BF2F131E96FB00C72C81 /* VJSApplication.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VJSApplication.cpp; path = ../../Sources/VJSApplication.cpp; sourceTree = SOURCE_ROOT; };
 		F442BF30131E96FB00C72C81 /* VJSApplication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VJSApplication.h; path = ../../Sources/VJSApplication.h; sourceTree = SOURCE_ROOT; };
@@ -596,8 +590,7 @@
 		F442BF4D131E96FB00C72C81 /* VRPCService.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VRPCService.h; path = ../../Sources/VRPCService.h; sourceTree = SOURCE_ROOT; };
 		F442BF82131E9A8700C72C81 /* RIAServerDebugMacho.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RIAServerDebugMacho.pch; sourceTree = "<group>"; };
 		F442BF83131E9A8700C72C81 /* RIAServerFinalMacho.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RIAServerFinalMacho.pch; sourceTree = "<group>"; };
-		F456C375153564F1001D3475 /* HelperTools.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = HelperTools.xcodeproj; path = ../../../../../HelperTools/1.0/Projects/HelperTools.xcodeproj; sourceTree = SOURCE_ROOT; };
-		F4B977D91552E18100D2EDFD /* 4DJavaScriptCore.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = 4DJavaScriptCore.xcodeproj; path = ../../../../../webkit/742/JavaScriptCore/4DJavaScriptCore.xcodeproj; sourceTree = SOURCE_ROOT; };
+		F456C35415356460001D3475 /* HelperTools.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = HelperTools.xcodeproj; path = ../../../../../HelperTools/1.0/Projects/HelperTools.xcodeproj; sourceTree = SOURCE_ROOT; };
 		F4CAA8F5149F7B380042797C /* VProjectSettings.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VProjectSettings.cpp; path = ../../../Common/Sources/VProjectSettings.cpp; sourceTree = SOURCE_ROOT; };
 		F4CAA8F6149F7B380042797C /* VProjectSettings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VProjectSettings.h; path = ../../../Common/Sources/VProjectSettings.h; sourceTree = SOURCE_ROOT; };
 		F4CAA8F7149F7B380042797C /* VSolutionSettings.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VSolutionSettings.cpp; path = ../../../Common/Sources/VSolutionSettings.cpp; sourceTree = SOURCE_ROOT; };
@@ -618,18 +611,17 @@
 		F4E2C3641337B01900E34403 /* VSolutionStartupParameters.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VSolutionStartupParameters.h; path = ../../../Common/Sources/VSolutionStartupParameters.h; sourceTree = SOURCE_ROOT; };
 		F4E2C3661337B03F00E34403 /* VRPCCatalog.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VRPCCatalog.cpp; path = ../../../Common/Sources/VRPCCatalog.cpp; sourceTree = SOURCE_ROOT; };
 		F4E2C3671337B03F00E34403 /* VRPCCatalog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VRPCCatalog.h; path = ../../../Common/Sources/VRPCCatalog.h; sourceTree = SOURCE_ROOT; };
-		F4EBB34F131E9C8E0005EDB8 /* Dll - XBox - Kernel */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "Dll - XBox - Kernel"; path = ../../../../../XToolbox/WAK2/Kernel/Projects/Xcode/Kernel.xcodeproj; sourceTree = SOURCE_ROOT; };
-		F4EBB367131E9CA30005EDB8 /* Dll - XBox - KernelIPC */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "Dll - XBox - KernelIPC"; path = ../../../../../XToolbox/WAK2/KernelIPC/Projects/Xcode/KernelIPC.xcodeproj; sourceTree = SOURCE_ROOT; };
-		F4EBB37E131E9D260005EDB8 /* Dll - XBox - JavaScript */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "Dll - XBox - JavaScript"; path = ../../../../../XToolbox/WAK2/JavaScript/Projects/Xcode/JavaScript.xcodeproj; sourceTree = SOURCE_ROOT; };
-		F4EBB3A2131E9D380005EDB8 /* Dll - XBox - JSDebugger */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "Dll - XBox - JSDebugger"; path = ../../../../../XToolbox/WAK2/JSDebugger/Projects/XCode/JSDebugger.xcodeproj; sourceTree = SOURCE_ROOT; };
-		F4EBB3AB131E9D6F0005EDB8 /* Dll - XBox - XML */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "Dll - XBox - XML"; path = ../../../../../XToolbox/WAK2/XML/Projects/Xcode/XML.xcodeproj; sourceTree = SOURCE_ROOT; };
+		F4EBB34F131E9C8E0005EDB8 /* Dll - XBox - Kernel */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "Dll - XBox - Kernel"; path = ../../../../../XToolbox/Main/Kernel/Projects/Xcode/Kernel.xcodeproj; sourceTree = SOURCE_ROOT; };
+		F4EBB367131E9CA30005EDB8 /* Dll - XBox - KernelIPC */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "Dll - XBox - KernelIPC"; path = ../../../../../XToolbox/Main/KernelIPC/Projects/Xcode/KernelIPC.xcodeproj; sourceTree = SOURCE_ROOT; };
+		F4EBB37E131E9D260005EDB8 /* Dll - XBox - JavaScript */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "Dll - XBox - JavaScript"; path = ../../../../../XToolbox/Main/JavaScript/Projects/Xcode/JavaScript.xcodeproj; sourceTree = SOURCE_ROOT; };
+		F4EBB3A2131E9D380005EDB8 /* Dll - XBox - JSDebugger */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "Dll - XBox - JSDebugger"; path = ../../../../../XToolbox/Main/JSDebugger/Projects/XCode/JSDebugger.xcodeproj; sourceTree = SOURCE_ROOT; };
+		F4EBB3AB131E9D6F0005EDB8 /* Dll - XBox - XML */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "Dll - XBox - XML"; path = ../../../../../XToolbox/Main/XML/Projects/Xcode/XML.xcodeproj; sourceTree = SOURCE_ROOT; };
 		F4EBB40B131E9E6B0005EDB8 /* XercesLib.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = XercesLib.xcodeproj; path = ../../../../../xerces/3.0.1/xerces/projects/MacOS/Xcode/XercesLib/XercesLib.xcodeproj; sourceTree = SOURCE_ROOT; };
-		F4EBB49D131EA0410005EDB8 /* Comp - DB4D */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "Comp - DB4D"; path = ../../../../../Components/WAK2/DB4D/projects/Xcode/DB4D.xcodeproj; sourceTree = SOURCE_ROOT; };
-		F4EBB4B1131EA0530005EDB8 /* Comp - HTTPServer */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "Comp - HTTPServer"; path = ../../../../../Components/WAK2/HTTPServer/Projects/XCode/HTTPServer.xcodeproj; sourceTree = SOURCE_ROOT; };
-		F4EBB4C1131EA0660005EDB8 /* Comp - Language Syntax */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "Comp - Language Syntax"; path = "../../../../../Components/WAK2/Language Syntax/Projects/XCode/Language Syntax.xcodeproj"; sourceTree = SOURCE_ROOT; };
-		F4EBB4D4131EA0790005EDB8 /* Comp - SQL */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "Comp - SQL"; path = ../../../../../Components/WAK2/SQL/Projects/Xcode/SQL.xcodeproj; sourceTree = SOURCE_ROOT; };
-		F4EBB4E7131EA0930005EDB8 /* Comp - UsersAndGroups */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "Comp - UsersAndGroups"; path = ../../../../../Components/WAK2/UsersAndGroups/projects/XCode/UsersAndGroups.xcodeproj; sourceTree = SOURCE_ROOT; };
-		F4EBB4F7131EA0AA0005EDB8 /* Comp - Zip */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "Comp - Zip"; path = ../../../../../Components/WAK2/Zip/Projects/Xcode/Zip.xcodeproj; sourceTree = SOURCE_ROOT; };
+		F4EBB49D131EA0410005EDB8 /* Comp - DB4D */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "Comp - DB4D"; path = ../../../../../Components/Main/DB4D/projects/Xcode/DB4D.xcodeproj; sourceTree = SOURCE_ROOT; };
+		F4EBB4B1131EA0530005EDB8 /* Comp - HTTPServer */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "Comp - HTTPServer"; path = ../../../../../Components/Main/HTTPServer/Projects/XCode/HTTPServer.xcodeproj; sourceTree = SOURCE_ROOT; };
+		F4EBB4C1131EA0660005EDB8 /* Comp - Language Syntax */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "Comp - Language Syntax"; path = "../../../../../Components/Main/Language Syntax/Projects/XCode/Language Syntax.xcodeproj"; sourceTree = SOURCE_ROOT; };
+		F4EBB4E7131EA0930005EDB8 /* Comp - UsersAndGroups */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "Comp - UsersAndGroups"; path = ../../../../../Components/Main/UsersAndGroups/projects/XCode/UsersAndGroups.xcodeproj; sourceTree = SOURCE_ROOT; };
+		F4EBB4F7131EA0AA0005EDB8 /* Comp - Zip */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "Comp - Zip"; path = ../../../../../Components/Main/Zip/Projects/Xcode/Zip.xcodeproj; sourceTree = SOURCE_ROOT; };
 		F4F8C5441164DEF7005C7BC6 /* Wakanda Server.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Wakanda Server.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -638,8 +630,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F4BC321D1554038100D9659A /* 4DJavaScriptCore.framework in Frameworks */,
-				F403B4E215356FFE00966ECB /* libInstallHelperToolDebugx64.a in Frameworks */,
+				F403B43615356F5500966ECB /* libInstallHelperToolDebugx64.a in Frameworks */,
+				F4012EAF1504F7C50089DA86 /* 4DJavaScriptCore.framework in Frameworks */,
 				F4EBB425131E9E8C0005EDB8 /* XercesDebug.framework in Frameworks */,
 				F4EBB3F7131E9DD40005EDB8 /* XMLDebug.framework in Frameworks */,
 				F4EBB3F6131E9DCE0005EDB8 /* 4DJavaScriptDebug.framework in Frameworks */,
@@ -756,7 +748,6 @@
 				42F42967147E4C0100B02139 /* Comp - Security Manager */,
 				F4EBB4F7131EA0AA0005EDB8 /* Comp - Zip */,
 				F4EBB4E7131EA0930005EDB8 /* Comp - UsersAndGroups */,
-				F4EBB4D4131EA0790005EDB8 /* Comp - SQL */,
 				F4EBB4C1131EA0660005EDB8 /* Comp - Language Syntax */,
 				F4EBB4B1131EA0530005EDB8 /* Comp - HTTPServer */,
 				F4EBB49D131EA0410005EDB8 /* Comp - DB4D */,
@@ -767,8 +758,8 @@
 		39C6D88008BA2F35005685B8 /* Dependencies */ = {
 			isa = PBXGroup;
 			children = (
-				F4B977D91552E18100D2EDFD /* 4DJavaScriptCore.xcodeproj */,
-				F456C375153564F1001D3475 /* HelperTools.xcodeproj */,
+				F456C35415356460001D3475 /* HelperTools.xcodeproj */,
+				F434BCD114FCC7A800FC487C /* JavaScriptCore.xcodeproj */,
 				F4EBB40B131E9E6B0005EDB8 /* XercesLib.xcodeproj */,
 				F4EBB34F131E9C8E0005EDB8 /* Dll - XBox - Kernel */,
 				F4EBB367131E9CA30005EDB8 /* Dll - XBox - KernelIPC */,
@@ -1078,14 +1069,28 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		F456C376153564F1001D3475 /* Products */ = {
+		F434BCD214FCC7A800FC487C /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				F456C37F153564F1001D3475 /* InstallTool */,
-				F456C381153564F1001D3475 /* HelperTool */,
-				F456C383153564F1001D3475 /* libInstallHelperToolDebug.a */,
-				F456C385153564F1001D3475 /* libInstallHelperToolDebugx64.a */,
-				F456C387153564F1001D3475 /* SampleShellTool */,
+				F434BCE014FCC7A800FC487C /* JavaScriptCore.framework */,
+				F434BCE214FCC7A800FC487C /* JavaScriptCore.framework */,
+				F434BCE414FCC7A800FC487C /* minidom */,
+				F434BCE614FCC7A800FC487C /* testapi */,
+				F434BCE814FCC7A800FC487C /* jsc */,
+				F434BCEC14FCC7A800FC487C /* 4DJavaScriptCore.framework */,
+				F434BCEE14FCC7A800FC487C /* 4DJavaScriptCore.framework */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		F456C35515356460001D3475 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F456C36415356460001D3475 /* InstallTool */,
+				F456C36615356460001D3475 /* HelperTool */,
+				F456C36815356460001D3475 /* libInstallHelperToolDebug.a */,
+				F456C36A15356460001D3475 /* libInstallHelperToolDebugx64.a */,
+				F456C36C15356460001D3475 /* SampleShellTool */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1099,18 +1104,6 @@
 				F442BF3C131E96FB00C72C81 /* VRIAServerHTTPSession.h */,
 			);
 			name = Sessions;
-			sourceTree = "<group>";
-		};
-		F4B977DA1552E18100D2EDFD /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				F4B977E51552E18100D2EDFD /* 4DJavaScriptCore.framework */,
-				F4B977E71552E18100D2EDFD /* minidom */,
-				F4B977E91552E18100D2EDFD /* testapi */,
-				F4B977EB1552E18100D2EDFD /* jsc */,
-				F4B977ED1552E18100D2EDFD /* 4DJavaScriptCore.framework */,
-			);
-			name = Products;
 			sourceTree = "<group>";
 		};
 		F4E2C3461337AD6800E34403 /* Precompile */ = {
@@ -1208,15 +1201,6 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		F4EBB4D5131EA0790005EDB8 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				F4EBB4E4131EA0790005EDB8 /* SQLServerDebug.bundle */,
-				F4EBB4E6131EA0790005EDB8 /* SQLServerDebug.bundle */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
 		F4EBB4E8131EA0930005EDB8 /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -1253,7 +1237,6 @@
 			);
 			dependencies = (
 				F42BBE8D131E9C2700F45C82 /* PBXTargetDependency */,
-				F42BBE68131E9BEA00F45C82 /* PBXTargetDependency */,
 				F4EBB37B131E9CF60005EDB8 /* PBXTargetDependency */,
 				F4EBB37D131E9CFA0005EDB8 /* PBXTargetDependency */,
 				F4EBB3F9131E9DDC0005EDB8 /* PBXTargetDependency */,
@@ -1262,14 +1245,14 @@
 				F4EBB50C131EA1140005EDB8 /* PBXTargetDependency */,
 				F4EBB50E131EA11F0005EDB8 /* PBXTargetDependency */,
 				F4EBB510131EA1280005EDB8 /* PBXTargetDependency */,
-				F4EBB512131EA12C0005EDB8 /* PBXTargetDependency */,
 				F4EBB514131EA1390005EDB8 /* PBXTargetDependency */,
 				F4EBB516131EA1460005EDB8 /* PBXTargetDependency */,
 				42A4A407147EAEE1000575A8 /* PBXTargetDependency */,
-				F403B4E115356FF300966ECB /* PBXTargetDependency */,
-				E46123D0153856E7009B648D /* PBXTargetDependency */,
-				E46123D2153856E7009B648D /* PBXTargetDependency */,
-				F4B977F31552E18A00D2EDFD /* PBXTargetDependency */,
+				F434BCF014FCC7B300FC487C /* PBXTargetDependency */,
+				F403B43515356F4D00966ECB /* PBXTargetDependency */,
+				E4612325153856BA009B648D /* PBXTargetDependency */,
+				E4612327153856BA009B648D /* PBXTargetDependency */,
+				D52AFCEE15A1D1FC0058855E /* PBXTargetDependency */,
 			);
 			name = "Wakanda Server x64";
 			productInstallPath = "$(HOME)/Applications";
@@ -1301,10 +1284,6 @@
 			projectDirPath = "";
 			projectReferences = (
 				{
-					ProductGroup = F4B977DA1552E18100D2EDFD /* Products */;
-					ProjectRef = F4B977D91552E18100D2EDFD /* 4DJavaScriptCore.xcodeproj */;
-				},
-				{
 					ProductGroup = F4EBB49E131EA0410005EDB8 /* Products */;
 					ProjectRef = F4EBB49D131EA0410005EDB8 /* Comp - DB4D */;
 				},
@@ -1319,10 +1298,6 @@
 				{
 					ProductGroup = 42F42968147E4C0100B02139 /* Products */;
 					ProjectRef = 42F42967147E4C0100B02139 /* Comp - Security Manager */;
-				},
-				{
-					ProductGroup = F4EBB4D5131EA0790005EDB8 /* Products */;
-					ProjectRef = F4EBB4D4131EA0790005EDB8 /* Comp - SQL */;
 				},
 				{
 					ProductGroup = F4EBB4E8131EA0930005EDB8 /* Products */;
@@ -1361,8 +1336,12 @@
 					ProjectRef = F4EBB3AB131E9D6F0005EDB8 /* Dll - XBox - XML */;
 				},
 				{
-					ProductGroup = F456C376153564F1001D3475 /* Products */;
-					ProjectRef = F456C375153564F1001D3475 /* HelperTools.xcodeproj */;
+					ProductGroup = F456C35515356460001D3475 /* Products */;
+					ProjectRef = F456C35415356460001D3475 /* HelperTools.xcodeproj */;
+				},
+				{
+					ProductGroup = F434BCD214FCC7A800FC487C /* Products */;
+					ProjectRef = F434BCD114FCC7A800FC487C /* JavaScriptCore.xcodeproj */;
 				},
 				{
 					ProductGroup = F4EBB40C131E9E6B0005EDB8 /* Products */;
@@ -1426,74 +1405,88 @@
 			remoteRef = F42BBE4A131E9B8A00F45C82 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		F456C37F153564F1001D3475 /* InstallTool */ = {
-			isa = PBXReferenceProxy;
-			fileType = "compiled.mach-o.executable";
-			path = InstallTool;
-			remoteRef = F456C37E153564F1001D3475 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		F456C381153564F1001D3475 /* HelperTool */ = {
-			isa = PBXReferenceProxy;
-			fileType = "compiled.mach-o.executable";
-			path = HelperTool;
-			remoteRef = F456C380153564F1001D3475 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		F456C383153564F1001D3475 /* libInstallHelperToolDebug.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = "compiled.mach-o.dylib";
-			path = libInstallHelperToolDebug.a;
-			remoteRef = F456C382153564F1001D3475 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		F456C385153564F1001D3475 /* libInstallHelperToolDebugx64.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = "compiled.mach-o.dylib";
-			path = libInstallHelperToolDebugx64.a;
-			remoteRef = F456C384153564F1001D3475 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		F456C387153564F1001D3475 /* SampleShellTool */ = {
-			isa = PBXReferenceProxy;
-			fileType = "compiled.mach-o.executable";
-			path = SampleShellTool;
-			remoteRef = F456C386153564F1001D3475 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		F4B977E51552E18100D2EDFD /* 4DJavaScriptCore.framework */ = {
+		F434BCE014FCC7A800FC487C /* JavaScriptCore.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
-			path = 4DJavaScriptCore.framework;
-			remoteRef = F4B977E41552E18100D2EDFD /* PBXContainerItemProxy */;
+			path = JavaScriptCore.framework;
+			remoteRef = F434BCDF14FCC7A800FC487C /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		F4B977E71552E18100D2EDFD /* minidom */ = {
+		F434BCE214FCC7A800FC487C /* JavaScriptCore.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = JavaScriptCore.framework;
+			remoteRef = F434BCE114FCC7A800FC487C /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F434BCE414FCC7A800FC487C /* minidom */ = {
 			isa = PBXReferenceProxy;
 			fileType = "compiled.mach-o.executable";
 			path = minidom;
-			remoteRef = F4B977E61552E18100D2EDFD /* PBXContainerItemProxy */;
+			remoteRef = F434BCE314FCC7A800FC487C /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		F4B977E91552E18100D2EDFD /* testapi */ = {
+		F434BCE614FCC7A800FC487C /* testapi */ = {
 			isa = PBXReferenceProxy;
 			fileType = "compiled.mach-o.executable";
 			path = testapi;
-			remoteRef = F4B977E81552E18100D2EDFD /* PBXContainerItemProxy */;
+			remoteRef = F434BCE514FCC7A800FC487C /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		F4B977EB1552E18100D2EDFD /* jsc */ = {
+		F434BCE814FCC7A800FC487C /* jsc */ = {
 			isa = PBXReferenceProxy;
 			fileType = "compiled.mach-o.executable";
 			path = jsc;
-			remoteRef = F4B977EA1552E18100D2EDFD /* PBXContainerItemProxy */;
+			remoteRef = F434BCE714FCC7A800FC487C /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		F4B977ED1552E18100D2EDFD /* 4DJavaScriptCore.framework */ = {
+		F434BCEC14FCC7A800FC487C /* 4DJavaScriptCore.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
 			path = 4DJavaScriptCore.framework;
-			remoteRef = F4B977EC1552E18100D2EDFD /* PBXContainerItemProxy */;
+			remoteRef = F434BCEB14FCC7A800FC487C /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F434BCEE14FCC7A800FC487C /* 4DJavaScriptCore.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = 4DJavaScriptCore.framework;
+			remoteRef = F434BCED14FCC7A800FC487C /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F456C36415356460001D3475 /* InstallTool */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = InstallTool;
+			remoteRef = F456C36315356460001D3475 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F456C36615356460001D3475 /* HelperTool */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = HelperTool;
+			remoteRef = F456C36515356460001D3475 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F456C36815356460001D3475 /* libInstallHelperToolDebug.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.dylib";
+			path = libInstallHelperToolDebug.a;
+			remoteRef = F456C36715356460001D3475 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F456C36A15356460001D3475 /* libInstallHelperToolDebugx64.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.dylib";
+			path = libInstallHelperToolDebugx64.a;
+			remoteRef = F456C36915356460001D3475 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F456C36C15356460001D3475 /* SampleShellTool */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = SampleShellTool;
+			remoteRef = F456C36B15356460001D3475 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		F4EBB35A131E9C8E0005EDB8 /* libKernelDebug.a */ = {
@@ -1657,20 +1650,6 @@
 			remoteRef = F4EBB4D2131EA0660005EDB8 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		F4EBB4E4131EA0790005EDB8 /* SQLServerDebug.bundle */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.cfbundle;
-			path = SQLServerDebug.bundle;
-			remoteRef = F4EBB4E3131EA0790005EDB8 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		F4EBB4E6131EA0790005EDB8 /* SQLServerDebug.bundle */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.cfbundle;
-			path = SQLServerDebug.bundle;
-			remoteRef = F4EBB4E5131EA0790005EDB8 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
 		F4EBB4F4131EA0930005EDB8 /* UsersAndGroupsDebug.bundle */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.cfbundle;
@@ -1734,7 +1713,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "echo \"Versionning ...\"\nperl \"${DEPOT_ROOT}/Tools/Versionning/Wakanda_versionning_mac.pl\"\nif [ \"$?\" != \"0\" ] ; then\n \techo \"error: Erreur versionning\"\n\texit 2; \nelse \n\tFicLoaderJs=\"${PROJECT_DIR}/../../../walib/WAF/Loader.js\"\n\tchangelist=`cat ${DEPOT_ROOT}/Tools/Versionning/version.txt | cut -d. -f3 `\n\tcp \"${FicLoaderJs}\" \"${OBJROOT}/Loader.js\"\n\tcat \"${OBJROOT}/Loader.js\" | sed \"s/\\('BUILD'\\ *:\\ *\\)'[0-9]*'/\\1'${changelist}'/\" > \"${FicLoaderJs}\"\nfi\n\necho \"Copying resources files ...\"\n\"${DEPOT_ROOT}/Tools/BuildMac/scripts_compil_main/Scripts/CopyFiles_Mac.sh\" \"$BUILT_PRODUCTS_DIR/$FULL_PRODUCT_NAME\" \"E\"\nif [ \"$?\" != \"0\" ] ; then\n \texit 1; \nfi\n\nexit 0";
+			shellScript = "echo \"Versionning ...\"\nperl \"${DEPOT_ROOT}/Tools/Versionning/Wakanda_versionning_mac.pl\"\nif [ \"$?\" != \"0\" ] ; then\n \techo \"error: Erreur versionning\"\n\texit 2; \nelse \n\tFicLoaderJs=\"${PROJECT_DIR}/../../../walib/WAF/Loader.js\"\n\tchangelist=`cat ${DEPOT_ROOT}/Tools/Versionning/version.txt | cut -d. -f3 `\n\tcp \"${FicLoaderJs}\" \"${OBJROOT}/Loader.js\"\n\tcat \"${OBJROOT}/Loader.js\" | sed \"s/\\('BUILD'\\ *:\\ *\\)'[0-9]*'/\\1'${changelist}'/\" > \"${FicLoaderJs}\"\nfi\n\necho \"Copying resources files ...\"\n\"${DEPOT_ROOT}/Tools/BuildMac/scripts_compil_${BRANCH_NAME_l}/Scripts/CopyFiles_Mac.sh\" \"$BUILT_PRODUCTS_DIR/$FULL_PRODUCT_NAME\" \"E\"\nif [ \"$?\" != \"0\" ] ; then\n \texit 1; \nfi\n\nexit 0";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -1793,35 +1772,35 @@
 			name = "Security Manager x64";
 			targetProxy = 42A4A406147EAEE1000575A8 /* PBXContainerItemProxy */;
 		};
-		E46123D0153856E7009B648D /* PBXTargetDependency */ = {
+		D52AFCEE15A1D1FC0058855E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "4DJavaScript x64";
+			targetProxy = D52AFCED15A1D1FC0058855E /* PBXContainerItemProxy */;
+		};
+		E4612325153856BA009B648D /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = InstallTool;
-			targetProxy = E46123CF153856E7009B648D /* PBXContainerItemProxy */;
+			targetProxy = E4612324153856BA009B648D /* PBXContainerItemProxy */;
 		};
-		E46123D2153856E7009B648D /* PBXTargetDependency */ = {
+		E4612327153856BA009B648D /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = HelperTool;
-			targetProxy = E46123D1153856E7009B648D /* PBXContainerItemProxy */;
+			targetProxy = E4612326153856BA009B648D /* PBXContainerItemProxy */;
 		};
-		F403B4E115356FF300966ECB /* PBXTargetDependency */ = {
+		F403B43515356F4D00966ECB /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = "libHelperTool x64";
-			targetProxy = F403B4E015356FF300966ECB /* PBXContainerItemProxy */;
-		};
-		F42BBE68131E9BEA00F45C82 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = "ServerNet x64";
-			targetProxy = F42BBE67131E9BEA00F45C82 /* PBXContainerItemProxy */;
+			targetProxy = F403B43415356F4D00966ECB /* PBXContainerItemProxy */;
 		};
 		F42BBE8D131E9C2700F45C82 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = "Graphics x64";
 			targetProxy = F42BBE8C131E9C2700F45C82 /* PBXContainerItemProxy */;
 		};
-		F4B977F31552E18A00D2EDFD /* PBXTargetDependency */ = {
+		F434BCF014FCC7B300FC487C /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			name = "4DJavaScriptCore x64";
-			targetProxy = F4B977F21552E18A00D2EDFD /* PBXContainerItemProxy */;
+			name = "4DJavaScriptCore x86_64";
+			targetProxy = F434BCEF14FCC7B300FC487C /* PBXContainerItemProxy */;
 		};
 		F4EBB37B131E9CF60005EDB8 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -1862,11 +1841,6 @@
 			isa = PBXTargetDependency;
 			name = "LanguageSyntax x64";
 			targetProxy = F4EBB50F131EA1280005EDB8 /* PBXContainerItemProxy */;
-		};
-		F4EBB512131EA12C0005EDB8 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = "SQL x64";
-			targetProxy = F4EBB511131EA12C0005EDB8 /* PBXContainerItemProxy */;
 		};
 		F4EBB514131EA1390005EDB8 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;

@@ -157,10 +157,10 @@ CUAGSession* VRIAHTTPSessionManager::RetainSessionFromCookie( const IHTTPRequest
 
 	if (session == nil)
 	{
-		std::vector<IHTTPCookie*> cookies;
-		inRequest.GetCookies( cookies);
+		XBOX::VectorOfCookie	cookies;
+		inRequest.GetCookies (cookies);
 
-		for (std::vector<IHTTPCookie*>::iterator iter = cookies.begin() ; iter != cookies.end() && !done ; ++iter)
+		for (XBOX::VectorOfCookie::iterator iter = cookies.begin() ; iter != cookies.end() && !done ; ++iter)
 		{
 			if (*iter != NULL)
 			{

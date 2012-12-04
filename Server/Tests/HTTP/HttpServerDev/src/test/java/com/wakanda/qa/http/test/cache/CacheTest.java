@@ -10,8 +10,10 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.util.Date;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpHeaders;
@@ -24,12 +26,11 @@ import org.apache.http.client.methods.HttpTrace;
 import org.apache.http.impl.cookie.DateUtils;
 import org.apache.http.util.EntityUtils;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import com.google.gson.Gson;
-import com.wakanda.qa.http.Resources;
+import com.wakanda.qa.http.Settings;
 import com.wakanda.qa.http.test.extend.AbstractHttpTestCase;
 
 /**
@@ -41,16 +42,17 @@ import com.wakanda.qa.http.test.extend.AbstractHttpTestCase;
 public class CacheTest extends AbstractHttpTestCase {
 
 	private String generetedURL = null;
+	private Settings settings = new Settings();
 
-	@Before
+	@Override
 	public void before() throws Exception {
+		super.before();
 		// generate a resource and store it in the application web folder
 		String generated = "/toCheckCache" + RandomStringUtils.randomNumeric(3)
 				+ ".tmp";
 		byte[] content = RandomStringUtils.random(1024).getBytes();
-		String cacheFolder = Resources
-				.getOrCreateFolderInSolutionWebFolder("cache");
-		Resources.writeBytesToFile(cacheFolder + generated, content);
+		String filePath = settings.getCacheFolder() + generated;
+		FileUtils.writeByteArrayToFile(new File(filePath), content);
 		setGeneratedURL("/cache" + generated);
 		//logger.debug("Resource generated");
 	}
@@ -190,8 +192,10 @@ public class CacheTest extends AbstractHttpTestCase {
 		// wait before editing the file
 		//logger.debug("Waiting 2 sec before editing the file...");
 		Thread.sleep(2000);
-		new OutputStreamWriter(new FileOutputStream(file)).append(
-				RandomStringUtils.random(10)).close();
+		Writer wr = new OutputStreamWriter(new FileOutputStream(file));
+		wr.append(
+				RandomStringUtils.random(10));
+		wr.close();
 
 		// get the lmd of the file
 		Date lmd02 = new Date(file.lastModified());
@@ -419,6 +423,13 @@ public class CacheTest extends AbstractHttpTestCase {
 	}
 
 	/**
+	 * @return
+	 */
+	private String getDefaultProjectWebFolderPath() {
+		return getSettings().getDefaultProjectWebFolderPath();
+	}
+
+	/**
 	 * Returns the cache entry from the server cache if it exsits or null
 	 * otherwise.
 	 * 
@@ -427,8 +438,7 @@ public class CacheTest extends AbstractHttpTestCase {
 	 * @throws ParseException
 	 * @throws IOException
 	 */
-	private CacheEntry getServerCacheEntry(String url) throws ParseException,
-			IOException {
+	private CacheEntry getServerCacheEntry(String url) throws Exception {
 		CacheInfo cacheInfo = getServerCacheInfo();
 		for (CacheEntry entry : cacheInfo.getCachedObjects()) {
 			if (entry.getUrl().equals(url)) {
@@ -445,12 +455,13 @@ public class CacheTest extends AbstractHttpTestCase {
 	 * @throws ParseException
 	 * @throws IOException
 	 */
-	private CacheInfo getServerCacheInfo() throws ParseException, IOException {
+	private CacheInfo getServerCacheInfo() throws Exception {
 		HttpGet request = new HttpGet("/cache");
-		HttpResponse response = executeRequest(request);
-		String json = EntityUtils.toString(response.getEntity());
-		// logger.debug(json);
-		CacheInfo cacheInfo = new Gson().fromJson(json, CacheInfo.class);
+		HttpResponse response = executeAuthenticated(request);
+		logger.debug(response.getStatusLine());
+		String content = EntityUtils.toString(response.getEntity());
+		logger.debug(content);
+		CacheInfo cacheInfo = new Gson().fromJson(content, CacheInfo.class);
 		return cacheInfo;
 	}
 

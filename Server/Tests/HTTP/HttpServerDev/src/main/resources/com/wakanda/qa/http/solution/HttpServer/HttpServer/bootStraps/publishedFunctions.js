@@ -90,3 +90,15 @@ application.addHttpRequestHandler(
       'handlers/authHandler.js',  
       'createFile'         
 );
+
+application.addHttpRequestHandler(
+      '/echoQueryString/',              
+      'handlers/methodsHandler.js',  
+      'echoQueryString'         
+);
+
+application.addHttpRequestHandler(
+      '/echoURL/',              
+      'handlers/methodsHandler.js',  
+      'echoURL'         
+);

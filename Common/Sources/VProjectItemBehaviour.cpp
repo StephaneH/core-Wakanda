@@ -40,7 +40,7 @@ VProjectItemBehaviour::~VProjectItemBehaviour()
 
 
 VProjectItemSolution::VProjectItemSolution( VProjectItem *inOwner)
-: VProjectItemBehaviour( inOwner),
+: VProjectItemFolder( inOwner),
 fSolution(NULL)
 {
 }
@@ -69,6 +69,20 @@ VProjectItem* VProjectItemSolution::Instantiate( const XBOX::VURL& inURL, const 
 	return result;
 }
 
+
+// ----------------------------------------------------------------------------
+
+
+
+VMediaLibraryFolder::VMediaLibraryFolder( VProjectItem *inOwner)
+: VProjectItemFolder( inOwner)
+{
+}
+
+
+VMediaLibraryFolder::~VMediaLibraryFolder()
+{
+}
 
 
 // ----------------------------------------------------------------------------
@@ -265,17 +279,16 @@ XBOX::VError VProjectItemFolder::Rename( const XBOX::VString& inNewName)
 		fOwner->SetName( folderName);	// sc 26/09/2011, WAK0073011
 		fOwner->SetDisplayName( folderName);
 		
-		VURL url = fOwner->GetURL();
-		if (!url.IsEmpty())
-		{
-			newFolder->GetPath( path);
-			url.FromFilePath( path);
-			fOwner->SetURL( url);
-		}
-		else
+		if (fOwner->HasRelativePath())
 		{
 			folderName += FOLDER_SEPARATOR;
 			fOwner->SetRelativePath( folderName);
+		}
+		else
+		{
+			VFilePath path;
+			newFolder->GetPath( path);
+			fOwner->SetURL( VURL( path));
 		}
 	}
 
@@ -584,7 +597,7 @@ bool VProjectItemFile::IsSystemFile() const
 			||	ConformsTo( RIAFileKind::kProjectFileKind)
 			||	ConformsTo( RIAFileKind::kSymbolDataFileKind)
 			||	ConformsTo( RIAFileKind::kSolutionFileKind)
-			||	ConformsTo( RIAFileKind::kSymbolMatchFileKind));
+			||	ConformsTo( RIAFileKind::kMatchFileKind));
 }
 
 
@@ -678,16 +691,15 @@ XBOX::VError VProjectItemFile::Rename( const XBOX::VString& inNewName)
 		fOwner->SetName( fileName);
 		fOwner->SetDisplayName( fileName);
 		
-		VURL url = fOwner->GetURL();
-		if (!url.IsEmpty())
+		if (fOwner->HasRelativePath())
 		{
-			newFile->GetPath( path);
-			url.FromFilePath( path);
-			fOwner->SetURL( url);
+			fOwner->SetRelativePath( fileName);
 		}
 		else
 		{
-			fOwner->SetRelativePath( fileName);
+			VFilePath path;
+			newFile->GetPath( path);
+			fOwner->SetURL( VURL( path));
 		}
 	}
 

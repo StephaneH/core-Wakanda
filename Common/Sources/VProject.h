@@ -49,7 +49,7 @@ public:
 	static	VProject*						Instantiate( XBOX::VError& outError, VSolution *inParentSolution, const XBOX::VFilePath& inProjectFile);
 
 			/* @brief	Read the project file, create referenced project items, synchronize with file system and open the symbols table */
-			XBOX::VError					Load();
+			XBOX::VError					Load( bool inOpenSymbolsTable);
 			/* @brief	Close the symbols table */
 			XBOX::VError					Unload();
 
@@ -76,6 +76,10 @@ public:
 			bool						GetProjectFolderPath( XBOX::VFilePath& outPath) const;
 			/** @brief	Returns in outPath the path of the project file. Returns false if the path of the project file is unknown. */
 			bool						GetProjectFilePath( XBOX::VFilePath& outPath) const;
+			/** @brief	Returns in outPath the path of the user cache folder for this project */			
+			bool						GetUserCacheFolderPath( XBOX::VFilePath& outPath) const;
+
+			bool						ResolvePosixPathMacros( XBOX::VString& ioPosixPath) const;
 
 			XBOX::VError				Rename( const XBOX::VString& inNewName);
 
@@ -114,8 +118,8 @@ public:
 			// Should be used only if the tag can be applied to one item
 			VProjectItem*		GetProjectItemFromTag( const VProjectItemTag& inTag) const;
 
-	XBOX::VError				BuildAppliURLString(XBOX::VString &outAppliURL, bool inWithIndexPage );
-	XBOX::VError				BuildFileURLString(XBOX::VString &outFileURL, VProjectItem* inProjectItem);
+	XBOX::VError				BuildAppliURLString(XBOX::VString &outAppliURL, bool inWithIndexPage, bool inWantSSL );
+	XBOX::VError				BuildFileURLString(XBOX::VString &outFileURL, VProjectItem* inProjectItem, bool inWantSSL );
 
 	VProjectItem*				GetMainPage();
 
@@ -132,8 +136,6 @@ public:
 	void						StopBackgroundParseFiles();
 	
 	std::vector<XBOX::VFilePath>&	GetDeletedFilePaths()				{ return fDeletedFilePaths; }
-
-	XBOX::VSyncEvent*			RetainRPCFilesParsingCompleteEvent() const;
 
 	void						ParseProjectItemForEditor( VProjectItem *inItem, XBOX::VString& inContents );
 	
@@ -159,6 +161,7 @@ public:
 	// ---------------------------------------
 	// Pour retrouver rapidement un VProjectItem a partir d'un full path
 	// ---------------------------------------
+	VProjectItem*				GetProjectItemFromFilePath( const XBOX::VFilePath& inPath) const;
 	VProjectItem*				GetProjectItemFromFullPath( const XBOX::VString& inFullPath) const; // path au format natif
 	void						RegisterProjectItemAndChildrenInMapOfFullPathes(VProjectItem* inProjectItem, bool inRegisterChildren = true);
 	void						RegisterProjectItemInMapOfFullPathes(VProjectItem* inProjectItem);
@@ -166,7 +169,7 @@ public:
 	void						UnregisterProjectItemFromMapOfFullPathes(VProjectItem* inProjectItem);
 	
 	VProjectSettings*			RetainSettings( XBOX::VError& outError) const;
-	XBOX::VError				GetPublicationSettings( XBOX::VString& outHostName, XBOX::VString& outIP, sLONG& outPort, XBOX::VString& outPattern) const;
+	XBOX::VError				GetPublicationSettings( XBOX::VString& outHostName, XBOX::VString& outIP, sLONG& outPort, bool& outAllowSSL, bool& outMandatorySSL, sLONG& outSSLPort) const;
 
 	VProjectItem*				ReferenceExternalFolder( XBOX::VError& outError, VProjectItem *inParentItem, const XBOX::VURL& inURL);
 	VProjectItem*				ReferenceExternalFile( XBOX::VError& outError, VProjectItem *inParentItem, const XBOX::VURL& inURL);
@@ -243,9 +246,6 @@ private:
 
 	std::vector<XBOX::VFilePath>	fDeletedFilePaths;
 
-			XBOX::VSyncEvent			*fRPCFilesParsingCompleteEvent;
-	mutable	XBOX::VCriticalSection		fRPCFilesParsingCompleteEventMutex;
-
 			bool				fIsWatchingFileSystem;
 			bool				fIsUpdatingSymbolTable;
 
@@ -257,7 +257,6 @@ private:
 	void LoadKludgeSymbols( ISymbolTable *inTable );
 	void LoadKludgeFile( const XBOX::VFolder &inFolder, const XBOX::VString &inName, ESymbolFileExecContext inExecContext, IDocumentParserManager::IJob *inJob );
 
-	void RPCFilesParsingComplete( IDocumentParserManager::TaskCookie inCookie);
 	static sLONG BackgroundDeleteFile( XBOX::VTask *inTask );
 
 	void _GetProjectItemsByExtension( const XBOX::VString &inExtension, VectorOfProjectItems &outItems );

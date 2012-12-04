@@ -3,6 +3,7 @@ project(WakandaServer)
 
 
 file(GLOB Sources ${WakandaServerRoot}/Sources/*.cpp)
+list(REMOVE_ITEM Sources ${WakandaServerRoot}/Sources/testMySQLConnector.cpp)
 
 file(GLOB SourcesCommon ${WakandaRoot}/Common/Sources/*.cpp)
 
@@ -17,6 +18,7 @@ add_definitions(-DVERSION_LINUX=1 -DRIA_SERVER)
 
 #jmo - need include path cleaning !
 include_directories(
+  ${ServerNetIncludeDir}
   ${ComponentsRoot}
   ${DB4DIncludeDir}
   ${IcuIncludeDir}
@@ -33,6 +35,9 @@ target_link_libraries(Wakanda Icu JavaScript JsDebugger Kernel KernelIPC ServerN
 
 add_dependencies(Wakanda DB4D HTTPServer LanguageSyntax SQLServer UsersAndGroups Zip)
 
+
+add_custom_command(TARGET Wakanda PRE_BUILD
+  COMMAND perl ${Depot}/Tools/Versionning/Wakanda_versionning_linux.perl ${WakandaRoot}/Server/Projet/Visual/WakandaVersNum.h)
 
 #The default behavior is to copy resources each time Wakanda is linked sucessfully...
 add_custom_command(TARGET Wakanda POST_BUILD

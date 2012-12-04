@@ -18,39 +18,28 @@ var testCase = {
     
     _should: {
         ignore: {
-            testObjectFolderConstructorMultiple: true, // not sure about the specs.
-            testObjectFolderConstructorOnFile: true, // not sure about the specs.
-            testObjectFolderFilesAttributeValueEmpty: true, // have to create an empty folder because of Perforce.
-            testObjectFolderCreationDateAttributeValue: true, // thanks Perforce for ruining my job
-            testObjectFolderModificationDateAttributeValue: true, // thanks Perforce for ruining my job
-            testObjectFolderReadonlyAttributeValueFalse: true,  // thanks Perforce for ruining my job
-            testObjectFolderFirstFileAttributeValueEmpty: true,
-            testObjectFolderFirstFolderAttributeValueEmpty: true,
-            testObjectFolderFoldersAttributeValueEmpty: true,
-            testObjectFolderReadonlyAttributeValueTrue: true,
-            testObjectFolderVisibleAttributeValueFalse: true,
-            testObjectFolderCreateMethodReadonlyFolder: true,
-            testObjectFolderCreateMethodFullFolder: true,
-            testObjectFolderForEachFileMethodEmpty: true,
-            testObjectFolderForEachFolderMethodEmpty: true,
-            testObjectFolderParseMethodValueEmpty: true,
-            testObjectFolderGetFreeSpaceMethodValueFree: true,
-            testObjectFolderGetFreeSpaceMethodValueFull: true,
-            testObjectFolderGetVolumeSizeMethodValue: true,
-            testObjectFolderGetVolumeSizeMethodValueEmpty: true,
-            testObjectFolderRemoveMethodErrorReadonly: true,
-            testObjectFolderDropMethodErrorReadonly: true,
-            testObjectFolderRemoveContentMethodErrorReadonly: true,
-            testObjectFolderDropContentMethodErrorReadonly: true,
-            testObjectFolderSetNameMethodFailsReadOnly: true,
-			testObjectFolderSetNameMethodFailsNonExisting: true, // Crashes the Server (WAK0072302)
-			testObjectFolderSetNameMethodFailsSameName: true, // Crashes the Server (WAK0072303)
-			testObjectFolderSetNameMethodFailsInvalidName: true // Crashes the Server (WAK0072304)
+
         }
     },
     
     setUp : function () {
-    	// TODO: Create empty folder for test 25
+    	if (typeof this.creationDone === 'undefined') {
+            this.creationDone = true;
+            var appPath = application.getFolder("path");
+            this.creationDate = new Date();
+            this.creationFilePath = appPath + 'Src/EmptyFolder';
+            var newFolder = Folder(this.creationFilePath);
+            newFolder.create();
+            var readOnlyFolder = Folder(appPath + 'Src/ReadOnlyFolder');
+            readOnlyFolder.create();
+            Folder(appPath + 'Src/ReadOnlyFolder').readOnly = true;  
+            var nonReadOnlyFolder = Folder(appPath + 'Src/NonReadOnlyFolder');
+            nonReadOnlyFolder.create();
+            Folder(appPath + 'Src/NonReadOnlyFolder').readOnly = false;
+            var nonVisibleFolder = Folder(appPath + 'Src/NonVisibleFolder');
+            nonVisibleFolder.create();
+            Folder(appPath + 'Src/NonVisibleFolder').visible = false;    
+        }
     },
  
     tearDown : function () {
@@ -67,17 +56,6 @@ var testCase = {
         var appPath = application.getFolder("path");
         var obj = Folder(appPath + "Src");
         Y.Assert.isObject(obj, "Folder(" + appPath + "Src) should return a Folder Object.");
-        // FIXME: the test should be Y.Assert.isInstanceOf(Folder, obj); but our implementation prevents it from working.
-    },
-
-    //3 - Constructor with mutiple arguments
-    testObjectFolderConstructorMultiple: function () {
-        var folder_path = application.getFolder("path") + "Src";
-        var obj = Folder(folder_path, "Folder");
-        var path = obj.path;
-        Y.Assert.isObject(obj, "Folder(" + folder_path + ", \"Folder\") should return a Folder Object.");
-        Y.Assert.areSame(folder_path + "/Folder", path);
-        // FIXME: the test should be Y.Assert.isInstanceOf(Folder, obj); but our implementation prevents it from working.
     },
     
     //4 - Constructor Folder on a file
@@ -86,6 +64,7 @@ var testCase = {
         var obj = Folder(appPath + "Src/file_main");
         Y.Assert.isObject(obj);
         Y.Assert.areSame(appPath + "Src/file_main/", obj.path);
+        Y.Assert.isFalse(obj.exists);
     },
     
     //4b - Method valid() exists
@@ -154,13 +133,15 @@ var testCase = {
     
     //4i - Attribute readOnly value true
     testObjectFolderReadonlyAttributeValueTrue: function () {
-        // TODO
+        var appPath = application.getFolder("path");
+        var obj = Folder(appPath + "Src/ReadOnlyFolder");
+        Y.Assert.isTrue(obj.readOnly);
     },
     
     //4j - Attribute readOnly value false
     testObjectFolderReadonlyAttributeValueFalse: function () {
         var appPath = application.getFolder("path");
-        var obj = Folder(appPath + "Src/Folder");
+        var obj = Folder(appPath + "Src/NonReadOnlyFolder");
         Y.Assert.isFalse(obj.readOnly);
     },
     
@@ -180,7 +161,9 @@ var testCase = {
     
     //4m - Attribute visible value false
     testObjectFolderVisibleAttributeValueFalse: function () {
-        // TODO
+        var appPath = application.getFolder("path");
+        var obj = Folder(appPath + 'Src/NonVisibleFolder');
+        Y.Assert.isFalse(obj.visible);
     },
 
     //5 - Attribute creationDate exists
@@ -193,10 +176,11 @@ var testCase = {
 
     //6 - Attribute creationDate value
     testObjectFolderCreationDateAttributeValue: function () {
-        var appPath = application.getFolder("path");
-        var obj = Folder(appPath + "Src/Folder");
+        var obj = Folder(this.creationFilePath);
         var result = new Date(obj.creationDate);
-        Y.Assert.areSame("2011-06-28T09:49:26.000Z", result.toISOString());
+        var expected = this.creationDate.toISOString();
+        var actual = result.toISOString()
+        Y.Assert.areSame(expected.substr(0, expected.lastIndexOf('.')), actual.substr(0, actual.lastIndexOf('.')));
     },
     
     //7 - Attribute modificationDate exists
@@ -208,10 +192,11 @@ var testCase = {
 
     //8 - Attribute modificationDate value
     testObjectFolderModificationDateAttributeValue: function () {
-        var appPath = application.getFolder("path");
-        var obj = Folder(appPath + "Src/Folder");
+        var obj = Folder(this.creationFilePath);
         var result = new Date(obj.modificationDate);
-        Y.Assert.areSame("2011-06-28T09:49:50.000Z", result.toISOString());
+        var expected = this.creationDate.toISOString();
+        var actual = result.toISOString()
+        Y.Assert.areSame(expected.substr(0, expected.lastIndexOf('.')), actual.substr(0, actual.lastIndexOf('.')));
     },
 
     //9 - Attribute exists exists
@@ -338,7 +323,7 @@ var testCase = {
     //25 - Attribute files value on empty folder
     testObjectFolderFilesAttributeValueEmpty: function () {
         var appPath = application.getFolder("path");
-        var obj = Folder(appPath + "Src/EmptyFolder"); // TODO: create folder in setUp.
+        var obj = Folder(appPath + "Src/EmptyFolder");
         Y.Assert.isArray(obj.files);
         Y.Assert.areSame(0, obj.files.length);
     },
@@ -364,7 +349,12 @@ var testCase = {
     
     //27b - Attribute firstFile value on empty folder
     testObjectFolderFirstFileAttributeValueEmpty: function () {
-        // TODO
+        var appPath = application.getFolder("path");
+        var obj = Folder(appPath + "Src/EmptyFolder");
+        var firstFile = obj.firstFile;
+        Y.Assert.isObject(firstFile);
+        Y.Assert.isFalse(firstFile.valid());
+        Y.Assert.areSame(null, firstFile.path);
     },
     
     //28 - Attribute firstFile iteration
@@ -406,7 +396,12 @@ var testCase = {
     
     //30b - Attribute firstFolder value on empty folder
     testObjectFolderFirstFolderAttributeValueEmpty: function () {
-        // TODO
+        var appPath = application.getFolder("path");
+        var obj = Folder(appPath + "Src/EmptyFolder");
+        var firstFolder = obj.firstFolder;
+        Y.Assert.isObject(firstFolder);
+        Y.Assert.isFalse(firstFolder.valid());
+        Y.Assert.areSame(null, firstFolder.path);
     },
     
     //31 - Attribute firstFolder iteration
@@ -450,7 +445,10 @@ var testCase = {
     
     //33b - Attribute folders value on empty folder
     testObjectFolderFoldersAttributeValueEmpty: function () {
-        // TODO
+        var appPath = application.getFolder("path");
+        var obj = Folder(appPath + "Src/EmptyFolder");
+        Y.Assert.isArray(obj.folders);
+        Y.Assert.areSame(0, obj.folders.length);
     },
     
     //34 - Method create() exists
@@ -518,12 +516,9 @@ var testCase = {
     
     //39b - Method create() on readonly folder
     testObjectFolderCreateMethodReadonlyFolder: function () {
-        // TODO
-    },
-    
-    //39c - Method create() on full folder
-    testObjectFolderCreateMethodFullFolder: function () {
-        // TODO
+        var appPath = application.getFolder("path");
+        var obj = Folder(appPath + "Src/ReadOnlyFolder/NewFolder");
+        Y.Assert.isFalse(obj.create());
     },
     
     //40 - Method forEachFile() exists
@@ -564,7 +559,13 @@ var testCase = {
     
     //42b - Method forEachFile() on empty folder
     testObjectFolderForEachFileMethodEmpty: function () {
-        // TODO
+        var appPath = application.getFolder("path");
+        var obj = Folder(appPath + "Src/EmptyFolder");
+        var beenThere = false;
+        obj.forEachFile(function (file) {
+            beenThere = true;
+        });
+        Y.Assert.isFalse(beenThere);
     },
     
     //43 - Method forEachFolder() exists
@@ -605,7 +606,13 @@ var testCase = {
     
     //45b - Method forEachFolder() on empty folder
     testObjectFolderForEachFolderMethodEmpty: function () {
-        // TODO
+        var appPath = application.getFolder("path");
+        var obj = Folder(appPath + "Src/EmptyFolder");
+        var beenThere = false;
+        obj.forEachFolder(function (folder) {
+            beenThere = true;
+        });
+        Y.Assert.isFalse(beenThere);
     },
     
     //46 - Method getURL() exists
@@ -722,7 +729,14 @@ var testCase = {
     
     //59 - Method parse() value on empty folder
     testObjectFolderParseMethodValueEmpty: function () {
-        // TODO
+        var appPath = application.getFolder("path");
+        var obj = Folder(appPath + "Src/EmptyFolder");
+        var beenThere = false;
+        obj.parse(function(item, position, folder) 
+        {
+            beenThere = true;
+        });
+        Y.Assert.isFalse(beenThere);
     },
     
     //60 - Method getFreeSpace() exists
@@ -733,13 +747,11 @@ var testCase = {
     },
     
     //61 - Method getFreeSpace() value free
-    testObjectFolderGetFreeSpaceMethodValueFree: function () {
-        // TODO
-    },
-    
-    //62 - Method getFreeSpace() value full
-    testObjectFolderGetFreeSpaceMethodValueFull: function () {
-        // TODO
+    testObjectFolderGetFreeSpaceMethodValue: function () {
+        var appPath = application.getFolder("path");
+        var obj = Folder(appPath + 'Src/Folder');
+        var result = obj.getFreeSpace(true);
+        Y.Assert.areNotSame(-1, result);
     },
     
     //63 - Method getVolumeSize() exists
@@ -751,12 +763,10 @@ var testCase = {
     
     //64 - Method getVolumeSize() value
     testObjectFolderGetVolumeSizeMethodValue: function () {
-        // TODO
-    },
-    
-    //65 - Method getVolumeSize() value empty
-    testObjectFolderGetVolumeSizeMethodValueEmpty: function () {
-        // TODO
+        var appPath = application.getFolder("path");
+        var obj = Folder(appPath + 'Src/Folder');
+        var result = obj.getVolumeSize(true);
+        Y.Assert.areNotSame(-1, result);
     },
     
     //66 - Method remove() exists
@@ -799,12 +809,28 @@ var testCase = {
     
     //70 - Method remove() error on readonly
     testObjectFolderRemoveMethodErrorReadonly: function () {
-        // TODO
+        var appPath = application.getFolder("path");
+        var obj = Folder(appPath + 'Src/ReadOnlyFolder');
+        var done = false;
+        try {
+            var done = obj.remove();
+        } catch (e) {
+            Y.Assert.fail('The "ReadOnlyFolder" Folder should still exist at this point: ' + e);
+        }
+        Y.Assert.isFalse(done, 'The "ReadOnlyFolder" Folder should not have been removed.');
     },
     
     //71 - Method drop() error on readonly
     testObjectFolderDropMethodErrorReadonly: function () {
-        // TODO
+        var appPath = application.getFolder("path");
+        var obj = Folder(appPath + 'Src/ReadOnlyFolder');
+        var done = false;
+        try {
+            var done = obj.drop();
+        } catch (e) {
+            Y.Assert.fail('The "ReadOnlyFolder" Folder should still exist at this point: ' + e);
+        }
+        Y.Assert.isFalse(done, 'The "ReadOnlyFolder" Folder should not have been removed.');
     },
     
     //72 - Method remove() on folder
@@ -911,12 +937,28 @@ var testCase = {
     
     //80 - Method removeContent() error on readonly
     testObjectFolderRemoveContentMethodErrorReadonly: function () {
-        // TODO
+        var appPath = application.getFolder("path");
+        var obj = Folder(appPath + 'Src/ReadOnlyFolder');
+        var done = false;
+        try {
+            done = obj.removeContent();
+        } catch (e) {
+            Y.Assert.fail('The "ReadOnlyFolder" Folder should still exist at this point: ' + e);
+        }
+        Y.Assert.isFalse(done, 'The content of the "ReadOnlyFolder" Folder should not have been removed.');
     },
     
     //81 - Method dropContent() error on readonly
     testObjectFolderDropContentMethodErrorReadonly: function () {
-        // TODO
+        var appPath = application.getFolder("path");
+        var obj = Folder(appPath + 'Src/ReadOnlyFolder');
+        var done = false;
+        try {
+            done = obj.dropContent();            
+        } catch (e) {
+            Y.Assert.fail('The "ReadOnlyFolder" Folder should still exist at this point: ' + e);
+        }
+        Y.Assert.isFalse(done, 'The content of the "ReadOnlyFolder" Folder should not have been removed.');
     }, 
     
     //82 - Method removeContent() on folder
@@ -980,14 +1022,21 @@ var testCase = {
     
     //87 - Method setName() fails on readonly folder
     testObjectFolderSetNameMethodFailsReadOnly: function () {
-        // TODO
+        var appPath = application.getFolder("path");
+        var obj = Folder(appPath + 'Src/ReadOnlyFolder');
+        Y.Assert.isFalse(obj.setName("NotSoReadOnlyFolder"));
     },
     
     //88 - Method setName() fails on invalid name
     testObjectFolderSetNameMethodFailsInvalidName: function () {
         var appPath = application.getFolder("path");
         var obj = Folder(appPath + "Src/FolderToRename");
-        Y.Assert.isFalse(obj.setName("Fol:der")); // ":" is invalid on both Mac and Windows, don't know on Linux…
+        if (os.isLinux) {
+            Y.Assert.isFalse(obj.setName("Fol/der")); 
+        }
+        else {
+            Y.Assert.isFalse(obj.setName("Fol:der")); 
+        }
     },
     
     //89 - Method setName() success

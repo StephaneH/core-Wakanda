@@ -11,6 +11,8 @@ import static org.junit.Assume.assumeTrue;
 
 import java.io.File;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
@@ -34,7 +36,7 @@ import org.apache.http.util.EntityUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import com.wakanda.qa.http.Resources;
+import com.wakanda.qa.http.Settings;
 import com.wakanda.qa.http.test.extend.AbstractHttpTestCase;
 
 /**
@@ -61,7 +63,7 @@ public class HeaderTest extends AbstractHttpTestCase {
 		String request = "GET / HTTP/1.1" + CRLF + HttpHeaders.HOST + ":"
 				+ getDefaultHostHeaderValue() + CRLF + header + CRLF + CRLF;
 
-		HttpResponse response = executeRequestString(request);
+		HttpResponse response = executeRawRequest(request);
 		// The server must respond with 200 OK
 		assertEqualsStatusCode(HttpStatus.SC_OK, response);
 
@@ -107,7 +109,7 @@ public class HeaderTest extends AbstractHttpTestCase {
 				+ getDefaultHostHeaderValue() + CRLF + HTTP.CONN_DIRECTIVE
 				+ ":" + headerFieldValue + CRLF + CRLF;
 		// response
-		HttpResponse response = executeRequestString(request);
+		HttpResponse response = executeRawRequest(request);
 		assertEqualsStatusCode(HttpStatus.SC_OK, response);
 		Header cnxHeader = response.getFirstHeader(HTTP.CONN_DIRECTIVE);
 		assertNotNull(cnxHeader);
@@ -144,7 +146,7 @@ public class HeaderTest extends AbstractHttpTestCase {
 				+ HttpHeaders.HOST + ":" + getDefaultHostHeaderValue() + CRLF
 				+ HttpHeaders.ACCEPT_ENCODING
 				+ ": deflate;q=0.5,identity;q=0.1,gzip" + CRLF + CRLF;
-		HttpResponse response0 = executeRequestString(request0);
+		HttpResponse response0 = executeRawRequest(request0);
 
 		// check the status code
 		assertEqualsStatusCode(HttpStatus.SC_OK, response0);
@@ -156,7 +158,7 @@ public class HeaderTest extends AbstractHttpTestCase {
 				+ HttpHeaders.HOST + ":" + getDefaultHostHeaderValue() + CRLF
 				+ HttpHeaders.ACCEPT_ENCODING + ": deflate;q=0.5," + CRLF
 				+ " identity;q=0.1," + CRLF + " gzip" + CRLF + CRLF;
-		HttpResponse response1 = executeRequestString(request1);
+		HttpResponse response1 = executeRawRequest(request1);
 
 		// check the status code
 		assertEqualsStatusCode(HttpStatus.SC_OK, response1);
@@ -200,10 +202,9 @@ public class HeaderTest extends AbstractHttpTestCase {
 		request.addHeader(header3);
 
 		HttpResponse response = executeRequest(request);
+		HttpEntity entity = response.getEntity();
 
 		assertEqualsStatusCode(HttpStatus.SC_OK, response);
-
-		HttpEntity entity = response.getEntity();
 		assertNotNull("Response should have content", entity);
 
 		Header ceHeader = entity.getContentEncoding();
@@ -229,7 +230,7 @@ public class HeaderTest extends AbstractHttpTestCase {
 		// assume that the standard behavior is true
 		String request00 = "GET / HTTP/1.1" + CRLF + HttpHeaders.HOST + ":"
 				+ getDefaultHostHeaderValue() + CRLF + CRLF;
-		HttpResponse response = executeRequestString(request00);
+		HttpResponse response = executeRawRequest(request00);
 		int actualsc = response.getStatusLine().getStatusCode();
 		assumeThat(actualsc, is(HttpStatus.SC_OK));
 		Header cnxHeader = response.getFirstHeader(HTTP.CONN_DIRECTIVE);
@@ -269,15 +270,16 @@ public class HeaderTest extends AbstractHttpTestCase {
 			throws Exception {
 		// create a file with xml extension
 		String filename = "file.html";
-		File file = new File(Resources.getMediaTypeFolder() + "/" + filename);
+		File file = new File(getSettings().getMediaTypeFolder() + "/"
+				+ filename);
 		if (!file.exists()) {
 			file.createNewFile();
 		}
 		// request
 		HttpGet request = new HttpGet("/mediaType/" + filename);
 		String fieldName = "aCcEpT";
-		// Client does not accept text/html
-		request.addHeader(fieldName, "text/html; q=0");
+		// Client accepts only text/xml
+		request.addHeader(fieldName, "text/xml");
 
 		// response
 		HttpResponse response = executeRequest(request);
@@ -299,7 +301,7 @@ public class HeaderTest extends AbstractHttpTestCase {
 	public void testThatAcceptCharsetHeaderFieldNameIsCaseInsensitive()
 			throws Exception {
 		// assume that the standard behavior is true
-		HttpPost request = getDefaultPostRequest();
+		HttpPost request = Settings.getDefaultPostRequest();
 		HttpResponse response = executeRequest(request);
 		// server should replay with 200 if no header "Accept-Charset" was sent.
 		int actual = response.getStatusLine().getStatusCode();
@@ -401,6 +403,15 @@ public class HeaderTest extends AbstractHttpTestCase {
 	 * 
 	 * @throws Exception
 	 */
+
+	@Override
+	protected Map<String, Long> getUnitTestsTimeout() {
+		Map<String, Long> hash = new HashMap<String, Long>();
+		hash.put("testThatContentLengthHeaderFieldNameIsCaseInsensitive",
+				new Long(30000));
+		return hash;
+	}
+
 	@Test
 	public void testThatContentLengthHeaderFieldNameIsCaseInsensitive()
 			throws Exception {
@@ -410,38 +421,41 @@ public class HeaderTest extends AbstractHttpTestCase {
 				+ HttpHeaders.HOST + ":" + getDefaultHostHeaderValue() + CRLF
 				+ HttpHeaders.TRANSFER_ENCODING + ":" + HTTP.IDENTITY_CODING
 				+ CRLF + HttpHeaders.CONTENT_TYPE + ":" + HTTP.PLAIN_TEXT_TYPE
-				+ CRLF + headerName + ":" + "5" + CRLF 
-				+ CRLF
-				+ "123456789";
+				+ CRLF + headerName + ":" + "5" + CRLF + CRLF + "123456789";
 
-		HttpResponse response = executeRequestString(request00);
-		int actualsc = response.getStatusLine().getStatusCode();
-		assumeThat(actualsc, is(HttpStatus.SC_OK));
+		HttpResponse response = executeRawRequest(request00, false);
 		HttpEntity entity = response.getEntity();
-		assumeNotNull(entity);
+		try {
+			int actualsc = response.getStatusLine().getStatusCode();
+			assumeThat(actualsc, is(HttpStatus.SC_OK));
+			assumeNotNull(entity);
 
-		String expectedContent = "12345";
-		String actualContent = EntityUtils.toString(entity);
-		assumeThat(actualContent, is(expectedContent));
-		
-		// check now the case-sensitivity
-		headerName = "cOnTeNt-LeNgTh";
-		String request01 = "POST /checkPostMethod/ HTTP/1.1" + CRLF
-				+ HttpHeaders.HOST + ":" + getDefaultHostHeaderValue() + CRLF
-				+ HttpHeaders.TRANSFER_ENCODING + ":" + HTTP.IDENTITY_CODING
-				+ CRLF + HttpHeaders.CONTENT_TYPE + ":" + HTTP.PLAIN_TEXT_TYPE
-				+ CRLF + headerName + ":" + "5" + CRLF 
-				+ CRLF
-				+ "123456789";
+			String expectedContent = "12345";
+			String actualContent = EntityUtils.toString(entity);
+			logger.debug(actualContent);
+			assumeThat(actualContent, is(expectedContent));
 
-		response = executeRequestString(request01);
-		assertEqualsStatusCode(HttpStatus.SC_OK, response);
-		entity = response.getEntity();
-		assertNotNull(entity);
-		actualContent = EntityUtils.toString(entity);
-		assertEquals("Wrong content", expectedContent, actualContent);
+			// check now the case-sensitivity
+			headerName = "cOnTeNt-LeNgTh";
+			String request01 = "POST /checkPostMethod/ HTTP/1.1" + CRLF
+					+ HttpHeaders.HOST + ":" + getDefaultHostHeaderValue()
+					+ CRLF + HttpHeaders.TRANSFER_ENCODING + ":"
+					+ HTTP.IDENTITY_CODING + CRLF + HttpHeaders.CONTENT_TYPE
+					+ ":" + HTTP.PLAIN_TEXT_TYPE + CRLF + headerName + ":"
+					+ "5" + CRLF + CRLF + "123456789";
+
+			response = executeRawRequest(request01, false);
+			assertEqualsStatusCode(HttpStatus.SC_OK, response);
+			entity = response.getEntity();
+			assertNotNull(entity);
+			actualContent = EntityUtils.toString(entity);
+			logger.debug(actualContent);
+			assertEquals("Wrong content", expectedContent, actualContent);
+		} finally {
+			EntityUtils.consume(entity);
+		}
 	}
-	
+
 	/**
 	 * <b>Implements:</b> Headers11
 	 * <p/>
@@ -457,28 +471,25 @@ public class HeaderTest extends AbstractHttpTestCase {
 		// assume that the standard behavior is true
 		String mt = "whatever/whatever";
 		String request00 = "POST /checkPostMethod/ HTTP/1.1" + CRLF
-		+ HttpHeaders.HOST + ":" + getDefaultHostHeaderValue() + CRLF
-		+ HttpHeaders.CONTENT_TYPE + ":" + mt + CRLF 
-		+ HttpHeaders.CONTENT_LENGTH + ":" + "5" + CRLF 
-		+ CRLF
-		+ "12345";
-		HttpResponse response = executeRequestString(request00);
+				+ HttpHeaders.HOST + ":" + getDefaultHostHeaderValue() + CRLF
+				+ HttpHeaders.CONTENT_TYPE + ":" + mt + CRLF
+				+ HttpHeaders.CONTENT_LENGTH + ":" + "5" + CRLF + CRLF
+				+ "12345";
+		HttpResponse response = executeRawRequest(request00);
 		int actualsc = response.getStatusLine().getStatusCode();
 		assumeThat(actualsc, is(HttpStatus.SC_UNSUPPORTED_MEDIA_TYPE));
-		
+
 		// check now the case-sensitivity
 		String headerName = "CoNtEnT-tYpE";
 		String request01 = "POST /checkPostMethod/ HTTP/1.1" + CRLF
-		+ HttpHeaders.HOST + ":" + getDefaultHostHeaderValue() + CRLF
-		+ headerName + ":" + mt + CRLF 
-		+ HttpHeaders.CONTENT_LENGTH + ":" + "5" + CRLF 
-		+ CRLF
-		+ "12345";
-		response = executeRequestString(request01);
+				+ HttpHeaders.HOST + ":" + getDefaultHostHeaderValue() + CRLF
+				+ headerName + ":" + mt + CRLF + HttpHeaders.CONTENT_LENGTH
+				+ ":" + "5" + CRLF + CRLF + "12345";
+		response = executeRawRequest(request01);
 		assertEqualsStatusCode(HttpStatus.SC_UNSUPPORTED_MEDIA_TYPE, response);
-		
+
 	}
-	
+
 	/**
 	 * <b>Implements:</b> Headers12
 	 * <p/>
@@ -489,23 +500,21 @@ public class HeaderTest extends AbstractHttpTestCase {
 	 * @throws Exception
 	 */
 	@Test
-	public void testThatHostHeaderFieldNameIsCaseInsensitive()
-			throws Exception {
+	public void testThatHostHeaderFieldNameIsCaseInsensitive() throws Exception {
 		// assume that the next passes
 		String request = "GET / HTTP/1.1" + CRLF + CRLF;
-		HttpResponse response = executeRequestString(request);
+		HttpResponse response = executeRawRequest(request);
 		int actualsc = response.getStatusLine().getStatusCode();
 		assumeThat(actualsc, is(HttpStatus.SC_BAD_REQUEST));
 
 		// check now the case-sensitivity
 		String headerName = "HoSt";
-		request = "GET / HTTP/1.1" + CRLF 
-				+ headerName + ":" + getDefaultHostHeaderValue() + CRLF 
-				+ CRLF;
-		response = executeRequestString(request);
+		request = "GET / HTTP/1.1" + CRLF + headerName + ":"
+				+ getDefaultHostHeaderValue() + CRLF + CRLF;
+		response = executeRawRequest(request);
 		assertEqualsStatusCode(HttpStatus.SC_OK, response);
 	}
-	
+
 	/**
 	 * <b>Implements:</b> Headers13
 	 * <p/>
@@ -520,13 +529,13 @@ public class HeaderTest extends AbstractHttpTestCase {
 			throws Exception {
 		// assume that the next passes
 		HttpGet request00 = new HttpGet("/");
-		String lmd = executeRequest(request00).getFirstHeader(HttpHeaders.LAST_MODIFIED)
-				.getValue();
+		String lmd = executeRequest(request00)
+				.getFirstHeader(HttpHeaders.LAST_MODIFIED).getValue();
 		request00.addHeader(HttpHeaders.IF_MODIFIED_SINCE, lmd);
 		HttpResponse response = executeRequest(request00);
 		int actualsc = response.getStatusLine().getStatusCode();
 		assumeThat(actualsc, is(HttpStatus.SC_NOT_MODIFIED));
-		
+
 		// check now the case-sensitivity
 		HttpGet request01 = new HttpGet("/");
 		String headerName = "iF-mOdIfIeD-sInCe";
@@ -534,7 +543,7 @@ public class HeaderTest extends AbstractHttpTestCase {
 		response = executeRequest(request01);
 		assertEqualsStatusCode(HttpStatus.SC_NOT_MODIFIED, response);
 	}
-	
+
 	/**
 	 * <b>Implements:</b> Headers14
 	 * <p/>
@@ -549,8 +558,8 @@ public class HeaderTest extends AbstractHttpTestCase {
 			throws Exception {
 		// assume that the next passes
 		HttpGet request00 = new HttpGet("/");
-		String slmd = executeRequest(request00).getFirstHeader(HttpHeaders.LAST_MODIFIED)
-				.getValue();
+		String slmd = executeRequest(request00)
+				.getFirstHeader(HttpHeaders.LAST_MODIFIED).getValue();
 		Date lmd = DateUtils.parseDate(slmd,
 				new String[] { DateUtils.PATTERN_RFC1123 });
 		Date cond = org.apache.commons.lang.time.DateUtils.addSeconds(lmd, -1);
@@ -559,7 +568,7 @@ public class HeaderTest extends AbstractHttpTestCase {
 		HttpResponse response = executeRequest(request00);
 		int actualsc = response.getStatusLine().getStatusCode();
 		assumeThat(actualsc, is(HttpStatus.SC_PRECONDITION_FAILED));
-		
+
 		// check now the case-sensitivity
 		HttpGet request01 = new HttpGet("/");
 		String headerName = "iF-uNmOdIfIeD-sInCe";

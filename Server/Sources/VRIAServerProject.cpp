@@ -36,7 +36,7 @@
 #include "VRIAServerJSCore.h"
 #include "VDataService.h"
 #include "VRIAPermissions.h"
-#include "JSDebugger/Headers/JSWDebugger.h"
+#include "VRIAJSDebuggerSettings.h"
 
 #if VERSIONMAC
 #include "AuthorizationHelpers.h"
@@ -45,13 +45,80 @@
 USING_TOOLBOX_NAMESPACE
 
 
-
 namespace ProjectOpeningParametersKeys
 {
 	CREATE_BAGKEY_WITH_DEFAULT_SCALAR( openingMode, XBOX::VLong, sLONG, ePOM_FOR_RUNNING);
 	CREATE_BAGKEY_NO_DEFAULT_SCALAR( customHttpPort, XBOX::VLong, sLONG);
+	CREATE_BAGKEY_NO_DEFAULT_SCALAR( customSSLPort, XBOX::VLong, sLONG);
+	CREATE_BAGKEY_NO_DEFAULT( customAuthenticationType, XBOX::VString);
+	CREATE_BAGKEY_WITH_DEFAULT_SCALAR( enableChrmDebugHandler, XBOX::VBoolean, bool, false);
+	CREATE_BAGKEY_WITH_DEFAULT_SCALAR(handlesDebuggerServer, XBOX::VBoolean, bool, false);
 }
 
+
+
+//--------------------------------------------------------------------------------------------------
+
+
+bool _FindExistingFileInProjectHierarchy (VRIAServerProject *inProject, const XBOX::VString& inFileName, XBOX::VFilePath& outFilePath)
+{
+	if (NULL == inProject)
+		return false;
+
+	bool			found = false;
+	VProject *		project = inProject->GetDesignProject();
+	XBOX::VFilePath	path;
+
+	outFilePath.Clear();
+
+	if (NULL != project)
+	{
+		project->GetProjectFolderPath (path);
+		path.ToSubFile (inFileName);
+
+		{
+			XBOX::VFile file (path);
+			if (file.Exists())
+				found = true;
+		}
+
+		if (!found)
+		{
+			VSolution* solution = project->GetSolution();
+
+			if (NULL != solution)
+			{
+				solution->GetSolutionFolderPath (path);
+				path.ToSubFile (inFileName);
+				XBOX::VFile file (path);
+				if (file.Exists())
+					found = true;
+			}
+		}
+
+		if (!found)
+		{
+			XBOX::VFolder * waLibFolder = VRIAServerApplication::Get()->RetainFolder (VRIAServerApplication::eFS_Walib);
+			path = waLibFolder->GetPath();
+			XBOX::ReleaseRefCountable (&waLibFolder);
+			path.ToSubFolder (CVSTR ("WAF"));
+			path.ToSubFolder (CVSTR ("routing"));
+			path.ToSubFile (inFileName);
+
+			VFile file (path);
+			if (file.Exists())
+				found = true;
+		}
+	}
+
+	if (found)
+		outFilePath.FromFilePath (path);
+
+	return found;
+}
+
+
+//--------------------------------------------------------------------------------------------------
 
 
 VRIAServerProjectOpeningParameters::VRIAServerProjectOpeningParameters()
@@ -88,6 +155,53 @@ bool VRIAServerProjectOpeningParameters::GetCustomHttpPort( sLONG& outPort) cons
 }
 
 
+void VRIAServerProjectOpeningParameters::SetCustomSSLPort( sLONG inPort)
+{
+	ProjectOpeningParametersKeys::customSSLPort.Set( &fBag, inPort);
+}
+
+
+bool VRIAServerProjectOpeningParameters::GetCustomSSLPort( sLONG& outPort) const
+{
+	return ProjectOpeningParametersKeys::customSSLPort.Get( &fBag, outPort);
+}
+
+
+void VRIAServerProjectOpeningParameters::SetCustomAuthenticationType( const XBOX::VString& inAuthenticationType)
+{
+	ProjectOpeningParametersKeys::customAuthenticationType.Set( &fBag, inAuthenticationType);
+}
+
+
+bool VRIAServerProjectOpeningParameters::GetCustomAuthenticationType( XBOX::VString& outAuthenticationType) const
+{
+	return ProjectOpeningParametersKeys::customAuthenticationType.Get( &fBag, outAuthenticationType);
+}
+
+
+void VRIAServerProjectOpeningParameters::SetEnableChrmDebugHandler( bool inEnable)
+{
+	ProjectOpeningParametersKeys::enableChrmDebugHandler.Set( &fBag, inEnable);
+}
+
+
+bool VRIAServerProjectOpeningParameters::GetEnableChrmDebugHandler() const
+{
+	return ProjectOpeningParametersKeys::enableChrmDebugHandler.Get( &fBag);
+}
+
+
+void VRIAServerProjectOpeningParameters::SetHandlesDebuggerServer(bool inEnable)
+{
+	ProjectOpeningParametersKeys::handlesDebuggerServer.Set(&fBag, inEnable);
+}
+
+
+bool VRIAServerProjectOpeningParameters::GetHandlesDebuggerServer() const
+{
+	return ProjectOpeningParametersKeys::handlesDebuggerServer.Get(&fBag);
+}
+
 
 // ----------------------------------------------------------------------------
 
@@ -105,27 +219,6 @@ protected:
 			{
 				if (fApplication != NULL)
 					fApplication->_StopHTTPServer();
-			}
-
-private:
-			VRIAServerProject	*fApplication;
-};
-
-
-// ----------------------------------------------------------------------------
-
-
-class VReloadCatalogMessage : public VMessage
-{
-public:
-	VReloadCatalogMessage( VRIAServerProject* inApplication) { fApplication = RetainRefCountable( inApplication); }
-	virtual ~VReloadCatalogMessage() { QuickReleaseRefCountable( fApplication); }
-
-protected:
-	virtual	void DoExecute()
-			{
-				if (fApplication != NULL)
-					fApplication->ReloadCatalog( NULL);
 			}
 
 private:
@@ -151,6 +244,24 @@ public:
 			{
 			}
 
+	virtual	VJSGlobalContext* RetainJSContext( VError* outError, bool inReusable)
+			{
+				VError err = VE_OK;
+				
+				VJSGlobalContext *context = fApplication->RetainJSContext( err, inReusable, NULL);
+
+				if (outError != NULL)
+					*outError = err;
+
+				return context;
+			}
+
+	virtual	VError ReleaseJSContext( VJSGlobalContext* inContext)
+			{
+				fApplication->ReleaseJSContext( inContext, NULL);
+				return VE_OK;
+			}
+
 	virtual CUAGSession* CopyUAGSession( const XBOX::VString& inUAGSessionID)
 			{
 				CUAGSession *uagSession = NULL;
@@ -160,6 +271,14 @@ public:
 					VUUID uuid;
 					uuid.FromString( inUAGSessionID);
 					uagSession = sessionMgr->RetainSession( uuid);
+					if (uagSession != NULL)
+					{
+						if (uagSession->hasExpired())
+						{
+							sessionMgr->RemoveSession( uagSession);
+							ReleaseRefCountable( &uagSession);
+						}
+					}
 					ReleaseRefCountable( &sessionMgr);
 				}
 				return uagSession;
@@ -181,6 +300,12 @@ public:
 							sessionMgr->Release();
 						}
 					}
+				}
+				else
+				{
+					XBOX::VString cookieValue;
+					if (ioResponse->GetRequest().GetCookie (kHTTP_SESSION_COOKIE_NAME, cookieValue) && !cookieValue.IsEmpty())
+						ioResponse->DropCookie (kHTTP_SESSION_COOKIE_NAME);
 				}
 			}
 
@@ -207,15 +332,6 @@ fJSRuntimeDelegate(NULL),
 fRPCService(NULL),
 fLogReader(NULL),
 fOpeningParameters(NULL),
-#if !USE_JAVASCRIPT_WEBAPP_SERVICE
-fIsWebAppServiceManager(false),
-#endif
-#if !USE_JAVASCRIPT_DATASTORE_SERVICE
-fIsDataServiceManager(false),
-#endif
-#if !USE_JAVASCRIPT_RPC_SERVICE
-fIsRPCServiceManager(false),
-#endif
 fHTTPServerProject (NULL),
 fApplicationStorage(NULL),
 fApplicationSettings(NULL),
@@ -223,7 +339,8 @@ fSessionMgr(NULL),
 fRequestNumber(0),
 fLastGarbageCollectRequest(0),
 fLastWorkingSetSize(0),
-fPermissions(NULL)
+fPermissions(NULL),
+fBackupSettings(NULL)
 {
 	fState.opened = false;
 	fState.started = false;
@@ -244,15 +361,6 @@ fJSRuntimeDelegate(NULL),
 fRPCService(NULL),
 fLogReader(NULL),
 fOpeningParameters(NULL),
-#if !USE_JAVASCRIPT_WEBAPP_SERVICE
-fIsWebAppServiceManager(false),
-#endif
-#if !USE_JAVASCRIPT_DATASTORE_SERVICE
-fIsDataServiceManager(false),
-#endif
-#if !USE_JAVASCRIPT_RPC_SERVICE
-fIsRPCServiceManager(false),
-#endif
 fHTTPServerProject (NULL),
 fApplicationStorage(NULL),
 fApplicationSettings(NULL),
@@ -260,7 +368,8 @@ fSessionMgr(NULL),
 fRequestNumber(0),
 fLastGarbageCollectRequest(0),
 fLastWorkingSetSize(0),
-fPermissions(NULL)
+fPermissions(NULL),
+fBackupSettings(NULL)
 {
 	fState.opened = false;
 	fState.started = false;
@@ -399,6 +508,97 @@ VError VRIAServerProject::Start()
 	VError err = VE_OK;
 	StErrorContextInstaller errContext;
 
+#if 1//DYNAMIC_DBGR_FEATURE
+	if (fOpeningParameters->GetHandlesDebuggerServer())
+	{
+		JSWDebuggerFactory		l_fctry;
+
+#if defined(_DEBUG) && 0 // early debug deactivated for the moment (waiting for SC's modif
+
+		VError l_err;
+			IHTTPServerProjectSettings *httpServerSettings = fHTTPServerProject->GetSettings();
+
+			XBOX::VString	l_ip_str = ServerNetTools::GetFirstLocalAddress();
+
+			IWAKDebuggerServer*		l_chr_dbgr = NULL;
+
+			VFolder*		l_folder = VRIAServerApplication::Get()->RetainApplicationResourcesFolder();
+			VFilePath		l_file_path;
+			VFile*			l_file;
+			VString			l_traces_content("");
+			l_file_path = l_folder->GetPath();
+			l_file_path.ToSubFolder( L"debugger").ToSubFolder( L"chromium");
+			l_file_path.SetFileName( L"remote_traces.skeleton", true);
+			l_file = new VFile(l_file_path);
+			if ( l_file && l_file->Exists() )
+			{
+				VFileStream		l_file_stream(l_file);
+				l_err = l_file_stream.OpenReading();
+				if (!l_err)
+				{
+					l_err = l_file_stream.GetText(l_traces_content);
+					l_file_stream.CloseReading();
+				}
+				QuickReleaseRefCountable(l_file);
+			}
+
+			l_file_path = l_folder->GetPath();
+			l_file_path.ToSubFolder( L"debugger").ToSubFolder( L"chromium");
+			l_file_path.SetFileName( L"remote_debugger.skeleton", true);
+			l_file = new VFile(l_file_path);
+			if ( l_file && l_file->Exists() )
+			{
+				VFileStream		l_file_stream(l_file);
+				VString			l_content("");
+				l_err = l_file_stream.OpenReading();
+				if (!l_err)
+				{
+					l_err = l_file_stream.GetText(l_content);
+					l_file_stream.CloseReading();
+					l_chr_dbgr = l_fctry.GetChromeDebugHandler(
+						l_ip_str,
+						(sLONG)httpServerSettings->GetListeningPort(),
+						l_content,
+						l_traces_content);
+				}
+				QuickReleaseRefCountable(l_file);
+			}
+			else
+			{
+				l_err = VE_INVALID_PARAMETER;
+			}
+			ReleaseRefCountable(&l_folder);
+			if (!l_err && testAssert(NULL != l_chr_dbgr))
+			{
+				VJSGlobalContext::SetDebuggerServer( l_chr_dbgr );
+				l_chr_dbgr->StartServer();
+				{
+					const VFolder *			vfRoot = fSolution->RetainFolder();
+					if ( vfRoot != 0 )
+					{
+						VJSGlobalContext::SetSourcesRoot( *vfRoot );
+						vfRoot->Release();
+						VJSGlobalContext::AllowDebuggerLaunch();
+					}
+				}
+				DebugMsg("VRIAServerProject::Start SetDebuggerServer OK: chrome debugger set !!!!\n");
+				fHTTPServerProject->AddHTTPRequestHandler(dynamic_cast<VChromeDebugHandler*>(l_chr_dbgr));
+			}
+#else
+
+		IWAKDebuggerServer*	l_dbgr_srv = l_fctry.Get();
+		VJSGlobalContext::SetDebuggerServer( l_dbgr_srv );
+		l_dbgr_srv->StartServer();
+		const VFolder *			vfRoot = fSolution->RetainFolder( );
+		if ( vfRoot != 0 )
+		{
+			VJSGlobalContext::SetSourcesRoot( *vfRoot );
+			vfRoot->Release();
+			VJSGlobalContext::AllowDebuggerLaunch();
+		}
+#endif
+	}
+#endif
 	if (fJSContextPool != NULL)
 	{
 		fJSContextPool->SetEnabled( true);
@@ -409,72 +609,6 @@ VError VRIAServerProject::Start()
 	{
 		if (fHTTPServerProject != NULL)
 		{
-
-		#if !USE_JAVASCRIPT_WEBAPP_SERVICE
-			// Is the Web App Service enabled on startup ?
-			VValueBag *webAppSettings = fSettings.RetainSettings( RIASettingID::webApp);
-			if (webAppSettings != NULL)
-			{
-				fIsWebAppServiceManager = true;
-
-				err = _SetWebAppServiceEnabled( RIASettingsKeys::WebApp::enabled.Get( webAppSettings));
-				if (err != VE_OK)
-					err = ThrowError( (RIASettingsKeys::WebApp::enabled.Get( webAppSettings)) ? VE_RIA_CANNOT_ENABLE_WEB_APP_SERVICE : VE_RIA_CANNOT_DISABLE_WEB_APP_SERVICE);
-				
-				webAppSettings->Release();
-			}
-		#endif
-
-
-		#if !USE_JAVASCRIPT_DATASTORE_SERVICE
-			if (fDataService != NULL)
-			{
-				// Is the Data Service enabled on startup ?
-				VValueBag *dataServiceSettings = fSettings.RetainSettings( RIASettingID::dataService);
-				if (dataServiceSettings != NULL)
-				{
-					fIsDataServiceManager = true;
-
-					if (fDatabase != NULL)
-					{
-						bool enabled = RIASettingsKeys::DataService::enabled.Get( dataServiceSettings);
-						
-						err = fDataService->SetEnabled( enabled);
-						if (err != VE_OK)
-							err = ThrowError( enabled ? VE_RIA_CANNOT_ENABLE_DATA_SERVICE : VE_RIA_CANNOT_DISABLE_DATA_SERVICE);
-					}
-					dataServiceSettings->Release();
-				}
-			}
-		#endif
-
-			
-		#if !USE_JAVASCRIPT_RPC_SERVICE
-			if (fRPCService != NULL)
-			{
-				// Is the RPC Service enabled on startup ?
-				VValueBag *rpcSettingsBag = fSettings.RetainSettings( RIASettingID::rpcService);
-				if (rpcSettingsBag != NULL)
-				{
-					fIsRPCServiceManager = true;
-
-					bool enabled = RIASettingsKeys::RPCService::enabled.Get( rpcSettingsBag);
-
-					if (enabled)
-					{
-						fRPCService->SetPatternForProxy( L"^/rpc-proxy/");
-						fRPCService->SetPublishInClientGlobalNamespace( RIASettingsKeys::RPCService::publishInClientGlobalNamespace.Get( rpcSettingsBag));
-					}
-
-					err = fRPCService->SetEnabled( enabled);
-					if (err != VE_OK)
-						err = ThrowError( enabled ? VE_RIA_CANNOT_ENABLE_RPC_SERVICE : VE_RIA_CANNOT_DISABLE_RPC_SERVICE);
-
-					rpcSettingsBag->Release();
-				}
-			}
-		#endif
-
 			// For debugging purpose, add a handler for the requests sent by Wakanda Studio
 			VDebugHTTPRequestHandler *debugHandler = new VDebugHTTPRequestHandler( this, CVSTR("(?i)/debug/.*"));
 			if (debugHandler != NULL)
@@ -586,21 +720,6 @@ VError VRIAServerProject::Stop()
 	// Post 'applicationWillStop' message to the services
 	_PostServicesMessage( L"applicationWillStop");
 
-#if !USE_JAVASCRIPT_WEBAPP_SERVICE
-	if (fIsWebAppServiceManager)
-		_SetWebAppServiceEnabled( false);
-#endif
-
-#if !USE_JAVASCRIPT_DATASTORE_SERVICE
-	if ((fDataService != NULL) && fIsDataServiceManager)
-		fDataService->SetEnabled( false);
-#endif
-
-#if !USE_JAVASCRIPT_RPC_SERVICE
-	if ((fRPCService != NULL) && fIsRPCServiceManager)
-		fRPCService->SetEnabled( false);
-#endif
-
 	if (fHTTPServerProject != NULL)
 	{
 		if (fHTTPServerProject->IsProcessing())
@@ -617,7 +736,16 @@ VError VRIAServerProject::Stop()
 		fJSContextPool->SetEnabled( false);
 		fJSContextPool->Clear();
 	}
-
+#if 1//DYNAMIC_DBGR_FEATURE
+	if (fOpeningParameters->GetHandlesDebuggerServer())
+	{
+		IWAKDebuggerServer*	l_dbgr_srv = VJSGlobalContext::GetDebuggerServer();
+		if (l_dbgr_srv)
+		{
+			l_dbgr_srv->StopServer();
+		}
+	}
+#endif
 	logger.LogMessagesFromErrorContext( fLoggerID, errContext.GetContext());
 
 	fState.started = false;
@@ -791,37 +919,8 @@ bool VRIAServerProject::IsHTTPServerProjectStarted (VRIAContext* inContext)
 }
 
 
-VError VRIAServerProject::SetWebAppServiceEnabled( VRIAContext* inContext, bool inEnabled)
-{
-	VError err = VE_OK;
-
-	VRIAContext *context = _ValidateAndRetainContext( inContext, true);
-	if (context != NULL)
-	{
-		err = _SetWebAppServiceEnabled( inEnabled);
-		context->Release();
-	}
-	return err;
-}
-
-
-bool VRIAServerProject::IsWebAppServiceEnabled( VRIAContext* inContext)
-{
-	bool result = false;
-
-	VRIAContext *context = _ValidateAndRetainContext( inContext, true);
-	if (context != NULL)
-	{
-		if (fHTTPServerProject != NULL)
-			result = fHTTPServerProject->GetEnableStaticPagesService();
-
-		context->Release();
-	}
-	return result;
-}
-
-
 CDB4DBase* VRIAServerProject::RetainDatabase( VRIAContext* inContext)
+
 {
 	CDB4DBase *base = NULL;
 
@@ -858,64 +957,6 @@ VDataService* VRIAServerProject::RetainDataService( VRIAContext* inContext, VErr
 }
 
 
-VError VRIAServerProject::SetDataServiceEnabled( VRIAContext* inContext, bool inEnabled)
-{
-	VError err = VE_OK;
-
-	VRIAContext *context = _ValidateAndRetainContext( inContext, true);
-	if (context != NULL)
-	{
-		if (fDataService != NULL)
-		{
-			if (inEnabled && !fDataService->IsEnabled())
-			{
-				VValueBag *dataServiceSettings = fSettings.RetainSettings( RIASettingID::dataService);
-				if (dataServiceSettings != NULL)
-				{
-					err = fDataService->SetEnabled( inEnabled);
-
-					ReleaseRefCountable( &dataServiceSettings);
-				}
-				else
-				{
-					err = ThrowError( VE_RIA_DATA_SERVICE_SETTINGS_NOT_FOUND);
-				}
-			}
-			else if (!inEnabled && fDataService->IsEnabled())
-			{
-				err = fDataService->SetEnabled( inEnabled);
-			}
-		}
-		else
-		{
-			err = ThrowError( VE_RIA_DATA_SERVICE_NOT_FOUND);
-		}
-		context->Release();
-	}
-	else
-	{
-		err = ThrowError( VE_RIA_INVALID_CONTEXT);
-	}
-	return err;
-}
-
-
-bool VRIAServerProject::IsDataServiceEnabled( VRIAContext* inContext)
-{
-	bool result = false;
-
-	VRIAContext *context = _ValidateAndRetainContext( inContext, true);
-	if (context != NULL)
-	{
-		if (fDataService != NULL)
-			result = fDataService->IsEnabled();
-
-		context->Release();
-	}
-	return result;
-}
-
-
 VError VRIAServerProject::ReloadCatalog( VRIAContext* inContext)
 {
 	VError err = VE_OK;
@@ -939,17 +980,6 @@ VError VRIAServerProject::ReloadCatalog( VRIAContext* inContext)
 			{
 				if (fDataService != NULL)
 				{
-				#if !USE_JAVASCRIPT_DATASTORE_SERVICE
-					if (fIsDataServiceManager)
-					{
-						if (fDataService->IsEnabled())
-						{
-							enableDataService = true;
-							err = fDataService->SetEnabled( false);
-						}
-					}
-				#endif
-
 					fDataService->SetDatabase( NULL);
 				}
 				
@@ -1010,11 +1040,6 @@ VError VRIAServerProject::ReloadCatalog( VRIAContext* inContext)
 						if (fDataService != NULL)
 						{
 							fDataService->SetDatabase( fDatabase);
-						
-						#if !USE_JAVASCRIPT_DATASTORE_SERVICE
-							if (fIsDataServiceManager && enableDataService)
-								err = fDataService->SetEnabled( true);
-						#endif
 						}
 					}
 					else
@@ -1089,122 +1114,6 @@ VRPCService* VRIAServerProject::RetainRPCService( VRIAContext* inContext, XBOX::
 }
 
 
-VError VRIAServerProject::SetRPCServiceEnabled( VRIAContext* inContext, bool inEnabled)
-{
-	VError err = VE_OK;
-
-	VRIAContext *context = _ValidateAndRetainContext( inContext, true);
-	if (context != NULL)
-	{
-		if (fRPCService != NULL)
-		{
-			if (inEnabled && !fRPCService->IsEnabled())
-			{
-				// Update the RPC Service with the settings
-				VValueBag *settingsBag = fSettings.RetainSettings( RIASettingID::rpcService);
-				if (settingsBag != NULL)
-				{
-					fRPCService->SetPatternForProxy( L"^/rpc-proxy/");
-					fRPCService->SetPublishInClientGlobalNamespace( RIASettingsKeys::RPCService::publishInClientGlobalNamespace.Get( settingsBag));
-
-					err = fRPCService->SetEnabled( inEnabled);
-
-					settingsBag->Release();
-				}
-				else
-				{
-					err = ThrowError( VE_RIA_RPC_SERVICE_SETTINGS_NOT_FOUND);
-				}
-			}
-			else if (!inEnabled && fRPCService->IsEnabled())
-			{
-				err = fRPCService->SetEnabled( inEnabled);
-			}
-		}
-		else
-		{
-			err = ThrowError( VE_RIA_RPC_SERVICE_NOT_FOUND);
-		}
-
-		context->Release();
-	}
-	else
-	{
-		err = ThrowError( VE_RIA_INVALID_CONTEXT);
-	}
-	return err;
-}
-
-
-bool VRIAServerProject::IsRPCServiceEnabled( VRIAContext* inContext)
-{
-	bool result = false;
-
-	VRIAContext *context = _ValidateAndRetainContext( inContext, true);
-	if (context != NULL)
-	{
-		if (fRPCService != NULL)
-			result = fRPCService->IsEnabled();
-
-		context->Release();
-	}
-	return result;
-}
-
-
-VFile* VRIAServerProject::RetainRPCMethodsFileFromRelativePath( VError& outError, const VString& inRelativePath, FilePathStyle inRelativPathStyle)
-{
-	VFile *result = NULL;
-
-	outError = VE_OK;
-
-	// The path may be relative to the default rpc folder
-	VString relativePath;
-	VFilePath fullPath;
-	VProjectItemTagManager::Get()->GetPreferedDefaultFolder( kRPCMethodTag, relativePath);
-	relativePath.AppendString( inRelativePath);
-	BuildPathFromRelativePath( fullPath, relativePath, inRelativPathStyle);
-
-	if (!fullPath.IsEmpty() && fullPath.IsFile())
-	{
-		result = new VFile( fullPath);
-		if (result != NULL)
-		{
-			if (!result->Exists())
-				ReleaseRefCountable( &result);
-		}
-		else
-		{
-			outError = ThrowError( VE_MEMORY_FULL);
-		}
-	}
-
-	if (outError == VE_OK && result == NULL)
-	{
-		// The path may be relative to the project folder
-		BuildPathFromRelativePath( fullPath, inRelativePath, inRelativPathStyle);
-		if (!fullPath.IsEmpty() && fullPath.IsFile())
-		{
-			result = new VFile( fullPath);
-			if (result != NULL)
-			{
-				if (!result->Exists())
-					ReleaseRefCountable( &result);
-			}
-			else
-			{
-				outError = ThrowError( VE_MEMORY_FULL);
-			}
-		}
-	}
-
-	if (result == NULL)
-		outError = ThrowError( VE_FILE_NOT_FOUND);
-
-	return result;
-}
-
-
 CUAGDirectory* VRIAServerProject::RetainUAGDirectory( VError& outError)
 {
 	if (fSolution == NULL)
@@ -1238,6 +1147,35 @@ VRIAPermissions* VRIAServerProject::RetainPermissions( VRIAContext *inContext, X
 		*outError = err;
 
 	return permissions;
+}
+
+IBackupSettings* VRIAServerProject::RetainBackupSettings(VRIAContext *inContext,VError* outError)
+{
+	VError err = VE_OK;
+	IBackupSettings *settings = NULL;
+
+	VRIAContext *context = _ValidateAndRetainContext( inContext, true);
+	if (context != NULL)
+	{
+		if (fBackupSettings == NULL)
+		{
+			_LoadBackupSettings();
+		}
+		if (fBackupSettings)
+		{
+			settings = RetainRefCountable( fBackupSettings);
+		}
+		context->Release();
+	}
+	else
+	{
+		err = ThrowError( VE_RIA_INVALID_CONTEXT);
+	}
+
+	if (outError != NULL)
+		*outError = err;
+
+	return settings;
 }
 
 
@@ -1320,8 +1258,11 @@ VJSGlobalContext* VRIAServerProject::RetainJSContext( VError& outError, bool inR
 		{
 			if (inRequest != NULL)
 			{
-				// Retreive the session according to the cookie
-				session = fSessionMgr->RetainSessionFromCookie( *inRequest);
+				// sc 09/08/2012, retreive the session from the authentication infos instead of the cookie
+				IAuthenticationInfos *authInfo = inRequest->GetAuthenticationInfos();
+				if (authInfo != nil)
+					session = RetainRefCountable( authInfo->GetUAGSession());
+
 				if (session != NULL)
 				{
 					if (session->hasExpired())
@@ -1386,74 +1327,72 @@ void VRIAServerProject::ReleaseJSContext( VJSGlobalContext* inContext, IHTTPResp
 			::DebugMsg ( vstrMessage );
 		}
 
-		VJSContext		jsContext( inContext);
-
-		CUAGSession* session = NULL;
-
-		VRIAJSRuntimeContext *rtContext = VRIAJSRuntimeContext::GetFromJSContext( jsContext);
-		if (rtContext != NULL)
+		// sc 28/05/2012, ensure the VJSContext object is destroyed before release the context
 		{
-			CDB4DContext* dbcontext = rtContext->RetainDB4DContext(this);
-			if (dbcontext != NULL)
+			VJSContext		jsContext( inContext);
+
+			CUAGSession* session = NULL;
+
+			VRIAJSRuntimeContext *rtContext = VRIAJSRuntimeContext::GetFromJSContext( jsContext);
+			if (rtContext != NULL)
 			{
-				dbcontext->CleanUpForReuse();
-				dbcontext->Release();
+				CDB4DContext* dbcontext = rtContext->RetainDB4DContext(this);
+				if (dbcontext != NULL)
+				{
+					dbcontext->CleanUpForReuse();
+					dbcontext->Release();
+				}
+
+				// This will make sure session storage object is unlocked (user may have locked it and forgot to unlock).
+				VJSSessionStorageObject	*sessionStorageObject = rtContext->GetSessionStorageObject();
+				if (sessionStorageObject != NULL)
+					sessionStorageObject->ForceUnlock();
+
+
+				session = rtContext->RetainUAGSession();
+				rtContext->SetUAGSession( NULL); // sc 05/06/2012, WAK0076874, the default session may be reused from an other client
 			}
 
-			// This will make sure session storage object is unlocked (user may have locked it and forgot to unlock).
-			VJSSessionStorageObject	*sessionStorageObject = rtContext->GetSessionStorageObject();
-			if (sessionStorageObject != NULL)
-				sessionStorageObject->ForceUnlock();
-
-
-			session = rtContext->RetainUAGSession();
-		}
-
-		// Finally, update the cookie
-		if (inResponse != NULL)
-		{
-			if (session != NULL)
-				session->SetCookie( *inResponse, kHTTP_SESSION_COOKIE_NAME);
-			else
+			// Finally, update the cookie
+			if (inResponse != NULL)
 			{
-				XBOX::VString cookieValue;
-				if (inResponse->GetRequest().GetCookie (kHTTP_SESSION_COOKIE_NAME, cookieValue))
-					inResponse->DropCookie (kHTTP_SESSION_COOKIE_NAME);
+				// sc 09/08/2012, cause HTTP server use the authentication infos UAG session to set the response, the session must be updated here
+				inResponse->GetRequest().GetAuthenticationInfos()->SetUAGSession( session);
+			}
+			
+			QuickReleaseRefCountable( session);
+
+			if ( fSolution != 0 && fSolution-> CanGarbageCollect ( ) )
+			{
+				VInterlocked::Increment ( &fRequestNumber );
+				sLONG8			nWorkingSetSize = 0;
+				if ( VSystem::AllowedToGetSystemInfo ( ) )
+					nWorkingSetSize = VSystem::GetApplicationPhysicalMemSize ( );
+
+				if ( fLastGarbageCollectRequest + 10 < fRequestNumber || fLastWorkingSetSize + 50000000 < nWorkingSetSize )
+				{
+					fLastGarbageCollectRequest = fRequestNumber;
+					fLastWorkingSetSize = nWorkingSetSize;
+					/*
+						Problem: this may be not the context hogging the memory. Need to garbage collect all contexts.
+						Need to have a usage (request) counter per context. 
+					*/
+					VString		vstrMessage ( "Garbage collecting context " );
+					sLONG8		nContext = ( sLONG8 ) inContext;
+					vstrMessage. AppendLong8 ( nContext );
+					vstrMessage. AppendCString ( "\n" );
+					::DebugMsg ( vstrMessage );
+
+					VJSGlobalObject*		globalObject = jsContext. GetGlobalObjectPrivateInstance ( );
+					globalObject-> GarbageCollect ( );
+
+					jsContext. GarbageCollect ( );
+				}
 			}
 		}
-		
-		QuickReleaseRefCountable( session);
 
-		sLONG8	nContext = ( sLONG8 ) inContext;
 		if (fJSContextPool != NULL)
 			fJSContextPool->ReleaseContext( inContext);
-
-		if ( fSolution != 0 && fSolution-> CanGarbageCollect ( ) )
-		{
-			VInterlocked::Increment ( &fRequestNumber );
-			sLONG8			nWorkingSetSize = 0;
-			if ( VSystem::AllowedToGetSystemInfo ( ) )
-				nWorkingSetSize = VSystem::GetApplicationPhysicalMemSize ( );
-
-			if ( fLastGarbageCollectRequest + 10 < fRequestNumber || fLastWorkingSetSize + 50000000 < nWorkingSetSize )
-			{
-				fLastGarbageCollectRequest = fRequestNumber;
-				fLastWorkingSetSize = nWorkingSetSize;
-				/*
-					Problem: this may be not the context hogging the memory. Need to garbage collect all contexts.
-					Need to have a usage (request) counter per context. 
-				*/
-				VString		vstrMessage ( "Garbage collecting context " );
-				vstrMessage. AppendLong8 ( nContext );
-				vstrMessage. AppendCString ( "\n" );
-				::DebugMsg ( vstrMessage );
-
-				VJSGlobalObject*		globalObject = jsContext. GetGlobalObjectPrivateInstance ( );
-				globalObject-> GarbageCollect ( );
-
-				jsContext. GarbageCollect ( );
-			}
-		}
 	}
 }
 
@@ -1646,9 +1585,6 @@ VError VRIAServerProject::GetPublicationSettings( VString& outHostName, VString&
 				ServerNetTools::GetIPAdress( ipv4Addresses.front(), outIP);
 			}
 		}
-
-#elif DEPRECATED_IPV4_API_SHOULD_NOT_COMPILE
-	#error NEED AN IP V6 UPDATE
 #endif
 	}
 	
@@ -1673,6 +1609,25 @@ void VRIAServerProject::GetMessagesLoggerID( XBOX::VString& outLoggerID) const
 	outLoggerID = fLoggerID;
 }
 
+
+void VRIAServerProject::BuildPathFromRelativePath( VFilePath& outPath, const VString& inRelativePath,const VString& inProjectItemRole, FilePathStyle inRelativPathStyle) const
+{
+	bool done = false;
+	
+	outPath.Clear();
+
+	if (fDesignProject != NULL)
+	{
+		VProjectItem *item = fDesignProject->GetProjectItemFromTag(inProjectItemRole);
+		if (item != NULL)
+		{
+			VFilePath folderPath;
+			item->GetFilePath( folderPath);
+			folderPath = folderPath.ToFolder();
+			outPath.FromRelativePath( folderPath, inRelativePath, inRelativPathStyle);
+		}
+	}	
+}
 
 void VRIAServerProject::BuildPathFromRelativePath( VFilePath& outPath, const VString& inRelativePath, FilePathStyle inRelativPathStyle) const
 {
@@ -1705,6 +1660,148 @@ void VRIAServerProject::BuildPathFromRelativePath( VFilePath& outPath, const VSt
 	}	
 }
 
+XBOX::VError VRIAServerProject::SynchronizeJournalInfos( const XBOX::VFilePath& inSourceDataFolderPath,const XBOX::VFilePath& inDestDataFolderPath)
+{
+	return _SynchronizeJournalInfos(inSourceDataFolderPath,inDestDataFolderPath);
+}
+
+WAKDebuggerType_t VRIAServerProject::GetDebuggerServer(VRIAContext* inContext)
+{
+	WAKDebuggerType_t		l_type = REGULAR_DBG_TYPE;
+	IWAKDebuggerServer*		l_dbgr_srv = VJSGlobalContext::GetDebuggerServer();
+	if (l_dbgr_srv)
+	{
+		l_type = l_dbgr_srv->GetType();
+	}
+	DebugMsg("VRIAServerProject::GetDebuggerServer type=%d\n",l_type);
+	return l_type;
+}
+
+VError VRIAServerProject::SetDebuggerServer(VRIAContext* inContext, WAKDebuggerType_t inWAKDebuggerType)
+{
+	VError	l_err = VE_INVALID_PARAMETER;
+
+#if 1//DYNAMIC_DBGR_FEATURE
+	if (!fOpeningParameters->GetHandlesDebuggerServer())
+	{
+		DebugMsg("VRIAServerProject::SetDebuggerServer only handled by admin!!!!\n");
+		l_err = VE_INVALID_PARAMETER;
+	}
+#endif
+#if 1
+	VRIAContext* context = _ValidateAndRetainContext( inContext, false);
+
+	if (context != NULL)
+	{
+		JSWDebuggerFactory		l_fctry;
+		if ( inWAKDebuggerType == WEB_INSPECTOR_TYPE)
+		{
+			IHTTPServerProjectSettings *httpServerSettings = fHTTPServerProject->GetSettings();
+#if WITH_DEPRECATED_IPV4_API	
+			IP4	l_ip_addr = httpServerSettings->GetListeningAddress();
+			if (l_ip_addr == 0)
+			{
+				std::vector<IP4> ipv4Addresses;
+				if (ServerNetTools::GetLocalIPv4Addresses(ipv4Addresses) > 0)
+				{
+					std::vector<IP4>::const_iterator l_it = ipv4Addresses.begin();
+					for( ; (l_it != ipv4Addresses.end()); ++l_it )
+					{
+						l_ip_addr = *l_it;
+						if ( l_ip_addr != 0x7F000001 )
+						{
+							//DebugMsg("VRIAServerProject::SetDebuggerServer found i=%x\n",l_ip_addr);
+							break;
+						}
+					}
+				}
+			}
+			XBOX::VString	l_ip_str;
+			ServerNetTools::GetIPAdress(l_ip_addr, l_ip_str);
+#else
+			XBOX::VString	l_ip_str = ServerNetTools::GetFirstLocalAddress();
+#endif
+			IWAKDebuggerServer*		l_chr_dbgr = NULL;
+
+			VFolder*		l_folder = VRIAServerApplication::Get()->RetainApplicationResourcesFolder();
+			VFilePath		l_file_path;
+			VFile*			l_file;
+			VString			l_traces_content("");
+			l_file_path = l_folder->GetPath();
+			l_file_path.ToSubFolder( L"debugger").ToSubFolder( L"chromium");
+			l_file_path.SetFileName( L"remote_traces.skeleton", true);
+			l_file = new VFile(l_file_path);
+			if ( l_file && l_file->Exists() )
+			{
+				VFileStream		l_file_stream(l_file);
+				l_err = l_file_stream.OpenReading();
+				if (!l_err)
+				{
+					l_err = l_file_stream.GetText(l_traces_content);
+					l_file_stream.CloseReading();
+				}
+				QuickReleaseRefCountable(l_file);
+			}
+
+			l_file_path = l_folder->GetPath();
+			l_file_path.ToSubFolder( L"debugger").ToSubFolder( L"chromium");
+			l_file_path.SetFileName( L"remote_debugger.skeleton", true);
+			l_file = new VFile(l_file_path);
+			if ( l_file && l_file->Exists() )
+			{
+				VFileStream		l_file_stream(l_file);
+				VString			l_content("");
+				l_err = l_file_stream.OpenReading();
+				if (!l_err)
+				{
+					l_err = l_file_stream.GetText(l_content);
+					l_file_stream.CloseReading();
+					l_chr_dbgr = l_fctry.GetChromeDebugHandler(
+						l_ip_str,
+						(sLONG)httpServerSettings->GetListeningPort(),
+						l_content,
+						l_traces_content);
+				}
+				QuickReleaseRefCountable(l_file);
+			}
+			else
+			{
+				l_err = VE_INVALID_PARAMETER;
+			}
+			ReleaseRefCountable(&l_folder);
+			if (!l_err && testAssert(NULL != l_chr_dbgr))
+			{
+				VJSGlobalContext::SetDebuggerServer( l_chr_dbgr );
+				l_chr_dbgr->StartServer();
+				{
+					const VFolder *			vfRoot = fSolution->RetainFolder();
+					if ( vfRoot != 0 )
+					{
+						VJSGlobalContext::SetSourcesRoot( *vfRoot );
+						vfRoot->Release();
+						VJSGlobalContext::AllowDebuggerLaunch();
+					}
+				}
+				DebugMsg("VRIAServerProject::SetDebuggerServer SetDebuggerServer OK: chrome debugger set !!!!\n");
+				fHTTPServerProject->AddHTTPRequestHandler(dynamic_cast<VChromeDebugHandler*>(l_chr_dbgr));
+			}
+		}
+		else
+		{
+			IWAKDebuggerServer*		l_regular_dbgr = l_fctry.Get();
+			if (testAssert(NULL != l_regular_dbgr))
+			{
+				VJSGlobalContext::SetDebuggerServer( l_regular_dbgr );
+				DebugMsg("VRIAServerProject::SetDebuggerServer SetDebuggerServer OK: regular debugger set !!!!\n");
+			}
+		}
+
+#endif
+		context->Release();
+		l_err = VE_OK;
+	}
+	return l_err;
+}
 
 IJSRuntimeDelegate* VRIAServerProject::GetRuntimeDelegate()
 {
@@ -1740,8 +1837,13 @@ VError VRIAServerProject::InitializeJSContext( VJSGlobalContext* inContext)
 					if (db4d != NULL && baseContext != NULL)
 					{
 						VJSObject jsDatabase = db4d->CreateJSDatabaseObject( jsContext, baseContext);
+						//IBackupSettings* pBackupSettings = db4d->CreateBackupSettings();
+						//VJSObject jsBackupSettings = db4d->CreateJSBackupSettings(jsContext,pBackupSettings);
+						
 						globalObject.SetProperty( kSSJS_PROPERTY_NAME_Database, jsDatabase, JS4D::PropertyAttributeDontEnum | JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete, NULL);
 						globalObject.SetProperty( kSSJS_PROPERTY_NAME_DataStore, jsDatabase, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete, NULL);
+						//globalObject.SetProperty( "BackupSettings", jsBackupSettings, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete, NULL);
+						//XBOX::ReleaseRefCountable(&pBackupSettings);
 						db4d->PutAllEmsInGlobalObject(globalObject, baseContext);
 					}
 				}
@@ -1831,7 +1933,7 @@ VError VRIAServerProject::_Open( VProject* inDesignProject, VRIAServerProjectOpe
 
 		if (err == VE_OK || fState.inMaintenance)
 		{
-			err = _LoadPermissionFile();
+			fPermissions = _LoadPermissionFile( err);
 			if  (err != VE_OK)
 				err = ThrowError( VE_RIA_CANNOT_LOAD_PERMISSIONS);
 		}
@@ -1911,6 +2013,20 @@ VError VRIAServerProject::_Open( VProject* inDesignProject, VRIAServerProjectOpe
 					fJSContextPool->AppendRequiredScript( requirePath2);
 				}
 
+				// sc 18/06/2012, append solution required file
+				VSolution *designSolution = fDesignProject->GetSolution();
+				if (designSolution != NULL)
+				{
+					VFilePath requiredPath;
+					if (designSolution->GetSolutionFolderPath( requiredPath))
+					{
+						requiredPath.SetFileName( L"required.js");
+
+						VFile requiredFile( requiredPath);
+						if (requiredFile.Exists())
+							fJSContextPool->AppendRequiredScript( requiredPath);
+					}
+				}
 			}
 			else
 			{
@@ -1985,7 +2101,7 @@ VError VRIAServerProject::_Open( VProject* inDesignProject, VRIAServerProjectOpe
 							fSettings.GetListeningAddress( strValue);
 							httpServerSettings->SetListeningAddress( strValue);
 
-							sLONG httpPort = 0;
+							sLONG httpPort = -1, sslPort = -1;
 							if (fOpeningParameters->GetCustomHttpPort( httpPort))
 							{
 								// Use the custom http port
@@ -1997,11 +2113,35 @@ VError VRIAServerProject::_Open( VProject* inDesignProject, VRIAServerProjectOpe
 							}
 
 							httpServerSettings->SetSSLMandatory( fSettings.GetSSLMandatory());
-							httpServerSettings->SetListeningSSLPort( fSettings.GetListeningSSLPort());
 
-							fSettings.GetSSLCertificatesPath( strValue);
-							VFilePath sslCertificatePath( projectFolderPath, strValue, FPS_POSIX);
+							if (fOpeningParameters->GetCustomSSLPort( sslPort))
+							{
+								// Use the custom ssl port
+								httpServerSettings->SetListeningSSLPort( sslPort);
+							}
+							else
+							{
+								httpServerSettings->SetListeningSSLPort( fSettings.GetListeningSSLPort());
+							}
+
+							VFilePath sslCertificatePath;
+							VValueBag *httpSettings = fSettings.RetainSettings( RIASettingID::http);
+							if (httpSettings->GetString( RIASettingsKeys::HTTP::SSLCertificatePath, strValue))
+							{
+								sslCertificatePath.FromRelativePath( projectFolderPath, strValue, FPS_POSIX);
+							}
+							else
+							{
+								VProjectItem *certificatesFolder = fDesignProject->GetProjectItemFromTag( kProjectCertificatesFolderTag);
+								if ((certificatesFolder == NULL) && (fDesignProject->GetSolution() != NULL))
+									certificatesFolder = fDesignProject->GetSolution()->GetProjectItemFromTag( kSolutionCertificatesFolderTag);
+								
+								if (certificatesFolder != NULL)
+									certificatesFolder->GetFilePath( sslCertificatePath);
+							}
 							httpServerSettings->SetSSLCertificatesFolderPath( sslCertificatePath);
+							ReleaseRefCountable( &httpSettings);
+
 							
 							bool allowSSL = false;
 							if (fSettings.GetAllowSSL() && sslCertificatePath.IsValid() && sslCertificatePath.IsFolder())	// sc 23/02/2012 check for "allowSSL" settings
@@ -2023,7 +2163,8 @@ VError VRIAServerProject::_Open( VProject* inDesignProject, VRIAServerProjectOpe
 							fSettings.GetHostName( strValue);
 							httpServerSettings->SetHostName( strValue);
 
-							fSolution->GetSettings().GetAuthenticationType( strValue);
+							if (!fOpeningParameters->GetCustomAuthenticationType( strValue))
+								fSolution->GetSettings().GetAuthenticationType( strValue);
 							httpServerSettings->SetDefaultAuthType( strValue);
 
 							// Cache settings
@@ -2048,6 +2189,7 @@ VError VRIAServerProject::_Open( VProject* inDesignProject, VRIAServerProjectOpe
 							fSettings.GetLogTokens( logTokens);
 							httpServerSettings->SetLogFormat( strValue, logTokens);
 							fSettings.GetLogFolderPath( strValue);
+							fDesignProject->ResolvePosixPathMacros( strValue);
 							VFilePath logFolderPath( projectFolderPath, strValue, FPS_POSIX);
 							httpServerSettings->SetLogFolderPath( logFolderPath);
 							fSettings.GetLogFileName( strValue);
@@ -2066,6 +2208,21 @@ VError VRIAServerProject::_Open( VProject* inDesignProject, VRIAServerProjectOpe
 								ReleaseRefCountable( &bagArray);
 							}
 							httpServerSettings->LoadVirtualFoldersSettingsFromBag( virtualFoldersSettings);
+
+
+							//----------------------------------------------------------------------
+							// VRoutingPreProcessingHandler
+
+							XBOX::VFilePath path;
+							bool found = _FindExistingFileInProjectHierarchy (this, CVSTR ("routing.json"), path);
+
+							if (found)
+							{
+								IPreProcessingHandler *routingProcessingHandler = new VRoutingPreProcessingHandler (path);
+								if (NULL != routingProcessingHandler)
+									fHTTPServerProject->AddPreProcessingHandler (routingProcessingHandler);
+								XBOX::ReleaseRefCountable (&routingProcessingHandler);
+							}
 						}
 
 						// Authentication Manager settings
@@ -2088,12 +2245,38 @@ VError VRIAServerProject::_Open( VProject* inDesignProject, VRIAServerProjectOpe
 							// The server will need a ptr to the Security Manager to handle request authentication
 							fHTTPServerProject->SetSecurityManager (fSecurityManager);
 						}
-
-						if (fSettings.GetEnableJavaScriptDebugger())
+#if 1//WKA_USE_UNIFIED_DBG
+						if (httpServerSettings && fOpeningParameters->GetEnableChrmDebugHandler())
 						{
+/*
+							const XBOX::VString			K_DBG_FILE_NAME("wak_chromium_dbg.txt");
+							bool	l_found;
+							l_found = false;
+							// test if wak_chromium_dbg.txt exists in wak server exec folder
+							VFolder *execFolder = VRIAServerApplication::Get()->RetainExecutableFolder();
+							if (execFolder != NULL)
+							{
+								VString										l_name;
+								std::vector< VRefPtr<VFile> >				l_files;
+								std::vector< VRefPtr<VFolder> >				l_folders;
+								execFolder->GetContents(l_files, l_folders);
+								std::vector< VRefPtr<VFile> >::iterator		l_it;
+
+								for( l_it=l_files.begin(); l_it<l_files.end(); l_it++)
+								{
+									(*l_it)->GetName(l_name);
+									if (l_name.EqualToString(K_DBG_FILE_NAME))
+									{
+										l_found = true;
+										break;
+									}
+								}
+								ReleaseRefCountable( &execFolder);
+							}
+*/
 							// Install a virtual fodler for the JavaScript debugger
 							VFolder *resourcesFolder = VRIAServerApplication::Get()->RetainApplicationResourcesFolder();
-							if (resourcesFolder != NULL)
+							if (/*l_found &&*/ resourcesFolder != NULL)
 							{
 								VFilePath virtualFolderPath( resourcesFolder->GetPath());
 								virtualFolderPath.ToSubFolder( L"debugger").ToSubFolder( L"chromium");
@@ -2104,27 +2287,22 @@ VError VRIAServerProject::_Open( VProject* inDesignProject, VRIAServerProjectOpe
 									fHTTPServerProject->AddVirtualFolder( virtualFolderPath.GetPath(), L"index.html", L"wka_dbg");
 								}
 
-								ReleaseRefCountable( &resourcesFolder);
 							}
-							JSWDebuggerFactory		l_fctry;
-							VChrmDebugHandler*		l_chr_dbgr = (VChrmDebugHandler *)(l_fctry.GetCD());
-							if (testAssert (NULL != l_chr_dbgr))
-								fHTTPServerProject->AddHTTPRequestHandler(l_chr_dbgr);
-							}
+							ReleaseRefCountable( &resourcesFolder);
+						}
+#endif
 					}
 					else
 					{
 						err = ThrowError (VE_RIA_HTTP_SERVER_PROJECT_NOT_FOUND);
 					}
 
-				#if HTTP_SERVER_GLOBAL_CACHE
 					// Cache Manager settings
 					ICacheManager *cacheManager = httpServer->GetCacheManager();
 					if (cacheManager != NULL)
 					{
 						cacheManager->LoadRulesFromBag( &resourcesSettings);
 					}
-				#endif
 
 					/* Set Server Signature such as ProductName/MajorVers.MinorVers build branch.buildNumber (Platform-BuildArch)
 					 * Example: Server: Wakanda/2.0 build 2.123456 (Windows-x64)
@@ -2144,6 +2322,10 @@ VError VRIAServerProject::_Open( VProject* inDesignProject, VRIAServerProjectOpe
 				}
 			}
 		}
+
+
+		if (err == VE_OK && fHTTPServerProject != NULL)
+			err = fHTTPServerProject->Validate();
 
 		if (err == VE_OK && !fState.inMaintenance)
 		{
@@ -2234,34 +2416,6 @@ VError VRIAServerProject::_Open( VProject* inDesignProject, VRIAServerProjectOpe
 			fApplicationSettings->SetKeyVBagArray (L"virtualFolder", *bagArray, false);
 		ReleaseRefCountable (&bagArray);
 
-
-	#if !USE_JAVASCRIPT_WEBAPP_SERVICE
-		// WebApp service settings
-		bag = fSettings.RetainSettings( RIASettingID::webApp);
-		if (bag != NULL)
-			fApplicationSettings->SetKeyVValueBag( L"webApp", *bag);
-		ReleaseRefCountable( &bag);
-	#endif
-
-
-	#if !USE_JAVASCRIPT_DATASTORE_SERVICE
-		// Data service settings
-		bag = fSettings.RetainSettings( RIASettingID::dataService);
-		if (bag != NULL)
-			fApplicationSettings->SetKeyVValueBag( L"dataService", *bag);
-		ReleaseRefCountable( &bag);
-	#endif
-
-
-	#if !USE_JAVASCRIPT_RPC_SERVICE
-		// RPC service settings
-		bag = fSettings.RetainSettings( RIASettingID::rpcService);
-		if (bag != NULL)
-			fApplicationSettings->SetKeyVValueBag( L"rpcService", *bag);
-		ReleaseRefCountable( &bag);
-	#endif
-
-
 		// Services settings
 		VValueBag servicesSettingsBag;
 		bagArray = fSettings.RetainServicesSettings();
@@ -2273,13 +2427,43 @@ VError VRIAServerProject::_Open( VProject* inDesignProject, VRIAServerProjectOpe
 				const VValueBag *serviceBag = bagArray->GetNth( serviceIter);
 				if (serviceBag != NULL)
 				{
-					VString serviceName;
-					if (serviceBag->GetString( RIASettingsKeys::Service::name, serviceName))
+					if (RIASettingsKeys::Service::enabled.Get( serviceBag))
 					{
-						if (RIASettingsKeys::Service::enabled.Get( serviceBag))
+						VValueBag *lBag = serviceBag->Clone();
+						if (lBag != NULL)
 						{
-							VValueBag *lBag = serviceBag->Clone();
-							servicesSettingsBag.AddElement( VValueBag::StKey(serviceName), lBag);
+							VString modulePath, serviceName;
+							if (!lBag->GetString( RIASettingsKeys::Service::modulePath, modulePath) && lBag->GetString( RIASettingsKeys::Service::name, serviceName))
+							{
+								if (!serviceName.IsEmpty())
+								{
+									// compatibility note: the module path, if not defined, is built from the service name
+									modulePath = L"services/" + serviceName;
+									lBag->SetString( RIASettingsKeys::Service::modulePath, modulePath);
+								}
+							}
+
+							if (!modulePath.IsEmpty())
+							{
+								if (!lBag->GetString( RIASettingsKeys::Service::name, serviceName))
+								{
+									// resolve the service name from the module path
+									VFilePath path( modulePath, FPS_POSIX);
+									if (path.IsFile())
+										path.GetFileName( serviceName, false);
+									else if (path.IsFolder())
+										path.GetFolderName( serviceName, false);
+
+									if (!serviceName.IsEmpty())
+										lBag->SetString( RIASettingsKeys::Service::name, serviceName);
+								}
+
+								if (!serviceName.IsEmpty())
+								{
+									if (servicesSettingsBag.GetElementsCount( VValueBag::StKey(serviceName)) == 0)
+										servicesSettingsBag.AddElement( VValueBag::StKey(serviceName), lBag);
+								}
+							}
 							ReleaseRefCountable( &lBag);
 						}
 					}
@@ -2288,8 +2472,6 @@ VError VRIAServerProject::_Open( VProject* inDesignProject, VRIAServerProjectOpe
 		}
 		ReleaseRefCountable( &bagArray);
 
-
-	#if USE_JAVASCRIPT_DATASTORE_SERVICE
 		// By default, if a database is opened, the "dataStore" service is enabled, even if none settings have been found
 		if (!fSettings.HasServiceSettings( L"dataStore"))
 		{
@@ -2307,15 +2489,13 @@ VError VRIAServerProject::_Open( VProject* inDesignProject, VRIAServerProjectOpe
 			if (serviceBag != NULL)
 			{
 				serviceBag->SetString( RIASettingsKeys::Service::name, L"dataStore");
+				serviceBag->SetString( RIASettingsKeys::Service::modulePath, L"services/dataStore");
 				serviceBag->SetString( VValueBag::StKey( L"autoStart"), autoStart ? L"true" : L"false");
 				servicesSettingsBag.AddElement( VValueBag::StKey( L"dataStore"), serviceBag);
 				ReleaseRefCountable( &serviceBag);
 			}
 		}
-	#endif
 
-
-	#if USE_JAVASCRIPT_RPC_SERVICE
 		// By default, the "rpc" service is enabled, even if none settings have been found
 		if (!fSettings.HasServiceSettings( L"rpc"))
 		{
@@ -2335,28 +2515,24 @@ VError VRIAServerProject::_Open( VProject* inDesignProject, VRIAServerProjectOpe
 			if (serviceBag != NULL)
 			{
 				serviceBag->SetString( RIASettingsKeys::Service::name, L"rpc");
+				serviceBag->SetString( RIASettingsKeys::Service::modulePath, L"services/rpc");
 				serviceBag->SetString( VValueBag::StKey( L"autoStart"), autoStart ? L"true" : L"false");
 				serviceBag->SetString( VValueBag::StKey( L"publishInClientGlobalNamespace"), publishInClientGlobalNamespace ? L"true" : L"false");
 				servicesSettingsBag.AddElement( VValueBag::StKey( L"rpc"), serviceBag);
 				ReleaseRefCountable( &serviceBag);
 			}
 		}
-	#endif
 
-
-	#if USE_JAVASCRIPT_WEBAPP_SERVICE
 		// By default, the "webApp" service is enabled, even if none settings have been found
 		if (!fSettings.HasServiceSettings( L"webApp"))
 		{
 			bool autoStart = true;
-			VString directoryIndex( L"index.html");
 
 			// Try to convert the deprecated "webApp" settings into "webApp" service settings
 			VValueBag *webAppServiceBag = fSettings.RetainSettings( RIASettingID::webApp);
 			if (webAppServiceBag != NULL)
 			{
 				autoStart = RIASettingsKeys::WebApp::enabled.Get( webAppServiceBag);
-				directoryIndex = RIASettingsKeys::WebApp::directoryIndex.Get( webAppServiceBag);
 				ReleaseRefCountable( &webAppServiceBag);
 			}
 
@@ -2364,13 +2540,12 @@ VError VRIAServerProject::_Open( VProject* inDesignProject, VRIAServerProjectOpe
 			if (serviceBag != NULL)
 			{
 				serviceBag->SetString( RIASettingsKeys::Service::name, L"webApp");
+				serviceBag->SetString( RIASettingsKeys::Service::modulePath, L"services/webApp");
 				serviceBag->SetString( VValueBag::StKey( L"autoStart"), autoStart ? L"true" : L"false");
-				serviceBag->SetString( VValueBag::StKey( L"directoryIndex"), directoryIndex);
 				servicesSettingsBag.AddElement( VValueBag::StKey( L"webApp"), serviceBag);
 				ReleaseRefCountable( &serviceBag);
 			}
 		}
-	#endif
 
 		// By default, the "upload" service is enabled, even if none settings have been found
 		if (!fSettings.HasServiceSettings( L"upload"))
@@ -2379,6 +2554,7 @@ VError VRIAServerProject::_Open( VProject* inDesignProject, VRIAServerProjectOpe
 			if (serviceBag != NULL)
 			{
 				serviceBag->SetString( RIASettingsKeys::Service::name, L"upload");
+				serviceBag->SetString( RIASettingsKeys::Service::modulePath, L"services/upload");
 				serviceBag->SetString( VValueBag::StKey( L"autoStart"), L"true");
 				servicesSettingsBag.AddElement( VValueBag::StKey( L"upload"), serviceBag);
 				ReleaseRefCountable( &serviceBag);
@@ -2417,37 +2593,943 @@ VError VRIAServerProject::_LoadSettingsFile()
 }
 
 
-VError VRIAServerProject::_LoadPermissionFile()
+VRIAPermissions* VRIAServerProject::_LoadPermissionFile( VError& outError)
 {
-	VError err = VE_OK;
+	VRIAPermissions *permissions = NULL;
+
+	outError = VE_OK;
 
 	if (testAssert(fDesignProject != NULL))
 	{
 		VProjectItem *item = fDesignProject->GetProjectItemFromTag( kPermissionsTag);
 		if (item != NULL)
 		{
-			if (fPermissions == NULL)
-			{
-				fPermissions = new VRIAPermissions();
-				if (fPermissions == NULL)
-					err = ThrowError( VE_MEMORY_FULL);
-			}
+			VFilePath path;
+			item->GetFilePath( path);
 
-			if (err == VE_OK)
+			permissions = new VRIAPermissions( path);
+			if (permissions == NULL)
+				outError = ThrowError( VE_MEMORY_FULL);
+			else
+				outError = permissions->LoadPermissionFile();
+		}
+	}
+
+	return permissions;	
+}
+
+
+XBOX::VError VRIAServerProject::_LoadBackupSettings()
+{
+	const VSolutionSettings& solutionSettings = fSolution->GetSettings();
+	CDB4DManager *db4dMgr = VRIAServerApplication::Get()->GetComponentDB4D();
+	VFilePath baseFolder,backupFolder,backupRegistryFolder;
+
+	//Retrieve folder with backup role
+	const VProjectItem* backupsFolderItem = fDesignProject->GetProjectItemFromTag(kBackupsTag);
+	if (backupsFolderItem)
+	{
+		backupsFolderItem->GetFilePath(backupRegistryFolder);
+	}
+	else
+	{
+		//Legacy projects: "Backups" role might not be declared so create the default 
+		//"Backups" folder at project level
+		XBOX::VFolder* fld = RetainFolder();
+		fld->GetPath(backupRegistryFolder);
+		backupRegistryFolder.ToSubFolder(CVSTR("Backups"));//MAGICAL
+		xbox::ReleaseRefCountable(&fld);
+	}
+
+	fBackupSettings = db4dMgr->CreateBackupSettings();
+
+	const VValueBag *projBackupSettingsbag = fSettings.RetainSettings(RIASettingID::backup);
+	const VValueBag *solBackupSettingsBag  = solutionSettings.RetainSettings( RIASettingID::backup);
+
+	if (projBackupSettingsbag )
+	{
+		//init from project level and provide backups role folder as base
+		//if absolute path specified at solution settings then all backups may be overwritten
+		//otherwise backups are stored in the project's folder with "backup" role
+		fBackupSettings->Initialize(*projBackupSettingsbag ,backupRegistryFolder);
+	}
+	else if (solBackupSettingsBag)
+	{
+		//no settings specified at project level so revert to solution level and apply same logic
+		fBackupSettings->Initialize(*solBackupSettingsBag ,backupRegistryFolder);
+	}
+	else
+	{
+		//No settings defined neither at project or solution level. Define default settings:
+		// backups are stored in the "Backups" folder in incrementally named subfolders
+		fBackupSettings->SetDestination(backupRegistryFolder);
+		fBackupSettings->SetUseUniqueNames(true);
+	}
+	
+	//Finished setting elements that are non customisable
+	fBackupSettings->SetBackupRegistryFolder(backupRegistryFolder);
+
+
+	fBackupSettings->GetDestination(backupFolder);
+	xbox_assert(backupFolder.IsFolder() && backupFolder.IsValid() && !backupFolder.IsEmpty());
+
+	XBOX::ReleaseRefCountable(&solBackupSettingsBag  );
+	XBOX::ReleaseRefCountable(&projBackupSettingsbag );
+	return VE_OK;
+}
+
+CDB4DBase* VRIAServerProject::_OpenDatabase( VError& outError, bool inCreateEmptyDatabaseIfNeed)
+{
+	CDB4DBase *base = NULL;
+	outError = VE_OK;
+
+	if (testAssert(fDesignProject != NULL))
+	{
+		bool found = false;
+		VFilePath structurePath;
+		sLONG flags = DB4D_Open_WithSeparateIndexSegment | DB4D_Open_Convert_To_Higher_Version;
+
+		// sc 06/06/2012, even if the tagged item exists, the model file may not exist. In this case, none error is returned
+		VProjectItem *catalogItem = fDesignProject->GetProjectItemFromTag( kCatalogTag);
+		if ((catalogItem != NULL) && (catalogItem->ContentExists()))
+		{
+			catalogItem->GetFilePath( structurePath);
+			flags |= DB4D_Open_As_XML_Definition;
+			flags |= DB4D_Open_No_Respart;
+			found = true;
+		}
+
+		if (found)
+		{
+			CDB4DManager *db4dMgr = VRIAServerApplication::Get()->GetComponentDB4D();
+			if (db4dMgr != NULL)
 			{
-				VFilePath path;
-				item->GetFilePath( path);
+				VFilePath dataPath;
+				StUseLogger logger;
+				VMicrosecondsCounter usCounter;
 				
-				VFile file( path);
-				err = fPermissions->LoadPermissionFile( file);
+				usCounter.Start();	
+				logger.Log( fLoggerID, eL4JML_Information, L"Opening the database");
+
+				VProjectItem *newDataFolderItem = fDesignProject->GetProjectItemFromTag( kDataFolderTag);
+				if (newDataFolderItem != NULL)
+				{
+					newDataFolderItem->GetFilePath( dataPath);
+					dataPath.SetFileName( L"data.waData");
+				}
+				else // new "DataFolder" does not exist - backward compatibility
+				{
+					VProjectItem *oldDataItem = fDesignProject->GetProjectItemFromTag( kDataTag);
+
+					// the data file with active role found
+					if (oldDataItem != NULL)
+					{
+						oldDataItem->GetFilePath( dataPath);
+					}
+					else // the data file with active role NOT found, build wak2 compatible data path, ie. "data\structureName.waData"
+					{
+						VString oldDefaultDataFolder;
+						VFilePath oldDataFolderPath;
+						VProjectItemTagManager::Get()->GetPreferedDefaultFolder( kDataTag, oldDefaultDataFolder);
+						BuildPathFromRelativePath( oldDataFolderPath, oldDefaultDataFolder, FPS_POSIX);
+
+						VFolder oldDataFolder( oldDataFolderPath);
+
+						//old folder "data" exist, now check if structureName.waData exist
+						VString name;
+						structurePath.GetFileName( name, false);
+						oldDataFolderPath.SetFileName( name, false);
+						oldDataFolderPath.SetExtension( RIAFileKind::kDataFileExtension);
+						VFile oldDataFile(oldDataFolderPath);
+						
+						dataPath = oldDataFolderPath;
+					}
+				}
+	
+				//Load backup settings we may need them to handle DB opening errors
+				_LoadBackupSettings();
+				xbox_assert(fBackupSettings != NULL);
+
+				// Open the structure
+				VFile structureFile(structurePath);
+				CUAGDirectory *uagDirectory = fSolution->RetainUAGDirectory();
+
+				VProjectItem* permissionsItem = NULL;
+				VFilePath permissionsPath;
+				VFile* permissionsFile = NULL;
+
+				permissionsItem = fDesignProject->GetProjectItemFromTag( kPermissionsTag );	// sc 14/09/2012 WAK0076884, pass the permission file to DB4D
+
+				if ( permissionsItem )
+				{
+					permissionsItem->GetFilePath( permissionsPath );
+					permissionsFile = new VFile( permissionsPath );
+				}
+
+				//Open structure
+				base = db4dMgr->OpenBase( structureFile, flags, &outError, FA_READ_WRITE, nil, uagDirectory, permissionsFile);
+
+				ReleaseRefCountable( &permissionsFile);
+
+				if (base != NULL && outError == VE_OK)
+				{
+					VFile dataFile( dataPath);
+					if (dataFile.Exists())
+					{
+						//Open data file, without opening journal so we can detect and fix some problems
+						XBOX::StErrorContextInstaller errContext( VE_DB4D_CANNOTOPENDATAFILE, VE_DB4D_CANNOTREADDATASEG, XBOX::VE_OK);
+						flags = DB4D_Open_WithSeparateIndexSegment | DB4D_Open_WITHOUT_JournalFile;
+						base->OpenData( dataFile, flags, NULL, &outError);
+						if ( outError != VE_OK || errContext.GetLastError() != VE_OK)
+						{
+							logger.Log( fLoggerID, eL4JML_Warning, CVSTR("Error opening data file"));
+
+							outError = errContext.GetLastError();
+
+							if (errContext.GetContext()->Find( VE_DB4D_FLUSH_DID_NOT_COMPLETE) 
+								|| errContext.GetContext()->Find( VE_DB4D_FLUSH_COMPLETE_ON_DATA))
+							{
+								outError = VE_DB4D_FLUSH_DID_NOT_COMPLETE;
+							}
+							else if (errContext.GetContext()->Find( VE_DB4D_DATAFILE_DOES_NOT_MATCH_STRUCT))
+							{
+								outError = VE_DB4D_DATAFILE_DOES_NOT_MATCH_STRUCT;
+							}
+							//XXX: don't mask error code here data file might be corrupted
+							//beyond usage and may require manual intervention
+							outError = _HandleDataBaseDataFileOpeningError(base,dataPath,outError);
+						}
+					}
+					else
+					{
+						VFolder parentDataFolder( dataPath.ToParent());
+						if (!parentDataFolder.Exists())
+							outError = parentDataFolder.CreateRecursive( true);
+						
+						if (outError == VE_OK)
+							base->CreateData( dataFile, flags, NULL, NULL, &outError);
+					}
+					if(outError == VE_OK)
+					{
+						outError = _OpenJournal(base,dataPath);
+					}
+
+					
+					if (outError == VE_OK && fJSContextPool != NULL)
+					{
+						// Retreive the Entity Model script
+						VFilePath emScriptPath( structurePath);
+						emScriptPath.SetExtension( "js" );
+
+						VFile file( emScriptPath);
+						if (file.Exists())
+						{
+							fJSContextPool->AppendRequiredScript( emScriptPath);
+						}
+						else
+						{
+							VString altScriptName;
+							structurePath.GetFileName( altScriptName, false);
+							altScriptName.AppendUniChar( '.');
+							altScriptName.AppendString( RIAFileKind::kCatalogFileExtension);
+							altScriptName.AppendString( L".js");
+
+							VFilePath altPath( structurePath );
+							altPath.SetFileName( altScriptName, true );
+
+							VFile altFile( altPath );
+							if ( altFile.Exists())
+							{
+								fJSContextPool->AppendRequiredScript( altPath);
+							}
+						}
+					}
+
+					if (outError == VE_OK)
+					{
+						xbox_assert(fBackupSettings != NULL);
+						base->SetRetainedBackupSettings(fBackupSettings);
+
+					}
+				}
+				ReleaseRefCountable( &uagDirectory);
+
+				if (outError == VE_OK)
+				{
+					VString logMsg;
+					logMsg.Printf( "Database opened (duration: %i ms)", usCounter.Stop()/1000);
+					logger.Log( fLoggerID, eL4JML_Information, logMsg);
+				}
+				else
+				{
+					if (base != NULL)
+					{
+						base->CloseAndRelease();
+						base = NULL;
+					}
+
+					VString logMsg;
+					logMsg.Printf( "Failed to open database (duration: %i ms)", usCounter.Stop()/1000);
+					logger.Log( fLoggerID, eL4JML_Fatal, logMsg);
+					outError = ThrowError( VE_RIA_CANNOT_OPEN_DATABASE);
+				}
+			}
+			else
+			{
+				outError = ThrowError( VE_RIA_DB4D_COMPONENT_NOT_FOUND);
+			}
+		}
+	}
+	return base;
+}
+
+bool VRIAServerProject::_ComputeJournalPathFromSettings(XBOX::VFilePath& outJournalPath,bool& outContainedInDataFolder)
+{
+	XBOX::VError error = VE_OK;
+	bool valid = false;
+	VString name;
+	outContainedInDataFolder = false;
+	outJournalPath.Clear();
+
+	if (fDesignProject != NULL)
+	{
+		VProjectItem *item = fDesignProject->GetProjectItemFromTag(kDataFolderTag);
+		if (item != NULL)
+		{
+			VFilePath folderPath;
+			item->GetFilePath( folderPath);
+			folderPath = folderPath.ToFolder();
+			valid = _ComputeJournalPath(folderPath,outJournalPath,outContainedInDataFolder);
+		}
+	}	
+	return valid;
+}
+
+bool VRIAServerProject::_ComputeJournalPath(const XBOX::VFilePath& inBaseFolder,XBOX::VFilePath& outJournalPath,bool& outRelativeToBaseFolder)
+{
+	VString name;
+	bool hasJournalSettings = false;
+	outRelativeToBaseFolder = false;
+	outJournalPath.Clear();
+	
+	hasJournalSettings = fSettings.HasDatabaseJournalSettings();
+	if (hasJournalSettings)
+	{
+		VFile* journal = NULL;
+		fSettings.GetDatabaseJournalPath(name);
+		if(name.GetLength() == 0)
+		{
+			name = CVSTR("./journal.waJournal");
+			outJournalPath.FromRelativePath(inBaseFolder,name,FPS_POSIX);
+			outRelativeToBaseFolder = true;
+		}
+		else
+		{
+			outJournalPath.FromRelativePath(inBaseFolder,name,FPS_POSIX);
+
+			//Path should be a folder, if not then make it a folder e.g. if name is './var/foo' then transform into './var/foo/'
+			if (outJournalPath.IsFile())
+			{
+				// /<SomeRoot>/.../var/foo -> /<SomeRoot>/.../var/foo/
+				outJournalPath.GetFileName(name,true);
+				outJournalPath.ToParent();
+				outJournalPath.ToSubFolder(name);
+			}
+			outJournalPath.ToSubFile(CVSTR("journal.waJournal"));
+			outRelativeToBaseFolder = outJournalPath.GetRelativePath(inBaseFolder,name);
+		}
+		xbox_assert(outJournalPath.IsValid() && outJournalPath.IsFile());
+	}
+	return hasJournalSettings;
+}
+
+
+
+bool VRIAServerProject::_BackupDatabaseOnOpening(CDB4DBase* inBase,const XBOX::VFilePath& inJournalToArchive)
+{
+	bool ok = true;
+	StUseLogger logger;
+
+	IBackupTool *backupTool = NULL;
+	CDB4DManager *db4dMgr = VRIAServerApplication::Get()->GetComponentDB4D();
+	if(db4dMgr != NULL)
+	{
+		backupTool = db4dMgr->CreateBackupTool();
+	}
+		
+	if (backupTool == NULL)
+	{
+		logger.Log( fLoggerID, eL4JML_Error, CVSTR("Cannot create backup tool"));
+		vThrowError(VE_MEMORY_FULL);
+		ok = false;
+	}
+	else
+	{
+		//Obtain context
+		CDB4DBaseContext* dbContext = NULL;
+
+		if (fBackupSettings)
+		{
+			logger.Log( fLoggerID, eL4JML_Information, CVSTR("Starting backup using application settings"));
+			ok = backupTool->BackupDatabaseAndDontResetJournal(inBase,inJournalToArchive,*fBackupSettings,NULL,NULL);
+		}
+		else
+		{
+			const IBackupSettings* settings = fSolution->RetainBackupSettings();
+			logger.Log( fLoggerID, eL4JML_Information, CVSTR("Starting backup using solution settings"));
+			ok = backupTool->BackupDatabaseAndDontResetJournal(inBase,inJournalToArchive,*settings,NULL,NULL);
+			XBOX::ReleaseRefCountable(&settings);
+		}
+	}
+
+	if(ok == true)
+	{
+		logger.Log( fLoggerID, eL4JML_Information, CVSTR("Backup completed successfully"));
+	}
+	else
+	{
+		logger.Log( fLoggerID, eL4JML_Error, CVSTR("Backup failed"));
+	}
+	delete backupTool;
+	backupTool = NULL;
+	return ok;
+}
+
+
+
+XBOX::VError VRIAServerProject::_IntegrateJournalFile(CDB4DBase* inBase,const XBOX::VFilePath& inDataFilePath,const XBOX::VFilePath& inJournalPath,bool force)
+{
+	StUseLogger logger;
+	CDB4DManager *db4dMgr = VRIAServerApplication::Get()->GetComponentDB4D();
+	XBOX::VError error = VE_OK;
+
+	if (fSettings.GetRecoverFromJournalOnIncompleteDatabase() || force)
+	{
+		CDB4DJournalParser* journalParser = NULL;
+		
+		journalParser = db4dMgr->NewJournalParser();
+	
+		if ( journalParser == NULL )
+		{
+			error = VE_MEMORY_FULL;
+		}
+		else
+		{
+			VString message;
+			VString strJournalPath,strDataFilePath;
+			uLONG8 totalOperationCount = 0;
+			VProgressIndicator *progressIndicator = NULL;
+			XBOX::VFile* journalFile = NULL;
+			StErrorContextInstaller errorContext(false);
+
+			inJournalPath.GetPosixPath(strJournalPath);
+			inDataFilePath.GetPosixPath(strDataFilePath);
+			
+			message.AppendString(CVSTR("Integrating journal '"));
+			message.AppendString(strJournalPath);
+			message.AppendString(CVSTR("' in data file '"));
+			message.AppendString(strDataFilePath);
+			message.AppendString(CVSTR("'"));
+			logger.Log( fLoggerID, eL4JML_Information, message);
+
+			journalFile = new VFile(inJournalPath);
+			progressIndicator = new VProgressIndicator();
+			error = journalParser->Init( journalFile, totalOperationCount, progressIndicator );
+			if ( error == XBOX::VE_OK )
+			{
+				XBOX::VUUID dataLink;
+				inBase->GetJournalUUIDLink(dataLink);
+				if ( journalParser->IsValid( dataLink ) )
+				{
+					
+					error = inBase->IntegrateJournal( journalParser, 0, 0, NULL, progressIndicator);
+					if ( error == VE_OK )
+					{
+						logger.Log( fLoggerID, eL4JML_Information, CVSTR("Successfully integrated journal"));
+					}
+					else
+					{
+						logger.LogMessagesFromErrorContext(fLoggerID,errorContext.GetContext());
+						logger.Log( fLoggerID, eL4JML_Error, CVSTR("Failed to integrate journal"));
+					}
+				}
+				else
+				{
+					logger.Log( fLoggerID, eL4JML_Error, CVSTR("Journal is not valid for integration in this data file"));
+					error = VE_DB4D_LOGFILE_DOES_NOT_MATCH_DATABASE;
+				}
+				XBOX::ReleaseRefCountable( &journalParser);
+			}
+			else
+			{
+				logger.LogMessagesFromErrorContext(fLoggerID,errorContext.GetContext());
+				logger.Log( fLoggerID, eL4JML_Error, CVSTR("Failed to integrate journal"));
+			}
+			XBOX::ReleaseRefCountable( &progressIndicator);
+			XBOX::ReleaseRefCountable( &journalFile);
+		}
+		XBOX::ReleaseRefCountable( &journalParser);
+	}
+	else
+	{
+		logger.Log( fLoggerID, eL4JML_Warning, CVSTR("Journal integration disabled by settings"));
+	}
+	return error;
+}
+
+
+XBOX::VError VRIAServerProject::_OpenJournal(CDB4DBase* inBase,const XBOX::VFilePath& inDataFilePath)
+{
+	CDB4DManager *db4dMgr = NULL;
+	XBOX::VError error = VE_OK;
+	XBOX::VUUID journalUUID;
+	XBOX::VFilePath lastJournalPath, nextJournalPath,*journalToOpen = NULL;
+	StUseLogger logger;
+	VFile* journalFile = NULL;
+	StErrorContextInstaller errorContext(false);
+	
+	//Some old projects throw errors when a extra props file is not found
+	//we hanlde that case properly but do not want the errors to be propagated
+	db4dMgr = VRIAServerApplication::Get()->GetComponentDB4D();
+	//Fix method below so that it uses data folder to complete relative paths
+	//inBase->GetJournalInfos(inDataFilePath,lastJournalPath,journalUUID);
+	db4dMgr->GetJournalInfos(inDataFilePath,lastJournalPath,journalUUID);
+	if (errorContext.GetLastError() != VE_OK)
+	{
+		lastJournalPath.Clear();
+		journalUUID.Clear();
+	}
+	errorContext.Flush();
+
+	if (!fSettings.HasDatabaseJournalSettings() || !fSettings.GetDatabaseJournalEnabled())
+	{
+		//Either journaling settings are available (legacy project, so don't force journal usage)
+		//or it is precisely disabled
+		if (!lastJournalPath.IsEmpty() && lastJournalPath.IsFile())
+		{
+			//But one is defined at database level , log the fact and clear clear it out, DB will run UNJOURNALED 
+			logger.Log( fLoggerID, eL4JML_Warning, CVSTR("Settings application require disabling of journal.") );
+			inBase->SetJournalFile(NULL,NULL,NULL,false);
+		}
+		journalToOpen = NULL;
+		error = VE_OK;
+	}
+	else
+	{
+		bool unused = false;
+		_ComputeJournalPathFromSettings(nextJournalPath,unused);
+		if testAssert(nextJournalPath.IsValid() && nextJournalPath.IsFile() && !nextJournalPath.IsEmpty())
+		{
+			journalToOpen = &nextJournalPath;
+			if (lastJournalPath.IsEmpty())
+			{
+				//no journal used previously, so we will create a new one
+				//but before that we must backup the database
+				StErrorContextInstaller errorContext;
+				CDB4DManager *db4dMgr = NULL;
+				VFilePath wasRenamed;
+				
+				logger.Log( fLoggerID, eL4JML_Information, CVSTR("New journal to be created") );
+				logger.Log( fLoggerID, eL4JML_Information, CVSTR("Backing up data before journal installation") );
+				
+				error = VE_MEMORY_FULL;
+				db4dMgr = VRIAServerApplication::Get()->GetComponentDB4D();
+				if (db4dMgr)
+				{
+					IBackupTool* backupTool = NULL;
+
+					backupTool = db4dMgr->CreateBackupTool();
+					if (backupTool != NULL)
+					{
+						error = VE_OK;
+						const IBackupSettings* settings = XBOX::RetainRefCountable(fBackupSettings);
+						if (settings == NULL)
+						{
+							settings = fSolution->RetainBackupSettings();
+						}
+						if(settings != NULL)
+						{
+							bool ok =  backupTool->BackupDatabase(inBase,NULL,*settings,NULL,NULL);
+							error = errorContext.GetLastError();
+						}
+						else
+						{
+							logger.Log( fLoggerID, eL4JML_Error, CVSTR("No backup settings found"));
+							error = VE_MEMORY_FULL;
+						}
+					}
+					delete backupTool;backupTool = NULL;
+				}
+				
+				if (error == VE_OK)
+				{
+					//Backup went fine so create the journal and activate it
+					logger.Log( fLoggerID, eL4JML_Information, CVSTR("Successfully backed up data. Now creating journal.") );
+					journalUUID.Regenerate();
+					journalFile = new VFile(*journalToOpen);
+					{
+						VFolder* parent = journalFile->RetainParentFolder();
+						if(parent && !parent->Exists())
+						{
+							error = parent->CreateRecursive();
+						}
+						XBOX::ReleaseRefCountable(&parent);
+					}
+					if(error == VE_OK)
+					{
+						error = inBase->CreateJournal(journalFile,&journalUUID,true);
+					}
+					if (error != VE_OK)
+					{
+						logger.Log( fLoggerID, eL4JML_Error, CVSTR("Failed to create new journal.") );
+					}
+				}
+				else
+				{
+					logger.LogMessagesFromErrorContext( fLoggerID, errorContext.GetContext() );
+					logger.Log( fLoggerID, eL4JML_Error, CVSTR("Backup failed") );
+				}
+			}
+			else
+			{
+				//Journal was already active on last launch so simply open it
+				journalFile = new VFile(*journalToOpen);
+				bool giveUp = false;
+				do
+				{
+					error  = inBase->OpenJournal(journalFile,journalUUID,true);
+					switch (error)
+					{
+						case VE_OK:
+							logger.Log( fLoggerID, eL4JML_Information, CVSTR("Successfully opened journal"));
+							giveUp = true;
+						break;
+
+						case VE_DB4D_LOGFILE_NOT_FOUND:
+						{
+							//TODO: add setting to automatically re-create journal file and carry one with journal opening
+							VString temp;
+							journalFile->GetPath().GetPosixPath(temp);
+							VString message = CVSTR("Current journal '");
+							message += temp;
+							message += CVSTR("' not found");
+							if (!lastJournalPath.IsEmpty())
+							{
+								message += CVSTR(" (Previous known journal: '");
+								lastJournalPath.GetPosixPath(temp);
+								message += temp;
+								message += CVSTR("')");
+							}
+							logger.Log( fLoggerID, eL4JML_Error, message );
+							giveUp = true;
+						}
+						break;
+
+
+						case VE_DB4D_LOGFILE_LAST_OPERATION_DOES_NOT_MATCH:
+							if (fSettings.GetRecoverFromJournalOnIncompleteDatabase())
+							{
+								logger.Log( fLoggerID, eL4JML_Information, CVSTR("Integrating current journal") );
+								error = _IntegrateJournalFile(inBase,inDataFilePath,*journalToOpen,false);
+								if(error == VE_OK)
+								{						
+									//Integration went fine, loop once more to re-open the integrated journal file and have journaling turned on
+									logger.Log( fLoggerID, eL4JML_Information, CVSTR("Successfully integrated current journal") );
+									giveUp = false;
+									continue;
+								}
+								else if (error !=VE_DB4D_LOGFILE_IS_INVALID && error != VE_DB4D_LOGFILE_DOES_NOT_MATCH_DATABASE)
+								{
+									logger.Log( fLoggerID, eL4JML_Fatal, CVSTR("Failed to integrate journal") );
+									giveUp = true;
+									break;
+								}
+							}
+							else
+							{
+								logger.Log( fLoggerID, eL4JML_Warning, CVSTR("Automatic journal integration forbidden by settings") );
+								giveUp = true;
+							}
+							break;
+					
+						case VE_DB4D_LOGFILE_IS_INVALID:
+						case VE_DB4D_LOGFILE_DOES_NOT_MATCH_DATABASE:
+							{
+								logger.Log( fLoggerID, eL4JML_Error, CVSTR("Journal cannot be used with database.") );
+								giveUp = true;
+							}
+						break;
+
+					default:
+						logger.Log( fLoggerID, eL4JML_Error, CVSTR("Unexpected error: disabling journaling") );
+						giveUp = true;
+						break;
+					}
+				}while (!giveUp);
+			}
+		}
+		else
+		{
+			error = VE_FILE_BAD_NAME;
+			VString message;
+			VString temp;
+			nextJournalPath.GetPosixPath(temp);
+			message.FromCString("Cannot open journal: invalid name '");
+			message.AppendString(temp);
+			message.AppendString(CVSTR("'"));
+			logger.Log( fLoggerID, eL4JML_Error, message);
+		}
+	}
+	XBOX::ReleaseRefCountable(&journalFile);
+	return error;
+}
+
+XBOX::VError VRIAServerProject::_SynchronizeJournalInfos(const XBOX::VFilePath& inDamagedDataFolderPath,const XBOX::VFilePath&  inRestoredDataFolderPath)
+{
+	StUseLogger logger;
+	VError result = VE_OK;
+
+	//Copy the waExtra from the damaged folder to the restored folder
+	{
+		VString name(CVSTR("data.waExtra"));
+		VFilePath extraPropsPath;
+
+		//Build extra props file path
+		extraPropsPath= inDamagedDataFolderPath;
+		extraPropsPath.SetFileName(name,true);
+		VFile sourceExtraPropsFile(extraPropsPath);
+		
+		//If some extra properties are found in the damaged folder, they prevail over the restored folder's (damaged folder was current before being damaged)
+		if(testAssert(sourceExtraPropsFile.Exists()))
+		{
+			XBOX::VFilePath dest(inRestoredDataFolderPath);
+			dest.ToFolder();
+			result = sourceExtraPropsFile.CopyTo(dest,NULL,FCP_Overwrite);
+		}
+		else
+		{
+			//No extra props are found (THIS SHOULD NOT BE THE CASE) so remove the file from the restored folder
+			extraPropsPath.GetFileName(name);
+			extraPropsPath = inRestoredDataFolderPath;
+			extraPropsPath.ToSubFile(name);
+
+			VFile destExtraPropsFile(extraPropsPath);
+			if (destExtraPropsFile.Exists())
+			{
+				result = destExtraPropsFile.Delete();
 			}
 		}
 	}
 
-	return err;	
+	
+	if (result == VE_OK )
+	{
+		if (fSettings.HasDatabaseJournalSettings())
+		{
+			/*
+			If the journal is stored within the data folder, then the correct journal is stored
+			in the damaged data folder and we must move it to that same location relative to the restored data folder.
+			This is mandatory if we want auto log integration to work 
+			*/
+			XBOX::VFilePath journalPathFromSettings;
+			bool relativeToDataFolder = false,journalPathIsRelevant = false;
+			journalPathIsRelevant = _ComputeJournalPathFromSettings(journalPathFromSettings,relativeToDataFolder);
+
+			if (fSettings.GetDatabaseJournalEnabled())
+			{
+				if(testAssert(journalPathIsRelevant) && relativeToDataFolder)
+				{
+					//That journal is stored relative to the data folder.
+					//For now journalPathFromSettings designates the location of the journal inside the restored data folder
+					XBOX::VFilePath pathOfCorrectJournal;
+					bool relative = false;
+			
+					//We need co compute that same location but related to the damaged data folder, this will
+					//give Instead, we compute the path of the correct journal using teh same rule, only relative to the damaged data folder path.
+					journalPathIsRelevant = _ComputeJournalPath(inDamagedDataFolderPath,pathOfCorrectJournal,relative);
+					xbox_assert(journalPathIsRelevant && pathOfCorrectJournal.IsValid() && pathOfCorrectJournal.IsFile());
+					
+					//And we copy it inside the restored data folder at the expected location.
+					//That way eventual journal integration will operate on the correct journal
+					VFile journalFile(pathOfCorrectJournal);
+					VString message(CVSTR("Copying current journal '")),temp;
+					pathOfCorrectJournal.GetPosixPath(temp);
+					message.AppendString(temp);
+					message.AppendString(CVSTR("' to restored data folder."));
+
+					logger.Log( fLoggerID, eL4JML_Information, message );
+					
+					result = journalFile.CopyTo(journalPathFromSettings,NULL,FCP_Overwrite);
+					if(result !=VE_OK)
+					{
+						logger.Log( fLoggerID, eL4JML_Error, CVSTR("Failed to copy current journal to restored data folder") );
+					}
+				}
+			}
+		}
+	}
+	return result;
+}
+XBOX::VError VRIAServerProject::_RestoreDataFolderFromLastBackup(const XBOX::VFilePath& inDataFilePath,XBOX::VFilePath& outReplacedDataFolderPath)
+{
+	VError error = VE_OK;
+	IBackupTool* backupTool = NULL;
+	CDB4DManager *db4dMgr = NULL;
+	StUseLogger logger;
+
+	error = VE_MEMORY_FULL;
+	db4dMgr = VRIAServerApplication::Get()->GetComponentDB4D();
+	if (db4dMgr)
+	{
+		backupTool = db4dMgr->CreateBackupTool();
+		if (backupTool != NULL)
+		{
+			error = VE_OK;
+		}
+		else
+		{
+			logger.Log( fLoggerID, eL4JML_Error, CVSTR("Failed to create backup tool"));
+		}
+	}
+	
+	if(error == VE_OK)
+	{
+		VFilePath lastBackupManifestPath;
+		VUUID	  unusedUUID;
+		error = VE_FOLDER_NOT_FOUND;
+		
+		//Retrieve last backup manifest using either project or solution settings
+		const IBackupSettings* backupSettings = XBOX::RetainRefCountable(fBackupSettings);
+		if (backupSettings == NULL)
+		{
+			backupSettings = fSolution->RetainBackupSettings();
+		}
+		error = backupTool->GetLastBackupPath(*backupSettings,lastBackupManifestPath);
+		XBOX::ReleaseRefCountable(&backupSettings);
+
+		if(error != VE_OK)
+		{
+			logger.Log( fLoggerID, eL4JML_Error, CVSTR("Failed to retrieve last backup manifest"));
+		}
+		else
+		{
+			//Use said manifest to extract the data folder
+			XBOX::VFilePath dataFolderParentPath;
+			inDataFilePath.GetParent(dataFolderParentPath);
+			dataFolderParentPath.ToParent();
+
+			logger.Log( fLoggerID, eL4JML_Information, CVSTR("Restoring data folder from last backup"));
+			{
+				StErrorContextInstaller errContext;
+				bool ok = backupTool->RestoreDataFolder(lastBackupManifestPath,dataFolderParentPath,outReplacedDataFolderPath,NULL);
+				error = errContext.GetLastError();
+
+				if (error != VE_OK)
+				{
+					logger.LogMessagesFromErrorContext(fLoggerID, errContext.GetContext());
+					logger.Log( fLoggerID, eL4JML_Error, CVSTR("Failed to restoring data folder from last backup"));
+				}
+				else
+				{
+					//Succeeded
+					logger.Log( fLoggerID, eL4JML_Information, CVSTR("Successfully restored data folder"));
+					if (!outReplacedDataFolderPath.IsEmpty())
+					{
+						VString msg;
+						outReplacedDataFolderPath.GetPosixPath(msg);
+						msg.Insert(CVSTR("Damaged data folder copied to: '"),1);
+						msg.AppendChar('\'');
+						logger.Log( fLoggerID, eL4JML_Information, msg);
+					}
+				}
+			}
+		}
+	}
+	delete backupTool;
+	backupTool = NULL;
+	return error;
 }
 
+XBOX::VError VRIAServerProject::_HandleDataBaseDataFileOpeningError(CDB4DBase* inBase,const XBOX::VFilePath& inDataFilePath,XBOX::VError inErrorToHandle)
+{
+	VError result = VE_OK;
+	VFilePath journalPath;
+	VString	 journalPathStr;
+	VUUID	  journalDataLink;
+	StUseLogger logger;
+	VFilePath newJournalPath;
+	CDB4DManager *db4dMgr = NULL;
 
+	//The base is potentially damaged so we revert to our stand-aloen APIs
+	//to retrieve the journal info
+
+	db4dMgr = VRIAServerApplication::Get()->GetComponentDB4D();
+	db4dMgr->GetJournalInfos(inDataFilePath,journalPath,journalDataLink);
+
+	journalPath.GetPath(journalPathStr);
+
+	switch (inErrorToHandle)
+	{
+		case VE_DB4D_DATAFILE_DOES_NOT_MATCH_STRUCT:
+			logger.Log( fLoggerID, eL4JML_Fatal, CVSTR("Database data/model mismatch: cannot open this data file with that model") );
+			result = VE_DB4D_DATAFILE_DOES_NOT_MATCH_STRUCT;
+		break;
+
+		case VE_DB4D_FLUSH_DID_NOT_COMPLETE:
+			logger.Log( fLoggerID, eL4JML_Error, CVSTR("Database data file is corrupted") );
+
+			if (!fSettings.GetRecoverFromLastBackupOnCorruptedDatabase())
+			{
+				logger.Log( fLoggerID, eL4JML_Warning, CVSTR("Automatic recovery from last backup forbidden by settings"));
+				result = VE_DB4D_FLUSH_DID_NOT_COMPLETE;
+			}
+			else
+			{
+				StErrorContextInstaller errContext;
+				XBOX::VFilePath replacedDataFolderPath;
+				logger.Log( fLoggerID, eL4JML_Information, CVSTR("Recovering damaged data file from last backup"));
+				result = _RestoreDataFolderFromLastBackup(inDataFilePath,replacedDataFolderPath);
+				if(result !=VE_OK)
+				{
+					logger.LogMessagesFromErrorContext( fLoggerID, errContext.GetContext());
+					logger.Log( fLoggerID, eL4JML_Fatal, CVSTR("Failed to recover from last backup") );
+				}
+				else
+				{
+					XBOX::VFilePath restoredDataFolerPath;
+					inDataFilePath.GetParent(restoredDataFolerPath);
+					result = _SynchronizeJournalInfos(replacedDataFolderPath,restoredDataFolerPath);
+					if(result == VE_OK)
+					{
+						//Now re-open restored data file
+						VFile dataFile( inDataFilePath);
+						logger.Log( fLoggerID, eL4JML_Information, CVSTR("Successfully recovered data file") );
+						sLONG flags	= DB4D_Open_WithSeparateIndexSegment | DB4D_Open_WITHOUT_JournalFile;
+						errContext.Flush();
+						inBase->OpenData( dataFile, flags, NULL, &result);
+						if ( result != VE_OK )
+						{
+							logger.LogMessagesFromErrorContext( fLoggerID, errContext.GetContext());
+							logger.Log( fLoggerID, eL4JML_Fatal, CVSTR("Failed to open restored data file"));
+						}
+						else
+						{
+							logger.Log( fLoggerID, eL4JML_Information, CVSTR("Successully opened recovered data file"));
+						}
+					}
+				}
+			}
+		break;
+
+		default:
+			result = inErrorToHandle;
+			logger.Log( fLoggerID, eL4JML_Fatal, CVSTR("Cannot recover from previous errors. Consider restoring data from backup.") );
+		break;
+	}
+	return result;
+}
+
+/*
 CDB4DBase* VRIAServerProject::_OpenDatabase( VError& outError, bool inCreateEmptyDatabaseIfNeed)
 {
 	CDB4DBase *base = NULL;
@@ -2479,34 +3561,87 @@ CDB4DBase* VRIAServerProject::_OpenDatabase( VError& outError, bool inCreateEmpt
 				
 				usCounter.Start();	
 				logger.Log( fLoggerID, eL4JML_Information, L"Opening the database");
-				
-				// Check if a data file has been defined
-				VProjectItem *dataItem = fDesignProject->GetProjectItemFromTag( kDataTag);
-				if (dataItem != NULL)
+
+				bool buildWak3DataPath = false;
+				VProjectItem *newDataFolderItem = fDesignProject->GetProjectItemFromTag( kDataFolderTag);
+				if (newDataFolderItem != NULL)
 				{
-					dataItem->GetFilePath( dataPath);
+					newDataFolderItem->GetFilePath( dataPath);
+					dataPath.SetFileName( L"data.waData");
 				}
-				else
+				else // new "DataFolder" does not exist - backward compatibility
+				{
+					VProjectItem *oldDataItem = fDesignProject->GetProjectItemFromTag( kDataTag);
+
+					// the data file with active role found
+					if (oldDataItem != NULL)
+					{
+						oldDataItem->GetFilePath( dataPath);
+					}
+					else // the data file with active role NOT found, check if folder "data" exist
+					{
+						VString oldDefaultDataFolder;
+						VFilePath oldDataFolderPath;
+						VProjectItemTagManager::Get()->GetPreferedDefaultFolder( kDataTag, oldDefaultDataFolder);
+						BuildPathFromRelativePath( oldDataFolderPath, oldDefaultDataFolder, FPS_POSIX);
+
+						VFolder oldDataFolder( oldDataFolderPath);
+						if ( oldDataFolder.Exists())
+						{
+							//old folder "data" exist, now check if structureName.waData exist
+							VString name;
+							structurePath.GetFileName( name, false);
+							oldDataFolderPath.SetFileName( name, false);
+							oldDataFolderPath.SetExtension( RIAFileKind::kDataFileExtension);
+							VFile oldDataFile(oldDataFolderPath);
+							
+							if ( oldDataFile.Exists())
+							{
+								dataPath = oldDataFolderPath;
+							}
+							else
+							{
+								buildWak3DataPath = true;
+							}
+						}
+						else
+						{
+							buildWak3DataPath = true;
+						}
+					}
+				}
+
+				// build wak3 compatible data path
+				if (buildWak3DataPath)
 				{
 					VString defaultFolder;
-					VProjectItemTagManager::Get()->GetPreferedDefaultFolder( kDataTag, defaultFolder);
+					VProjectItemTagManager::Get()->GetPreferedDefaultFolder( kDataFolderTag, defaultFolder);
 					BuildPathFromRelativePath( dataPath, defaultFolder, FPS_POSIX);
 
 					VFolder dataFolder( dataPath);
-					if (dataFolder.Exists() || (dataFolder.Create() == VE_OK))
-					{
-						VString name;
-						structurePath.GetFileName( name, false);
-						dataPath.SetFileName( name, false);
-						dataPath.SetExtension( RIAFileKind::kDataFileExtension);
-					}
+					dataPath.SetFileName( L"data.waData");
 				}
 
 				// Open the structure
 				VFile structureFile(structurePath);
 				CUAGDirectory *uagDirectory = fSolution->RetainUAGDirectory();
 
-				base = db4dMgr->OpenBase( structureFile, flags, &outError, FA_READ_WRITE, nil, uagDirectory);
+				VProjectItem* permissionsItem = NULL;
+				VFilePath permissionsPath;
+				VFile* permissionsFile = NULL;
+
+				permissionsItem = fDesignProject->GetProjectItemFromTag( kPermissionsTag );
+
+				if ( permissionsItem )
+				{
+					permissionsItem->GetFilePath( permissionsPath );
+					permissionsFile = new VFile( permissionsPath );
+				}
+
+				base = db4dMgr->OpenBase( structureFile, flags, &outError, FA_READ_WRITE, nil, uagDirectory, permissionsFile );
+
+				ReleaseRefCountable( &permissionsFile );
+
 				if (base != NULL && outError == VE_OK)
 				{
 					VFile dataFile( dataPath);
@@ -2526,11 +3661,9 @@ CDB4DBase* VRIAServerProject::_OpenDatabase( VError& outError, bool inCreateEmpt
 
 					if (outError == VE_OK && fJSContextPool != NULL)
 					{
-						// Retreive the Entity Model script, which is the "catalogName.kCatalogFileExtension.js" file near the catalog
+						// Retreive the Entity Model script, which is the "catalogName.js" file near the catalog
 						VString emScriptName;
 						structurePath.GetFileName( emScriptName, false);
-						emScriptName.AppendUniChar( '.');
-						emScriptName.AppendString( RIAFileKind::kCatalogFileExtension);
 						emScriptName.AppendString( L".js");
 
 						VFilePath emScriptPath( structurePath);
@@ -2540,6 +3673,22 @@ CDB4DBase* VRIAServerProject::_OpenDatabase( VError& outError, bool inCreateEmpt
 						if (file.Exists())
 						{
 							fJSContextPool->AppendRequiredScript( emScriptPath);
+						}
+						else
+						{
+							// if the file is not found, try to find the file using the old way, by searching "ModelName.waModel.js" file
+							VString emAlternateScriptName;
+							structurePath.GetFileName( emScriptName, true);
+							emAlternateScriptName.AppendString( L".js");
+
+							VFilePath emAlternateScriptPath( structurePath);
+							emAlternateScriptPath.SetFileName( emAlternateScriptName, true);
+
+							VFile alternateFile( emAlternateScriptPath);
+							if (alternateFile.Exists())
+							{
+								fJSContextPool->AppendRequiredScript( emAlternateScriptPath);
+							}
 						}
 					}
 				}
@@ -2561,7 +3710,7 @@ CDB4DBase* VRIAServerProject::_OpenDatabase( VError& outError, bool inCreateEmpt
 	}
 	return base;
 }
-
+*/
 
 void VRIAServerProject::_CloseAndReleaseDatabase( CDB4DBase *inBase)
 {
@@ -2573,6 +3722,9 @@ void VRIAServerProject::_CloseAndReleaseDatabase( CDB4DBase *inBase)
 		usCounter.Start();
 		logger.Log( fLoggerID, eL4JML_Information, L"Closing the database");
 
+		inBase->SetRetainedBackupSettings(NULL);
+		XBOX::ReleaseRefCountable(&fBackupSettings);
+
 		if (fJSContextPool != NULL)
 		{
 			// Remove the Entity Model script from required script
@@ -2580,22 +3732,44 @@ void VRIAServerProject::_CloseAndReleaseDatabase( CDB4DBase *inBase)
 			VFolder *emFolder = inBase->RetainStructFolder();
 			if (emFolder != NULL)
 			{
-				// Build the Entity Model script path, which is the "catalogName.kCatalogFileExtension.js" file near the catalog
+				// Build the Entity Model script path, which is the "catalogName.js" file near the catalog
 				VFilePath emScriptPath;
 				VString emScriptName;
 				
 				inBase->GetName( emScriptName);
-				emScriptName.AppendUniChar( '.');
-				emScriptName.AppendString( RIAFileKind::kCatalogFileExtension);
 				emScriptName.AppendString( L".js");
 				
 				emFolder->GetPath( emScriptPath);
 				emScriptPath.SetFileName( emScriptName, true);
 
-				fJSContextPool->RemoveRequiredScript( emScriptPath);
+				VFile file( emScriptPath );
+				if ( file.Exists() )
+				{
+					fJSContextPool->RemoveRequiredScript( emScriptPath);
+				}
+				else
+				{
+					VFilePath emAlternateScriptPath;
+					VString emAlternateScriptName;
+
+					inBase->GetName( emAlternateScriptName);
+					emAlternateScriptName.AppendString( L".js");
+
+					emAlternateScriptName.AppendUniChar( '.');
+					emAlternateScriptName.AppendString( RIAFileKind::kCatalogFileExtension);
+
+					emFolder->GetPath( emAlternateScriptPath);
+					emAlternateScriptPath.SetFileName( emAlternateScriptName, true);
+
+					VFile alternateFile( emAlternateScriptPath );
+					if ( alternateFile.Exists() )
+					{
+						fJSContextPool->RemoveRequiredScript( emAlternateScriptPath);
+					}
+				}
 			}
 		}
-
+		
 		inBase->CloseAndRelease( true);
 		
 		VString logMsg;
@@ -2623,18 +3797,32 @@ VError VRIAServerProject::_StartHTTPServer()
 			sLONG	listeningSSLPort = fHTTPServerProject->GetSettings()->GetListeningSSLPort();
 			bool	bAllowSSL = fHTTPServerProject->GetSettings()->GetAllowSSL();
 			
+			//IPv6-TODO : Maj HelperTool
 			if ((listeningPort < 1024) || (listeningSSLPort < 1024 && bAllowSSL))
 			{
 				if (AuthorizationHelpers::IsHelperToolInstalled())
 				{
+#if WITH_DEPRECATED_IPV4_API				
 					uLONG	listeningAddress = fHTTPServerProject->GetSettings()->GetListeningAddress();
+#else
+					VString	tmpAddress = fHTTPServerProject->GetSettings()->GetListeningAddress();
+					
+					char listeningAddress[INET6_ADDRSTRLEN]; //large enough for v4 or v6, with trailing 0
+
+					tmpAddress.ToCString(listeningAddress, sizeof(listeningAddress));
+#endif			
 					int		httpSocketDescriptor = -1;
 					int		sslSocketDescriptor = -1;
-					
+
+#if WITH_DEPRECATED_IPV4_API									
 					AuthorizationHelpers::OpenSocketAndGetDescriptor (listeningAddress, listeningPort, httpSocketDescriptor);
 					if (bAllowSSL)
 						AuthorizationHelpers::OpenSocketAndGetDescriptor (listeningAddress, listeningSSLPort, sslSocketDescriptor);
-					
+#else
+					AuthorizationHelpers::OpenSocketAndGetDescriptor_IPv6 (listeningAddress, listeningPort, httpSocketDescriptor);
+					if (bAllowSSL)
+						AuthorizationHelpers::OpenSocketAndGetDescriptor_IPv6 (listeningAddress, listeningSSLPort, sslSocketDescriptor);		
+#endif					
 					if (httpSocketDescriptor != -1)
 						fHTTPServerProject->SetListeningSocketDescriptor (httpSocketDescriptor);
 					
@@ -2701,21 +3889,6 @@ VError VRIAServerProject::_StopHTTPServer()
 			// Post 'httpServerWillStop' message to the services
 			_PostServicesMessage( L"httpServerWillStop");
 			
-		#if !USE_JAVASCRIPT_WEBAPP_SERVICE
-			if (fIsWebAppServiceManager)
-				_SetWebAppServiceEnabled (false);
-		#endif
-
-		#if !USE_JAVASCRIPT_DATASTORE_SERVICE
-			if ((fDataService != NULL) && fIsDataServiceManager)
-				fDataService->SetEnabled( false);
-		#endif
-
-		#if !USE_JAVASCRIPT_RPC_SERVICE
-			if ((fRPCService != NULL) && fIsRPCServiceManager)
-				fRPCService->SetEnabled( false);
-		#endif
-
 			err = fHTTPServerProject->StopProcessing();
 
 			if (err == VE_OK)
@@ -2735,27 +3908,6 @@ VError VRIAServerProject::_StopHTTPServer()
 }
 
 
-VError VRIAServerProject::_SetWebAppServiceEnabled( bool inEnabled)
-{
-	VError err = VE_OK;
-
-	if (fHTTPServerProject != NULL)
-	{
-		if (inEnabled)
-			err = _LoadWebAppServiceSettings();
-
-		if (err == VE_OK)
-			fHTTPServerProject->EnableStaticPagesService (inEnabled);
-	}
-	else
-	{
-		err =  ThrowError (VE_RIA_HTTP_SERVER_PROJECT_NOT_FOUND);
-	}
-
-	return err;
-}
-
-
 VRPCCatalog* VRIAServerProject::_RetainRPCCatalog( VError& outError, const IHTTPRequest* inRequest, IHTTPResponse* inResponse)
 {
 	VRPCCatalog *catalog = NULL;
@@ -2764,97 +3916,9 @@ VRPCCatalog* VRIAServerProject::_RetainRPCCatalog( VError& outError, const IHTTP
 
 	if (testAssert(fDesignProject != NULL))
 	{
-		// sc 22/06/2011 always ensure that the symbols table is up to date for the methods files before building the catalog
-		VSyncEvent *syncEvent = fDesignProject->RetainRPCFilesParsingCompleteEvent();
-		if (syncEvent != NULL)
-		{
-			syncEvent->Lock();
-			ReleaseRefCountable( &syncEvent);
-		}
-
 		catalog = new VRPCCatalog();
 		if (catalog != NULL)
 		{
-			// Update the catalog with catalog files
-			VectorOfProjectItems itemsVector;
-			VectorOfVFile files;
-
-			fDesignProject->GetProjectItemsFromTag( kRPCCatalogTag, itemsVector);
-			for (VectorOfProjectItemsIterator iter = itemsVector.begin() ; iter != itemsVector.end() && outError == VE_OK ; ++iter)
-			{
-				if (*iter != NULL)
-				{
-					VFilePath path;
-					(*iter)->GetFilePath( path);
-					if (!path.IsEmpty() && path.IsFile())
-					{
-						VFile *file = new VFile( path);
-						if (file != NULL)
-						{
-							files.push_back( file);
-							file->Release();
-						}
-						else
-						{
-							outError = ThrowError( VE_MEMORY_FULL);
-						}
-					}
-				}
-			}
-
-			if (outError == VE_OK)
-				outError = catalog->SetCatalogFilesList( files);
-
-			if (outError == VE_OK)
-			{
-				// Update the catalog with methods files
-				CLanguageSyntaxComponent *languageSyntax = VRIAServerApplication::Get()->GetComponentLanguageSyntax();
-				if (languageSyntax != NULL)
-				{
-					// sc 03/03/2010 use the project symbol table
-					ISymbolTable *symbolTable = fDesignProject->GetSymbolTable();
-					if (symbolTable != NULL)
-					{
-						itemsVector.clear();
-						files.clear();
-
-						fDesignProject->GetProjectItemsFromTag( kRPCMethodTag, itemsVector);
-						for (VectorOfProjectItemsIterator iter = itemsVector.begin() ; iter != itemsVector.end() && outError == VE_OK ; ++iter)
-						{
-							if (*iter != NULL)
-							{
-								VFilePath path;
-								(*iter)->GetFilePath( path);
-								if (!path.IsEmpty() && path.IsFile())
-								{
-									VFile *file = new VFile(path);
-									if (file != NULL)
-									{
-										files.push_back( file);
-										file->Release();
-									}
-									else
-									{
-										outError = ThrowError( VE_MEMORY_FULL);
-									}
-								}
-							}
-						}
-
-						if (outError == VE_OK)
-							outError = catalog->SetMethodsFilesList( files, languageSyntax, symbolTable);
-					}
-					else
-					{
-						outError = ThrowError( VE_RIA_SYMBOLS_TABLE_NOT_FOUND);
-					}
-				}
-				else
-				{
-					outError = ThrowError( VE_RIA_LANGUAGE_SYNTAX_COMPONENT_NOT_FOUND);
-				}
-			}
-
 			if (fPermissions != NULL)
 			{
 				// chech whether we have some modules permissions
@@ -2894,14 +3958,6 @@ VRPCCatalog* VRIAServerProject::_RetainRPCCatalog( VError& outError, const IHTTP
 					}
 				}
 			}
-
-		#if VERSIONDEBUG
-			MapOfRPCSchema schemas;
-			catalog->RetainAllSchemas( schemas);
-			DebugMsg( "RPC catalog contains the following functions: \r\n");
-			//for (MapOfRPCSchema_iter iter = schemas.begin() ; iter != schemas.end() ; ++iter)
-			//	DebugMsg( L"- " + iter->first.GetMethodName() + L"\r\n");
-		#endif
 		}
 		else
 		{
@@ -2945,53 +4001,6 @@ bool VRIAServerProject::_SetContextCreationEnabled( bool inEnabled)
 bool VRIAServerProject::_IsContextCreationEnabled() const
 {
 	return fContextCreationEnabled;
-}
-
-
-VError VRIAServerProject::_LoadWebAppServiceSettings()
-{
-	VError err = VE_OK;
-
-	if (fHTTPServerProject != NULL)
-	{
-		IHTTPServerProjectSettings *httpSettings = fHTTPServerProject->GetSettings();
-		if (httpSettings != NULL)
-		{
-			// Set the web folder path
-			VProjectItem *webFolder = fDesignProject->GetProjectItemFromTag( kWebFolderTag);
-			if (webFolder != NULL)
-			{
-				VFilePath webFolderPath;
-				if (webFolder->GetFilePath( webFolderPath))
-				{
-					httpSettings->SetWebFolderPath( webFolderPath);
-				}
-			}
-
-			// Set index page name
-			VValueBag *webAppSettings = fSettings.RetainSettings( RIASettingID::webApp);
-			if (webAppSettings != NULL)
-			{
-				httpSettings->SetIndexPageName( RIASettingsKeys::WebApp::directoryIndex.Get( webAppSettings));
-				webAppSettings->Release();
-			}
-			else
-			{
-				err = ThrowError( VE_RIA_CANNOT_LOAD_WEB_APP_SETTINGS);
-			}
-
-		}
-		else
-		{
-			err = VE_UNKNOWN_ERROR;
-		}
-	}
-	else
-	{
-		err = ThrowError (VE_RIA_HTTP_SERVER_PROJECT_NOT_FOUND);
-	}
-
-	return err;
 }
 
 
@@ -3096,3 +4105,582 @@ VProgressIndicator* VRIAServerProjectJSRuntimeDelegate::CreateProgressIndicator(
 }
 
 
+
+// ----------------------------------------------------------------------------
+
+
+
+VReloadCatalogMessage::VReloadCatalogMessage( VRIAServerProject* inApplication)
+{
+	fApplication = RetainRefCountable( inApplication);
+}
+
+
+VReloadCatalogMessage::~VReloadCatalogMessage()
+{
+	QuickReleaseRefCountable( fApplication);
+}
+
+
+void VReloadCatalogMessage::DoExecute()
+{
+	if (fApplication != NULL)
+		fApplication->ReloadCatalog( NULL);
+}
+
+
+//------- TODO: Move in separates files later
+//--------------------------------------------------------------------------------------------------
+
+
+struct _CountElementInVStringFunctor
+{
+	_CountElementInVStringFunctor (const XBOX::VString& inString)
+		: fString (inString)
+	{
+	}
+
+	bool operator() (const XBOX::VString& inString) const
+	{
+		return (fString.Find (inString) > 0);
+	}
+
+private:
+	const XBOX::VString&	fString;
+};
+
+
+struct _MatchVRoutingRuleFunctor
+{
+	_MatchVRoutingRuleFunctor (const XBOX::VString& inString)
+		: fString (inString)
+	{
+	}
+
+	bool operator() (const std::pair<XBOX::VString, XBOX::VString>& inPairString) const
+	{
+		XBOX::VectorOfVString includesStrings;
+		inPairString.first.GetSubStrings (CHAR_COMMA, includesStrings, false, true);
+		
+		if (std::count_if (includesStrings.begin(), includesStrings.end(), _CountElementInVStringFunctor (fString)) == includesStrings.size())
+		{
+			XBOX::VectorOfVString excludesStrings;
+			inPairString.second.GetSubStrings (CHAR_COMMA, excludesStrings, false, true);
+			
+			if (std::count_if (excludesStrings.begin(), excludesStrings.end(), _CountElementInVStringFunctor (fString)) == 0)
+				return true;
+		}
+
+		return false;
+	}
+
+private:
+	const XBOX::VString&	fString;
+};
+
+
+//--------------------------------------------------------------------------------------------------
+
+
+VRoutingRule::VRoutingRule()
+: fName()
+, fSuffix()
+, fRules()
+{
+}
+
+
+VRoutingRule::~VRoutingRule()
+{
+	fRules.clear();
+}
+
+
+XBOX::VError VRoutingRule::LoadFromJSONValue (const XBOX::VJSONValue& inJSONValue)
+{
+	if (inJSONValue.IsObject())
+	{
+		inJSONValue.GetProperty ("name").GetString (fName);
+		inJSONValue.GetProperty ("suffix").GetString (fSuffix);
+
+		VJSONArray *rules = inJSONValue.GetProperty ("rules").GetArray();
+		for (sLONG i = 0; i < rules->GetCount(); i++)
+		{
+			VJSONValue elem = (*rules)[i];
+			if (elem.IsObject())
+			{
+				VJSONObject *elemObject = elem.GetObject();
+
+				bool isInclude = true;
+				VJSONValue jsValue = elemObject->GetProperty ("include");
+
+				if (JSON_undefined != jsValue.GetType())
+				{
+					XBOX::VString includeString;
+					XBOX::VString excludeString;
+
+					jsValue.GetString (includeString);
+					jsValue = elemObject->GetProperty ("exclude");
+					jsValue.GetString (excludeString);
+
+					fRules.push_back (std::make_pair (includeString, excludeString));
+				}
+			}
+		}
+	}
+
+	return XBOX::VE_OK;
+}
+
+
+bool VRoutingRule::MatchString (const XBOX::VString& inString)
+{
+	if (fRules.size() > 0)
+	{
+		VectorOfVRoutingRulePair::iterator it = std::find_if (fRules.begin(), fRules.end(), _MatchVRoutingRuleFunctor (inString));
+		return (it != fRules.end());
+	}
+
+	return false;
+}
+
+
+//--------------------------------------------------------------------------------------------------
+
+
+struct _FindMatchingRuleFunctor
+{
+	_FindMatchingRuleFunctor (const XBOX::VString& inString)
+		: fString (inString)
+	{
+	}
+
+	bool operator() (const VRoutingRuleRefPtr& inRoutingRule) const
+	{
+		return (inRoutingRule)->MatchString (fString);
+	}
+
+private:
+	const XBOX::VString&	fString;
+};
+
+
+//--------------------------------------------------------------------------------------------------
+
+
+VRoutingRulesList::VRoutingRulesList()
+: fRoutingRulesList()
+, fLock()
+{
+}
+
+
+VRoutingRulesList::~VRoutingRulesList()
+{
+	fRoutingRulesList.clear();
+}
+
+
+XBOX::VError VRoutingRulesList::LoadFromJSONValue (const XBOX::VJSONValue& inJSONValue)
+{
+	XBOX::VTaskLock		lock (&fLock);
+
+	if (inJSONValue.IsArray())
+	{
+		VJSONArray *jsonArray = inJSONValue.GetArray();
+		for (sLONG i = 0; i < jsonArray->GetCount(); ++i)
+		{
+			VJSONValue elem = (*jsonArray)[i];
+			if ( elem.IsObject() )
+			{
+				VRoutingRule *rule = new VRoutingRule();
+				if (NULL != rule)
+				{
+					rule->LoadFromJSONValue (elem);
+					fRoutingRulesList.push_back (rule);
+					rule->Release();
+				}
+			}
+		}
+	}
+
+	return XBOX::VE_OK;
+}
+
+
+bool VRoutingRulesList::FindMatchingRule (const XBOX::VString& inString, XBOX::VString& outMatchingRuleSuffix)
+{
+	outMatchingRuleSuffix.Clear();
+
+	XBOX::VTaskLock		lock (&fLock);
+	bool				isOK = false;
+	VRoutingRulesVector::const_iterator it = std::find_if (fRoutingRulesList.begin(), fRoutingRulesList.end(), _FindMatchingRuleFunctor (inString));
+	if (it != fRoutingRulesList.end())
+	{
+		outMatchingRuleSuffix.FromString ((*it)->GetSuffix());
+		isOK = !outMatchingRuleSuffix.IsEmpty();
+	}
+
+	return isOK;
+}
+
+
+//--------------------------------------------------------------------------------------------------
+
+
+VRoutingPreProcessingHandler::VRoutingPreProcessingHandler (const XBOX::VFilePath& inFilePath)
+: fRoutingRulesList (NULL)
+{
+	_InitRulesFromFile (inFilePath);
+}
+
+
+VRoutingPreProcessingHandler::~VRoutingPreProcessingHandler()
+{
+	XBOX::ReleaseRefCountable (&fRoutingRulesList);
+}
+
+
+void VRoutingPreProcessingHandler::_InitRulesFromFile (const XBOX::VFilePath& inFilePath)
+{
+	fRoutingRulesList = new VRoutingRulesList ();
+
+	if (NULL != fRoutingRulesList)
+	{
+		XBOX::VString	content;
+		XBOX::VError	err = XBOX::VE_OK;
+		XBOX::VFile		file (inFilePath);
+
+		if (file.Exists())
+		{
+			XBOX::VFileStream fileStream (&file);
+
+			if (XBOX::VE_OK == (err = fileStream.OpenReading()))
+			{
+				err = fileStream.GetText (content);
+				fileStream.CloseReading();
+			}
+		}
+
+		content.ExchangeAll( CVSTR( "\r" ), CVSTR( "" ) );
+		content.ExchangeAll( CVSTR( "\n" ), CVSTR( "" ) );
+		content.ExchangeAll( CVSTR( "\t" ), CVSTR( "" ) );
+
+		if (XBOX::VE_OK == err)
+		{
+			VJSONValue		value;
+			VJSONImporter	importer (content);
+			importer.Parse (value);
+
+			fRoutingRulesList->LoadFromJSONValue (value);
+
+#if 0
+			// ---------------------------- temp for tests
+			XBOX::VString suffix;
+
+			fRoutingRulesList->FindMatchingRule (CVSTR ("safari iphone (10.x)"), suffix);
+			fRoutingRulesList->FindMatchingRule (CVSTR ("theBrowser android (10.x)"), suffix);
+			fRoutingRulesList->FindMatchingRule (CVSTR ("another browser android (10.x mobile)"), suffix);
+			fRoutingRulesList->FindMatchingRule (CVSTR ("safari ipad (10.x)"), suffix);
+			fRoutingRulesList->FindMatchingRule (CVSTR ("htc desire (xxx.x)"), suffix);
+			fRoutingRulesList->FindMatchingRule (CVSTR ("phone"), suffix);
+			fRoutingRulesList->FindMatchingRule (CVSTR ("e10i"), suffix);
+			fRoutingRulesList->FindMatchingRule (CVSTR ("samsung galaxy android mobile"), suffix);
+
+			// ---------------------------- end of tests
+#endif
+		}
+	}
+}
+
+
+XBOX::VError VRoutingPreProcessingHandler::GetPatterns (XBOX::VectorOfVString *outPatterns) const
+{
+	if (outPatterns == NULL)
+		return VE_HTTP_INVALID_ARGUMENT;
+
+	outPatterns->clear();
+	outPatterns->push_back (CVSTR (".*"));
+
+	return XBOX::VE_OK;
+}
+
+
+static
+bool CheckFolderExists (const XBOX::VFilePath& inBaseFolderPath, const XBOX::VString& inFolderName)
+{
+	XBOX::VFilePath folderPath (inBaseFolderPath);
+
+	folderPath.ToSubFolder (inFolderName);
+
+	if (folderPath.IsFolder())
+	{
+		XBOX::VFolder	folder (folderPath);
+		return folder.Exists();
+	}
+	
+	return false;
+}
+
+
+static
+bool CheckFileExists (const XBOX::VFilePath& inBaseFolderPath, const XBOX::VString& inFileName)
+{
+	XBOX::VFilePath filePath (inBaseFolderPath);
+
+	filePath.ToSubFile (inFileName);
+
+	if (filePath.IsFile())
+	{
+		XBOX::VFile file (filePath);
+		return file.Exists();
+	}
+
+	return false;
+}
+
+
+static
+XBOX::VError CheckAndResolveURL (const XBOX::VFilePath& inBaseFolderPath, const XBOX::VString& inVirtualFolderName, XBOX::VString& ioURL, IHTTPResponse *ioResponse)
+{
+	if (NULL == ioResponse)
+		return VE_HTTP_INVALID_ARGUMENT;
+
+	const XBOX::VString	CONST_WAPAGE_SUFFIX (".waPage");
+	const XBOX::VString	CONST_DEFAULT_WAPAGE_NAME ("index.waPage");
+
+	XBOX::VString		URL (ioURL);
+	XBOX::VString		newLocation;
+	XBOX::VFilePath		path (inBaseFolderPath);
+	bool				bSendRedirect = false;
+
+	if (URL.FindUniChar (CHAR_COLON) > 0) // ':'
+		URL.ExchangeAll (CHAR_COLON, CHAR_SOLIDUS);
+
+	if (URL.FindUniChar (CHAR_REVERSE_SOLIDUS) > 0) // '\'
+		URL.ExchangeAll (CHAR_REVERSE_SOLIDUS, CHAR_SOLIDUS);
+
+	XBOX::VectorOfVString	elements;
+
+	URL.GetSubStrings (CHAR_SOLIDUS, elements);
+
+	if (elements.size() == 0)
+	{
+		if (CheckFolderExists (path, CONST_DEFAULT_WAPAGE_NAME))
+			path = path.ToSubFolder (CONST_DEFAULT_WAPAGE_NAME);
+	}
+	else
+	{
+		XBOX::VString							elementName;
+		XBOX::VectorOfVString::const_iterator	firstElement = elements.begin();
+		XBOX::VectorOfVString::const_iterator	lastElement = (elements.end() - 1);
+
+		for (XBOX::VectorOfVString::const_iterator it = elements.begin(); it != elements.end(); ++it)
+		{
+			elementName.FromString (*it);
+
+			if ((it == lastElement) && CheckFileExists (path, elementName))
+			{
+				path = path.ToSubFile (elementName);
+			}
+			else
+			{
+				if ((it == firstElement) && !inVirtualFolderName.IsEmpty() && elementName.EqualToString (inVirtualFolderName))
+					;	// Do Nothing
+				else if  ((elementName.GetLength() == 1) && (elementName[0] == CHAR_FULL_STOP)) // "."
+					;	// Do Nothing
+				else if ((elementName.GetLength() == 2) && (elementName[0] == CHAR_FULL_STOP) && (elementName[1] == CHAR_FULL_STOP)) // ".."
+				{
+					XBOX::VFilePath parentPath (path.ToParent());
+
+					// Try One level up
+					if (parentPath.IsChildOf (inBaseFolderPath))
+						path.FromFilePath (parentPath);
+				}
+				else
+				{
+					// Check if folder exists
+					if (CheckFolderExists (path, elementName))
+					{
+						path = path.ToSubFolder (elementName);
+
+						/*
+						 *	Special case: using '/aFolder' URL with /aFolder/index.waPage' folder existing in WebFolder.
+						 *	We'll find an existing folder with an existing index.waPage sub folder, but as the URL does not end with '/'
+						 *	all the following requestes will be relatives to parent folder '/' instead of '/subFolder'
+						 *	--> In this case, we send a redirection to adress this issue.
+						 */
+						if (it == lastElement)
+						{
+							if (URL.GetUniChar (URL.GetLength()) != CHAR_SOLIDUS)
+							{
+								bSendRedirect = true;
+								break;
+							}
+
+							// Check if an index.waPage folder exists...
+							if (!CONST_DEFAULT_WAPAGE_NAME.BeginsWith (elementName) &&
+								CheckFolderExists (path, CONST_DEFAULT_WAPAGE_NAME))
+							{
+								path = path.ToSubFolder (CONST_DEFAULT_WAPAGE_NAME);
+							}
+						}
+						else
+						{
+							XBOX::VString nextElementName (*(it + 1));
+							if (!CONST_DEFAULT_WAPAGE_NAME.BeginsWith (nextElementName) &&
+								CheckFolderExists (path, CONST_DEFAULT_WAPAGE_NAME))
+							{
+								path = path.ToSubFolder (CONST_DEFAULT_WAPAGE_NAME);
+							}
+						}
+					}
+					else
+					{
+						XBOX::VString	elementNameCopy (elementName);
+
+						elementNameCopy.AppendString (CONST_WAPAGE_SUFFIX);
+
+						// Check if something.waPage exists...
+						if (CheckFolderExists (path, elementNameCopy))
+						{
+							/*
+							 *	Special case: using '/aFolder' URL with /aFolder/aSubFolder.waPage' folder existing in WebFolder.
+							 *	We'll find an existing folder with an existing index.waPage sub folder, but as the URL does not end with '/'
+							 *	all the following requestes will be relatives to parent folder '/aFolder/' instead of '/aFolder/aSubFolder/'
+							 */
+							if ((it == lastElement) && URL.GetUniChar (URL.GetLength()) != CHAR_SOLIDUS)
+							{
+								path = path.ToSubFolder (elementName); // YT 12-Sep-2012 - WAK0078328 - Send redirection to '/aSubFolder/' not '/aSubFolder.waPage/'
+								bSendRedirect = true;
+								break;
+							}
+							else
+							{
+								path = path.ToSubFolder (elementNameCopy);
+							}
+						}
+						else
+						{
+							// Then try index.waPage...
+							if (!elementName.EqualToString (CONST_DEFAULT_WAPAGE_NAME) &&
+								CheckFolderExists (path, CONST_DEFAULT_WAPAGE_NAME))
+								path = path.ToSubFolder (CONST_DEFAULT_WAPAGE_NAME);
+
+							if ((it == lastElement) && CheckFileExists (path, elementName))
+								path = path.ToSubFile (elementName);
+							else
+								path = path.ToSubFolder (elementName);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	if (path != inBaseFolderPath)
+	{
+		path.GetRelativePosixPath (inBaseFolderPath, newLocation);
+		if (newLocation.GetUniChar (1) != CHAR_SOLIDUS)
+			newLocation.Insert (CHAR_SOLIDUS, 1);
+
+		if (!inVirtualFolderName.IsEmpty())
+		{
+			newLocation.Insert (inVirtualFolderName, 1);
+			newLocation.Insert (CHAR_SOLIDUS, 1);
+		}
+
+		if (!newLocation.EqualToString (ioURL))
+		{
+			if (bSendRedirect)
+			{
+				ioResponse->SetResponseStatusCode (HTTP_FOUND);
+				ioResponse->AddResponseHeader (CVSTR ("Location"), newLocation, true);
+				return VE_HTTP_PROTOCOL_FOUND;
+			}
+			else
+			{
+				ioResponse->SetRequestURLPath (newLocation);
+				ioURL.FromString (newLocation);
+			}
+		}
+	}
+
+	return XBOX::VE_OK;
+}
+
+
+XBOX::VError VRoutingPreProcessingHandler::HandleRequest (IHTTPResponse *ioResponse)
+{
+	if (NULL == fRoutingRulesList)
+		return XBOX::VE_OK;
+
+	if (NULL == ioResponse)
+		return XBOX::vThrowError (XBOX::VE_INVALID_PARAMETER);
+
+	XBOX::VError			error = XBOX::VE_OK;
+	XBOX::VString			URL (ioResponse->GetRequest().GetURLPath());
+	const XBOX::VString		CONST_WAPLATFORM_COOKIE (CVSTR ("waPlatform"));
+	const XBOX::VString		CONST_EMPTY_STRING (CVSTR (""));
+	const XBOX::VString		CONST_USER_AGENT (CVSTR ("User-Agent"));
+	const XBOX::VString		CONST_DEFAULT_WAPAGE_NAME ("index.waPage");
+	IVirtualHost *			virtualHost = ioResponse->GetVirtualHost();
+	IHTTPRequestHandler *	requestHandler = virtualHost->GetProject()->RetainMatchingHTTPRequestHandler (URL);
+
+	/*
+	 *	Check that request will not be handled by another requestHandler than the default 
+	 *	requestHandler (VStaticPageRequestHandler)
+	 */
+	if (NULL == requestHandler)
+	{
+		/*
+		 *	Check each URL level, try to find an existing.waPage folder and then "rewrite" original URL
+		 */
+		XBOX::VFilePath		webFolderPath;
+		XBOX::VString		defaultIndexName;
+		XBOX::VString		webFolderName; // Used for VirtualFolders
+
+
+		virtualHost->GetMatchingVirtualFolderInfos (URL, webFolderPath, defaultIndexName, webFolderName);
+
+		error = CheckAndResolveURL (webFolderPath, webFolderName, URL, ioResponse);
+
+		if (XBOX::VE_OK == error)
+		{
+			/*
+			 *	Check waPlatform cookie other else try to guess platform using User-Agent header
+			 */
+			XBOX::VString	platformValue;
+			bool			waPlatformCookieExists = false;
+
+			waPlatformCookieExists = ioResponse->GetRequest().GetCookie (CONST_WAPLATFORM_COOKIE, platformValue);
+			if (!waPlatformCookieExists || platformValue.IsEmpty())
+			{
+				XBOX::VString	userAgent;
+				ioResponse->GetRequestHeader().GetHeaderValue (CONST_USER_AGENT, userAgent);
+				fRoutingRulesList->FindMatchingRule (userAgent, platformValue);
+			}
+
+			if (!platformValue.IsEmpty())
+			{
+				XBOX::VString outResolvedURL;
+				bool setCookie = true;
+				sLONG cookieExpires = 0; // -1: expires at the end of session, 0: expires now
+
+				if (virtualHost->ResolveURLForAlternatePlatformPage (URL, platformValue, outResolvedURL))
+				{
+					ioResponse->SetRequestURLPath (outResolvedURL);
+					ioResponse->AddCookie (CONST_WAPLATFORM_COOKIE, platformValue, CONST_EMPTY_STRING, CONST_EMPTY_STRING, CONST_EMPTY_STRING, false, true, -1); // Expires at the end of session
+				}
+				else if (waPlatformCookieExists)
+					ioResponse->AddCookie (CONST_WAPLATFORM_COOKIE, platformValue, CONST_EMPTY_STRING, CONST_EMPTY_STRING, CONST_EMPTY_STRING, false, true, 0); // Expires now
+			}
+		}
+	}
+	else
+	{
+		XBOX::QuickReleaseRefCountable (requestHandler);
+	}
+
+	return error;
+}

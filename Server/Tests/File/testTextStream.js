@@ -18,7 +18,7 @@ var testCase = {
 
 	_should: {
         ignore: {
-            testAttributLengthExists: true // Not sure about the doc.
+
         }
     },
     
@@ -67,16 +67,6 @@ var testCase = {
         Y.Assert.areNotSame("undefined", result);
         Y.Assert.areSame("function", result);
         obj.close();
-    },
-
-    //6- attribut length exist
-	testAttributLengthExists: function () {
-        var appPath= application.getFolder("path");
-        var obj = TextStream(appPath + 'Src/file_text_read0.txt','Read');
-        var result = typeof obj.length;
-        Y.Assert.areNotSame("undefined", result);
-		Y.Assert.areSame("number", result);
-		obj.close();
     },
 
     //7- method read exist
@@ -310,5 +300,32 @@ var testCase = {
 			failed = true;
  		}
  		Y.Assert.isTrue(failed, "obj.read() should failed at position " + obj.getPos() + " with the '" + appPath + "Src/file_text_read_failure0.txt' file.");
-     }
+     },
+
+	//24- Check that when we write line breaks, we always use CRLF characters.
+	testCRLFLineBreaks: function () {
+        var appPath	= application.getFolder("path");
+        var file 	= File(appPath + 'Src/file_text_write_crlf.txt');
+		
+        if (file.exists) 
+		
+            file.remove();
+        
+		var	writtenString	= "abcd\nabcd";
+		var	readString;
+		
+		Y.Assert.isTrue(writtenString.length == 9);
+		
+        var obj1 = TextStream(file, 'Write');
+        obj1.write(writtenString);
+        obj1.close();
+		
+        var obj2 = TextStream(file, 'Read');
+        readString = obj2.read();
+        obj2.close();
+
+		Y.Assert.isTrue(readString.length == 10);
+		Y.Assert.isTrue(readString.charCodeAt(4) == 0x0d); 	// '\r' character.
+		Y.Assert.isTrue(readString.charCodeAt(5) == 0x0a); 	// '\n' character.
+	},		
 };

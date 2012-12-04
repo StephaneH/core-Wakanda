@@ -1,0 +1,405 @@
+<html>
+<head>
+
+</head>
+
+<body>
+
+<script type="text/javascript">
+var BrowserDetect = {
+	init: function () {
+		this.browser = this.searchString(this.dataBrowser) || "An unknown browser";
+		this.version = this.searchVersion(navigator.userAgent)
+			|| this.searchVersion(navigator.appVersion)
+			|| "an unknown version";
+		this.OS = this.searchString(this.dataOS) || "an unknown OS";
+	},
+	searchString: function (data) {
+		for (var i=0;i<data.length;i++)	{
+			var dataString = data[i].string;
+			var dataProp = data[i].prop;
+			this.versionSearchString = data[i].versionSearch || data[i].identity;
+			if (dataString) {
+				if (dataString.indexOf(data[i].subString) != -1)
+					return data[i].identity;
+			}
+			else if (dataProp)
+				return data[i].identity;
+		}
+	},
+	searchVersion: function (dataString) {
+		var index = dataString.indexOf(this.versionSearchString);
+		if (index == -1) return;
+		return parseFloat(dataString.substring(index+this.versionSearchString.length+1));
+	},
+	dataBrowser: [
+		{
+			string: navigator.userAgent,
+			subString: "Chrome",
+			identity: "Chrome"
+		},
+		{ 	string: navigator.userAgent,
+			subString: "OmniWeb",
+			versionSearch: "OmniWeb/",
+			identity: "OmniWeb"
+		},
+		{
+			string: navigator.vendor,
+			subString: "Apple",
+			identity: "Safari",
+			versionSearch: "Version"
+		},
+		{
+			prop: window.opera,
+			identity: "Opera",
+			versionSearch: "Version"
+		},
+		{
+			string: navigator.vendor,
+			subString: "iCab",
+			identity: "iCab"
+		},
+		{
+			string: navigator.vendor,
+			subString: "KDE",
+			identity: "Konqueror"
+		},
+		{
+			string: navigator.userAgent,
+			subString: "Firefox",
+			identity: "Firefox"
+		},
+		{
+			string: navigator.vendor,
+			subString: "Camino",
+			identity: "Camino"
+		},
+		{		// for newer Netscapes (6+)
+			string: navigator.userAgent,
+			subString: "Netscape",
+			identity: "Netscape"
+		},
+		{
+			string: navigator.userAgent,
+			subString: "MSIE",
+			identity: "Explorer",
+			versionSearch: "MSIE"
+		},
+		{
+			string: navigator.userAgent,
+			subString: "Gecko",
+			identity: "Mozilla",
+			versionSearch: "rv"
+		},
+		{ 		// for older Netscapes (4-)
+			string: navigator.userAgent,
+			subString: "Mozilla",
+			identity: "Netscape",
+			versionSearch: "Mozilla"
+		}
+	],
+	dataOS : [
+		{
+			string: navigator.platform,
+			subString: "Win",
+			identity: "Windows"
+		},
+		{
+			string: navigator.platform,
+			subString: "Mac",
+			identity: "Mac"
+		},
+		{
+			   string: navigator.userAgent,
+			   subString: "iPhone",
+			   identity: "iPhone/iPod"
+	    },
+		{
+			string: navigator.platform,
+			subString: "Linux",
+			identity: "Linux"
+		}
+	]
+
+};
+
+function treatOpenWindow(contextId)
+{
+	var hdl = hash[contextId].hdl;
+	console.log("treatOpenWindow hdl=",hdl," ,url=",hash[contextId].url);
+	if (hdl == null) {
+		if (!hash[contextId].url) {
+			ws.send('{"method":"getURL","id":"' + contextId + '"}');
+			return;
+		}
+		
+		hdl = window.open(
+					hash[contextId].url, 
+					contextId,   
+					"menubar=yes,location=yes,resizable=yes,scrollbars=yes,status=yes");
+		
+		hash[contextId].hdl = hdl;
+	}
+	else {
+		hdl.focus();
+	}
+}
+
+function refreshHtml() {
+	document.getElementById("wakserv_host").innerHTML = WAKANDA_SERVER_HOST;
+	document.getElementById("wakserv_port").innerHTML = WAKANDA_SERVER_PORT;
+	switch(ws.readyState) {
+	case ws.CLOSED:
+		document.getElementById("wakserv_state").innerHTML = "CLOSED";
+		document.getElementById("wakserv_state").style.color = "red";
+		break;
+	case ws.CLOSING:
+		document.getElementById("wakserv_state").innerHTML = "CLOSING";
+		document.getElementById("wakserv_state").style.color = "red";
+		break;
+	case ws.CONNECTING:
+		document.getElementById("wakserv_state").innerHTML = "CONNECTING";
+		document.getElementById("wakserv_state").style.color = "red";
+		break;
+	case ws.OPEN:
+		document.getElementById("wakserv_state").innerHTML = "OPEN";
+		document.getElementById("wakserv_state").style.color = "green";
+		break;
+	default:
+		document.getElementById("wakserv_state").innerHTML = "UNKNOWN STATE :" + ws.readyState;
+		document.getElementById("wakserv_state").style.color = "red";
+	}
+}
+
+function addNewElement(contextId) {
+			name = "ctx:" + contextId;
+			var frontend_ref;
+			frontend_ref = document.createElement("a");
+			frontend_ref.href = "#";
+			frontend_ref.onclick = function(event){treatOpenWindow(contextId); };
+			frontend_ref.title = name;
+			frontend_ref.className = "frontend_ref";
+			
+			var text = document.createElement("div");
+			text.className = "rmt_dbgr";
+			text.innerText = name;
+			text.style.color = "blue";
+			frontend_ref.appendChild(text);
+
+			var item = document.createElement("p");
+			item.className = "item";
+			item.id = contextId;
+			item.appendChild(frontend_ref);
+
+			document.getElementById("items").appendChild(item);
+			return text;
+}
+
+function treatMessage(msg) {
+	var hdl;
+	refreshHtml();
+	console.log("treatMessage called, state=", state," ,ws_state=",ws.readyState," received: ",msg.data);
+	if (state < CONNECTING_STATE) {
+		console.log("treatMessage BAD STATE");
+		ws.close();
+		return;
+	}
+	var jsonMsg = JSON.parse(msg.data);
+	//console.log("method=",jsonMsg.method,", "ctxId=",jsonMsg.contextId);
+	
+	if (state == CONNECTING_STATE) {
+		if (jsonMsg.result == "ok") {
+			state = CONNECTED_STATE;
+			return;
+		}
+	}
+	if (state != CONNECTED_STATE) {
+		console.log("treatMessage BAD STATE2");
+		return;
+	}
+	if (jsonMsg.method == "newContext" ) {
+
+		hash[jsonMsg.contextId] = {};
+		hash[jsonMsg.contextId].hdl = null;
+		hash[jsonMsg.contextId].url = null;
+		hash[jsonMsg.contextId].text = addNewElement(jsonMsg.contextId);
+		ws.send('{"result":"ok","id":"' + jsonMsg.id +'"}');
+		//console.log("treatMessage hdl=",hash[jsonMsg.contextId].hdl," url=",hash[jsonMsg.contextId].url);
+	}
+	if (jsonMsg.method == "updateContext" ) {
+		console.log("method=",jsonMsg.method," ,hdl=",hash[jsonMsg.contextId].hdl );//hash.getItem(jsonMsg.contextId) );
+
+		if (!hash[jsonMsg.contextId].url) {
+			hash[jsonMsg.contextId].text.style.color = "red";
+		}
+		
+		hdl = hash[jsonMsg.contextId].hdl;
+		if (hdl == null || hdl.closed) {
+
+			alert('context ' + jsonMsg.contextId + ' updated!!!');
+		}
+		else {
+			hdl.focus();
+		}
+	}
+	
+	if (jsonMsg.method == "setURLContext" ) {
+		if (!hash[jsonMsg.contextId].url) {
+			hash[jsonMsg.contextId].url = jsonMsg.url;
+			hash[jsonMsg.contextId].text.style.color = "orange";
+			treatOpenWindow(jsonMsg.contextId);
+		}
+	}
+	
+	if (jsonMsg.method == "removeContext" ) {
+		hdl = hash[jsonMsg.contextId].hdl;
+		console.log("method=",jsonMsg.method," ,hdl=",hdl );
+		if (hdl != null) {
+			hdl.close();
+		}
+		document.getElementById("items").removeChild(document.getElementById(jsonMsg.contextId));
+		delete hash[jsonMsg.contextId];
+		window.focus();
+		ws.send('{"result":"ok","id":"' + jsonMsg.id +'"}');
+	}	
+}
+
+function treatOKButton() {
+	console.log("treatOKButton called");
+	xmlHttp=new XMLHttpRequest();
+	name = document.getElementById("username").value;
+	pwd = document.getElementById("passwd").value;
+	login = 'login(' + name + ',' + pwd + ')'
+	console.log("login ->", login)
+	xmlHttp.open('GET','http://192.168.6.39:8080/rest/$directory/' + login,false);
+	xmlHttp.send();
+	var jsonResp = JSON.parse(xmlHttp.response);
+	console.log("treatOKButton RESPresp->",jsonResp); 
+	if (jsonResp.result == true) {
+		if (firstTry) {
+			state = RETRY_STATE;
+			firstTry = false;
+			ws = connectWakSrv();
+			return;
+		}
+	}
+
+	state = STOPPED_STATE;
+}
+
+
+function treatError(msg) {
+	console.log("treatError called, state=",ws.readyState," msg=",msg,"  ws=",ws);
+	document.getElementById("username_form").style.visibility="visible";
+}
+
+function treatClose(msg) {
+	console.log("treatClose called, state=",ws.readyState," msg=",msg);
+
+	for (k in hash) {
+		if (hash[k].hasOwnProperty("hdl")) {
+			hdl = hash[k].hdl;
+			console.log("treatClose of ctx=",k);
+			if (hdl != null) {
+				hdl.close();
+			}
+			delete hash[k];
+		}
+	}
+	state = STOPPED_STATE;
+	refreshHtml();
+}
+
+function treatOpen() {
+	console.log("treatOpen called");
+	if (state != STOPPED_STATE) {
+		console.log("treatOpen bad state=",state);
+		ws.close();
+	} else {
+		state = CONNECTING_STATE;
+		document.getElementById("username_form").style.visibility="hidden";
+		ws.send('{"method":"connect","id":"GuyHERMANN"}');
+	}
+}
+
+function connectWakSrv() {
+	console.log("trying to connect to ",WAKANDA_SERVER_WS_URL);
+	state = STOPPED_STATE;
+	var lWS = new WebSocket(WAKANDA_SERVER_WS_URL);    //e.g. : "ws://192.168.6.39:8080/devtools/remote_debugger_ws"
+	lWS.onmessage = treatMessage;
+	lWS.onclose = treatClose;
+	lWS.onerror = treatError;
+	lWS.onopen = treatOpen;
+	console.log("readystate=", lWS.readyState);
+	return lWS;
+}
+
+console.log("start");
+
+var id = 1000;
+var WAKANDA_SERVER_HOST = "__TEMPLATE_WAKANDA_SERVER_HOST__";
+var WAKANDA_SERVER_PORT = "__TEMPLATE_WAKANDA_SERVER_PORT__";
+var WAKANDA_SERVER_WS_URL = "ws://" + WAKANDA_SERVER_HOST + ":" + WAKANDA_SERVER_PORT + "/devtools/remote_debugger_ws";
+
+var hash = {};
+var STOPPED_STATE = 0;
+var CONNECTING_STATE = 1;
+var CONNECTED_STATE = 2;
+var RETRY_STATE = 3;
+
+var firstTry = true;
+var state = STOPPED_STATE;
+var ws;
+
+window.onload = function() {
+	document.getElementById("ok_button").onclick = function() {treatOKButton();};
+	document.getElementById("ok_button").innerHTML = "Send Username/Passwd";
+	document.getElementById("username_form").style.visibility="hidden";
+};
+BrowserDetect.init();
+BrowserDetect.isCompatible = false;
+if ( (BrowserDetect.browser == "Chrome") && (BrowserDetect.version >= 19) ) {
+	BrowserDetect.isCompatible = true;
+}
+if ( (BrowserDetect.browser == "Safari")  && (BrowserDetect.version >= 6) ) {
+	BrowserDetect.isCompatible = true;
+}
+
+if (!BrowserDetect.isCompatible) {
+	window.alert("Your browser is not compatible for WAKANDA remote debug!!!"); 
+}
+else {
+	ws = connectWakSrv();
+}
+
+</script>
+
+<h1 style="text-align : center;">WAKANDA REMOTE DEBUGGER</h1>
+<div> 
+
+<p>
+
+<span>Host:</span>
+<span id="wakserv_host"></span>
+
+<span>Port:</span>
+<span id="wakserv_port"></span>
+
+<span>Connexion State:</span>
+<span id="wakserv_state"></span>
+</p>
+
+<p id="username_form">
+<label for="username">Username:</label>
+<input id="username" name="username" value=""></input>
+<label for="passwd">Passwd:</label>
+<input id="passwd" name="passwd" value=""></input>
+<button id="ok_button"></button>
+</p>
+
+</div>
+<div id="items"></div>
+
+</body>
+
+</html>

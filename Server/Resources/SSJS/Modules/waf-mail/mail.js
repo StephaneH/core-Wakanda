@@ -66,11 +66,37 @@ function MailScope () {
 	
 	var foldedLineStartRegExp		= /^ |\t/;
 	
+	// Translate lower case field names to "camel" case. That way, user can use syntax "mail.subject = 'somebody'" 
+	// and still be compliant.
+	
+	var fieldNameTable	= {
+	
+		from:			'From',
+		to:				'To',
+		cc:				'Cc',
+		bcc:			'Bcc',
+		subject:		'Subject',
+		organization:	'Organization',
+	
+	};
+	
 	function Mail (from, to, subject, content) {
 
 		// Body must be properly formatted as explained in section 2.3 of specification.
 
-		var	body	= new Array();	// An empty body is valid.
+		var	body		= new Array();	// An empty body is valid.
+		
+		// Type of the body (usually "text/plain" or "text/html"), default is "text/plain".
+		
+		var bodyType 	= "text/plain";
+		
+		// If user adds attachment(s) a MimeWriter object will be created and will handle that.
+		
+		var mimeWriter	= null;
+		
+		// Have only one mimeMessage object.
+				
+		var mimeMessage	= null;
 		
 		// Exceptions for Mail, this will explain error, see codes below.
 		
@@ -78,7 +104,8 @@ function MailScope () {
 		
 			this.code = code;
 		
-		} 
+		}
+		
 		MailException.INVALID_ARGUMENT	= -1;	// Function has been called with incorrect argument.
 		MailException.INVALID_STATE		= -2;	// Should be impossible.
 				
@@ -188,11 +215,17 @@ function MailScope () {
 					
 					continue;
 					
-				else if (typeof this[name] == 'string')
+				else if (typeof this[name] == 'string') {
 				
-					header.push(name + ': ' + this[name]);
-							
-				else if (this[name] instanceof Array) {
+					if (typeof fieldNameTable[name] == 'string') 
+					
+						header.push(fieldNameTable[name] + ': ' + this[name]);
+						
+					else
+					
+						header.push(name + ': ' + this[name]);
+					
+				} else if (this[name] instanceof Array) {
 				
 					var	i;
 				
@@ -202,10 +235,14 @@ function MailScope () {
 						
 							throw new MailException(MailException.INVALID_STATE);	// Impossible!
 							
-						else 
+						else if (typeof fieldNameTable[name] == 'string') 
+					
+							header.push(fieldNameTable[name] + ': ' + this[name][i]);
+						
+						else
 					
 							header.push(name + ': ' + this[name][i]);
-				
+					
 				} else 
 				
 					continue;	// Field names may "collide" with object's attributes, ignore.
@@ -234,6 +271,15 @@ function MailScope () {
 
 		}
 		
+		// Same as setBody() except that it defines the body type as html.
+		
+		this.setBodyAsHTML = function (newBody) {
+		
+			this.setBody(newBody);
+			this.setBodyTypeToHTML();
+		
+		}
+		
 		// Retrieve body of mail, just ad CRLF at end of each line and it is ready to send using SMTP.
 
 		this.getBody = function () {
@@ -242,6 +288,34 @@ function MailScope () {
 		
 		}
 		
+		// Set and get body type. Must be a valid MIME type string.
+		
+		this.setBodyType = function (newBodyType) {
+		
+			if (typeof newBodyType == 'string')
+			
+				bodyType = newBodyType;
+				
+			else
+		
+				throw new MailException(MailException.INVALID_ARGUMENT);
+		
+		}
+		
+		this.getBodyType = function () {
+		
+			return bodyType;
+		
+		}
+		
+		// Helper function to set body type as HTML.
+
+		this.setBodyTypeToHTML = function () {
+		
+			bodyType = 'text/html';
+		
+		}
+				
 		// Format and set the body of mail message, return true if successful. The new body can be a single 
 		// string or an array of lines (strings). For an array of strings, the new body is considered as the
 		// concatenation of all its strings. Formating replaces single '\r' (CR) characters by blanks and 
@@ -360,6 +434,48 @@ function MailScope () {
 				
 			}
 			
+		}
+		
+		// Add an attachment (a MIME part). Currently supported.
+		
+		this.addAttachment = function (attachment, name, mimeType, contentID, isInline) {
+		
+					
+			// Doesn't check attachment type. 
+		
+			if (typeof name != 'string' || typeof mimeType != 'string') 
+						
+				throw new MailException(MailException.INVALID_ARGUMENT);
+				
+			else {
+			
+				if (mimeWriter == null) 
+			
+					mimeWriter = new MIMEWriter();
+									
+				mimeWriter.addPart(attachment, name, mimeType, contentID, isInline);
+				
+			}
+		
+		}
+				
+		// Return MIMEMessage object if mail has attachment(s), or null otherwise.
+		
+		this.getMIMEMessage = function () {
+		
+			if (mimeWriter == null)
+			
+				return null;
+				
+			else if (mimeMessage == null) {
+			
+				mimeMessage = mimeWriter.getMIMEMessage();
+				return mimeMessage;
+			
+			} else 
+					
+				return mimeMessage;
+		
 		}
 		
 		// Parse an email as received from POP3 or IMAP. Take an array of lines, startLine and endLine are the start

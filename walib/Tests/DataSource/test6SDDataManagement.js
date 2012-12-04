@@ -22,9 +22,7 @@ var testCase = {
 		
         _should: {
             ignore: {
-                testDropCurrentExists: true, // Not sure about the spec.
-                testDropCurrentLogicNew: true, // Not sure about the spec.
-                testDropCurrentLogicSelect: true // Not sure about the spec.
+                
             }
         },
         
@@ -336,15 +334,15 @@ var testCase = {
 		/**
  		 * SD-00 dropCurrent method exists
  		 */
-		testDropCurrentExists: function () {
+		/*testDropCurrentExists: function () {
 			Y.Assert.areNotSame("undefined", typeof source.CitiesDS.dropCurrent);
 			Y.Assert.areSame("function", typeof source.CitiesDS.dropCurrent);
-		},
+		},*/
 
 		/**
  		 * SD-00 dropCurrent method business logic on a new element (just added)
  		 */
-		testDropCurrentLogicNew: function () {	
+		/*testDropCurrentLogicNew: function () {	
 			//get the test runner
 			var testRunner = this;
 
@@ -388,12 +386,12 @@ var testCase = {
 				);  
 			}, 50);
 			testRunner.wait();
-		},
+		},*/
 
 		/**
  		 * SD-00 dropCurrent method business logic on a non just added element
  		 */
-		testDropCurrentLogicSelect: function () {	
+		/*testDropCurrentLogicSelect: function () {	
 			//get the test runner
 			var testRunner = this;
 			//point the second element
@@ -438,7 +436,7 @@ var testCase = {
 				);  
 			}, 50);
 			testRunner.wait();
-		},
+		},*/
 
 		/**
  		 * SD-00 addEntity method exists

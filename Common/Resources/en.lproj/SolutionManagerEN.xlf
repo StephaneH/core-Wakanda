@@ -215,11 +215,15 @@
           <source>New Web Component</source>
           <target>New Web Component</target>
         </trans-unit>
-        <trans-unit resname="file_already_exists" id="28">
+        <trans-unit resname="new_file_page" id="30">
+          <source>New Page</source>
+          <target>New Page</target>
+        </trans-unit>
+        <trans-unit resname="file_already_exists" id="31">
           <source>File already exists!</source>
           <target>File already exists!</target>
         </trans-unit>
-        <trans-unit resname="folder_already_exists" id="29">
+        <trans-unit resname="folder_already_exists" id="32">
           <source>Folder already exists!</source>
           <target>Folder already exists!</target>
         </trans-unit>

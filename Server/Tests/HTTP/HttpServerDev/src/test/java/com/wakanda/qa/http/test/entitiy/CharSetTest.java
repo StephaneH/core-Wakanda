@@ -22,11 +22,12 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import com.wakanda.qa.http.CharSetUtil;
-import com.wakanda.qa.http.Resources;
+import com.wakanda.qa.http.Settings;
 import com.wakanda.qa.http.test.extend.AbstractHttpTestCase;
 
 /**
@@ -54,7 +55,8 @@ public class CharSetTest extends AbstractHttpTestCase {
 	public void testThatServerReturns406WhenCharSetNotAcceptable()
 			throws Exception {
 		String charset = "Unknown";
-		HttpPost request = getDefaultPostRequest();
+		getSettings();
+		HttpPost request = Settings.getDefaultPostRequest();
 		request.addHeader(HttpHeaders.ACCEPT_CHARSET, charset);
 		HttpResponse response = executeRequest(request);
 		assertEqualsStatusCode(HttpStatus.SC_NOT_ACCEPTABLE, response);
@@ -82,15 +84,17 @@ public class CharSetTest extends AbstractHttpTestCase {
 		// Send request for charset
 		HttpGet request = new HttpGet(url);
 		request.addHeader(HttpHeaders.ACCEPT_CHARSET, charsetName);
-		HttpResponse response = executeRequest(request);
+		HttpResponse response = executeRequest(request, false);
 		byte[] responseContent = EntityUtils.toByteArray(response.getEntity());
 
 		// Read encoded content
-		File file = new File(getDefaultProjectWebFolderPath() + url);
+		File file = new File(getSettings().getDefaultProjectWebFolderPath()
+				+ url);
 		BufferedInputStream br = new BufferedInputStream(new FileInputStream(
 				file));
 		byte[] bytes = new byte[(int) file.length()];
 		br.read(bytes);
+		br.close();
 
 		// check the content validity
 		String responseContentCharSet = EntityUtils.getContentCharSet(response
@@ -117,7 +121,7 @@ public class CharSetTest extends AbstractHttpTestCase {
 	public void testThatServerSupportsCharSetWhenDynamicContent(Charset charset)
 			throws Exception {
 
-		//Charset charset = Charset.forName("ISO-8859-8");
+		// Charset charset = Charset.forName("ISO-8859-8");
 		// Init variables
 		String charsetName = charset.name();
 		logger.debug("Testing " + charsetName + " charset...");
@@ -128,7 +132,7 @@ public class CharSetTest extends AbstractHttpTestCase {
 				charsetName, false);
 
 		// Write unicode content in file
-		String unicodeContentPath = Resources.getCharsetFolder() + "/"
+		String unicodeContentPath = getSettings().getCharsetFolder() + "/"
 				+ charsetName + "-UTF-8.txt";
 		CharSetUtil.encodeUnicodeContentToFile1(unicodeContent, "UTF-8",
 				unicodeContentPath);
@@ -140,7 +144,7 @@ public class CharSetTest extends AbstractHttpTestCase {
 		HttpGet request = new HttpGet(
 				"/checkCharsetWhenContentTypeIsSet/?charsetName=" + charsetName);
 		request.addHeader(HttpHeaders.ACCEPT_CHARSET, charsetName);
-		HttpResponse response = executeRequest(request);
+		HttpResponse response = executeRequest(request, false);
 		byte[] responseContent = EntityUtils.toByteArray(response.getEntity());
 
 		// check the content validity
@@ -179,7 +183,7 @@ public class CharSetTest extends AbstractHttpTestCase {
 				charsetName, false);
 
 		// save it into the solution web folder
-		String encodedContentPath = Resources.getCharsetFolder() + "/"
+		String encodedContentPath = getSettings().getCharsetFolder() + "/"
 				+ charsetName + ".txt";
 		CharSetUtil.encodeUnicodeContentToFile1(unicodeContent, charsetName,
 				encodedContentPath);
@@ -187,7 +191,7 @@ public class CharSetTest extends AbstractHttpTestCase {
 		// send request to corresponding request handler
 		HttpGet request = new HttpGet("/checkDefaultCharset/");
 		request.addHeader(HttpHeaders.ACCEPT_CHARSET, "*");
-		HttpResponse response = executeRequest(request);
+		HttpResponse response = executeRequest(request, false);
 
 		// check the status code
 		assertEqualsStatusCode(HttpStatus.SC_OK, response);
@@ -241,15 +245,25 @@ public class CharSetTest extends AbstractHttpTestCase {
 
 	/**
 	 * <b>Implements:</b> CharSet06
-	 * <p>
+	 * <p/>
 	 * Check that server responds with 415 when the charset of the request
 	 * entity is not supported.
-	 * <p>
+	 * <p/>
+	 * Le test est ignoré car le serveur n'a aucun moyen de savoir si le request
+	 * handler accepte le charset, c'est donc à chaque requestHandler de
+	 * vérifier si le charset est supporté/accepté.
+	 * <p/>
 	 * <b>Reference:</b> SPEC695 (RFC2616) 10.4.16
 	 * 
 	 * @throws Exception
 	 */
 	@Test
+	/*
+	 * Le Server n'a aucun moyen de savoir si le request handler accepte le
+	 * charset, c'est donc à chaque requestHandler de vérifier si le charset est
+	 * supporté/accepté.
+	 */
+	@Ignore
 	public void testThatServerReplaysWith415WhenCharsetOfRequestEntityIsNotSupported()
 			throws Exception {
 		// entity
@@ -264,7 +278,7 @@ public class CharSetTest extends AbstractHttpTestCase {
 		request.setEntity(reqEntity);
 
 		// response
-		HttpResponse response = executeRequest(request);
+		HttpResponse response = executeRequest(request, false);
 		logger.debug(EntityUtils.toString(response.getEntity()));
 		assertEqualsStatusCode(HttpStatus.SC_UNSUPPORTED_MEDIA_TYPE, response);
 	}
@@ -292,7 +306,7 @@ public class CharSetTest extends AbstractHttpTestCase {
 				true, false, chars);
 
 		// Write unicode content in file
-		String unicodeContentPath = Resources.getCharsetFolder() + "/"
+		String unicodeContentPath = getSettings().getCharsetFolder() + "/"
 				+ acptCharset + "-UTF-8.txt";
 		CharSetUtil.encodeUnicodeContentToFile1(unicodeContent, "UTF-8",
 				unicodeContentPath);
@@ -306,25 +320,24 @@ public class CharSetTest extends AbstractHttpTestCase {
 		request.addHeader(HttpHeaders.ACCEPT_CHARSET, acptCharset);
 
 		// get the response content
-		HttpResponse response = executeRequest(request);
-
+		HttpResponse response = executeRequest(request, false);
+		byte[] actuals = EntityUtils.toByteArray(response.getEntity());
 		// check that charset is not labeled
 		String resCharset = EntityUtils.getContentCharSet(response.getEntity());
 		assertEquals(acptCharset + " charset should not be labeled", null,
 				resCharset);
 
 		// check content validity
-		byte[] actuals = EntityUtils.toByteArray(response.getEntity());
 		Assert.assertArrayEquals(acptCharset + " not supported", expecteds,
 				actuals);
 
 	}
 
 	/**
-	 * <b>Implements:</b> CharSet07
+	 * <b>Implements:</b> CharSet08
 	 * <p>
 	 * Check that server does not label the charset of entities encoded
-	 * ISO-8859-1.
+	 * US-ASCII.
 	 * <p>
 	 * <b>Reference:</b> RFC2616 19.3
 	 * 
@@ -339,7 +352,7 @@ public class CharSetTest extends AbstractHttpTestCase {
 		String unicodeContent = RandomStringUtils.randomAscii(255);
 
 		// Write unicode content in file
-		String unicodeContentPath = Resources.getCharsetFolder() + "/"
+		String unicodeContentPath = getSettings().getCharsetFolder() + "/"
 				+ acptCharset + "-UTF-8.txt";
 		CharSetUtil.encodeUnicodeContentToFile1(unicodeContent, "UTF-8",
 				unicodeContentPath);
@@ -353,15 +366,15 @@ public class CharSetTest extends AbstractHttpTestCase {
 		request.addHeader(HttpHeaders.ACCEPT_CHARSET, acptCharset);
 
 		// get the response content
-		HttpResponse response = executeRequest(request);
-
+		HttpResponse response = executeRequest(request, false);
+		byte[] actuals = EntityUtils.toByteArray(response.getEntity());
+		
 		// check that charset is not labeled
 		String resCharset = EntityUtils.getContentCharSet(response.getEntity());
 		assertEquals(acptCharset + " charset should not be labeled", null,
 				resCharset);
 
 		// check content validity
-		byte[] actuals = EntityUtils.toByteArray(response.getEntity());
 		Assert.assertArrayEquals(acptCharset + " not supported", expecteds,
 				actuals);
 

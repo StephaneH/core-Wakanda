@@ -47,14 +47,6 @@ bool VSolutionSettings::GetStopIfProjectFails() const
 	return result;
 }
 
-bool VSolutionSettings::GetHideExtensions() const
-{
-	const VValueBag *bag = RetainSettings( RIASettingID::solution);
-	bool result = RIASettingsKeys::Solution::hideExtensions.GetUsingPath( bag);
-	ReleaseRefCountable( &bag);
-	return result;
-}
-
 
 bool VSolutionSettings::GetGarbageCollect() const
 {
@@ -69,6 +61,26 @@ void VSolutionSettings::GetAuthenticationType( XBOX::VString& outType) const
 {
 	const VValueBag *bag = RetainSettings( RIASettingID::solution);
 	RIASettingsKeys::Solution::authenticationType.GetUsingPath( bag, outType);
+	ReleaseRefCountable( &bag);
+}
+
+
+void VSolutionSettings::GetDirectoryCacheFolder( XBOX::VString& outPath) const
+{
+	const VValueBag *bag = RetainSettings( RIASettingID::solution);
+	const VValueBag *directorySettings = (bag != NULL) ? bag->RetainUniqueElement( RIASettingsKeys::Solution::directory) : NULL;
+	outPath = RIASettingsKeys::Solution::cacheFolderPath.Get( directorySettings);
+	ReleaseRefCountable( &directorySettings);
+	ReleaseRefCountable( &bag);
+}
+
+
+void VSolutionSettings::GetLogFolder( XBOX::VString& outPath) const
+{
+	const VValueBag *bag = RetainSettings( RIASettingID::solution);
+	const VValueBag *logSettings = (bag != NULL) ? bag->RetainUniqueElement( RIASettingsKeys::Solution::log) : NULL;
+	outPath = RIASettingsKeys::Solution::folderPath.Get( logSettings);
+	ReleaseRefCountable( &logSettings);
 	ReleaseRefCountable( &bag);
 }
 

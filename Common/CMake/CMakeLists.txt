@@ -113,12 +113,12 @@ add_custom_target(unlink
 # Usefull Directorys
 ################################################################################
 
-set(4DRoot		${Depot}/4eDimension/WAK2/4D)
-set(WakandaRoot		${Depot}/Wakanda/WAK2)
-set(CopyFilesRoot	${Depot}/Tools/BuildLinux/scripts_compil_WAK2/Scripts)
+set(4DRoot		${Depot}/4eDimension/main/4D)
+set(WakandaRoot		${Depot}/Wakanda/main)
+set(CopyFilesRoot	${Depot}/Tools/BuildLinux/scripts_compil_main/Scripts)
 set(AppRoot		${WakandaRoot}/Apps/Linux/${CMAKE_BUILD_TYPE})
-set(ComponentsRoot	${Depot}/Components/WAK2)
-set(XBoxRoot		${Depot}/XToolbox/WAK2)
+set(ComponentsRoot	${Depot}/Components/Main)
+set(XBoxRoot		${Depot}/XToolbox/Main)
 
 
 ################################################################################
@@ -194,7 +194,7 @@ set(LibZipBuild		${LibZipProj}/Build/${CMAKE_BUILD_TYPE})
 add_subdirectory(${LibZipProj} ${LibZipBuild})
 
 
-set(WebKitRoot		${Depot}/webkit/742 CACHE INTERNAL "Path to WebKit src.")
+set(WebKitRoot		${Depot}/webkit/534.53 CACHE INTERNAL "Path to WebKit src.")
 set(WebCoreRoot		${WebKitRoot}/WebCore CACHE INTERNAL "Path to JavascriptCore src.")
 
 set(JsCoreRoot		${WebKitRoot}/JavaScriptCore CACHE INTERNAL "Path to JavascriptCore src.")
@@ -291,13 +291,6 @@ set(DB4DProj		${DB4DRoot}/projects/CMake)
 set(DB4DBuild		${DB4DProj}/Build/${CMAKE_BUILD_TYPE})
 
 add_subdirectory(${DB4DProj} ${DB4DBuild})
-
-
-set(SQLServerRoot	${ComponentsRoot}/SQL CACHE INTERNAL "Path to SQLServer src.")
-set(SQLServerProj	${SQLServerRoot}/Projects/CMake)
-set(SQLServerBuild	${SQLServerProj}/Build/${CMAKE_BUILD_TYPE})
-
-add_subdirectory(${SQLServerProj} ${SQLServerBuild})
 
 
 set(LanguageSyntaxRoot	${ComponentsRoot}/Language\ Syntax CACHE INTERNAL "Path to Language Syntax src.")

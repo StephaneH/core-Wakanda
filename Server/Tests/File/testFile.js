@@ -18,33 +18,28 @@ var testCase = {
     
     _should: {
         ignore: {
-            testObjectFileExists2: true, // Not sure about the doc.
-            testCreationDateAttributeValue: true, // Cannot rely on Perforce for creation date.
-            testMethodGetVolumeSizeExists: true, // Requires a virtual volume
-            testMethodGetVolumeSizeValue: true, // Requires a virtual volume
-            testMethodGetFreeSpaceExists: true, // Requires a virtual volume
-            testMethodGetFreeSpaceValue: true // Requires a virtual volume
+            
         }
     },
     
     setUp : function () {
-    	if (os.isWindows) {
-    		console.log("Setup: ignore visibility test on Windows");
+    	if (os.isWindows || os.isLinux) {
     		this._should.ignore.testVisibleValue2 = true;
     	}
-    	if (os.isLinux) {
-    		console.log("Setup: ignore visibility test on Linux");
-    		this._should.ignore.testVisibleValue2 = true;
-    	}
-        console.log("Setup: try to create Temp folder");
-        var appPath = application.getFolder("path");
-        var obj = Folder(appPath + 'Temp');
-        obj.create();
-        console.log("Setup: Temp folder creation success");
+        if (typeof this.creationDone === 'undefined') {
+            this.creationDone = true;
+            var appPath = application.getFolder("path");
+            var temp = Folder(appPath + 'Temp');
+            temp.create();
+            this.creationDate = new Date();
+            this.creationFilePath = temp.path + 'newCreatedFile';
+            var newFile = File(this.creationFilePath);
+            newFile.create();
+        }
     },
  
     tearDown : function () {
-        console.log("TearDown: does nothing, just testing...");
+
     },
 
     //0- Class File exist
@@ -61,17 +56,6 @@ var testCase = {
         Y.Assert.areSame("function", result);
     },
 
-    //1- object File exist 2
-    testObjectFileExists2: function () {
-        var folder_path = application.getFolder("path") + 'Src';
-        var obj = File(folder_path, 'file_main');
-        var path = obj.path;
-        var type = typeof obj;
-        var result = [type, folder_path, path];
-        Y.Assert.areSame("object", result[0]);
-        Y.Assert.areSame(result[1] + '/file_main', result[2]);
-    },
-
     //2- Attribut creationDate exist
     testCreationDateAttributeExists: function () {
         var appPath = application.getFolder("path");
@@ -82,10 +66,11 @@ var testCase = {
 
     //3- Attribut creationDate value
     testCreationDateAttributeValue: function () {
-        var appPath = application.getFolder("path");
-        var obj = File(appPath + 'Src/file_cdate_14_03_2011_12_48_04');
+        var obj = File(this.creationFilePath);
         var result = new Date(obj.creationDate);
-        Y.Assert.areSame("2011-03-14T12:48:04.000Z", result.toISOString());
+        var expected = this.creationDate.toISOString();
+        var actual = result.toISOString()
+        Y.Assert.areSame(expected.substr(0, expected.lastIndexOf('.')), actual.substr(0, actual.lastIndexOf('.')));
     },
     
     //4- Attribut lastModifiedDate exist
@@ -113,7 +98,7 @@ var testCase = {
     },
 
     //7- Attribut exists value case 01
-    testExistsAttributeValue: function () {
+    testExistsAttributeValue1: function () {
         var appPath = application.getFolder("path");
         var obj = File(appPath + 'Src/notexist');
         var result = obj.exists;
@@ -121,7 +106,7 @@ var testCase = {
     },
 
     //8- Attribut exists value case 02
-    testExistsAttributeValue: function () {
+    testExistsAttributeValue2: function () {
         var appPath = application.getFolder("path");
         var obj = File(appPath + 'Src/file_main');
         var result = obj.exists;
@@ -427,7 +412,8 @@ var testCase = {
 
     //41- method getVolumeSize exist
     testMethodGetVolumeSizeExists: function () {
-        var obj = File('E:/file_volume');
+        var appPath = application.getFolder("path");
+        var obj = File(appPath + 'Src/file_main');
         var result = typeof obj.getVolumeSize;
         Y.Assert.areNotSame("undefined", result);
         Y.Assert.areSame("function", result);
@@ -435,24 +421,27 @@ var testCase = {
 
     //42- method getVolumeSize value
     testMethodGetVolumeSizeValue: function () {
-        var result = null; //obj.getVolumeSize()
-        Y.Assert.areSame(1, 1);
+        var appPath = application.getFolder("path");
+        var obj = File(appPath + 'Src/file_main');
+        var result = obj.getVolumeSize(true);
+        Y.Assert.areNotSame(-1, result);
     },
 
     //43- method getFreeSpace exist
     testMethodGetFreeSpaceExists: function () {
-        var obj = File('E:/file_volume');
+        var appPath = application.getFolder("path");
+        var obj = File(appPath + 'Src/file_main');
         var result = typeof obj.getFreeSpace;
         Y.Assert.areNotSame("undefined", result);
         Y.Assert.areSame("function", result);
     },
 
     //44- method getFreeSpace value
-    // Besoin d'un DD virtuel
     testMethodGetFreeSpaceValue: function () {
-        var obj = File('E:/file_volume');
-        var result = null; //obj.getFreeSpace()
-        Y.Assert.areSame(1, 1);
+        var appPath = application.getFolder("path");
+        var obj = File(appPath + 'Src/file_main');
+        var result = obj.getFreeSpace(true);
+        Y.Assert.areNotSame(-1, result);
     },
 
     //45- method next exist

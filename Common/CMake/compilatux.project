@@ -47,7 +47,7 @@
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.buildLocation</key>
-					<value>%depo%/Build/Debug</value>
+					<value>%depo%/Wakanda/main/Common/CMake/Build/Debug</value>
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.useDefaultBuildCmd</key>
@@ -84,7 +84,7 @@
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.build.location</key>
-					<value>%depo%/Build/Debug</value>
+					<value>%depo%/Wakanda/main/Common/CMake/Build/Debug</value>
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.autoBuildTarget</key>
@@ -132,7 +132,7 @@
 		<link>
 			<name>ICU</name>
 			<type>2</type>
-			<location>%depo%/icu/3.8</location>
+			<location>%depo%/icu/4.8</location>
 		</link>
 		<link>
 			<name>JAVASCRIPT</name>
@@ -142,7 +142,7 @@
 		<link>
 			<name>JSCORE</name>
 			<type>2</type>
-			<location>%depo%/webkit/Main/JavaScriptCore</location>
+			<location>%depo%/webkit/742/JavaScriptCore</location>
 		</link>
 		<link>
 			<name>JSDEBUGGER</name>
@@ -167,7 +167,7 @@
 		<link>
 			<name>LIBZIP</name>
 			<type>2</type>
-			<location>%depo%/libzip/0.8</location>
+			<location>%depo%/libzip/0.10</location>
 		</link>
 		<link>
 			<name>SECURITYMANAGER</name>
@@ -237,12 +237,12 @@
 		<link>
 			<name>ZLIB</name>
 			<type>2</type>
-			<location>%depo%/zlib/1.2.4</location>
+			<location>%depo%/zlib/1.2.5</location>
 		</link>
 <link>
     <name>Wakanda Server App</name>
     <type>2</type>
-    <location>%depo%/4eDimension/main/Apps/Linux/Debug/Wakanda Server</location>
+    <location>%depo%/Wakanda/main/Apps/Linux/Debug/Wakanda Server</location>
 </link>
 	</linkedResources>
 </projectDescription>

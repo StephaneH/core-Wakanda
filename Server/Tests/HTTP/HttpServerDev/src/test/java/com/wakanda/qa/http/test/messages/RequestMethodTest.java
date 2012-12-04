@@ -4,17 +4,17 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
-import java.io.IOException;
+import java.io.File;
 import java.net.Socket;
 
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.http.Header;
 import org.apache.http.HeaderIterator;
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpException;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
@@ -49,7 +49,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import com.wakanda.qa.http.Resources;
 import com.wakanda.qa.http.test.extend.AbstractHttpTestCase;
 import com.wakanda.qa.http.test.extend.SessionInputBufferMockup;
 
@@ -77,15 +76,22 @@ public class RequestMethodTest extends AbstractHttpTestCase {
 		String url = "/toCheckGetMethod.tmp";
 		// create resource with random content
 		byte[] expecteds = RandomStringUtils.random(1024).getBytes();
-		Resources.writeBytesToFile(getDefaultProjectWebFolderPath() + url,
-				expecteds);
+		File file = new File(getSettings().getDefaultProjectWebFolderPath()
+				+ url);
+		FileUtils.writeByteArrayToFile(file, expecteds);
 		// request & response
-		HttpResponse response = executeRequest(new HttpGet(url));
-		// check status code
-		assertEqualsStatusCode(HttpStatus.SC_OK, response);
-		// check content
-		byte[] actuals = EntityUtils.toByteArray(response.getEntity());
-		Assert.assertArrayEquals("Wrong response content", expecteds, actuals);
+		HttpResponse response = executeRequest(new HttpGet(url), false);
+		HttpEntity entity = response.getEntity();
+		try {
+			byte[] actuals = EntityUtils.toByteArray(entity);
+			// check status code
+			assertEqualsStatusCode(HttpStatus.SC_OK, response);
+			// check content
+			Assert.assertArrayEquals("Wrong response content", expecteds,
+					actuals);
+		} finally {
+			EntityUtils.consume(entity);
+		}
 	}
 
 	/**
@@ -103,31 +109,41 @@ public class RequestMethodTest extends AbstractHttpTestCase {
 		String url = "/toCheckHeadMethod.tmp";
 		// create resource with random content
 		byte[] expecteds = RandomStringUtils.random(1024).getBytes();
-		Resources.writeBytesToFile(getDefaultProjectWebFolderPath() + url,
-				expecteds);
+		File file = new File(getSettings().getDefaultProjectWebFolderPath()
+				+ url);
+		FileUtils.writeByteArrayToFile(file, expecteds);
 		// request & response
-		HttpResponse responseHead = executeRequest(new HttpHead(url));
+		HttpResponse responseHead = executeRequest(new HttpHead(
+		url));
 		// check status code
 		assertEqualsStatusCode(HttpStatus.SC_OK, responseHead);
 		// check content
 		assertNull("Response must have no body", responseHead.getEntity());
 
 		// request get method
-		HttpResponse responseGet = executeRequest(new HttpGet(url));
+		HttpResponse responseGet = executeRequest(new HttpGet(
+		url));
+
+		assertNotNull("Response must have a body", responseGet.getEntity());
 
 		assertEquals(
 				"Response must have the same number of headers as the response to a GET method",
 				responseGet.getAllHeaders().length,
 				responseHead.getAllHeaders().length);
-		
+
 		// Get headers of the entity meta info of the response of GET
 		HeaderGroup metaInfoHeaders = new HeaderGroup();
-		metaInfoHeaders.addHeader(responseGet.getFirstHeader(HttpHeaders.CONTENT_LENGTH));
-		metaInfoHeaders.addHeader(responseGet.getFirstHeader(HttpHeaders.CONTENT_ENCODING));
-		metaInfoHeaders.addHeader(responseGet.getFirstHeader(HttpHeaders.CONTENT_TYPE));
-		metaInfoHeaders.addHeader(responseGet.getFirstHeader(HttpHeaders.LAST_MODIFIED));
-		
-		// compare each header value with he one of received from HEAD response, they should be the same.
+		metaInfoHeaders.addHeader(responseGet
+				.getFirstHeader(HttpHeaders.CONTENT_LENGTH));
+		metaInfoHeaders.addHeader(responseGet
+				.getFirstHeader(HttpHeaders.CONTENT_ENCODING));
+		metaInfoHeaders.addHeader(responseGet
+				.getFirstHeader(HttpHeaders.CONTENT_TYPE));
+		metaInfoHeaders.addHeader(responseGet
+				.getFirstHeader(HttpHeaders.LAST_MODIFIED));
+
+		// compare each header value with he one of received from HEAD response,
+		// they should be the same.
 		HeaderIterator it = metaInfoHeaders.iterator();
 		while (it.hasNext()) {
 			Header headerGET = it.nextHeader();
@@ -154,7 +170,8 @@ public class RequestMethodTest extends AbstractHttpTestCase {
 			throws Exception {
 
 		// build the TRACE request
-		BasicHttpRequest request = new BasicHttpRequest("TRACE", "/", HttpVersion.HTTP_1_0);
+		BasicHttpRequest request = new BasicHttpRequest("TRACE", "/",
+				HttpVersion.HTTP_1_0);
 		HeaderGroup headers = new HeaderGroup();
 		// headers.addHeader(new BasicHeader("Host", "localhost:8081"));
 		for (int i = 0; i < 4; i++) {
@@ -163,7 +180,6 @@ public class RequestMethodTest extends AbstractHttpTestCase {
 		request.setHeaders(headers.getAllHeaders());
 
 		// Execute the request
-		
 
 		HttpRequestExecutor httpexecutor = new HttpRequestExecutor();
 		HttpContext context = new BasicHttpContext(null);
@@ -173,43 +189,49 @@ public class RequestMethodTest extends AbstractHttpTestCase {
 		context.setAttribute(ExecutionContext.HTTP_CONNECTION, conn);
 		context.setAttribute(ExecutionContext.HTTP_TARGET_HOST,
 				getDefaultTarget());
-		
-		//logger.debug(getRequestAsString(request));
-		
+
+		// logger.debug(getRequestAsString(request));
+
 		HttpParams params = new SyncBasicHttpParams();
-		Socket socket = new Socket(getDefaultHostName(), getDefaultPort());
+		Socket socket = new Socket(getSettings().getDefaultTargetName(),
+				getSettings().getDefaultPort());
 		conn.bind(socket, params);
 		HttpResponse response = httpexecutor.execute(request, conn, context);
-
-		//logger.debug(getResponseAsString(response));
-		
-		// check status code
-		assertEqualsStatusCode(HttpStatus.SC_OK, response);
-		// check content
+		// logger.debug(getResponseAsString(response));
 		HttpEntity respEntity = response.getEntity();
-		assertNotNull("Response must have a body", respEntity);
-		assertEquals("Wrong Content-Type", "message/http",
-				EntityUtils.getContentMimeType(respEntity));
 
-		// parse the response content
-		String respContent = EntityUtils.toString(respEntity);
-		SessionInputBuffer inbuffer = new SessionInputBufferMockup(respContent,
-				"US-ASCII");
-		HttpRequestParser parser = new HttpRequestParser(inbuffer,
-				BasicLineParser.DEFAULT, new DefaultHttpRequestFactory(),
-				new BasicHttpParams());
-		HttpRequest httprequest = (HttpRequest) parser.parse();
+		try {
 
-		// check the response content
-		RequestLine reqline = httprequest.getRequestLine();
-		assertNotNull(reqline);
-		assertEquals("TRACE", reqline.getMethod());
-		assertEquals("/", reqline.getUri());
-		assertEquals(HttpVersion.HTTP_1_0, reqline.getProtocolVersion());
-		Header[] contentheaders = httprequest.getAllHeaders();
-		assertEquals(headers.getAllHeaders().length, contentheaders.length);
+			// check status code
+			assertEqualsStatusCode(HttpStatus.SC_OK, response);
+			// check content
+
+			assertNotNull("Response must have a body", respEntity);
+			assertEquals("Wrong Content-Type", "message/http",
+					EntityUtils.getContentMimeType(respEntity));
+
+			// parse the response content
+			String respContent = EntityUtils.toString(respEntity);
+			SessionInputBuffer inbuffer = new SessionInputBufferMockup(
+					respContent, "US-ASCII");
+			HttpRequestParser parser = new HttpRequestParser(inbuffer,
+					BasicLineParser.DEFAULT, new DefaultHttpRequestFactory(),
+					new BasicHttpParams());
+			HttpRequest httprequest = (HttpRequest) parser.parse();
+
+			// check the response content
+			RequestLine reqline = httprequest.getRequestLine();
+			assertNotNull(reqline);
+			assertEquals("TRACE", reqline.getMethod());
+			assertEquals("/", reqline.getUri());
+			assertEquals(HttpVersion.HTTP_1_0, reqline.getProtocolVersion());
+			Header[] contentheaders = httprequest.getAllHeaders();
+			assertEquals(headers.getAllHeaders().length, contentheaders.length);
+		} finally {
+			EntityUtils.consume(respEntity);
+		}
 	}
-	
+
 	/**
 	 * <b>Implements:</b> Methods04
 	 * <p/>
@@ -221,11 +243,12 @@ public class RequestMethodTest extends AbstractHttpTestCase {
 	 */
 	@Test
 	public void testNotImplementedMethod() throws Exception {
-		HttpRequest request = new BasicHttpRequest("whatever", getDefaultUrl());
+		HttpRequest request = new BasicHttpRequest("whatever", getSettings()
+				.getDefaultUrl());
 		HttpResponse response = executeRequest(request);
 		assertEqualsStatusCode(HttpStatus.SC_NOT_IMPLEMENTED, response);
 	}
-	
+
 	/**
 	 * <b>Implements:</b> Methods05
 	 * <p/>
@@ -236,16 +259,14 @@ public class RequestMethodTest extends AbstractHttpTestCase {
 	 * @throws Exception
 	 */
 	@Test
-	public void testThatCONNECTIsNotImplemented() throws IOException,
-			HttpException {
+	public void testThatCONNECTIsNotImplemented() throws Exception {
 		HttpRequest request = new BasicHttpRequest("CONNECT", "/");
 		HttpResponse response = executeRequest(request);
-		//logger.debug(response.getStatusLine());
+		// logger.debug(response.getStatusLine());
 		// check status code
 		assertEqualsStatusCode(HttpStatus.SC_NOT_IMPLEMENTED, response);
 	}
-	
-	
+
 	/**
 	 * <b>Implements:</b> Methods06
 	 * <p/>
@@ -263,7 +284,7 @@ public class RequestMethodTest extends AbstractHttpTestCase {
 				256).getBytes());
 		request.setEntity(entity);
 		HttpResponse response = executeRequest(request);
-		//logger.debug(response.getStatusLine());
+		// logger.debug(response.getStatusLine());
 		// check status code
 		assertEqualsStatusCode(HttpStatus.SC_METHOD_NOT_ALLOWED, response);
 	}
@@ -280,23 +301,26 @@ public class RequestMethodTest extends AbstractHttpTestCase {
 	@Test
 	public void testThatPOSTIsAllowedWithDynamicRequestHandler()
 			throws Exception {
-		//request
+		// request
 		HttpPost request = new HttpPost("/checkPostMethod/");
 		String expected = "Hello!";
 		StringEntity entity = new StringEntity(expected);
 		request.setEntity(entity);
-		
-		//response
-		HttpResponse response = executeRequest(request);
 
-		// check status code
-		assertEqualsStatusCode(HttpStatus.SC_OK, response);
-		
-		// check content
+		// response
+		HttpResponse response = executeRequest(request, false);
 		HttpEntity respEntity = response.getEntity();
-		assertNotNull("Response should enclose an entity", respEntity);
-		assertEquals("Wrong response content", expected,
-				EntityUtils.toString(respEntity));
+
+		try {
+			// check status code
+			assertEqualsStatusCode(HttpStatus.SC_OK, response);
+			// check content
+			assertNotNull("Response should enclose an entity", respEntity);
+			String actual = EntityUtils.toString(respEntity);
+			assertEquals("Wrong response content", expected, actual);
+		} finally {
+			EntityUtils.consume(respEntity);
+		}
 	}
 
 	/**
@@ -315,7 +339,7 @@ public class RequestMethodTest extends AbstractHttpTestCase {
 				256).getBytes());
 		request.setEntity(entity);
 		HttpResponse response = executeRequest(request);
-		//logger.debug(response.getStatusLine());
+		// logger.debug(response.getStatusLine());
 		// check status code
 		assertEqualsStatusCode(HttpStatus.SC_METHOD_NOT_ALLOWED, response);
 	}
@@ -334,11 +358,12 @@ public class RequestMethodTest extends AbstractHttpTestCase {
 		String url = "/toCheckDeleteMethod.tmp";
 		// create resource with random content
 		byte[] expecteds = RandomStringUtils.random(1024).getBytes();
-		Resources.writeBytesToFile(getDefaultProjectWebFolderPath() + url,
-				expecteds);
+		File file = new File(getSettings().getDefaultProjectWebFolderPath()
+				+ url);
+		FileUtils.writeByteArrayToFile(file, expecteds);
 		HttpDelete request = new HttpDelete(url);
 		HttpResponse response = executeRequest(request);
-		//logger.debug(response.getStatusLine());
+		// logger.debug(response.getStatusLine());
 		// check status code
 		assertEqualsStatusCode(HttpStatus.SC_METHOD_NOT_ALLOWED, response);
 	}
@@ -356,11 +381,11 @@ public class RequestMethodTest extends AbstractHttpTestCase {
 	public void testThatOPTIONIsNotAllowed() throws Exception {
 		HttpOptions request = new HttpOptions("/");
 		HttpResponse response = executeRequest(request);
-		//logger.debug(response.getStatusLine());
+		// logger.debug(response.getStatusLine());
 		// check status code
 		assertEqualsStatusCode(HttpStatus.SC_METHOD_NOT_ALLOWED, response);
 	}
-	
+
 	/**
 	 * <b>Implements:</b> Methods11
 	 * <p/>
@@ -371,14 +396,14 @@ public class RequestMethodTest extends AbstractHttpTestCase {
 	 * @throws Exception
 	 */
 	@Test
-	@Parameters({"gEt", "HeaD", "tRace", "pUt", "opTionS", "deLetE", "PoSt"})
+	@Parameters({ "gEt", "HeaD", "tRace", "pUt", "opTionS", "deLetE", "PoSt" })
 	public void testThatMethodsAreCaseSensitive(String method) throws Exception {
-		HttpRequest request =  new BasicHttpRequest(method, "/");
+		HttpRequest request = new BasicHttpRequest(method, "/");
 		HttpResponse response = executeRequest(request);
 		int expected = HttpStatus.SC_NOT_IMPLEMENTED;
 		int actual = response.getStatusLine().getStatusCode();
-		assertEquals("[" + method + "]Method name must be case-insensitive", expected, actual);
+		assertEquals("[" + method + "]Method name must be case-sensitive",
+				expected, actual);
 	}
-
 
 }

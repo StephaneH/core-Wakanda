@@ -47,7 +47,7 @@ public class ProductTokenTest extends AbstractHttpTestCase {
 		String productToken = product + "|" + COMMENT;
 		String server = "(" + productToken + ")([ ](" + productToken +"))*";
 
-		HttpHead request = new HttpHead(getDefaultUrl());
+		HttpHead request = new HttpHead(getSettings().getDefaultUrl());
 		HttpResponse response = executeRequest(request);
 		Header hServer = response.getFirstHeader(HttpHeaders.SERVER);
 		if (hServer != null) {

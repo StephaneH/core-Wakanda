@@ -27,6 +27,7 @@ namespace RIAFileKind
 	extern const XBOX::VString kDataFileExtension;
 	extern const XBOX::VString kDataIndexFileExtension;
 	extern const XBOX::VString kCatalogFileExtension;
+	extern const XBOX::VString kPageFolderExtension;
 	extern const XBOX::VString kSolutionLinkFileExtension;
 	extern const XBOX::VString kFileLinkFileExtension;
 	extern const XBOX::VString kDirectoryFileExtension;
@@ -34,8 +35,7 @@ namespace RIAFileKind
 	extern const XBOX::VString kRPCCatalogFileExtension;
 	extern const XBOX::VString kSymbolFileExtension;
 	extern const XBOX::VString kSymbolDataFileExtension;
-	extern const XBOX::VString kSymbolMatchFileExtension;
-	extern const XBOX::VString kBackupFileExtension;
+	extern const XBOX::VString kMatchFileExtension;
 	extern const XBOX::VString kWebComponentFileExtension;
 	extern const XBOX::VString kCacheUAGFileExtension;
 
@@ -71,8 +71,9 @@ namespace RIAFileKind
 	extern const XBOX::VString kLogFileKind;
 	extern const XBOX::VString kSymbolFileKind;
 	extern const XBOX::VString kSymbolDataFileKind;
-	extern const XBOX::VString kSymbolMatchFileKind;
+	extern const XBOX::VString kMatchFileKind;
 	extern const XBOX::VString kWebComponentFileKind;
+	extern const XBOX::VString kPageFolderFileKind;
 	extern const XBOX::VString kCSSFileKind;
 	extern const XBOX::VString kJSONFileKind;
 	extern const XBOX::VString kSQLFileKind;

@@ -20,16 +20,25 @@
 */
 
 function checkPostMethod(request, response){
-	console.log("checkPostMethod in");
 	var body = request.body;
 	console.log(body);
 	return body;
 }
 
 function checkURI(request, response){
-	console.log("checkURI in");
 	var send = request.urlQuery;
 	console.log(send);
 	return send;
 }
 
+function echoQueryString(request, response){
+	var query = request.urlQuery;
+	console.log(query);
+	return query;
+}
+
+function echoURL(request, response){
+	var url = request.url;
+	console.log(url);
+	return url;
+}

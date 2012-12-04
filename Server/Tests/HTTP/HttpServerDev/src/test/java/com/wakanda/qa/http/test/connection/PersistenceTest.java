@@ -27,8 +27,10 @@ import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
+import org.junit.Ignore;
 import org.junit.Test;
 
+import com.wakanda.qa.http.Utils;
 import com.wakanda.qa.http.test.extend.AbstractHttpTestCase;
 
 /**
@@ -62,48 +64,53 @@ public class PersistenceTest extends AbstractHttpTestCase {
 		// create and bind the socket
 		Socket socket = new Socket(target.getHostName(), target.getPort());
 		conn.bind(socket, new SyncBasicHttpParams());
-		// send the request
-		conn.sendRequestHeader(req);
-		conn.flush();
-		// consume the response
-		HttpResponse response = conn.receiveResponseHeader();
-		conn.receiveResponseEntity(response);
-		EntityUtils.consume(response.getEntity());
-
-		// logger.debug(getRequestAsString(req));
-		// logger.debug(getResponseAsString(response));
-		// check the status code
-		assertEqualsStatusCode(HttpStatus.SC_OK, response);
-
-		// check that response have a self-defined message length (i.e., one not
-		// defined by closure of the connection).
-		Header lengthHeader = response.getFirstHeader(HTTP.CONTENT_LEN);
-		assertNotNull("Response must have a self-defined message length",
-				lengthHeader);
-
-		// check the connection header directive
-		Header cnxHeader = response.getFirstHeader(HTTP.CONN_DIRECTIVE);
-		if (cnxHeader != null) {
-			String cnxHeaderValue = cnxHeader.getValue();
-			assertTrue("Wrong " + HTTP.CONN_DIRECTIVE + " header field value",
-					cnxHeaderValue.equalsIgnoreCase(HTTP.CONN_KEEP_ALIVE));
-		}
-
-		// One should be able to send a second request upon the current
-		// connection
 		try {
+			// send the request
 			conn.sendRequestHeader(req);
 			conn.flush();
 			// consume the response
-			HttpResponse response2 = conn.receiveResponseHeader();
-			conn.receiveResponseEntity(response2);
-			EntityUtils.consume(response2.getEntity());
+			HttpResponse response = conn.receiveResponseHeader();
+			conn.receiveResponseEntity(response);
+			EntityUtils.consume(response.getEntity());
 
+			// logger.debug(getRequestAsString(req));
+			// logger.debug(getResponseAsString(response));
 			// check the status code
 			assertEqualsStatusCode(HttpStatus.SC_OK, response);
 
-		} catch (SocketException e) {
-			fail("Connection must remain opened");
+			// check that response have a self-defined message length (i.e., one
+			// not
+			// defined by closure of the connection).
+			Header lengthHeader = response.getFirstHeader(HTTP.CONTENT_LEN);
+			assertNotNull("Response must have a self-defined message length",
+					lengthHeader);
+
+			// check the connection header directive
+			Header cnxHeader = response.getFirstHeader(HTTP.CONN_DIRECTIVE);
+			if (cnxHeader != null) {
+				String cnxHeaderValue = cnxHeader.getValue();
+				assertTrue("Wrong " + HTTP.CONN_DIRECTIVE
+						+ " header field value",
+						cnxHeaderValue.equalsIgnoreCase(HTTP.CONN_KEEP_ALIVE));
+			}
+
+			// One should be able to send a second request upon the current
+			// connection
+			try {
+				conn.sendRequestHeader(req);
+				conn.flush();
+				// consume the response
+				HttpResponse response2 = conn.receiveResponseHeader();
+				conn.receiveResponseEntity(response2);
+				EntityUtils.consume(response2.getEntity());
+
+				// check the status code
+				assertEqualsStatusCode(HttpStatus.SC_OK, response);
+
+			} catch (SocketException e) {
+				fail("Connection must remain opened");
+
+			}
 
 		} finally {
 			// close the connection
@@ -134,35 +141,39 @@ public class PersistenceTest extends AbstractHttpTestCase {
 		// create and bind the socket
 		Socket socket = new Socket(target.getHostName(), target.getPort());
 		conn.bind(socket, new SyncBasicHttpParams());
-		// send the request
-		conn.sendRequestHeader(req);
-		conn.flush();
-		// consume the response
-		HttpResponse response = conn.receiveResponseHeader();
-		conn.receiveResponseEntity(response);
-		EntityUtils.consume(response.getEntity());
-
-		// check the status code
-		assertEqualsStatusCode(HttpStatus.SC_OK, response);
-
-		// check the connection header directive
-		Header cnxHeader = response.getFirstHeader(HTTP.CONN_DIRECTIVE);
-		assertNotNull("Response must contain a " + HTTP.CONN_DIRECTIVE
-				+ " header", cnxHeader);
-		String cnxHeaderValue = cnxHeader.getValue();
-		assertTrue("Wrong " + HTTP.CONN_DIRECTIVE + " value",
-				cnxHeaderValue.equalsIgnoreCase(HTTP.CONN_CLOSE));
-
-		// Send a second request and wait for the response, we should get an
-		// exception
 		try {
+			// send the request
 			conn.sendRequestHeader(req);
 			conn.flush();
-			conn.receiveResponseHeader();
-			// logger.debug("No exception !");
-			fail("Server must close connection");
-		} catch (Exception e) {
-			// logger.debug("Exception was throwen when tryin to read/write on connection closed by server!");
+			// consume the response
+			HttpResponse response = conn.receiveResponseHeader();
+			conn.receiveResponseEntity(response);
+			EntityUtils.consume(response.getEntity());
+
+			// check the status code
+			assertEqualsStatusCode(HttpStatus.SC_OK, response);
+
+			// check the connection header directive
+			Header cnxHeader = response.getFirstHeader(HTTP.CONN_DIRECTIVE);
+			assertNotNull("Response must contain a " + HTTP.CONN_DIRECTIVE
+					+ " header", cnxHeader);
+			String cnxHeaderValue = cnxHeader.getValue();
+			assertTrue("Wrong " + HTTP.CONN_DIRECTIVE + " value",
+					cnxHeaderValue.equalsIgnoreCase(HTTP.CONN_CLOSE));
+
+			// Send a second request and wait for the response, we should get an
+			// exception
+			try {
+				conn.sendRequestHeader(req);
+				conn.flush();
+				conn.receiveResponseHeader();
+				// logger.debug("No exception !");
+				fail("Server must close connection");
+			} catch (Exception e) {
+				// logger.debug("Exception was throwen when tryin to read/write on connection closed by server!");
+			}
+		} finally {
+			conn.close();
 		}
 
 	}
@@ -191,39 +202,42 @@ public class PersistenceTest extends AbstractHttpTestCase {
 		// create and bind the socket
 		Socket socket = new Socket(target.getHostName(), target.getPort());
 		conn.bind(socket, new SyncBasicHttpParams());
-		// send the request
-		conn.sendRequestHeader(req);
-		conn.flush();
-		// consume the response
-		HttpResponse response = conn.receiveResponseHeader();
-		conn.receiveResponseEntity(response);
-		EntityUtils.consume(response.getEntity());
+		try {
+			// send the request
+			conn.sendRequestHeader(req);
+			conn.flush();
+			// consume the response
+			HttpResponse response = conn.receiveResponseHeader();
+			conn.receiveResponseEntity(response);
+			EntityUtils.consume(response.getEntity());
 
-		// check the status code
-		assertEqualsStatusCode(HttpStatus.SC_OK, response);
+			// check the status code
+			assertEqualsStatusCode(HttpStatus.SC_OK, response);
 
-		// check the connection header directive
-		Header cnxHeader = response.getFirstHeader(HTTP.CONN_DIRECTIVE);
-		assertNotNull("Response must contain a " + HTTP.CONN_DIRECTIVE
-				+ " header", cnxHeader);
-		String cnxHeaderValue = cnxHeader.getValue();
-		assertTrue("Wrong " + HTTP.CONN_DIRECTIVE + " value",
-				cnxHeaderValue.equalsIgnoreCase(HTTP.CONN_KEEP_ALIVE));
+			// check the connection header directive
+			Header cnxHeader = response.getFirstHeader(HTTP.CONN_DIRECTIVE);
+			assertNotNull("Response must contain a " + HTTP.CONN_DIRECTIVE
+					+ " header", cnxHeader);
+			String cnxHeaderValue = cnxHeader.getValue();
+			assertTrue("Wrong " + HTTP.CONN_DIRECTIVE + " value",
+					cnxHeaderValue.equalsIgnoreCase(HTTP.CONN_KEEP_ALIVE));
 
-		// One should be able to send a second request upon the current
-		// connection
-		conn.sendRequestHeader(req);
-		conn.flush();
-		// consume the response
-		HttpResponse response2 = conn.receiveResponseHeader();
-		conn.receiveResponseEntity(response2);
-		EntityUtils.consume(response2.getEntity());
+			// One should be able to send a second request upon the current
+			// connection
+			conn.sendRequestHeader(req);
+			conn.flush();
+			// consume the response
+			HttpResponse response2 = conn.receiveResponseHeader();
+			conn.receiveResponseEntity(response2);
+			EntityUtils.consume(response2.getEntity());
 
-		// check the status code
-		assertEqualsStatusCode(HttpStatus.SC_OK, response);
+			// check the status code
+			assertEqualsStatusCode(HttpStatus.SC_OK, response);
 
-		// close the connection
-		conn.close();
+		} finally {
+			// close the connection
+			conn.close();
+		}
 
 	}
 
@@ -303,6 +317,7 @@ public class PersistenceTest extends AbstractHttpTestCase {
 	 * 
 	 * @throws Exception
 	 */
+
 	@Test
 	public void testHTTP_1_0_PersistentConnection() throws Exception {
 		HttpHost target = getDefaultTarget();
@@ -313,7 +328,7 @@ public class PersistenceTest extends AbstractHttpTestCase {
 		req.addHeader(HTTP.TARGET_HOST, target.toHostString());
 		req.addHeader(HTTP.CONN_DIRECTIVE, HTTP.CONN_KEEP_ALIVE);
 
-		logger.debug(getRequestAsString((BasicHttpRequest) req));
+		logger.debug(Utils.getRequestAsString((BasicHttpRequest) req));
 
 		// create and bind the socket
 		Socket socket = new Socket(target.getHostName(), target.getPort());
@@ -323,7 +338,12 @@ public class PersistenceTest extends AbstractHttpTestCase {
 		conn.flush();
 		// consume the response
 		HttpResponse response = conn.receiveResponseHeader();
+		logger.debug(response.getStatusLine());
+
 		conn.receiveResponseEntity(response);
+
+		// String content = EntityUtils.toString(response.getEntity());
+		// logger.debug(content);
 		EntityUtils.consume(response.getEntity());
 
 		// check the status code
@@ -438,29 +458,28 @@ public class PersistenceTest extends AbstractHttpTestCase {
 		String toIgnore = HttpHeaders.IF_MODIFIED_SINCE;
 		String conToken = HTTP.CONN_CLOSE;
 
-		//get last modified date
+		// get last modified date
 		String validator = HttpHeaders.LAST_MODIFIED;
 		HttpGet request = new HttpGet(url);
 		HttpResponse response = client.execute(target, request, context);
 		EntityUtils.consume(response.getEntity());
 		String lmd = response.getFirstHeader(validator).getValue();
 
-		//add "If-Modified-Since" header
+		// add "If-Modified-Since" header
 		request.addHeader(toIgnore, lmd);
 
-		//"If-Modified-Since" header and "Keep-Alive" token should be ignored
+		// "If-Modified-Since" header and "Keep-Alive" token should be ignored
 		request.addHeader(HTTP.CONN_DIRECTIVE, toIgnore + "," + conToken);
 
-		//get the response
+		// get the response
 		response = client.execute(target, request, context);
 
-		//check status code
+		// check status code
 		int actual = response.getStatusLine().getStatusCode();
 		assertEquals(
 				"When receiving an HTTP/1.0 message that includes a Connection header, check that server remove and ignore, for each connection-token in this field, any header field from the message with the same name as the connection-token.",
 				HttpStatus.SC_OK, actual);
-		
-		
+
 	}
 
 	/**
@@ -476,22 +495,18 @@ public class PersistenceTest extends AbstractHttpTestCase {
 	@Test
 	public void testThatResponsesOnPersistentConnectionHasASelfDefinedMessageLength()
 			throws Exception {
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		HttpGet request = new HttpGet("/");
+		HttpResponse response = executeRequest(request);
+		HttpEntity entity = response.getEntity();
 		try {
-			HttpHost target = getDefaultTarget();
-			HttpGet request = new HttpGet("/");
-
-			HttpResponse response = httpclient.execute(target, request);
-
 			assertEqualsStatusCode(HttpStatus.SC_OK, response);
-			HttpEntity entity = response.getEntity();
 			assertNotNull(entity);
 			assertTrue(
 					"Messages on persistent connection MUST have a self-defined message lengt",
 					entity.getContentLength() != -1);
 
 		} finally {
-			httpclient.getConnectionManager().shutdown();
+			EntityUtils.consume(entity);
 		}
 
 	}
@@ -502,11 +517,14 @@ public class PersistenceTest extends AbstractHttpTestCase {
 	 * Check that the server sends its responses to pipe-lined requests in the
 	 * same order that the requests were received.
 	 * <p/>
+	 * The test is ignored for now because the feature is not yet implemented.
+	 * <p/>
 	 * <b>Reference:</b> SPEC693 (RFC2616 8.1.2.2)
 	 * 
 	 * @throws Exception
 	 */
 	@Test
+	@Ignore
 	public void testThatServerRespondsToPipelinedRequestsInTheSameOrderThatTheRequestsWereReceived()
 			throws Exception {
 		HttpHost target = getDefaultTarget();
@@ -526,28 +544,30 @@ public class PersistenceTest extends AbstractHttpTestCase {
 		Socket socket = new Socket(target.getHostName(), target.getPort());
 		conn.bind(socket, new SyncBasicHttpParams());
 
-		// send pipelined requests
-		conn.sendRequestHeader(request1);
-		// logger.debug(getRequestAsString(request1));
-		conn.sendRequestHeader(request2);
-		// logger.debug(getRequestAsString(request2));
-		conn.flush();
+		try {
+			// send pipelined requests
+			conn.sendRequestHeader(request1);
+			// logger.debug(getRequestAsString(request1));
+			conn.sendRequestHeader(request2);
+			// logger.debug(getRequestAsString(request2));
+			conn.flush();
 
-		// consume responses
-		String responses = IOUtils.toString(socket.getInputStream());
-		// logger.debug(responses);
+			// consume responses
+			String responses = IOUtils.toString(socket.getInputStream());
+			// logger.debug(responses);
 
-		int offset = responses.indexOf("HTTP/1.1 200 OK");
-		assertTrue("Server did not respond to first request", offset != -1);
-		offset = responses.indexOf("R1", offset);
-		assertTrue("Server did not respond to first request", offset != -1);
-		offset = responses.indexOf("HTTP/1.1 200 OK", offset);
-		assertTrue("Server did not respond to second request", offset != -1);
-		offset = responses.indexOf("R2", offset);
-		assertTrue("Server did not respond to second request", offset != -1);
-
-		// close the connection
-		conn.close();
+			int offset = responses.indexOf("HTTP/1.1 200 OK");
+			assertTrue("Server did not respond to first request", offset != -1);
+			offset = responses.indexOf("R1", offset);
+			assertTrue("Server did not respond to first request", offset != -1);
+			offset = responses.indexOf("HTTP/1.1 200 OK", offset);
+			assertTrue("Server did not respond to second request", offset != -1);
+			offset = responses.indexOf("R2", offset);
+			assertTrue("Server did not respond to second request", offset != -1);
+		} finally {
+			// close the connection
+			conn.close();
+		}
 	}
 
 }

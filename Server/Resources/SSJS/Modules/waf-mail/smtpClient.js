@@ -39,6 +39,8 @@
 //		(if given proper arguments when constructor is called). Or manually connect using connect() or sslConnect().
 //		When connected, it is up to caller to issue proper commands and follow protocol.
 
+var threeDigitReply = typeof requireNative != 'undefined' ? require('waf-mail/threeDigitReply') : require('./threeDigitReply.js');
+
 function SMTPClientScope () {
 	
 	var FLAG_READING_REPLY		= 0x1000;
@@ -70,7 +72,9 @@ function SMTPClientScope () {
 		READING_REPLY_VRFY:		FLAG_READING_REPLY | 10,
 		READING_REPLY_EXPN:		FLAG_READING_REPLY | 11,
 		READING_REPLY_HELP:		FLAG_READING_REPLY | 12,
-		READING_REPLY_RAW:		FLAG_READING_REPLY | 13,
+		READING_REPLY_BDAT:		FLAG_READING_REPLY | 13,
+		
+		READING_REPLY_RAW:		FLAG_READING_REPLY | 14,
 		
 		// Erroneous states.
 		
@@ -82,9 +86,7 @@ function SMTPClientScope () {
 	
 	var net				= isWakanda ? requireNative('net') : require('net');
 	var tls				= isWakanda ? requireNative('tls') : require('tls');
-	
-	var threeDigitReply = isWakanda ? require('waf-mail/threeDigitReply') : require('./threeDigitReply.js');
-	
+		
 	// SMTPClient exception, just contains an error code (see below).
 	
 	function SMTPClientException (code) {
@@ -109,7 +111,7 @@ function SMTPClientScope () {
 		// Current command's reply.
 		
 		var reply;			
-		var replyCallback;
+		var replyCallback; 
 		
 		// Feed data received from socket to this function.
 			
@@ -117,8 +119,7 @@ function SMTPClientScope () {
 
 			if (state & FLAG_READING_REPLY) {
 			
-				var	r	= reply.readData(data.toString('binary'));	// Support 8-bit characters
-												// (8BITMIME).
+				var	r	= reply.readData(data.toString('binary'));	// Support 8-bit characters (8BITMIME).
 
 				if (!r) {
 				
@@ -209,6 +210,7 @@ function SMTPClientScope () {
 					case STATES.READING_REPLY_VRFY:	
 					case STATES.READING_REPLY_EXPN:	 
 					case STATES.READING_REPLY_HELP:
+					case STATES.READING_REPLY_BDAT:
 					
 					case STATES.READING_REPLY_RAW:
 					
@@ -452,7 +454,7 @@ function SMTPClientScope () {
 			
 			else if (typeof arguments[1] != 'function') {
 				
-				if (is8bitMIME == true) 
+				if (is8bitMIME == true)
 				
 					sendCommand('MAIL FROM:' + from + ' BODY=8BITMIME\r\n', STATES.READING_REPLY_MAIL, callback);
 				
@@ -496,8 +498,14 @@ function SMTPClientScope () {
 		// sequence, which mark the end of mail content submission.
                 
         this.sendContent = function (content) {
+
+			if (state != STATES.IDLE) 
+				
+				throw new SMTPClientException(SMTPClientException.INVALID_STATE);
         
-            socket.write(content);
+			else
+			
+				socket.write(content);
         
         }
                
@@ -560,6 +568,45 @@ function SMTPClientScope () {
 				throw new SMTPClientException(SMTPClientException.INVALID_ARGUMENT);
 					
 		}
+		
+		// Send a BDAT command along with data (a Buffer object).
+		
+		this.sendBDAT = function (buffer, isLast, callback) {
+		
+			if (state != STATES.IDLE) 
+				
+				throw new SMTPClientException(SMTPClientException.INVALID_STATE);
+		
+			else if (typeof buffer == 'undefined' || !(buffer instanceof Buffer))
+			
+				throw new SMTPClientException(SMTPClientException.INVALID_ARGUMENT);
+				
+			else {
+			
+				if (typeof isLast == 'function') {
+				
+					callback = isLast;
+					isLast = false;
+					
+				}
+					
+				if (typeof callback != 'undefined' && typeof callback != 'function') 
+				
+					throw new SMTPClientException(SMTPClientException.INVALID_ARGUMENT);
+			
+				else {
+
+					reply = new threeDigitReply.ThreeDigitReply();
+					replyCallback = callback;
+					state = STATES.READING_REPLY_BDAT;
+					socket.write(isLast ? 'BDAT ' + buffer.length + ' LAST\r\n' : 'BDAT ' + buffer.length + '\r\n');
+					socket.write(buffer);
+					
+				}
+			
+			}
+			
+		}	
 		
 		// Send a "raw" command, can be anything. The '\r\n' terminating the command line will be added automatically.
 		

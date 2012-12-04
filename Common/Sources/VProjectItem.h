@@ -58,8 +58,9 @@ public:
 		eCATALOG_FILE				= 5,
 		eFOLDER						= 500,	// dossier physique
 		ePROJECT					= 501,	// dossier physique et projet
+		eMEDIA_LIBRARY				= 502,
 		eDATA_CLASS					= 901,
-		eDATA_CLASS_ATTRIBUTE		= 902,		
+		eDATA_CLASS_ATTRIBUTE		= 902,
 		eSOLUTION					= 1000,
 		// -------------------------------
 		// !!! CI-DESSOUS : NE PAS PRENDRE EN COMPTE !!!
@@ -148,11 +149,12 @@ public:
 			XBOX::VString				GetXMLElementName() const;
 
 			// URL and path accessors
-			
 			void						SetURL( const XBOX::VURL& inURL);
-			const XBOX::VURL&			GetURL() const										{ return fURL; }
+			bool						GetURL( XBOX::VURL& outURL)	const;
+			XBOX::VURL					GetURL() const;
 
 			// The path is relative to the parent item
+			bool						HasRelativePath() const								{ return !fRelativePath.IsEmpty(); }
 			void						SetRelativePath( const XBOX::VString& inRelativePath, XBOX::EURLPathStyle inStyle = XBOX::eURL_POSIX_STYLE);
 			void						GetRelativePath( XBOX::VString& outRelativePath, XBOX::EURLPathStyle inStyle = XBOX::eURL_POSIX_STYLE) const;
 
@@ -546,8 +548,10 @@ public:
 // Project item role constants
 extern const VProjectItemTag kSettingTag;
 extern const VProjectItemTag kCatalogTag;
+extern const VProjectItemTag kBackupsTag;
 // extern const VProjectItemTag kEntityModelScriptTag;	// sc 30/09/2010 unused
 extern const VProjectItemTag kDataTag;
+extern const VProjectItemTag kDataFolderTag;
 extern const VProjectItemTag kDocumentationTag;
 extern const VProjectItemTag kExternalLibraryTag;
 extern const VProjectItemTag kRPCMethodTag;
@@ -557,9 +561,10 @@ extern const VProjectItemTag kUAGDirectoryTag;
 extern const VProjectItemTag kPermissionsTag;
 extern const VProjectItemTag kIndexPageTag;
 extern const VProjectItemTag kWebFolderTag;
-extern const VProjectItemTag kMobileFolderTag;
-extern const VProjectItemTag kTabletFolderTag;
 extern const VProjectItemTag kWebComponentFolderTag;
+extern const VProjectItemTag kPageFolderTag;
+extern const VProjectItemTag kProjectCertificatesFolderTag;
+extern const VProjectItemTag kSolutionCertificatesFolderTag;
 
 
 enum

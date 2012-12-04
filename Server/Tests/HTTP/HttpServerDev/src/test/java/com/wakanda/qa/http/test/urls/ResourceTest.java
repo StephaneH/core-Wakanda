@@ -1,12 +1,8 @@
 package com.wakanda.qa.http.test.urls;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
-import java.io.File;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.RandomStringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
@@ -14,7 +10,6 @@ import org.apache.http.HttpStatus;
 import org.apache.http.util.EntityUtils;
 import org.junit.Test;
 
-import com.wakanda.qa.http.Resources;
 import com.wakanda.qa.http.test.extend.AbstractHttpTestCase;
 
 /**
@@ -24,7 +19,7 @@ import com.wakanda.qa.http.test.extend.AbstractHttpTestCase;
  * 
  */
 public class ResourceTest extends AbstractHttpTestCase {
-	
+
 	/**
 	 * <b>Implements:</b> Resource01
 	 * <p/>
@@ -40,12 +35,12 @@ public class ResourceTest extends AbstractHttpTestCase {
 			throws Exception {
 
 		String request = "GET / HTTP/1.1" + CRLF + CRLF;
-		HttpResponse response = executeRequestString(request);
+		HttpResponse response = executeRawRequest(request);
 		assertEqualsStatusCode(HttpStatus.SC_BAD_REQUEST, response);
 
 		request = "GET / HTTP/1.1" + CRLF + "Host:"
 				+ getDefaultHostHeaderValue() + CRLF + CRLF;
-		response = executeRequestString(request);
+		response = executeRawRequest(request);
 		assertEqualsStatusCode(HttpStatus.SC_OK, response);
 
 	}
@@ -63,7 +58,7 @@ public class ResourceTest extends AbstractHttpTestCase {
 	public void testThatHostHeaderIsOptionalIn_HTTP_1_0_Request()
 			throws Exception {
 		String request = "GET / HTTP/1.0" + CRLF + CRLF;
-		HttpResponse response = executeRequestString(request);
+		HttpResponse response = executeRawRequest(request);
 		assertEqualsStatusCode(HttpStatus.SC_OK, response);
 
 	}
@@ -79,29 +74,22 @@ public class ResourceTest extends AbstractHttpTestCase {
 	 */
 	@Test
 	public void testThatServerAcceptsAbsoluteURI() throws Exception {
-		// generate a resource with random content
-		String expected = RandomStringUtils.randomAlphanumeric(256);
-		String resource = "checkAbsUri.txt";
-		String path = getDefaultProjectWebFolderPath() + "/" + resource;
-		Resources.writeStringToFile(path, expected);
 
-		// request with absolute path
-		String uri = "http://" + getDefaultHostName() + ":" + getDefaultPort()
-				+ "/" + resource;
-		String request = "GET " + uri + " HTTP/1.1" + CRLF + "Host:"
+		// Request with absolute path
+		String uri = "http://" + getDefaultTarget().toString() + "/index.html";
+		String request = "GET " + uri + " HTTP/1.1" + CRLF + "Host: "
 				+ getDefaultHostHeaderValue() + CRLF + CRLF;
+		logger.debug(request);
 
-		// response
-		HttpResponse response = executeRequestString(request);
-
-		// delete resource
-		FileUtils.forceDelete(new File(path));
-
+		// Response
+		HttpResponse response = executeRawRequest(request);
+		// Should get 200 OK
 		assertEqualsStatusCode(HttpStatus.SC_OK, response);
 		HttpEntity entity = response.getEntity();
 		assertNotNull("Response has no content", entity);
 		String actual = EntityUtils.toString(entity);
-		assertEquals("Wrong content", expected, actual);
+		// Check content
+		assertTrue("Wrong content", actual.contains("HTTP/1.1"));
 
 	}
 
@@ -116,41 +104,35 @@ public class ResourceTest extends AbstractHttpTestCase {
 	 * @throws Exception
 	 */
 	@Test
-	
 	public void testThatHostHeaderValueIsIgnoredWhenRequestURIIsAbsolute()
 			throws Exception {
-		// params
-		int port = Integer.parseInt(getGlobalProp().getProperty("port2"));
-		
-		String relative = getGlobalProp()
-				.getProperty("project2WebFolder");
-		String webFolderPath = getAbsPathFromResourcesDir(relative);
-		
-		// generate a resource with random content
-		String expected = RandomStringUtils.randomAlphanumeric(256);
-		String resource = "checkResourceUri.txt";
-		String path = webFolderPath + "/" + resource;
-		Resources.writeStringToFile(path, expected);
-		
-		// request with absolute path
-		HttpHost host = new HttpHost(getDefaultHostName(), port, "http");
-		String uri = host.toURI() + "/" + resource;
-		String request = "GET " + uri + " HTTP/1.1" + CRLF 
-						+ "Host: whatever" + CRLF 
-						+ CRLF;
+		// Host
+		int port = getSettings().getMultiHostPort();
+		String hostName = "host3";
+		HttpHost host = new HttpHost(hostName, port, "http");
 
-		// response
-		HttpHost target = getWebAdminTarget();
-		HttpResponse response = executeRequestString(request, target);
-
-		// delete resource
-		FileUtils.forceDelete(new File(path));
-
-		assertEqualsStatusCode(HttpStatus.SC_OK, response);
+		// Request with absolute path
+		String uri = host.toURI() + "/index.html";
+		String shouldBeIgnored = "host2";
+		String request = "GET " + uri + " HTTP/1.1" + CRLF + "Host: "
+				+ shouldBeIgnored + CRLF + CRLF;
+		logger.debug(request);
+		// Target
+		HttpHost target = getMultiHostTarget();
+		// Response
+		HttpResponse response = executeRawRequest(target, request, false);
 		HttpEntity entity = response.getEntity();
-		assertNotNull("Response has no content", entity);
-		String actual = EntityUtils.toString(entity);
-		assertEquals("Wrong content", expected, actual);
+		try {
+			// Should be 200 OK
+			assertEqualsStatusCode(HttpStatus.SC_OK, response);
+			assertNotNull("Response has no content", entity);
+			String actual = EntityUtils.toString(entity);
+			logger.debug(actual);
+			// Should get the content of Host 3
+			assertTrue("Wrong content", actual.contains("Host 3"));
+		} finally {
+			EntityUtils.consume(entity);
+		}
 	}
 
 	/**
@@ -166,19 +148,21 @@ public class ResourceTest extends AbstractHttpTestCase {
 	@Test
 	public void testThatServerReports400BadRequestWhenRequestURIIsAbsoluteAndTheDeterminedHostIsNotvalid()
 			throws Exception {
-		
-		// request with absolute path & invalid host
-		HttpHost host = new HttpHost("whatever", 6666, "http");
-		String uri = host.toURI() + "/";
-		String request = "GET " + uri + " HTTP/1.1" + CRLF 
-						+ "Host: whatever" + CRLF 
-						+ CRLF;
-		
-		logger.debug(request);
-		// response
-		HttpHost target = getWebAdminTarget();
-		HttpResponse response = executeRequestString(request, target);
 
+		HttpHost invalid = new HttpHost("whatever", 6666);
+		String uri = invalid.toURI() + "/";
+		HttpHost valid = new HttpHost("host2", getMultiHostPort());
+
+		// Request with absolute path & invalid host
+		String request = "GET " + uri + " HTTP/1.1" + CRLF + "Host: "
+				+ valid.toHostString() + CRLF + CRLF;
+
+		logger.debug(request);
+		// Target
+		HttpHost target = getMultiHostTarget();
+		// Response
+		HttpResponse response = executeRawRequest(target, request, false);
+		// Should get 400
 		assertEqualsStatusCode(HttpStatus.SC_BAD_REQUEST, response);
 	}
 
@@ -193,39 +177,35 @@ public class ResourceTest extends AbstractHttpTestCase {
 	 * 
 	 * @throws Exception
 	 */
+
 	@Test
 	public void testThatHostHeaderValueIsUsedWhenRequestURIIsNotAbsolute()
 			throws Exception {
-		// params
-		String relative = getGlobalProp().getProperty("project3WebFolder");
-		String webFolderPath = getAbsPathFromResourcesDir(relative);
-		
-		int port = Integer.parseInt(getGlobalProp().getProperty("port3"));
-
-		// generate a resource with random content
-		String expected = RandomStringUtils.randomAlphanumeric(256);
-		String resource = "checkResourceUri.txt";
-		String path = webFolderPath + "/" + resource;
-		Resources.writeStringToFile(path, expected);
-
-		// request with non absolute path
-		HttpHost host = new HttpHost(getDefaultHostName(), port, "http");
-		String uri = "/" + resource;
+		// Request with non absolute path
+		HttpHost host = new HttpHost("host3", getMultiHostPort());
+		String uri = "/index.html";
 		String request = "GET " + uri + " HTTP/1.1" + CRLF + "Host: "
 				+ host.toHostString() + CRLF + CRLF;
+		logger.debug(request);
 
-		// response
-		HttpHost target = getWebAdminTarget();
-		HttpResponse response = executeRequestString(request, target);
-
-		// delete resource
-		FileUtils.forceDelete(new File(path));
-
-		assertEqualsStatusCode(HttpStatus.SC_OK, response);
+		// Target
+		HttpHost target = getMultiHostTarget();
+		// Response
+		HttpResponse response = executeRawRequest(target, request, false);
 		HttpEntity entity = response.getEntity();
-		assertNotNull("Response has no content", entity);
-		String actual = EntityUtils.toString(entity);
-		assertEquals("Wrong content", expected, actual);
+		try {
+			// Should be 200 OK
+			assertEqualsStatusCode(HttpStatus.SC_OK, response);
+			assertNotNull("Response has no content", entity);
+			String actual = EntityUtils.toString(entity);
+			logger.debug(actual);
+			// Should get content of host 3
+			assertTrue(
+					"Wrong content: server should return the content of Host 3",
+					actual.contains("Host 3"));
+		} finally {
+			EntityUtils.consume(entity);
+		}
 	}
 
 	/**
@@ -241,80 +221,65 @@ public class ResourceTest extends AbstractHttpTestCase {
 	@Test
 	public void testThatServerReports400BadRequestWhenTheRequestURIIsNotAbsoluteAndHostHeaderValueIsNotValid()
 			throws Exception {
-		// params
-		String relative = getGlobalProp().getProperty("project3WebFolder");
-		String webFolderPath = getAbsPathFromResourcesDir(relative);
-
-		// generate a resource with random content
-		String expected = RandomStringUtils.randomAlphanumeric(256);
-		String resource = "checkResourceUri.txt";
-		String path = webFolderPath + "/" + resource;
-		Resources.writeStringToFile(path, expected);
-
-		// request with absolute path
-		String uri = "/" + resource;
+		// Not absolute URI and invalid host
+		String uri = "/index.html";
 		String host = "whatever:6666";
-		String request = "GET " + uri + " HTTP/1.1" + CRLF 
-						+ "Host: " + host + CRLF 
-						+ CRLF;
-		
-		//logger.debug(request);
-
-		// response
-		HttpHost target = getWebAdminTarget();
-		HttpResponse response = executeRequestString(request, target);
-
-		// delete resource
-		FileUtils.forceDelete(new File(path));
-
+		String request = "GET " + uri + " HTTP/1.1" + CRLF + "Host: " + host
+				+ CRLF + CRLF;
+		logger.debug(request);
+		// Target
+		HttpHost target = getMultiHostTarget();
+		HttpResponse response = executeRawRequest(
+				target, request);
+		logger.debug(response.getStatusLine());
+		// Should get 400
 		assertEqualsStatusCode(HttpStatus.SC_BAD_REQUEST, response);
 	}
-	
+
 	/**
 	 * <b>Implements:</b> Resource08
 	 * <p/>
-	 * Check that the host header value is case insensitive.
+	 * Check that the host header value is case-insensitive.
 	 * <p/>
 	 * <b>Reference:</b> SPEC690 (RFC2616) 5.2
 	 * 
 	 * @throws Exception
 	 */
 	@Test
-	public void testThatHostHeaderValueIsCaseInsensitive()	throws Exception {
-		// params
-		String relative = getGlobalProp().getProperty("project3WebFolder");
-		String webFolderPath = getAbsPathFromResourcesDir(relative);
-		
-		int port = Integer.parseInt(getGlobalProp().getProperty("port3"));
-
-		// generate a resource with random content
-		String expected = RandomStringUtils.randomAlphanumeric(256);
-		String resource = "checkResourceUri.txt";
-		String path = webFolderPath + "/" + resource;
-		Resources.writeStringToFile(path, expected);
-		
-		logger.debug(path);
-
-		// request with non absolute path
-		HttpHost host = new HttpHost(getDefaultHostName(), port, "http");
-		String uri = "/" + resource;
-		//host value to upper case
+	public void testThatHostHeaderValueIsCaseInsensitive() throws Exception {
+		// Request with non absolute path
+		HttpHost host = new HttpHost("host2", getMultiHostPort());
+		String uri = "/index.html";
+		// Change host case
 		String hostHeaderValue = host.toHostString().toUpperCase();
-		String request = "GET " + uri + " HTTP/1.1" + CRLF 
-						+ "Host: " + hostHeaderValue + CRLF 
-						+ CRLF;
-
-		// response
-		HttpHost target = getWebAdminTarget();
-		HttpResponse response = executeRequestString(request, target);
-
-		// delete resource
-		FileUtils.forceDelete(new File(path));
-
-		assertEqualsStatusCode(HttpStatus.SC_OK, response);
+		String request = "GET " + uri + " HTTP/1.1" + CRLF + "Host: "
+				+ hostHeaderValue + CRLF + CRLF;
+		logger.debug(request);
+		// Target
+		HttpHost target = getMultiHostTarget();
+		// Response
+		HttpResponse response = executeRawRequest(target, request, false);
 		HttpEntity entity = response.getEntity();
-		assertNotNull("Response has no content", entity);
-		String actual = EntityUtils.toString(entity);
-		assertEquals("Wrong content", expected, actual);
+		try {
+			// Should get 200 OK
+			assertEqualsStatusCode(HttpStatus.SC_OK, response);
+			assertNotNull("Response has no content", entity);
+			String actual = EntityUtils.toString(entity);
+			logger.debug(actual);
+			// Should get the content of Host 2
+			assertTrue("Wrong content", actual.contains("Host 2"));
+		} finally {
+			EntityUtils.consume(entity);
+		}
 	}
+
+	private int getMultiHostPort() {
+		return getSettings().getMultiHostPort();
+	}
+
+	private HttpHost getMultiHostTarget() {
+		return new HttpHost(getSettings().getDefaultTargetName(),
+				getMultiHostPort());
+	}
+
 }

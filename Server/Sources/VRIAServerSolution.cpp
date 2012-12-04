@@ -26,9 +26,12 @@
 #include "VRIAServerApplication.h"
 #include "VRIAServerLogger.h"
 #include "UsersAndGroups/Sources/UsersAndGroups.h"
-#include "VRIAServerSolution.h"
 #include "VRIAJSDebuggerSettings.h"
+#include "VRIAPermissions.h"
+#include "VRIAServerSolution.h"
 
+//jmo - Pour les certificats intermediaires ; Necessite sans doute un petit refactoring !
+#include "ServerNet/VServerNet.h"
 
 USING_TOOLBOX_NAMESPACE
 
@@ -39,6 +42,8 @@ namespace SolutionOpeningParametersKeys
 	CREATE_BAGKEY( solutionOpeningParameters);
 	CREATE_BAGKEY_WITH_DEFAULT_SCALAR( openingMode, XBOX::VLong, sLONG, ePOM_FOR_RUNNING);
 	CREATE_BAGKEY_NO_DEFAULT_SCALAR( customAdministratorHttpPort, XBOX::VLong, sLONG);
+	CREATE_BAGKEY_NO_DEFAULT_SCALAR( customAdministratorSSLPort, XBOX::VLong, sLONG);
+	CREATE_BAGKEY_NO_DEFAULT( customAdministratorAuthType, XBOX::VString);
 	CREATE_BAGKEY_WITH_DEFAULT_SCALAR( openDefaultSolutionIfOpeningFails, XBOX::VBoolean, bool, true);
 }
 
@@ -110,6 +115,30 @@ bool VRIAServerSolutionOpeningParameters::GetCustomAdministratorHttpPort( sLONG&
 }
 
 
+void VRIAServerSolutionOpeningParameters::SetCustomAdministratorSSLPort( sLONG inPort)
+{
+	SolutionOpeningParametersKeys::customAdministratorSSLPort.Set( fBag, inPort);
+}
+
+
+bool VRIAServerSolutionOpeningParameters::GetCustomAdministratorSSLPort( sLONG& outPort) const
+{
+	return SolutionOpeningParametersKeys::customAdministratorSSLPort.Get( fBag, outPort);
+}
+
+
+void VRIAServerSolutionOpeningParameters::SetCustomAdministratorAuthType( const XBOX::VString& inAuthenticationType)
+{
+	SolutionOpeningParametersKeys::customAdministratorAuthType.Set( fBag, inAuthenticationType);
+}
+
+
+bool VRIAServerSolutionOpeningParameters::GetCustomAdministratorAuthType( XBOX::VString& outAuthenticationType) const
+{
+	return SolutionOpeningParametersKeys::customAdministratorAuthType.Get( fBag, outAuthenticationType);
+}
+
+
 void VRIAServerSolutionOpeningParameters::SetOpenDefaultSolutionWhenOpeningFails( bool inOpenDefaultSolution)
 {
 	SolutionOpeningParametersKeys::openDefaultSolutionIfOpeningFails.Set( fBag, inOpenDefaultSolution);
@@ -129,12 +158,11 @@ bool VRIAServerSolutionOpeningParameters::GetOpenDefaultSolutionWhenOpeningFails
 
 VRIAServerSolution::VRIAServerSolution()
 : fDesignSolution(NULL),
+fBackupSettings(NULL),
 fOpeningParameters(NULL),
-#if defined(WKA_USE_CHR_REM_DBG)
-#else
 fDebuggerSettings(NULL),
-#endif
 fUAGDirectory(NULL),
+fPermissions(NULL),
 fJSContextPool(NULL),
 fJSRuntimeDelegate(NULL),
 fLogger(NULL),
@@ -211,8 +239,11 @@ VError VRIAServerSolution::Close()
 		fApplicationsMutex.Unlock();
 	}
 
-	xbox_assert(fUAGDirectory->GetRefCount() == 1);
+	ReleaseRefCountable( &fPermissions);
+	xbox_assert(fUAGDirectory == NULL || fUAGDirectory->GetRefCount() == 1);
 	ReleaseRefCountable( &fUAGDirectory);
+	xbox_assert(fBackupSettings == NULL || fBackupSettings->GetRefCount() == 1);
+	ReleaseRefCountable( &fBackupSettings);
 
 	if (fDesignSolution != NULL)
 	{
@@ -221,16 +252,24 @@ VError VRIAServerSolution::Close()
 		fDesignSolution = NULL;
 	}
 
-#if defined(WKA_USE_CHR_REM_DBG)
-#else
 	JSWDebuggerFactory		fctry;
+#if 0//!defined(WKA_USE_UNIFIED_DBG)
 	IJSWDebugger*			jswDebugger = fctry. Get ( );
+#else
+	IWAKDebuggerServer*		jswDebugger = fctry. Get ( );
+	IWAKDebuggerServer*		chrDbgr = fctry.GetChromeDebugHandler();
+#endif
+	
 	if ( jswDebugger != 0 )
 		jswDebugger-> SetSettings ( NULL );
 
+	VChromeDebugHandler::StaticSetSettings(NULL);
+	/*if (chrDbgr)
+	{
+		chrDbgr->SetSettings(NULL);
+	}*/
 	delete fDebuggerSettings;
 	fDebuggerSettings = NULL;
-#endif
 
 	VString logMsg;
 	logMsg.Printf( "Solution closed (duration: %i ms)", usCounter.Stop()/1000);
@@ -349,19 +388,27 @@ VError VRIAServerSolution::Start()
 	if (err == VE_OK)
 	{
 		//TEST_RegisterDebuggerUAGCallback ( );
-#if defined(WKA_USE_CHR_REM_DBG)
-#else
+
 		xbox_assert ( fDebuggerSettings == NULL );
 		fDebuggerSettings = new VJSDebuggerSettings ( this );
 		err = fDebuggerSettings-> Init ( );
 		if ( err == VE_OK )
 		{
 			JSWDebuggerFactory		fctry;
+#if 0//!defined(WKA_USE_UNIFIED_DBG)
 			IJSWDebugger*			jswDebugger = fctry. Get ( );
+#else
+			IWAKDebuggerServer*		jswDebugger = fctry. Get ( );
+			IWAKDebuggerServer*		chrDbgr = fctry.GetChromeDebugHandler();
+#endif
 			if ( jswDebugger != 0 )
 				jswDebugger-> SetSettings ( fDebuggerSettings );
+			VChromeDebugHandler::StaticSetSettings(fDebuggerSettings);
+			/*if ( chrDbgr != 0 )
+			{
+				chrDbgr->SetSettings(fDebuggerSettings);
+			}*/
 		}
-#endif
 	}
 
 	if (err == VE_OK)
@@ -458,16 +505,19 @@ VFolder* VRIAServerSolution::RetainLogFolder( bool inCreateIfNotExists) const
 
 	if (fDesignSolution != NULL)
 	{
-		VProjectItem *item = fDesignSolution->GetSolutionFileProjectItem();
-		if (item != NULL)
+		VFilePath solutionFolderPath;
+		fDesignSolution->GetSolutionFolderPath( solutionFolderPath);
+
+		VString posixPath;
+		fSettings.GetLogFolder( posixPath);
+		fDesignSolution->ResolvePosixPathMacros( posixPath);
+
+		VFilePath path( solutionFolderPath, posixPath, FPS_POSIX);
+		if (path.IsFolder())
 		{
-			VFilePath path;
-			item->GetFilePath( path);
-			path = path.ToFolder();
-			path.ToSubFolder( L"Logs");
 			folder = new VFolder( path);
 			if (folder != NULL && !folder->Exists() && inCreateIfNotExists)
-				folder->Create();
+				folder->CreateRecursive( false);
 		}
 	}
 	return folder;
@@ -479,10 +529,25 @@ const VRIASettingsFile* VRIAServerSolution::RetainSettingsFile( const RIASetting
 	return fSettings.RetainSettingsFile( inSettingsID);
 }
 
+const IBackupSettings* VRIAServerSolution::RetainBackupSettings()const
+{
+	return RetainRefCountable(fBackupSettings);
+}
 
 CUAGDirectory* VRIAServerSolution::RetainUAGDirectory() const
 {
 	return RetainRefCountable( fUAGDirectory);
+}
+
+
+VRIAPermissions* VRIAServerSolution::RetainPermissions( XBOX::VError *outError) const
+{
+	VRIAPermissions *permissions = RetainRefCountable( fPermissions);
+
+	if (outError != NULL)
+		*outError = VE_OK;
+
+	return permissions;
 }
 
 
@@ -660,6 +725,14 @@ VError VRIAServerSolution::_Open( VSolution* inDesignSolution, VRIAServerSolutio
 
 		fLoggerID = L"com.wakanda-software." + fName;
 
+		if (err == VE_OK || fState.inMaintenance)
+		{
+			// Load all available settings files
+			err = _LoadFileSettings();
+			if (err != VE_OK)
+				err = ThrowError( VE_RIA_CANNOT_LOAD_SETTINGS_FILES);
+		}
+
 		if (err == VE_OK && !fState.inMaintenance)
 		{
 			// Create a messages logger
@@ -674,6 +747,22 @@ VError VRIAServerSolution::_Open( VSolution* inDesignSolution, VRIAServerSolutio
 				else
 				{
 					VRIAServerApplication::Get()->SetLogger( fLogger);
+
+					VRIAServerStartupParameters* startupParameters=VRIAServerApplication::Get()->RetainStartupParameters();
+
+					if(startupParameters!=NULL)
+					{
+						bool netdump=false;
+						
+						if(startupParameters->GetNetDump(netdump))
+						{
+							fLogger->WithTrace(true);
+							fLogger->WithDump(true);
+						}	
+							
+						ReleaseRefCountable(&startupParameters);
+					}
+						
 					fLogger->Start();
 				}
 
@@ -718,20 +807,26 @@ VError VRIAServerSolution::_Open( VSolution* inDesignSolution, VRIAServerSolutio
 				fJSContextPool = VRIAServerApplication::Get()->GetJSContextMgr()->CreateJSContextPool( err, this);
 			}
 	
-			if (err == VE_OK || fState.inMaintenance)
-			{
-				// Load all available settings files
-				err = _LoadFileSettings();
-				if (err != VE_OK)
-					err = ThrowError( VE_RIA_CANNOT_LOAD_SETTINGS_FILES);
-			}
-
 			if  (err == VE_OK || fState.inMaintenance)
 			{
 				// Load the database settings
 				err = _LoadDatabaseSettings();
 				if (err != VE_OK)
 					err = ThrowError( VE_RIA_CANNOT_LOAD_DATABASE_SETTINGS);
+			}
+			/*if  (err == VE_OK || fState.inMaintenance)
+			{
+				// Load the database settings
+				err = _LoadBackupSettings();
+				if (err != VE_OK)
+					err = ThrowError( VE_RIA_CANNOT_LOAD_DATABASE_SETTINGS);
+			}*/
+
+			if (err == VE_OK || fState.inMaintenance)
+			{
+				fPermissions = _LoadPermissionFile( err);
+				if (err != VE_OK)
+					err = ThrowError( VE_RIA_CANNOT_LOAD_PERMISSIONS);
 			}
 
 			if (err == VE_OK || fState.inMaintenance)
@@ -740,6 +835,19 @@ VError VRIAServerSolution::_Open( VSolution* inDesignSolution, VRIAServerSolutio
 				fUAGDirectory = _OpenUAGDirectory( err);
 				if (err != VE_OK)
 					err = ThrowError( VE_RIA_CANNOT_LOAD_UAG_DIRECTORY);
+			}
+			
+			//jmo - Fix rapide pour les certificats intermediaires : 
+			//		On charge tous les .pem qui se trouve a la racine de la solution
+			if (err == VE_OK || fState.inMaintenance)
+			{
+				const VFolder *	vfRoot = RetainFolder ( );
+				
+				if ( vfRoot != 0 )
+				{
+					ServerNetTools::AddIntermediateCertificateDirectory(*vfRoot);
+					vfRoot-> Release ( );
+				}
 			}
 
 			if (err == VE_OK || fState.inMaintenance)
@@ -782,9 +890,23 @@ VError VRIAServerSolution::_Open( VSolution* inDesignSolution, VRIAServerSolutio
 							{
 								projectOpeningParams->SetOpeningMode( fState.inMaintenance ? ePOM_FOR_MAINTENANCE : ePOM_FOR_RUNNING);
 
-								sLONG defaultAdminPort = 0;
-								if (*iter == serverAdminProject && fOpeningParameters->GetCustomAdministratorHttpPort( defaultAdminPort))
-									projectOpeningParams->SetCustomHttpPort( defaultAdminPort);
+								if (*iter == serverAdminProject)
+								{
+									sLONG defaultAdminPort = -1, dftAdminSSLPort = -1;
+									VString authType;
+
+									if (fOpeningParameters->GetCustomAdministratorHttpPort( defaultAdminPort))
+										projectOpeningParams->SetCustomHttpPort( defaultAdminPort);
+
+									if (fOpeningParameters->GetCustomAdministratorSSLPort( dftAdminSSLPort))
+										projectOpeningParams->SetCustomSSLPort( dftAdminSSLPort);
+
+									if (fOpeningParameters->GetCustomAdministratorAuthType( authType))
+										projectOpeningParams->SetCustomAuthenticationType( authType);
+
+									projectOpeningParams->SetHandlesDebuggerServer(true);
+									projectOpeningParams->SetEnableChrmDebugHandler(true);		// sc 05/07/2012 enable the chrm debug handler for admin
+								}
 															
 								// for Default solution, pass the WebAdmin opening parameters
 								application = VRIAServerProject::OpenProject( err, this, *iter, projectOpeningParams);
@@ -876,9 +998,17 @@ VError VRIAServerSolution::_Open( VSolution* inDesignSolution, VRIAServerSolutio
 								{
 									projectOpeningParams->SetOpeningMode( ePOM_FOR_RUNNING);
 
-									sLONG defaultAdminPort = 0;
+									sLONG defaultAdminPort = -1, dftAdminSSLPort = -1;
 									if (fOpeningParameters->GetCustomAdministratorHttpPort( defaultAdminPort))
 										projectOpeningParams->SetCustomHttpPort( defaultAdminPort);
+
+									if (fOpeningParameters->GetCustomAdministratorSSLPort( dftAdminSSLPort))
+										projectOpeningParams->SetCustomSSLPort( dftAdminSSLPort);
+
+									projectOpeningParams->SetCustomAuthenticationType( L"basic");	// sc 15/06/2012 force basic authentication for admin
+
+									projectOpeningParams->SetHandlesDebuggerServer(true);
+									projectOpeningParams->SetEnableChrmDebugHandler(true);		// sc 05/07/2012 enable the chrm debug handler for admin
 
 									application = VRIAServerProject::OpenProject( err, this, designProject, projectOpeningParams);
 									if (application != NULL && err == VE_OK)
@@ -962,13 +1092,11 @@ VError VRIAServerSolution::_LoadFileSettings()
 	return err;	
 }
 
-
 VError VRIAServerSolution::_LoadDatabaseSettings()
 {
 	VError err = VE_OK;
-
-	VValueBag *settings = fSettings.RetainSettings( RIASettingID::database);
-	if (settings != NULL)
+	//O.R.: removed previous retain which was actually used only to check that fSettings had database-related settings
+	if (fSettings.HasDatabaseSettings() )
 	{
 		// Set the DB4D cache size
 		CDB4DManager *db4dMgr = VRIAServerApplication::Get()->GetComponentDB4D();
@@ -1083,84 +1211,56 @@ CUAGDirectory* VRIAServerSolution::_OpenUAGDirectory( VError& outError)
 			StUseLogger logger;
 			VMicrosecondsCounter usCounter;
 
-			VProjectItem *dirItem = fDesignSolution->GetProjectItemFromTag( kUAGDirectoryTag);
-			if (dirItem != NULL)
+			VFolder *cacheFolder = NULL;
+			VString posixPath;
+			fSettings.GetDirectoryCacheFolder( posixPath);
+			if (!posixPath.IsEmpty())
 			{
-				VFilePath directoryPath;
-				dirItem->GetFilePath( directoryPath);
-			
-				usCounter.Start();
-				logger.Log( fLoggerID, eL4JML_Information, L"Opening the users and groups directory");
-				
-				VFile file( directoryPath);
-				directory = uag->RetainDirectory( file, FA_READ_WRITE, NULL, NULL, &outError);
-			}
-
-			if (directory == NULL && outError == VE_OK)
-			{
-				VFilePath solpath;
-				fDesignSolution->GetSolutionFilePath(solpath);
-				solpath.SetExtension(RIAFileKind::kDirectoryFileExtension);
-				VFile defaultDirFile(solpath);
-				directory = uag->RetainDirectory( defaultDirFile, FA_READ_WRITE, NULL, NULL, &outError, NULL, true);
-			}
-
-			if (directory != NULL && outError == VE_OK)
-			{
-				// Create an "admin" user if needed
-
-				CUAGGroup *adminGroup = directory->RetainSpecialGroup( CUAGDirectory::AdminGroup);
-				CUAGGroup *debuggerGroup = directory->RetainSpecialGroup( CUAGDirectory::DebuggerGroup);
-
-				if ((adminGroup != NULL) && (debuggerGroup != NULL))
+				if (fDesignSolution->ResolvePosixPathMacros( posixPath))
 				{
-					StErrorContextInstaller errorContext( VE_UAG_USERNAME_DOES_NOT_EXIST, VE_OK);
-
-					CUAGUser *adminUser = directory->RetainUser( L"admin");
-					
-					if (adminUser == NULL)
-						adminUser = directory->AddOneUser( L"admin", L"", L"", outError);
-
-					if ((outError == VE_OK) && (adminUser != NULL))
+					VFilePath solutionFolderPath;
+					fDesignSolution->GetSolutionFolderPath( solutionFolderPath);
+					VFilePath cacheFolderPath( solutionFolderPath, posixPath, FPS_POSIX);
+					cacheFolder = new VFolder( cacheFolderPath);
+					if (cacheFolder != NULL)
 					{
-						VUUID adminUserID, userID;
-						adminUser->GetID( adminUserID);
-						
-						CUAGUserVector users;
-						adminGroup->RetainUsers( users);
-
-						bool hasAdminUser = false;
-						for (CUAGUserVector::iterator userIter = users.begin() ; (userIter != users.end()) && !hasAdminUser ; ++userIter)
-						{
-							(*userIter)->GetID( userID);
-							hasAdminUser = (adminUserID == userID);
-						}
-
-						if (!hasAdminUser)
-							outError = adminUser->PutIntoGroup( adminGroup);
-
-						if (outError == VE_OK)
-						{
-							users.clear();
-							debuggerGroup->RetainUsers( users);
-
-							hasAdminUser = false;
-							for (CUAGUserVector::iterator userIter = users.begin() ; (userIter != users.end()) && !hasAdminUser ; ++userIter)
-							{
-								(*userIter)->GetID( userID);
-								hasAdminUser = (adminUserID == userID);
-							}
-
-							if (!hasAdminUser)
-								outError = adminUser->PutIntoGroup( debuggerGroup);
-						}
+						if (!cacheFolder->Exists())
+							outError = cacheFolder->CreateRecursive( false);						
 					}
-					ReleaseRefCountable( &adminUser);
+					else
+					{
+						outError = vThrowError( VE_MEMORY_FULL);
+					}
 				}
-				QuickReleaseRefCountable( adminGroup);
-				QuickReleaseRefCountable( debuggerGroup);
 			}
 
+			if (outError == VE_OK)
+			{
+				VProjectItem *dirItem = fDesignSolution->GetProjectItemFromTag( kUAGDirectoryTag);
+				if (dirItem != NULL)
+				{
+					VFilePath directoryPath;
+					dirItem->GetFilePath( directoryPath);
+				
+					usCounter.Start();
+					logger.Log( fLoggerID, eL4JML_Information, L"Opening the users and groups directory");
+					
+					VFile file( directoryPath);
+					directory = uag->RetainDirectory( file, FA_READ_WRITE, cacheFolder, NULL, &outError);
+				}
+
+				if (directory == NULL && outError == VE_OK)
+				{
+					VFilePath solpath;
+					fDesignSolution->GetSolutionFilePath(solpath);
+					solpath.SetExtension(RIAFileKind::kDirectoryFileExtension);
+					VFile defaultDirFile(solpath);
+					directory = uag->RetainDirectory( defaultDirFile, FA_READ_WRITE, cacheFolder, NULL, &outError, NULL, true);
+				}
+			}
+
+			ReleaseRefCountable( &cacheFolder);
+		
 			if (directory != NULL && outError == VE_OK)
 			{
 				VString logMsg;
@@ -1176,6 +1276,33 @@ CUAGDirectory* VRIAServerSolution::_OpenUAGDirectory( VError& outError)
 	}
 	return directory;
 }
+
+
+VRIAPermissions* VRIAServerSolution::_LoadPermissionFile( VError& outError)
+{
+	VRIAPermissions *permissions = NULL;
+
+	outError = VE_OK;
+
+	if (testAssert(fDesignSolution != NULL))
+	{
+		VProjectItem *item = fDesignSolution->GetProjectItemFromTag( kPermissionsTag);
+		if (item != NULL)
+		{
+			VFilePath path;
+			item->GetFilePath( path);
+
+			permissions = new VRIAPermissions( path);
+			if (permissions == NULL)
+				outError = ThrowError( VE_MEMORY_FULL);
+			else
+				outError = permissions->LoadPermissionFile();
+		}
+	}
+
+	return permissions;	
+}
+
 
 // THIS TEST METHOD WILL GO AWAY INTO ITS OWN SEPARATE SOURCE FILE
 VError VRIAServerSolution::TEST_RegisterDebuggerUAGCallback ( )

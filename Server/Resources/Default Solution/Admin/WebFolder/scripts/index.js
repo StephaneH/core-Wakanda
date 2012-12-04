@@ -1,10 +1,9 @@
-﻿
+
 var adminObject;
 
 WAF.onAfterInit = function onAfterInit() {
 	
 	$("#adminTabView").hide();
-	checkAdminAccess();
 	
 // @lock
 
@@ -16,7 +15,6 @@ WAF.onAfterInit = function onAfterInit() {
 	var adminRepairButton = {};	// @buttonImage
 	var solutionCombobox = {};	// @combobox
 	var adminVerifyButton = {};	// @buttonImage
-	var radioSolution = {};	// @radioGroup
 	var logToAdmin = {};	// @login
 	var documentEvent = {};	// @document
 	var logToAdmin = {};	// @login
@@ -45,13 +43,13 @@ WAF.onAfterInit = function onAfterInit() {
 
 	adminCompactButton.click = function adminCompactButton_click (event)// @startlock
 	{// @endlock
-		this.disable();
+		// this.disable();
 		adminObject.compactApplication();
 	};// @lock
 
 	adminRepairButton.click = function adminRepairButton_click (event)// @startlock
 	{// @endlock
-		this.disable();
+		// this.disable();
 		adminObject.repairApplication();
 	};// @lock
 
@@ -62,15 +60,8 @@ WAF.onAfterInit = function onAfterInit() {
 
 	adminVerifyButton.click = function adminVerifyButton_click (event)// @startlock
 	{// @endlock
-		this.disable();
+		// this.disable();
 		adminObject.verifyApplication();
-	};// @lock
-
-	radioSolution.change = function radioSolution_change (event) {
-		
-		if(this.getValue() === "currentSolution") {
-			adminObject.selectCurrentSolution();
-		}
 	};// @lock
 
 	logToAdmin.logout = function logToAdmin_logout (event)// @startlock
@@ -87,6 +78,11 @@ WAF.onAfterInit = function onAfterInit() {
 		
 	};// @lock
 	
+	documentEvent.onLoad = function documentEvent_onLoad (event)
+ 	{
+		checkAdminAccess();
+	};
+	
 // @region eventManager// @startlock
 	WAF.addListener("adminStopSolutionButton", "click", adminStopSolutionButton.click, "WAF");
 	WAF.addListener("adminBrowseButton", "click", adminBrowseButton.click, "WAF");
@@ -95,10 +91,10 @@ WAF.onAfterInit = function onAfterInit() {
 	WAF.addListener("adminRepairButton", "click", adminRepairButton.click, "WAF");
 	WAF.addListener("solutionCombobox", "change", solutionCombobox.change, "WAF");
 	WAF.addListener("adminVerifyButton", "click", adminVerifyButton.click, "WAF");
-	WAF.addListener("radioSolution", "change", radioSolution.change, "WAF");
 	WAF.addListener("logToAdmin", "logout", logToAdmin.logout, "WAF");
 	WAF.addListener("logToAdmin", "logout", logToAdmin.logout, "WAF");
 	WAF.addListener("logToAdmin", "login", logToAdmin.login, "WAF");
+	WAF.addListener("document", "onLoad", documentEvent.onLoad, "WAF");
 // @endregion
 	
 	$("body").bind("keypress", function (event) {
@@ -114,79 +110,38 @@ WAF.onAfterInit = function onAfterInit() {
 
 function checkAdminAccess() {
 
-	var returnLogin,
-		currentUser;
-	
-	result = {
-		access : false,
-		status : ""
-	};
-	
-	currentUser = WAF.directory.currentUser();
-	returnLogin = false;
-	
-	if(currentUser === null) {
-		returnLogin = autoLog();
-	}
-	
-	checkAdminCallback(returnLogin, currentUser);
-}
-
-function autoLog() {
-	return WAF.directory.login({
-		"sync": true,
-		"onSuccess" : function (event) {
-			
-			checkAdminCallback(event.result, null);
-		}
-	}, "admin", "");
-}
-
-function checkAdminCallback(loginReturn, currentUser) {
-	
-	if (loginReturn === true || currentUser !== null) {
-		
-		if (WAF.directory.currentUserBelongsTo("01000000000000000000000000000000")) {
-			
+	$("#adminHeader").hide();
+	webAdmin.getCurrentRunningHashAsync({
+		"onsuccess": function (response) {	
 			$("#adminHeader").show();
 			$("#adminTabView").show();
 			adminObject = new Admin();
 			adminObject.init();
-		} else {
-			
-			alert("You are not allowed to access this page");
 		}
-	}
-	
-	if(adminObject === undefined) {
-		$("#adminHeader").hide();
-		$$("logToAdmin").showLoginDialog();
-		$("#name_login_logToAdmin").val("admin");
-		$("#name_login_logToAdmin").focus();
-	}
+	});
 }
 
 function Admin() {
 	
 	this.MODE_OVERVIEW = "overview";
 	this.MODE_MAINTENANCE = "maintenance";
+	this.MODE_DIRECTORY = "directory";
 	
 	this.currentRunningSolution = null;
 	this.currentSolution = null;
 	this.currentApplicationName = null;
 	this.recentSolutions = null;
+	this.recentSolutionsHash = {};
 	this.viewMode = "";
+	this.currentRunningHash = "";
 	
 	this.maintenanceActionRunning = false;
-	this.verifingApplication = {};
-	this.repairingApplication = {};
-	this.compactingApplication = {};
-	this.backupingApplication = {};
-	this.restoringApplication = {};
-	this.dataFlusingApplication = {};
+	this.maintenanceApplication = null;
 	
 	this.reloadingPage = false;
 	this.reloadingSetTimeOut = [];
+	
+	this.applicationSettings = null;
 }
 
 Admin.prototype = {
@@ -194,15 +149,30 @@ Admin.prototype = {
 	init : function init_admin() {
 		
 		var i,
-			runningSolution;
+			recentSolution,
+			runningSolution,
+			recentSolutionLabel;
 		
 		$("#loadingContainer").show();
-		this.recentSolutions = admin.getRecentSolutionsList();
+		
+		runningSolution = webAdmin.getSolution();
+		
+		this.recentSolutions = webAdmin.getRecentSolutions();
+		this.recentSolutionsHash = {};
 		
 		for(i = 0; i < this.recentSolutions.length; i++) {
 			
-			if(this.recentSolutions[i].hasOwnProperty("name")) {
-				$$("solutionCombobox").addOption(this.recentSolutions[i].name, this.recentSolutions[i].name, false);
+			recentSolution = this.recentSolutions[i];
+			
+			if(recentSolution.hasOwnProperty("name")) {
+				
+				recentSolutionLabel = recentSolution.name;
+				if(runningSolution.name !== "DefaultSolution" && runningSolution.name === recentSolution.name) {
+					recentSolutionLabel += " (Running)";
+				}
+				
+				$$("solutionCombobox").addOption(recentSolution.hash, recentSolutionLabel, false);
+				this.recentSolutionsHash[recentSolution.hash] = recentSolution.name;
 			}
 		}
 		
@@ -215,10 +185,18 @@ Admin.prototype = {
 				case 2 :
 					adminObject.displayMaintenanceTab();
 					break;
+				case 3 :
+					adminObject.displayDirectoryTab();
+					break;
 			}
 		}
 		
-		runningSolution = admin.getSolution();
+		/**
+		 * Not necessary for the current version
+		 */
+		$("#adminSaveButton").hide();
+		$("#adminCancelButton").hide();
+		$("#adminUnlockButton").hide();
 		
 		$("#adminHeader").show();
 		$("#adminTabView").show();
@@ -231,16 +209,20 @@ Admin.prototype = {
 		
 		if(runningSolution.name !== "DefaultSolution" || runningSolution.applications.length > 1) {
 			this.currentRunningSolution = runningSolution
-			this.selectSolution(this.currentRunningSolution.name);
-			$$("solutionCombobox").setValue(this.currentRunningSolution.name);
-			$$("radioSolution").select("currentSolution");
+			// this.selectSolution(this.currentRunningSolution.hash);
+			$$("solutionCombobox").setValue(this.currentRunningSolution.hash);
 		} else {
-			$$("radioSolution").select("recentSolution");
 			if(this.recentSolutions.length > 0 && this.recentSolutions[0].hasOwnProperty("name")) {
-				this.selectSolution(this.recentSolutions[0].name);
-				$$("solutionCombobox").setValue(this.recentSolutions[0].name);
+				// this.selectSolution(this.recentSolutions[0].hash);
+				$$("solutionCombobox").setValue(this.recentSolutions[0].hash);
 			}
 		}
+		
+		webAdmin.getCurrentRunningHashAsync({
+			"onsuccess" : function (response) {
+				adminObject.currentRunningHash = response;
+			}
+		});
 		
 		$("#wafConsole").resizable({
 			handles: "n",
@@ -259,6 +241,16 @@ Admin.prototype = {
 				ui.element.css("top", "");
 			},
 		});
+		
+		$("#adminCancelSettingsButton").bind("click", function(event) {
+			adminObject.closeSettings();
+		});
+		
+		
+		$("#adminSaveSettingsButton").bind("click", function(event) {
+			adminObject.saveSettings();
+		});
+		
 	},
 	
 	console : {
@@ -266,11 +258,12 @@ Admin.prototype = {
 		timer: null,
 		opened: false,
 		node: $('#wafConsole'),
+		maintenanceLogId : 0,
 		
 		getServerLog : function(open, option) {
 			
 			try {
-				var result = admin.getLogMessages();
+				var result = webAdmin.getLogMessages();
 				
 				if(open === undefined) {
 					open = true;
@@ -279,7 +272,21 @@ Admin.prototype = {
 				this.log(result.messages, open, option);
 			} catch(e) {
 				this.log('<b>getServerLog failed :</b> ' + e, open, option);
-			};
+			}
+		},
+		getMaintenanceLog : function get_maintenance_log(open, option) {
+			
+			try {
+				var result = webAdmin.getMaintenanceLog(this.maintenanceLogId);
+				if(open === undefined) {
+					open = true;
+				}
+				
+				this.log(result.messages, open, option);
+				this.maintenanceLogId = result.maxId;
+			} catch(e) {
+				this.log('<b>getMaintenanceLog failed :</b> ' + e, open, option);
+			}
 		},
 		log : function console_log(contents, open, option) {
 			
@@ -303,7 +310,7 @@ Admin.prototype = {
 				html = contents.toString() + '<br />';
 			}
 			
-			if(option !== undefined) {
+			if(option !== undefined && option.hasOwnProperty("solutionName") && option.hasOwnProperty("applicationName")) {
 				
 				logSolutionName = option.solutionName;
 				logApplicationName = option.applicationName;
@@ -314,7 +321,7 @@ Admin.prototype = {
 				logApplicationName = adminObject.currentApplicationName;
 			}
 			
-			if(logSolutionName !== adminObject.currentSolution.name || logApplicationName !== adminObject.currentApplicationName) {
+			if(adminObject.currentSolution !== null && adminObject.currentApplicationName !== null && (logSolutionName !== adminObject.currentSolution.name || logApplicationName !== adminObject.currentApplicationName)) {
 				logDisplay = 'display : none;';
 			}
 
@@ -328,7 +335,8 @@ Admin.prototype = {
 					html = '<p class="' + logSolutionName.replace(" ", "-") + "-" + logApplicationName.replace(" ", "-") + '-log" style="'+logDisplay+'">' + html + '</p>';
 				}
 				
-				$('#wafConsole .content').append(html).scrollTop($('#wafConsole .content')[0].scrollHeight);
+				$('#wafConsole .content').append(html)
+					.scrollTop($('#wafConsole .content')[0].scrollHeight);
 			}
 		},
 		error : function console_log_error(contents, open, option) {
@@ -336,18 +344,18 @@ Admin.prototype = {
 			if($.isArray(contents) && contents.length > 0) {
 				
 				contents.forEach(function (element, index, elementArray) {
-					elementArray[index] = add_error_tag(element);
+					elementArray[index] = addErrorTag(element);
 				});
 			} else if($.isPlainObject(contents) && contents.message && (contents.message !== '')) {
 				
-				contents.message = add_error_tag(contents.message);
-				contents.description = add_error_tag(contents.description);
+				contents.message = addErrorTag(contents.message);
+				contents.description = addErrorTag(contents.description);
 			} else if(contents.toString() !== '') {
 				
-				contents = add_error_tag(contents.toString());
+				contents = addErrorTag(contents.toString());
 			}
 			
-			function add_error_tag(element) {
+			function addErrorTag(element) {
 				
 				return '<span class="log-error">'+element+'</span>';
 			
@@ -407,58 +415,59 @@ Admin.prototype = {
 	},
 	
 	selectMode : function admin_select_mode(mode) {
-		if(mode === this.MODE_OVERVIEW || mode === this.MODE_MAINTENANCE) {
+		if(mode === this.MODE_OVERVIEW || mode === this.MODE_MAINTENANCE || mode === this.MODE_DIRECTORY) {
 			this.viewMode = mode;
 		}
 	},
 	
 	selectSolution : function select_solution(selectedSolution) {
 		
-		this.currentSolution = null;
 		$("#loadingContainer").show();
 		
-		if(this.currentRunningSolution !== null && this.currentRunningSolution.name === selectedSolution) {
+		if(this.currentRunningSolution !== null && this.currentRunningSolution.name === this.recentSolutionsHash[selectedSolution]) {
 			
 			this.displaySelectedSolution(this.currentRunningSolution);
 			
 		} else {
 			
-			admin.getSolutionmaintenanceAsync({
+			webAdmin.getSolutionMaintenanceAsync({
 				"onsuccess" : function (response) {
 					if(response.hasOwnProperty("name")) {
 						adminObject.displaySelectedSolution(response);
 						adminObject.console.getServerLog(false);
 					} else {
 						alert("Error: cannot open this solution");
+						adminObject.currentSolution = null;
+						adminObject.currentApplicationName = null;
 						$("#loadingContainer").hide();
-						$("#adminMaintenanceProjectList").html("");
-						$("#maintenanceModeleFileDetail").html("");
-						$("#maintenanceLogFileDetail").html("");
-						
 						$$("adminTabView").selectTab(2);
+						
+						$("#adminMaintenanceProjectList").html("");
+						$("#maintenanceModelFileDetail").html("");
+						$("#maintenanceLogFileDetail").html("");
+						$("#maintenanceProgress").hide();
+						
 						adminObject.console.getServerLog(true);
 					}
 				}
 			}, selectedSolution);
 			
 		}
-		this.refreshAdminHeader(selectedSolution);
+		this.refreshAdminHeader(this.recentSolutionsHash[selectedSolution]);
 	},
 	
-	refreshAdminHeader : function refresh_admin_header(selectedSolution) {
+	refreshAdminHeader : function refresh_admin_header(selectedSolutionName) {
 		
-		if(this.currentRunningSolution !== null && this.currentRunningSolution.name === selectedSolution) {
+		if(this.currentRunningSolution !== null && this.currentRunningSolution.name === selectedSolutionName) {
 			
-			$$("radioSolution").select("currentSolution");
-			selectedSolution = this.getActiveIcon() + selectedSolution;
+			selectedSolutionName = this.getActiveIcon() + selectedSolutionName;
 			
 		} else {
 			
-			$$("radioSolution").select("recentSolution");
-			selectedSolution = this.getMaintenanceIcon() + selectedSolution;
+			selectedSolutionName = this.getMaintenanceIcon() + selectedSolutionName;
 		}
 		
-		$$("solutionName").setValue(selectedSolution);
+		$$("solutionName").setValue(selectedSolutionName);
 	},
 	
 	getMaintenanceIcon : function get_maintenance_icon() {
@@ -470,7 +479,8 @@ Admin.prototype = {
 	},
 	
 	displayOverviewTab : function display_overview_tab() {
-		var settingsHtml;
+		var settingsHtml,
+			projectListHtml;
 		
 		this.selectMode(this.MODE_OVERVIEW);
 		
@@ -481,10 +491,10 @@ Admin.prototype = {
 		$("#adminRestoreButton").hide();
 		$("#adminFlushDataButton").hide();
 		
-		$("#adminSaveButton").show(100);
-		$("#adminCancelButton").show(200);
-		$("#adminBrowseButton").show(300);
-		$("#adminUnlockButton").show(300);
+		// $("#adminSaveButton").show(100);
+		// $("#adminCancelButton").show(200);
+		$("#adminBrowseButton").show(100);
+		// $("#adminUnlockButton").show(300);
 		
 		$$("adminSaveButton").disable();
 		$$("adminCancelButton").disable();
@@ -513,15 +523,22 @@ Admin.prototype = {
 		if(this.currentSolution !== null) {
 			
 			if(this.currentSolution.settings === undefined || this.currentSolution.settings === null || $.isEmptyObject(this.currentSolution.settings)) {
-				this.currentSolution.settings = admin.getSettingsFileForSolution(this.currentSolution.name);
+				this.currentSolution.settings = webAdmin.getSettingsFileForSolution(this.currentSolution.hash);
 			}
 			if(!$.isEmptyObject(this.currentSolution.settings)) {
 				settingsHtml = this.getSolutionSettingsMarkup(this.currentSolution.settings);
 				$("#solutionSettingsOverview").html(settingsHtml);
 				$("#solutionSettingsOverview").show();
+				
+				projectListHtml = this.getProjectListHtml();
+				$("#projectListOverview").html(projectListHtml);
+				$("#projectListOverview").show();
+				
 			}
 		} else {
 			$("#solutionSettingsOverview").hide();
+			$("#projectListOverview").hide();
+			
 		}
 		
 		$("#loadingContainer").hide();
@@ -551,17 +568,68 @@ Admin.prototype = {
 		}
 		
 		return '<div class="settings-container">'+
-			'<div>Datastore Cache: <span class="settings-value"><span class="setting-value-label">'+settings.database.fixedSize+'</span><input class="settings-value-input" name="fixedSize" id="fixedSize" value="'+settings.database.fixedSize+'"/> MB</span></div>'+
-			'<div>Flush data buffers every: <span class="settings-value"><span class="setting-value-label">'+settings.database.flushDataInterval+'</span><input class="settings-value-input" name="flushDataInterval" id="flushDataInterval" value="'+settings.database.flushDataInterval+'"/> seconds</span></div>'+
+			'<div>Datastore cache size: <span class="settings-value"><span class="setting-value-label">'+settings.database.fixedSize+'</span><input class="settings-value-input" name="fixedSize" id="fixedSize" value="'+settings.database.fixedSize+'"/> MB</span></div>'+
+			'<div>Flush data buffers every: <span class="settings-value"><span class="setting-value-label">'+settings.database.flushDataCacheInterval+'</span><input class="settings-value-input" name="flushDataInterval" id="flushDataInterval" value="'+settings.database.flushDataInterval+'"/> seconds</span></div>'+
 			'<div>Authentification type: <span class="settings-value"><span class="setting-value-label">'+settings.solution.directory.authenticationType+'</span><input class="settings-value-input" name="flushDataInterval" id="flushDataInterval" value="'+settings.solution.directory.authenticationType+'"/></span></div>'+
 			'<div>Allocated for other application: <span class="settings-value"><span class="setting-value-label">'+settings.database.memoryForOtherApplications+'</span><input class="settings-value-input" name="flushDataInterval" id="flushDataInterval" value="'+settings.database.memoryForOtherApplications+'"/> MB</span></div>'+
-			'<div>Datastore Cache adoptive: <span class="settings-value"><span class="setting-value-label">'+(settings.database.adaptiveCache ? 'yes' : 'no')+'</span><input class="settings-value-input" name="fixedSize" id="fixedSize" type="checkbox" value="1" '+(settings.database.adaptiveCache ? 'checked="checked"' : '')+'/></span></div>'
+			'<div>Datastore Cache adoptive: <span class="settings-value"><span class="setting-value-label">'+(settings.database.adaptiveCache ? 'yes' : 'no')+'</span><input class="settings-value-input" name="fixedSize" id="fixedSize" type="checkbox" value="1" '+
+			(settings.database.adaptiveCache ? 'checked="checked"' : '')+'/></span></div>'+
+			'<input type="button" value="Settings" onclick="adminObject.openSettings(event, false);">'+
 		'</div>';
+	},
+	
+	getProjectListHtml : function get_project_list_html() {
+		var i,
+			html,
+			application,
+			applications,
+			applicationsLength;
+		
+		//TODO
+		html = "";
+		applications = this.currentSolution.applications;
+		applicationsLength = applications.length;
+		
+		for(i = 0; i < applicationsLength; i++) {
+			application = applications[i];
+			
+			if(application.admin === false) {
+				html += '<div class="">'+
+					'<div class="title">'+
+						'<h1>'+application.name+'</h1>'+
+						' - '+
+						'<span class="application-settings" data-application-name="'+application.name+'" onclick="adminObject.openSettings(event, true);">[settings]</span>'+
+					'</div>'+
+					// getServiceStateHtml(application)+
+				'</div>';
+			}
+		}
+		
+		return html;
+	},
+	
+	getServiceStateHtml : function get_service_state_html(application) {
+		
+	},
+	
+	displayDirectoryTab : function display_directory_tab() {
+		this.selectMode(this.MODE_DIRECTORY);
+		
+		$("#adminSaveButton").hide();
+		$("#adminCancelButton").hide();
+		$("#adminBrowseButton").hide();
+		$("#adminStartSolutionButton").hide();
+		$("#adminStopSolutionButton").hide();
+		$("#adminUnlockButton").hide();
+		$("#adminVerifyButton").hide();
+		$("#adminRepairButton").hide();
+		$("#adminCompactButton").hide();
 	},
 	
 	displayMaintenanceTab : function display_overview_tab() {
 		this.selectMode(this.MODE_MAINTENANCE);
 		
+		this.displayMaintenanceToolbar();
 		this.displayMaintenanceProjectList();
 		
 	},
@@ -610,7 +678,7 @@ Admin.prototype = {
 			application,
 			applicationList;
 
-		if(this.currentSolution !== null) {
+		if(this.currentSolution !== null && this.currentSolution.applications.length > 0) {
 			html = "";
 			applicationList = this.currentSolution.applications;
 			
@@ -628,9 +696,9 @@ Admin.prototype = {
 			}
 			
 			$("#adminMaintenanceProjectList").html(html);
-			if(applicationList.length > 0){
+			if(applicationList.length > 0) {
 				
-				this.displayMaintenanceProject(applicationList[0].name, false);
+				this.displayMaintenanceProject(applicationList[0].name, true);
 			}
 			
 			projects = $("#adminMaintenanceProjectList .project-list");
@@ -649,13 +717,23 @@ Admin.prototype = {
 					$(this).removeClass("project-hover");
 				});
 			}
+			
+			if(this.maintenanceApplication !== null) {
+				$('#projectList-'+this.maintenanceApplication.solution.replace(" ", "-")+'-'+this.maintenanceApplication.application.replace(" ", "-")+' span.project-busy').show();
+			}
+		} else {
+			
+			$("#adminMaintenanceProjectList").html("");
+			$("#maintenanceModelFileDetail").html("");
+			$("#maintenanceLogFileDetail").html("");
+			$("#maintenanceProgress").hide();
 		}
 	},
 	
 	selectCurrentSolution : function select_current_solution() {
 		
 		if(this.currentRunningSolution !== null) {
-			this.selectSolution(this.currentRunningSolution.name);
+			// this.selectSolution(this.currentRunningSolution.name);
 			$$("solutionCombobox").setValue(this.currentRunningSolution.name);
 		}
 	},
@@ -694,27 +772,39 @@ Admin.prototype = {
 			}
 			
 			if(this.currentSolution !== null && this.currentApplicationName !== null) {
-				admin.FilesAsync(
+				webAdmin.FilesAsync(
 				{
 					"onsuccess" : function (response) {
 						adminObject.displayLogFileDetail(response);
 					},
 					"onerror" : function (response) {
-						
+						$("#maintenanceLogFileDetail").html("");
 					}
 				}
 				, {
-					"name" : this.currentApplicationName,
-					"sol_name" : this.currentSolution.name
+					"applicationName" : this.currentApplicationName,
+					"hash" : this.currentSolution.hash
 				});
 			}
 			
 			this.console.showApplicationLog();
 		}
+		
+		if(
+			!this.maintenanceActionRunning ||
+			this.maintenanceApplication === null ||
+			this.maintenanceApplication.solution !== this.currentSolution.name ||
+			this.maintenanceApplication.application !== this.currentApplicationName
+		) {
+			$("#maintenanceProgress").hide();
+		} else {
+			$("#maintenanceProgress").show();
+		}
 	},
 	
 	displayModeleFileDetail : function display_modele_file_detail(currentApplication) {
-		var modeleFileHtml;
+		var modeleFileHtml,
+			waDataFilePath;
 		
 		modeleFileHtml = "";
 		
@@ -725,15 +815,21 @@ Admin.prototype = {
 		}
 		
 		if(currentApplication !== null) {
+			waDataFilePath = currentApplication.waData;
+			
+			if(currentApplication.http.enabled && waDataFilePath !== '') {
+				waDataFilePath += ' <a href="http://'+currentApplication.http.hostName+':'+currentApplication.http.port+'/walib/dataBrowser/index.html" target="_blank" title="Data Browser" alt="Data Browser">[^]</a>';
+			}
+			
 			modeleFileHtml = '<div class="modele-file-line">'+
 				'<span class="modele-file-label">Model: </span><div class="modele-file-path">'+currentApplication.waModel+'</div>'+
 			'</div>'+
 			'<div class="modele-file-line">'+
-				'<span class="modele-file-label">Data: </span><div class="modele-file-path">'+currentApplication.waData+'</div>'+
+				'<span class="modele-file-label">Data: </span><div class="modele-file-path">'+waDataFilePath+'</div>'+
 			'</div>';
 		}
 		
-		$("#maintenanceModeleFileDetail").html(modeleFileHtml);
+		$("#maintenanceModelFileDetail").html(modeleFileHtml);
 	},
 	
 	displayLogFileDetail : function display_log_file_detail(logs) {
@@ -790,7 +886,7 @@ Admin.prototype = {
 					selectedOption = '';
 				}
 				
-				logFileHtml += '</select></span>';
+				logFileHtml += '</select><a href="#" class="log-downloader" title="Download this file" onclick="return adminObject.downloadLogFile(\'logVerifyFile\');">&nbsp;</a></span>';
 			} else {
 				
 				logFileHtml += '<span class="log-file-label">The Data has never been verified.</span>';
@@ -825,7 +921,7 @@ Admin.prototype = {
 					selectedOption = '';
 				}
 				
-				logFileHtml += '</select></span>';
+				logFileHtml += '</select><a href="#" class="log-downloader" title="Download this file" onclick="return adminObject.downloadLogFile(\'logRepairFile\');">&nbsp;</a></span>';
 				
 			} else {
 				
@@ -860,7 +956,7 @@ Admin.prototype = {
 					selectedOption = '';
 				}
 				
-				logFileHtml += '</select></span>';
+				logFileHtml += '</select><a href="#" class="log-downloader" title="Download this file" onclick="return adminObject.downloadLogFile(\'logCompactFile\');">&nbsp;</a></span>';
 				
 			} else {
 				logFileHtml += '<span class="log-file-label">The Data has never been compacted.</span>';
@@ -899,33 +995,58 @@ Admin.prototype = {
 		return currentApplication;
 	},
 	
-	startWatchingServerLog : function start_waching_server_log(option) {
+	startWatchingMaintenanceLog : function start_waching_maintenance_log(option) {
 		var timer;
 		
 		timer = window.setInterval(function() {
-			adminObject.console.getServerLog(true, option);
+			adminObject.console.getMaintenanceLog(true, option);
 		}, 500);
 		
 		return timer;
 	},
 	
-	stopWatchingServerLog : function stop_waching_server_log(timer) {
+	stopWatchingMaintenanceLog : function stop_waching_maintenance_log(timer) {
 		window.clearInterval(timer);
 	},
 	
+	formatErrorsToDisplay : function format_errors_to_display(errors) {
+		var i,
+			error,
+			formatedErrors;
+		
+		formatedErrors = [];
+		for(i = 0; i < errors.length; i++) {
+			
+			error = errors[i];
+			formatedErrors[i] = '<span>'+
+				'<span style="color : '+(error.ErrorLevel === 3 ? "orange" : "red")+'">'+error.ErrorText+'</span><br/>'+
+				'<span>ErrorLevel: '+error.ErrorLevelLabel+'</span><br/>'+
+				'<span>ErrorNumber: '+error.ErrorNumber+'</span><br/>'+
+				'<span>ProblemTypeText: '+error.ProblemTypeText+'</span><br/>'+
+				'<span>ProblemType: '+error.ProblemType+'</span><br/>'+
+			'</span>';
+		}
+		
+		return formatedErrors;
+	},
+	
 	verifyApplication : function verify_application() {
-		var app,
-			option,
-			logTimer;
+		var option,
+			logTimer,
+			verifyOption;
 		
 		if(!this.maintenanceActionRunning && this.currentSolution !== null) {
 			
-			app = {
-				name : this.currentApplicationName,
-				sol_name : this.currentSolution.name
+			verifyOption = {
+				applicationName : this.currentApplicationName,
+				hash : this.currentSolution.hash
 			};
 			
 			this.maintenanceActionRunning = true;
+			this.maintenanceApplication = {
+				"solution": this.currentSolution.name,
+				"application": this.currentApplicationName
+			}
 			this.displayMaintenanceToolbar();
 			
 			$('#projectList-'+this.currentSolution.name.replace(" ", "-")+'-'+this.currentApplicationName.replace(" ", "-")+' span.project-busy').show();
@@ -935,55 +1056,72 @@ Admin.prototype = {
 				applicationName: this.currentApplicationName
 			};
 			
-			adminObject.console.head('Verifing '+app.name, true, option);
-			logTimer = this.startWatchingServerLog(option);
+			adminObject.console.head('Verifing ' + verifyOption.applicationName + " - " + new Date(), true, option);
+			logTimer = this.startWatchingMaintenanceLog(option);
 			
-			admin.VerifyAsync({
+			webAdmin.verifyApplicationAsync({
 				"onsuccess" : function (response) {
+					var errors;
+					
 					adminObject.maintenanceActionRunning = false;
+					adminObject.maintenanceApplication = null;
 					$('.project-list span.project-busy').hide();
 					
-					adminObject.stopWatchingServerLog(logTimer);
-					adminObject.console.getServerLog(true, option);
+					adminObject.stopWatchingMaintenanceLog(logTimer);
+					adminObject.console.getMaintenanceLog(true, option);
 					
 					if(response.errors.length > 0) {
-						adminObject.console.error(response.errors, true, option);
+						errors = adminObject.formatErrorsToDisplay(response.errors);
+						adminObject.console.error("<b>Errors</b>", true, option);
+						adminObject.console.log(errors, true, option);
 					}
+					
+					$$("adminProgressBar").stopListening();
+					$("#maintenanceProgress").hide();
+					adminObject.console.head('End Verifing ' + verifyOption.applicationName + " - " + new Date(), true, option);
 					
 					adminObject.displayMaintenanceProject(adminObject.currentApplicationName, true);
 				},
 				"onerror" : function(errorResponse) {
 					
 					adminObject.maintenanceActionRunning = false;
+					adminObject.maintenanceApplication = null;
 					adminObject.displayMaintenanceToolbar();
 					$('.project-list span.project-busy').hide();
 					
-					adminObject.stopWatchingServerLog(logTimer);
-					adminObject.console.getServerLog(true, option);
+					adminObject.stopWatchingMaintenanceLog(logTimer);
+					adminObject.console.getMaintenanceLog(true, option);
 					adminObject.console.error(errorResponse, true, option);
+					
+					$$("adminProgressBar").stopListening();
+					$("#maintenanceProgress").hide();
+					adminObject.console.head('End Verifing ' + verifyOption.applicationName + " - " + new Date(), true, option);
 				}
-			}, app);
+			}, verifyOption);
+			
+			$("#maintenanceProgress").show();
+			$$("adminProgressBar").startListening();
 		}
 	},
 	
 	repairApplication : function verify_application() {
-		var app,
-			option,
+		var option,
 			logTimer,
-			canRepair;
+			canRepair,
+			repairOption;
 			
 		if(!this.maintenanceActionRunning && this.currentSolution !== null) {
 			
 			canRepair = (this.currentRunningSolution === null || this.currentSolution.name !== this.currentRunningSolution.name);
-			if(canRepair === false && confirm("This action required to stop current running solution. Do you want to continue ?")) {
+			if(canRepair === false && confirm("To perform this action, the solution that is currently running on the server must be stopped. Do you want to proceed?")) {
 				
 				$("#loadingContainer").show();
-				if(admin.closeSolution()) {
+				if(webAdmin.closeSolution()) {
 					this.currentRunningSolution = null;
+					this.console.maintenanceLogId = 0;
 					this.refreshAdminHeader(this.currentSolution.name);
 					
-					adminObject.reloadingSetTimeOut.push(setTimeout(adminObject.waitServerAndCallback, 500, function() {
-						autoLog();
+					adminObject.reloadingSetTimeOut.push(setTimeout(adminObject.waitServerAndCallback, 1000, function() {
 						$("#loadingContainer").hide();
 						adminObject.repairApplication();
 					}));
@@ -993,12 +1131,16 @@ Admin.prototype = {
 			
 			if(this.currentRunningSolution === null || canRepair) {
 				
-				app = {
-					name : this.currentApplicationName,
-					sol_name : this.currentSolution.name
+				repairOption = {
+					applicationName : this.currentApplicationName,
+					hash : this.currentSolution.hash
 				};
 				
 				this.maintenanceActionRunning = true;
+				this.maintenanceApplication = {
+					"solution": this.currentSolution.name,
+					"application": this.currentApplicationName
+				}
 				this.displayMaintenanceToolbar();
 				
 				$('#projectList-'+this.currentSolution.name.replace(" ", "-")+'-'+this.currentApplicationName.replace(" ", "-")+' span.project-busy').show();
@@ -1008,37 +1150,51 @@ Admin.prototype = {
 					applicationName: this.currentApplicationName
 				};
 				
-				adminObject.console.head('Repairing '+app.name, true, option);
-				logTimer = this.startWatchingServerLog(option);
+				adminObject.console.head('Repairing '+repairOption.applicationName + " - " + new Date(), true, option);
+				logTimer = this.startWatchingMaintenanceLog(option);
 				
-				admin.RepairAsync({
+				webAdmin.repairApplicationAsync({
 					"onsuccess" : function (response) {
 						
 						adminObject.maintenanceActionRunning = false;
-						
+						adminObject.maintenanceApplication = null;
 						$('.project-list span.project-busy').hide();
 						
-						adminObject.stopWatchingServerLog(logTimer);
-						adminObject.console.getServerLog(true, option);
+						adminObject.stopWatchingMaintenanceLog(logTimer);
+						adminObject.console.getMaintenanceLog(true, option);
 						
 						if(response.errors.length > 0) {
-							adminObject.console.error(response.errors, true, option);
+							errors = adminObject.formatErrorsToDisplay(response.errors);
+							adminObject.console.error("<b>Errors</b>", true, option);
+							adminObject.console.log(errors, true, option);
 						}
+						
+						$$("adminProgressBar").stopListening();
+						$("#maintenanceProgress").hide();
+						adminObject.console.head('End Repairing '+repairOption.applicationName + " - " + new Date(), true, option);
 						
 						adminObject.displayMaintenanceProject(adminObject.currentApplicationName, true);
 					},
 					"onerror" : function (errorResponse) {
 						
 						adminObject.maintenanceActionRunning = false;
+						adminObject.maintenanceApplication = null;
 						adminObject.displayMaintenanceToolbar();
 						
 						$('.project-list span.project-busy').hide();
 						
-						adminObject.stopWatchingServerLog(logTimer);
-						adminObject.console.getServerLog(true, option);
+						adminObject.stopWatchingMaintenanceLog(logTimer);
+						adminObject.console.getMaintenanceLog(true, option);
 						adminObject.console.error(errorResponse, true, option);
+						
+						$$("adminProgressBar").stopListening();
+						$("#maintenanceProgress").hide();
+						adminObject.console.head('End Repairing '+repairOption.applicationName + " - " + new Date(), true, option);
 					}
-				}, app);
+				}, repairOption);
+				
+				$("#maintenanceProgress").show();
+				$$("adminProgressBar").startListening();
 			} else {
 				adminObject.displayMaintenanceToolbar();
 			}
@@ -1046,23 +1202,23 @@ Admin.prototype = {
 	},
 	
 	compactApplication : function compact_application() {
-		var app,
-			option,
+		var option,
 			logTimer,
-			canCompact;
+			canCompact,
+			compactOption;
 		
 		if(!this.maintenanceActionRunning && this.currentSolution !== null) {
 			
 			canCompact = (this.currentRunningSolution === null || this.currentSolution.name !== this.currentRunningSolution.name);
-			if(canCompact === false && confirm("This action required to stop current running solution. Do you want to continue ?")) {
+			if(canCompact === false && confirm("To perform this action, the solution that is currently running on the server must be stopped. Do you want to proceed?")) {
 				
 				$("#loadingContainer").show();
-				if(admin.closeSolution()) {
+				if(webAdmin.closeSolution()) {
 					this.currentRunningSolution = null;
+					this.console.maintenanceLogId = 0;
 					this.refreshAdminHeader(this.currentSolution.name);
 					
-					adminObject.reloadingSetTimeOut.push(setTimeout(adminObject.waitServerAndCallback, 500, function() {
-						autoLog();
+					adminObject.reloadingSetTimeOut.push(setTimeout(adminObject.waitServerAndCallback, 1000, function() {
 						$("#loadingContainer").hide();
 						adminObject.compactApplication();
 					}));
@@ -1071,12 +1227,16 @@ Admin.prototype = {
 			}
 			
 			if(this.currentRunningSolution === null || canCompact) {
-				app = {
-					name : this.currentApplicationName,
-					sol_name : this.currentSolution.name
+				compactOption = {
+					applicationName : this.currentApplicationName,
+					hash : this.currentSolution.hash
 				};
 				
 				this.maintenanceActionRunning = true;
+				this.maintenanceApplication = {
+					"solution": this.currentSolution.name,
+					"application": this.currentApplicationName
+				}
 				this.displayMaintenanceToolbar();
 				
 				$('#projectList-'+this.currentSolution.name.replace(" ", "-")+'-'+this.currentApplicationName.replace(" ", "-")+' span.project-busy').show();
@@ -1086,37 +1246,51 @@ Admin.prototype = {
 					applicationName: this.currentApplicationName
 				};
 				
-				adminObject.console.head('Compacting '+app.name, true, option);
-				logTimer = this.startWatchingServerLog(option);
+				adminObject.console.head('Compacting '+compactOption.applicationName + " - " + new Date(), true, option);
+				logTimer = this.startWatchingMaintenanceLog(option);
 				
-				admin.CompactAsync({
+				webAdmin.compactApplicationAsync({
 					"onsuccess" : function (response) {
 						
 						adminObject.maintenanceActionRunning = false;
-						
+						adminObject.maintenanceApplication = null;
 						$('.project-list span.project-busy').hide();
 						
-						adminObject.stopWatchingServerLog(logTimer);
-						adminObject.console.getServerLog(true, option);
+						adminObject.stopWatchingMaintenanceLog(logTimer);
+						adminObject.console.getMaintenanceLog(true, option);
 						
 						if(response.errors.length > 0) {
-							adminObject.console.error(response.errors, true, option);
+							errors = adminObject.formatErrorsToDisplay(response.errors);
+							adminObject.console.error("<b>Errors</b>", true, option);
+							adminObject.console.log(errors, true, option);
 						}
+						
+						$$("adminProgressBar").stopListening();
+						$("#maintenanceProgress").hide();
+						adminObject.console.head('End Compacting '+compactOption.applicationName + " - " + new Date(), true, option);
 						
 						adminObject.displayMaintenanceProject(adminObject.currentApplicationName, true);
 					},
 					"onerror" : function (errorResponse) {
 						
 						adminObject.maintenanceActionRunning = false;
-						
+						adminObject.maintenanceApplication = null;
 						adminObject.displayMaintenanceToolbar();
 						$('.project-list span.project-busy').hide();
 						
-						adminObject.stopWatchingServerLog(logTimer);
-						adminObject.console.getServerLog(true, option);
+						adminObject.stopWatchingMaintenanceLog(logTimer);
+						adminObject.console.getMaintenanceLog(true, option);
 						adminObject.console.error(errorResponse, true, option);
+						
+						$$("adminProgressBar").stopListening();
+						$("#maintenanceProgress").hide();
+						adminObject.console.head('End Compacting '+compactOption.applicationName + " - " + new Date(), true, option);
 					}
-				}, app);
+				}, compactOption);
+				
+				$("#maintenanceProgress").show();
+				$$("adminProgressBar").startListening();
+				
 			} else {
 				adminObject.displayMaintenanceToolbar();
 			}
@@ -1127,11 +1301,11 @@ Admin.prototype = {
 		
 		if(this.currentSolution !== null) {
 			$("#loadingContainer").show();
-			admin.openRecentSolutionAsync({
+			webAdmin.openRecentSolutionAsync({
 				"onsuccess" : function (response) {
 					
 					if(response === true) {
-						adminObject.reloadingSetTimeOut.push(setTimeout(adminObject.waitServerAndCallback, 500, null));
+						adminObject.reloadingSetTimeOut.push(setTimeout(adminObject.waitServerAndCallback, 1000, null));
 					} else {
 						
 						alert("Cannot open this solution");
@@ -1141,7 +1315,7 @@ Admin.prototype = {
 						$("#loadingContainer").hide();
 					}
 				}
-			}, this.currentSolution.name);
+			}, this.currentSolution.hash);
 		} else {
 			
 			alert("Please select a solution");
@@ -1151,52 +1325,40 @@ Admin.prototype = {
 	waitServerAndCallback : function wait_server_and_reload(callback) {
 		
 		try {
-			$.ajax({
-				url : "/",
-				statusCode : {
-					200 : function() {
-						var i;
-						
-						try {
+			webAdmin.getCurrentRunningHashAsync({
+				"onsuccess" : function (response) {
+					if(response !== null && adminObject.currentRunningHash !== response) {
+						if(!adminObject.reloadingPage) {
+							adminObject.reloadingPage = true;
 							
-							if(WAF.directory.currentUser() === null) {
-								if(!adminObject.reloadingPage) {
-									adminObject.reloadingPage = true;
-									
-									for(i = 0; i < adminObject.reloadingSetTimeOut.length; i++) {
-										
-										clearTimeout(adminObject.reloadingSetTimeOut[i]);
-									}
-									
-									adminObject.reloadingSetTimeOut = [];
-									
-									if(callback === null) {
-										window.location.reload();
-									} else {
-										callback();
-										adminObject.reloadingPage = false;
-									}
-								}
-							} else {
-								if(adminObject.reloadingSetTimeOut.length > 0) {
-									adminObject.reloadingSetTimeOut.push(setTimeout(adminObject.waitServerAndCallback, 1000, callback));
-								}
+							for(i = 0; i < adminObject.reloadingSetTimeOut.length; i++) {
+								
+								clearTimeout(adminObject.reloadingSetTimeOut[i]);
 							}
-						} catch(e) {
-							adminObject.reloadingSetTimeOut.push(setTimeout(adminObject.waitServerAndCallback, 1000, callback));
+							
+							adminObject.reloadingSetTimeOut = [];
+							
+							if(callback === null) {
+								window.location.reload();
+							} else {
+								callback();
+								adminObject.currentRunningHash = response;
+								adminObject.reloadingPage = false;
+							}
 						}
-					},
-					404 : function() {
-						adminObject.reloadingSetTimeOut.push(setTimeout(adminObject.waitServerAndCallback, 1000, callback));
-					},
-					503 : function() {
+					} else {
 						adminObject.reloadingSetTimeOut.push(setTimeout(adminObject.waitServerAndCallback, 1000, callback));
 					}
 				},
-				error : function (jqXHR, textStatus, errorThrown) {
-					adminObject.reloadingSetTimeOut.push(setTimeout(adminObject.waitServerAndCallback, 1000, callback));
+				"onerror" : function (error) {
+					if(error.code === -32603 && error.message.indexOf('failed permission') != -1) {
+						window.location.reload();
+					} else {
+						adminObject.reloadingSetTimeOut.push(setTimeout(adminObject.waitServerAndCallback, 1000, callback));
+					}
 				}
 			});
+			
 		} catch(e) {
 			adminObject.reloadingSetTimeOut.push(setTimeout(adminObject.waitServerAndCallback, 1000, callback));
 		}
@@ -1207,10 +1369,10 @@ Admin.prototype = {
 		if(this.currentSolution !== null) {
 			
 			$("#loadingContainer").show();
-			admin.closeSolutionAsync({
+			webAdmin.closeSolutionAsync({
 				"onsuccess" : function (response) {
 					if(response === true) {
-						adminObject.reloadingSetTimeOut.push(setTimeout(adminObject.waitServerAndCallback, 500, null));
+						adminObject.reloadingSetTimeOut.push(setTimeout(adminObject.waitServerAndCallback, 1000, null));
 					} else {
 						alert("Connot close current solution. Try again later.");
 						$$("adminStopSolutionButton").enable();
@@ -1252,11 +1414,11 @@ Admin.prototype = {
 	openSolutionByPath : function open_solution_by_path(path) {
 		
 		$("#loadingContainer").show();
-		admin.openSolutionAsync({
+		webAdmin.openSolutionByPathAsync({
 			"onsuccess" : function (response) {
 				
 				if(response === true) {
-					adminObject.reloadingSetTimeOut.push(setTimeout(adminObject.waitServerAndCallback, 500, null));
+					adminObject.reloadingSetTimeOut.push(setTimeout(adminObject.waitServerAndCallback, 1000, null));
 				} else {
 					
 					alert("Cannot open this solution");
@@ -1269,6 +1431,13 @@ Admin.prototype = {
 				alert("Cannot open this solution");
 			}
 		}, path);
+	},
+	
+	downloadLogFile : function downloadLogFile(logSelectId) {
+		var downloadUrl;
+		
+		downloadUrl = "/ReadFile?name="+$("#"+logSelectId).val()+"&download=true";
+		window.open(downloadUrl, "download log");
 	},
 	
 	shortcutHandler : function admin_shortcut_handler(event) {
@@ -1321,6 +1490,32 @@ Admin.prototype = {
 		
 		return eventReturn;
 		
+	},
+	
+	openSettings : function (event, application) {
+		
+		$("#adminSettingsContainer").show();
+		//TODO : change this url
+		$("#adminSettingsIframe").attr("src", "/walib/settingsEditor/index.html");
+		
+		if(application) {
+			this.applicationSettings = $(event.currentTarget).data("application-name");
+		} else {
+			this.applicationSettings = null;
+		}
+		
+	},
+	
+	closeSettings : function() {
+		
+		$("#adminSettingsContainer").hide();
+		this.applicationSettings = null;
+		$("#adminSettingsIframe").attr("src", "");
+		$("#settingsSetDirty").hide();
+	},
+	
+	saveSettings : function() {
+		studio.editor.setSettingJsonData();
 	}
 
 };

@@ -26,7 +26,7 @@
 #include "VJSWebAppServiceCore.h"
 #include "VRIAServerJSCore.h"
 #include "VJSSolution.h"
-
+#include <../../JavaScriptCore/4D/4DDebuggerServer.h>
 
 
 USING_TOOLBOX_NAMESPACE
@@ -81,6 +81,8 @@ void VRIAServerJSCore::GetDefinition( ClassDefinition& outDefinition)
 	{
 		{ "openSolution", js_callStaticFunction<_openSolution>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
 		{ "recentlyOpenedSolution", js_callStaticFunction<_getRecentSolution>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
+		{ "setDebuggerServer", js_callStaticFunction<_setDebuggerServer>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
+		{ "getDebuggerServer", js_callStaticFunction<_getDebuggerServer>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
 		{ 0, 0, 0}
 	};
 	
@@ -90,6 +92,60 @@ void VRIAServerJSCore::GetDefinition( ClassDefinition& outDefinition)
 	outDefinition.staticFunctions = functions;
 }
 
+
+void VRIAServerJSCore::_setDebuggerServer( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication)
+{
+#if 1//defined(WKA_USE_UNIFIED_DBG)
+	if (!inApplication)
+	{
+		ioParms.ReturnUndefinedValue();
+		return;
+	}
+
+	VRIAContext* riaContext = VRIAJSRuntimeContext::GetApplicationContextFromJSContext(ioParms.GetContext(), inApplication);
+
+	sLONG	l_dbg_type;
+	DebugMsg("\n\n !!!! \n VRIAServerJSCore::_setDebuggerServer CALLED!!!!!\n\n\n");
+	if (ioParms.GetLongParam( 1, &l_dbg_type ))
+	{
+		WAKDebuggerType_t	l_type = REGULAR_DBG_TYPE;
+		if (l_dbg_type)
+		{
+			l_type = WEB_INSPECTOR_TYPE;
+		}
+		if (!inApplication->SetDebuggerServer(riaContext,l_type))
+		{
+			ioParms.ReturnNullValue();
+		}
+		else
+		{
+			ioParms.ReturnUndefinedValue();
+		}
+	}
+	else
+	{
+		ioParms.ReturnUndefinedValue();
+	}
+
+#else
+	{
+		ioParms.ReturnUndefinedValue();
+	}
+#endif
+}
+
+void VRIAServerJSCore::_getDebuggerServer( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication)
+{
+	if (!inApplication)
+	{
+		ioParms.ReturnUndefinedValue();
+		return;
+	}
+
+	VRIAContext* riaContext = VRIAJSRuntimeContext::GetApplicationContextFromJSContext(ioParms.GetContext(), inApplication);
+
+	ioParms.ReturnNumber( inApplication->GetDebuggerServer(riaContext) );
+}
 
 void VRIAServerJSCore::_openSolution( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication)
 {
@@ -124,6 +180,8 @@ void VRIAServerJSCore::_openSolution( XBOX::VJSParms_callStaticFunction& ioParms
 
 		if (startupParams != NULL)
 		{
+			startupParams->SetOpenProjectSymbolsTable( false);	// sc 25/05/2012, on Server, do not use the symbols table anymore
+			
 			VRIAServerSolutionOpeningParameters openingParams( startupParams);
 
 			if (openingMode == 1)
@@ -179,6 +237,8 @@ void VRIAServerJSCore::_getRecentSolution( XBOX::VJSParms_callStaticFunction& io
 		VSolutionStartupParameters *solutionParams = new VSolutionStartupParameters();
 		if (solutionParams != NULL)
 		{
+			solutionParams->SetOpenProjectSymbolsTable( false);	// sc 25/05/2012, on Server, do not use the symbols table anymore
+
 			VFile *linkFile = new VFile( iter->second.second);
 			if (linkFile != NULL)
 			{

@@ -68,7 +68,7 @@ public:
 			VSolution*						CreateNewSolutionFromTemplate( const XBOX::VFilePath& inSolutionFilePath, const XBOX::VFolder& inSolutionTemplateFolder, ISolutionMessageManager* inSolutionMessageManager = NULL, ISolutionBreakPointsManager* inSolutionBreakPointsManager = NULL, ISolutionUser* inSolutionUser = NULL);
 			/** @brief	The startup parameters, message managers, breakpoints manager and solution user are retained */
 			VSolution*						OpenSolution( VSolutionStartupParameters* inSolutionStartupParameters, ISolutionMessageManager* inSolutionMessageManager = NULL, ISolutionBreakPointsManager* inSolutionBreakPointsManager = NULL, ISolutionUser* inSolutionUser = NULL);
-			VSolution*						OpenSolution( const XBOX::VFilePath& inSolutionFilePath, ISolutionMessageManager* inSolutionMessageManager = NULL, ISolutionBreakPointsManager* inSolutionBreakPointsManager = NULL, ISolutionUser* inSolutionUser = NULL);
+			VSolution*						OpenSolution( const XBOX::VFilePath& inSolutionFilePath, ISolutionMessageManager* inSolutionMessageManager = NULL, ISolutionBreakPointsManager* inSolutionBreakPointsManager = NULL, ISolutionUser* inSolutionUser = NULL, bool inOpenProjectSymbolsTable = true);
 
 			bool							CloseSolution( VSolution *inSolution);
 
@@ -186,6 +186,10 @@ public:
 			bool							GetSolutionFolderPath( XBOX::VFilePath& outPath) const;
 			/** @brief	Returns in outPath the path of the solution file. Returns false if the path of the solution file is unknown. */
 			bool							GetSolutionFilePath( XBOX::VFilePath& outPath) const;
+			/** @brief	Returns in outPath the path of the user cache folder for this solution */			
+			bool							GetUserCacheFolderPath( XBOX::VFilePath& outPath) const;
+
+			bool							ResolvePosixPathMacros( XBOX::VString& ioPosixPath) const;
 
 			XBOX::VError					Rename( const XBOX::VString& inNewName);
 
@@ -199,16 +203,20 @@ public:
 	void			GetPreferencesUserFilePath( XBOX::VFilePath& outPath );
 	void			LoadSolutionUserFile();
 	void			SaveSolutionUserFile();
-	void			SaveProjectItemPosition( const XBOX::VFilePath& inFilePath, bool inMaximized, sLONG inMaxX, sLONG inMaxY, sLONG inX, sLONG inY, sLONG inWidth, sLONG inHeight );
-	bool			GetProjectItemPosition( const XBOX::VFilePath& inFilePath, bool& outMaximized, sLONG& outMaxX, sLONG& outMaxY, sLONG& outX, sLONG& outY, sLONG& outWidth, sLONG& outHeight );
+	void			SaveProjectItemPosition( const XBOX::VFilePath& inFilePath, bool inMaximized, sLONG inX, sLONG inY, sLONG inWidth, sLONG inHeight );
+	bool			GetProjectItemPosition( const XBOX::VFilePath& inFilePath, bool& outMaximized, sLONG& outX, sLONG& outY, sLONG& outWidth, sLONG& outHeight );
 
 	void			SetSolutionStartupParameters(VSolutionStartupParameters* inSolutionStartupParameters);
+	void			ForceSavingSolutionFile(VProjectItem*  inProjectItem, const VProjectItemTag& );
 
 	// ---------------------------------------
 	// fonctions utilitaires grand public
 	// ---------------------------------------
 	// obtenir un VProject à partir du VFilePath d'un fichier project
 	VProject*		GetProjectFromFilePathOfProjectFile(const XBOX::VFilePath& inFilePath) const;
+			
+			/** @brief	Returns the project whose folder is the passed file path ancestor. */
+			VProject*						GetParentProject( const XBOX::VFilePath& inPath) const;
 
 	// obtenir le vecteur des projets de la solution
 	void			GetVectorOfProjects(VectorOfProjects& outProjects) const ;
@@ -230,7 +238,8 @@ public:
 	VProjectItem*	GetSolutionItem() const { return fSolutionItem; }
 
 	// ATTENTION : ICI ON SAIT que la reponse est unique et donc ne traite pas les references externes
-	VProjectItem*	GetProjectItemFromFullPath(const XBOX::VString& inFullPath);
+	VProjectItem*	GetProjectItemFromFullPath( const XBOX::VString& inFullPath, XBOX::FilePathStyle inFullPathStyle = XBOX::FPS_DEFAULT) const;
+	VProjectItem*	GetProjectItemFromFilePath( const XBOX::VFilePath& inPath) const;
 
 	// (initialement creees pour FindInFiles Zhongxu)
 	void			GetVectorOfProjectNames(std::vector<XBOX::VString>& outProjectNames) const;
@@ -251,16 +260,19 @@ public:
 	// ---------------------------------------
 	// operations generales sur les elements d'une solution
 	// ---------------------------------------
-	XBOX::VError	ImportFromExistingFile(VProjectItem* inNewProjectItem, const XBOX::VURL& inExistingURL);
-	VProjectItem*	ImportFromExistingFolder(XBOX::VError& outError, VProjectItem* inProjectItem, const XBOX::VFilePath& inNewParentFolderPath, const XBOX::VFilePath& inSrcFolderPath, bool inIncludeSrcFolder = true, XBOX::VProgressIndicator* inProgressIndicator = NULL);
+	VProjectItem*	ImportExistingFile( XBOX::VError& outError, VProjectItem *inParentItem, const XBOX::VFilePath& inSourceFilePath);
+	VProjectItem*	ImportExistingFolder( XBOX::VError& outError, VProjectItem *inParentItem, const XBOX::VFilePath& inSourceFolderPath);
 	XBOX::VError	RemoveItem( VProjectItem *inProjectItem, bool inDeletePhysicalItems);
 	XBOX::VError	RemoveItems( const VectorOfProjectItems& inProjectItems, bool inDeletePhysicalItems);
 	XBOX::VError	RenameItem( VProjectItem *inProjectItem, const XBOX::VString& inNewName);
 
-	VProject*		AddExistingProject(const XBOX::VURL& inProjectFileURL, bool inMustBeReferenced = true);
+	VProject*		AddExistingProject(const XBOX::VURL& inProjectFileURL, bool inMustBeReferenced);
 	XBOX::VError	RemoveProject( VProject *inProject, bool inDeleteProjectFolder);
 	VProjectItem*	ReferenceExternalFolder( XBOX::VError& outError, VProjectItem *inParentItem, const XBOX::VURL& inURL);
 	VProjectItem*	ReferenceExternalFile( XBOX::VError& outError, VProjectItem *inParentItem, const XBOX::VURL& inURL);
+
+	VProjectItem*	CreateFileItemFromPath( XBOX::VError& outError, const XBOX::VFilePath& inPath, bool inRecursive);
+	VProjectItem*	CreateFolderItemFromPath( XBOX::VError& outError, const XBOX::VFilePath& inPath, bool inRecursive, bool inSynchronizeWithFileSystem);
 
 	// ---------------------------------------
 	// Source Control
@@ -379,6 +391,12 @@ private:
 			/**	@brief	Remove the item and its children from the solution internal containers. */
 			void			_DoItemRemoved( VProjectItem *inItem, bool inTouchSolutionFile);
 
+			bool			_RegisterProjectItem( VProjectItem *inItem);
+			bool			_UnregisterProjectItem( VProjectItem *inItem);
+			VProjectItem*	_GetProjectItemFromURL( const XBOX::VURL& inURL) const;
+
+			XBOX::VError	_SynchronizeWithFileSystem( VProjectItem *inItem);
+
 			void			_TouchSolutionFile();
 			sLONG			_GetSolutionFileDirtyStamp() const					{ return fSolutionFileDirtyStamp; }
 
@@ -398,11 +416,13 @@ private:
 	bool					_IsItemReferenced( VProjectItem *inItem) const;
 	bool					_IsVectorContainsReferencedItems( const VectorOfProjectItems& inProjectItems, bool inRecursive) const;
 
+	VProjectItem*			_CreateFileItemFromPath( XBOX::VError& outError, const XBOX::VFilePath& inPath, bool inRecursive, bool inTouchSolutionFile);
+	VProjectItem*			_CreateFolderItemFromPath( XBOX::VError& outError, const XBOX::VFilePath& inPath, bool inRecursive, bool inTouchSolutionFile, bool inSynchronizeWithFileSystem);
+
 			// Utilities
 	static	XBOX::VError			_CountFilesAndFolders( const XBOX::VFolder& inFolder, sLONG& outFilesCount, sLONG &outFoldersCount, bool inRecursive);
 	static	XBOX::VError			_CopyFolder( const XBOX::VFolder& inSourceFolder, XBOX::VFolder& inDestinationFolder, const XBOX::FileCopyOptions inOptions = XBOX::FCP_Default, XBOX::VProgressIndicator *inProgressIndicator = NULL, bool *outUserAbort = NULL);
 	static	XBOX::VError			_ResolveMacro( const XBOX::VFolder& inFolder, const XBOX::VString& inMacroName, const XBOX::VString& inNewName);
-
 
 	XBOX::VUUID						fUUID;
 	VProjectItem*					fSolutionItem;
@@ -412,6 +432,8 @@ private:
 	ISolutionDelegate*				fDelegate;
 
 	VectorOfProjectItems			fReferencedItems;
+
+	MapOfProjectItemByURL			fProjectItemsMapByURL;
 
 	// on stocke les VProjects d'une solution pour acces facile
 	VectorOfProjects				fProjects;

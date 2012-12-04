@@ -1,6 +1,6 @@
 package com.wakanda.qa.http.test.statuscodes;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
@@ -37,7 +37,7 @@ public class StatusCode4xxTest extends AbstractHttpTestCase {
 		int expected = HttpStatus.SC_BAD_REQUEST;
 		String badRequest = "GET " + CRLF
 							+ CRLF;
-		HttpResponse response = executeRequestString(badRequest);
+		HttpResponse response = executeRawRequest(badRequest);
 		assertEquals("Wrong status code", expected, response
 				.getStatusLine().getStatusCode());
 
@@ -82,7 +82,7 @@ public class StatusCode4xxTest extends AbstractHttpTestCase {
 	@Test
 	public void testStatusCode405NotAllowed() throws Exception {
 		int expected = HttpStatus.SC_METHOD_NOT_ALLOWED;
-		HttpPut request = new HttpPut(getDefaultUrl());
+		HttpPut request = new HttpPut(getSettings().getDefaultUrl());
 		HttpResponse response = executeRequest(request);
 		assertEquals("Wrong status code", expected, response.getStatusLine()
 				.getStatusCode());

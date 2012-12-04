@@ -22,20 +22,13 @@ var testCase = {
 		
         _should: {
             ignore: {
-                testSourceGetElementLogicSync: true // Not sure if it could be used synchronously
+
             }
         },
         
         setUp : function () {
-            /*if (os.isWindows) {
-                this._should.ignore.testCurrentElementLogicUsingGet = true; // Need to know which assert fails and why it only fails on Windows (Chrome ?)
-                this._should.ignore.testCurrentElementLogicUsingPropertyAccess = true; // Need to know which assert fails and why it only fails on Windows (Chrome ?)
-                this._should.ignore.testSelectLogic = true; // Need to know why it only fails on Windows (Chrome ?)
-                this._should.ignore.testSelectNextLogic = true; // Need to know which assert fails and why it only fails on Windows (Chrome ?)
-                this._should.ignore.testSelectPreviousLogic = true; // Need to know which assert fails and why it only fails on Windows (Chrome ?)
-            } */
+           
         },
-
         
 		/**
  		 * SDBD-2.1 getCurrentElement method exists
@@ -117,15 +110,6 @@ var testCase = {
 		testSourceGetElementExists: function () {
 			Y.Assert.areNotSame("undefined", typeof source.CitiesDS.getElement);
 			Y.Assert.areSame("function", typeof source.CitiesDS.getElement);
-		},
-
-		/**
- 		 * SDBD-3.2 getElement method logic sync
- 		 */
-		testSourceGetElementLogicSync: function () {
-			var element = source.CitiesDS.getElement(3);
-			Y.Assert.areSame("Palo Alto", element.name.getValue());
-			Y.Assert.areSame(140000, element.pop.getValue());
 		},
 
 		/**

@@ -30,6 +30,8 @@ class VRIAServerSolutionJSRuntimeDelegate;
 class VSolutionStartupParameters;
 class CUAGDirectory;
 class VJSDebuggerSettings;
+class IBackupSettings;
+class VRIAPermissions;
 
 
 
@@ -66,6 +68,12 @@ public:
 
 			void					SetCustomAdministratorHttpPort( sLONG inPort);
 			bool					GetCustomAdministratorHttpPort( sLONG& outPort) const;
+
+			void					SetCustomAdministratorSSLPort( sLONG inPort);
+			bool					GetCustomAdministratorSSLPort( sLONG& outPort) const;
+
+			void					SetCustomAdministratorAuthType( const XBOX::VString& inAuthenticationType);
+			bool					GetCustomAdministratorAuthType( XBOX::VString& outAuthenticationType) const;
 
 			void					SetOpenDefaultSolutionWhenOpeningFails( bool inOpenDefaultSolution);
 			bool					GetOpenDefaultSolutionWhenOpeningFails() const;
@@ -112,7 +120,11 @@ public:
 			/** @brief	Returns the settings file which contains the setting. */
 			const VRIASettingsFile*			RetainSettingsFile( const RIASettingsID& inSettingsID) const;
 
+			const IBackupSettings*			RetainBackupSettings()const;
+
 			CUAGDirectory*					RetainUAGDirectory() const;
+
+			VRIAPermissions*				RetainPermissions( XBOX::VError *outError) const;
 
 			bool							GetUUID( XBOX::VUUID& outUUID) const;
 
@@ -149,12 +161,15 @@ private:
 
 			CUAGDirectory*					_OpenUAGDirectory( XBOX::VError& outError);
 
+			VRIAPermissions*				_LoadPermissionFile( XBOX::VError& outError);
+
 			/* FOR TEST PURPOSES ONLY. A method to see the whole authentication chain in action.
 			THIS TEST METHOD WILL GO AWAY INTO ITS OWN HEADER SOURCE FILE */
 			XBOX::VError TEST_RegisterDebuggerUAGCallback ( );
 
 			XBOX::VString					fName;
 			VSolution						*fDesignSolution;
+			IBackupSettings					*fBackupSettings;///Backup settings defined at the solution level
 
 			VRIAServerSolutionOpeningParameters	*fOpeningParameters;
 			
@@ -173,12 +188,11 @@ private:
 	mutable	XBOX::VCriticalSection			fApplicationsMutex;
 
 			VSolutionSettings				fSettings;
-#if defined(WKA_USE_CHR_REM_DBG)
-#else
 			VJSDebuggerSettings*			fDebuggerSettings;
-#endif
+
 			// Users and groups directory
 			CUAGDirectory					*fUAGDirectory;
+			VRIAPermissions					*fPermissions;
 
 			// JavaScript contexts
 			VJSContextPool							*fJSContextPool;

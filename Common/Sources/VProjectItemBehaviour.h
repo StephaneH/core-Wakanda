@@ -77,33 +77,6 @@ protected:
 
 
 /*
-	VProjectItemSolution: implement the solution item behaviour
-*/
-
-class VProjectItemSolution : public VProjectItemBehaviour
-{
-public:
-	VProjectItemSolution( VProjectItem *inOwner);
-	virtual ~VProjectItemSolution();
-
-			/**	@brief	Create an item for the solution. inURL may be the solution folder url. */
-	static	VProjectItem*				Instantiate( const XBOX::VURL& inURL, const XBOX::VString& inSolutionName);
-
-	virtual	VSolution*					GetSolution() const								{ return fSolution; }
-			void						SetSolution( VSolution* inSolution)				{ fSolution = inSolution; }
-
-	virtual	VProjectItem::e_ProjectItemKind		GetKind() const							{ return VProjectItem::eSOLUTION; }
-
-	virtual	bool						IsVirtualFolder() const							{ return true; }
-	virtual	XBOX::VString				GetXMLElementName() const						{ return kXML_ELEMENT_SOLUTION; }
-
-private:
-			VSolution					*fSolution;
-};
-
-
-
-/*
 	VProjectItemFolder: implement the folder item behaviour
 */
 
@@ -153,6 +126,43 @@ public:
 
 private:
 			XBOX::VError				_MoveTo(const XBOX::VFolder& srcFolder, XBOX::VFolder& destFolder);
+};
+
+
+
+/*
+	VProjectItemSolution: implement the solution item behaviour
+*/
+
+class VProjectItemSolution : public VProjectItemFolder
+{
+public:
+	VProjectItemSolution( VProjectItem *inOwner);
+	virtual ~VProjectItemSolution();
+
+			/**	@brief	Create an item for the solution. inURL may be the solution folder url. */
+	static	VProjectItem*				Instantiate( const XBOX::VURL& inURL, const XBOX::VString& inSolutionName);
+
+	virtual	VSolution*					GetSolution() const								{ return fSolution; }
+			void						SetSolution( VSolution* inSolution)				{ fSolution = inSolution; }
+
+	virtual	VProjectItem::e_ProjectItemKind		GetKind() const							{ return VProjectItem::eSOLUTION; }
+
+	virtual	XBOX::VString				GetXMLElementName() const						{ return kXML_ELEMENT_SOLUTION; }
+
+private:
+			VSolution					*fSolution;
+};
+
+
+
+class VMediaLibraryFolder : public VProjectItemFolder
+{
+public:
+			VMediaLibraryFolder( VProjectItem *inOwner);
+	virtual	~VMediaLibraryFolder();
+			
+	virtual	VProjectItem::e_ProjectItemKind		GetKind() const									{ return VProjectItem::eMEDIA_LIBRARY; }
 };
 
 

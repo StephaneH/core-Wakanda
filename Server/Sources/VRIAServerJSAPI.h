@@ -18,11 +18,12 @@
 
 
 class IHTTPResponse;
-class IHTTPHeader;
+class XBOX::VHTTPHeader;
 class IHTTPRequest;
 class VRIAServerProject;
-class IHTMLForm;
-class IHTMLFormPart;
+class XBOX::VMIMEMessage;
+class XBOX::VMIMEMessagePart;
+class XBOX::VMIMEWriter;
 class VRIAServerSolution;
 class VRIAServerApplication;
 
@@ -35,9 +36,6 @@ extern const char kSSJS_CLASS_NAME_HTTPServer[];
 extern const char kSSJS_CLASS_NAME_SSL[];
 extern const char kSSJS_CLASS_NAME_HTTPServerCache[];
 extern const char kSSJS_CLASS_NAME_Console[];
-extern const char kSSJS_CLASS_NAME_WebAppService[];
-extern const char kSSJS_CLASS_NAME_DataService[];
-extern const char kSSJS_CLASS_NAME_RPCService[];
 extern const char kSSJS_CLASS_NAME_OS[];
 extern const char kSSJS_CLASS_NAME_Process[];
 
@@ -50,9 +48,6 @@ extern const char kSSJS_PROPERTY_NAME_HTTPServer[];
 extern const char kSSJS_PROPERTY_NAME_SSL[];
 extern const char kSSJS_PROPERTY_NAME_HTTPServerCache[];
 extern const char kSSJS_PROPERTY_NAME_Console[];
-extern const char kSSJS_PROPERTY_NAME_WebAppService[];
-extern const char kSSJS_PROPERTY_NAME_DataService[];
-extern const char kSSJS_PROPERTY_NAME_RPCService[];
 extern const char kSSJS_PROPERTY_NAME_SessionStorage[];
 extern const char kSSJS_PROPERTY_NAME_AddHttpRequestHandler[];
 extern const char kSSJS_PROPERTY_NAME_RemoveHttpRequestHandler[];
@@ -73,10 +68,12 @@ extern const char kSSJS_PROPERTY_NAME_Permissions[];
 extern const char kSSJS_PROPERTY_NAME_Process[];
 extern const char kSSJS_PROPERTY_NAME_RPCCatalog[];
 extern const char kSSJS_PROPERTY_NAME_wildchar[];
+extern const char kSSJS_PROPERTY_NAME_backupSettings[];
 
 extern const char kSSJS_PROPERTY_NAME_verifyDataStore[];
 extern const char kSSJS_PROPERTY_NAME_repairDataStore[];
 extern const char kSSJS_PROPERTY_NAME_compactDataStore[];
+extern const char kSSJS_PROPERTY_NAME_backupDataStore[];
 
 extern const char kSSJS_PROPERTY_NAME_setCurrentUser[];
 extern const char kSSJS_PROPERTY_NAME_loginByKey[];
@@ -95,19 +92,19 @@ bool SetHTTPResponseFromJSValue (const XBOX::VJSValue& inValue, IHTTPResponse *i
 // JavaScript API
 
 
-class VJSHTTPRequestHeader : public XBOX::VJSClass<VJSHTTPRequestHeader, IHTTPHeader>
+class VJSHTTPRequestHeader : public XBOX::VJSClass<VJSHTTPRequestHeader, XBOX::VHTTPHeader>
 {
 public:
-	typedef XBOX::VJSClass<VJSHTTPRequestHeader, IHTTPHeader>	inherited;
+	typedef XBOX::VJSClass<VJSHTTPRequestHeader, XBOX::VHTTPHeader>	inherited;
 
-	static	void			Initialize (const XBOX::VJSParms_initialize& inParms, IHTTPHeader *inHeader);
-	static	void			Finalize (const XBOX::VJSParms_finalize& inParms, IHTTPHeader *inHeader);
-	static	void			GetProperty (XBOX::VJSParms_getProperty& ioParms, IHTTPHeader *inHeader);
-	static	bool			SetProperty (XBOX::VJSParms_setProperty& ioParms, IHTTPHeader *inHeader);
-	static	void			GetPropertyNames (XBOX::VJSParms_getPropertyNames& ioParms, IHTTPHeader *inHeader);
+	static	void			Initialize (const XBOX::VJSParms_initialize& inParms, XBOX::VHTTPHeader *inHeader);
+	static	void			Finalize (const XBOX::VJSParms_finalize& inParms, XBOX::VHTTPHeader *inHeader);
+	static	void			GetProperty (XBOX::VJSParms_getProperty& ioParms, XBOX::VHTTPHeader *inHeader);
+	static	bool			SetProperty (XBOX::VJSParms_setProperty& ioParms, XBOX::VHTTPHeader *inHeader);
+	static	void			GetPropertyNames (XBOX::VJSParms_getPropertyNames& ioParms, XBOX::VHTTPHeader *inHeader);
 	static	void			GetDefinition (ClassDefinition& outDefinition);
 
-	static void				_GetHeaderValue (XBOX::VJSParms_callStaticFunction& ioParms, IHTTPHeader *inHeader);  // headerValue : getValue(headerName)
+	static void				_GetHeaderValue (XBOX::VJSParms_callStaticFunction& ioParms, XBOX::VHTTPHeader *inHeader);  // headerValue : getValue(headerName)
 
 private:
 	static void				_GetHeaderNameFromPropertyName (const XBOX::VString& inPropertyName, XBOX::VString& outHeaderName);
@@ -119,20 +116,20 @@ private:
 // ----------------------------------------------------------------------------
 
 
-class VJSHTTPResponseHeader : public XBOX::VJSClass<VJSHTTPResponseHeader, IHTTPHeader>
+class VJSHTTPResponseHeader : public XBOX::VJSClass<VJSHTTPResponseHeader, XBOX::VHTTPHeader>
 {
 public:
-	typedef XBOX::VJSClass<VJSHTTPResponseHeader, IHTTPHeader>	inherited;
+	typedef XBOX::VJSClass<VJSHTTPResponseHeader, XBOX::VHTTPHeader>	inherited;
 
-	static	void			Initialize (const XBOX::VJSParms_initialize& inParms, IHTTPHeader *inHeader);
-	static	void			Finalize (const XBOX::VJSParms_finalize& inParms, IHTTPHeader *inHeader);
-	static	void			GetProperty (XBOX::VJSParms_getProperty& ioParms, IHTTPHeader *inHeader);
-	static	bool			SetProperty (XBOX::VJSParms_setProperty& ioParms, IHTTPHeader *inHeader);
-	static	void			GetPropertyNames (XBOX::VJSParms_getPropertyNames& ioParms, IHTTPHeader *inHeader);
+	static	void			Initialize (const XBOX::VJSParms_initialize& inParms, XBOX::VHTTPHeader *inHeader);
+	static	void			Finalize (const XBOX::VJSParms_finalize& inParms, XBOX::VHTTPHeader *inHeader);
+	static	void			GetProperty (XBOX::VJSParms_getProperty& ioParms, XBOX::VHTTPHeader *inHeader);
+	static	bool			SetProperty (XBOX::VJSParms_setProperty& ioParms, XBOX::VHTTPHeader *inHeader);
+	static	void			GetPropertyNames (XBOX::VJSParms_getPropertyNames& ioParms, XBOX::VHTTPHeader *inHeader);
 	static	void			GetDefinition (ClassDefinition& outDefinition);
 
-	static void				_GetHeaderValue (XBOX::VJSParms_callStaticFunction& ioParms, IHTTPHeader *inHeader);  // headerValue : getValue(headerName)
-	static void				_SetHeaderValue (XBOX::VJSParms_callStaticFunction& ioParms, IHTTPHeader *inHeader);  // setValue(headerName, headerValue)
+	static void				_GetHeaderValue (XBOX::VJSParms_callStaticFunction& ioParms, XBOX::VHTTPHeader *inHeader);  // headerValue : getValue(headerName)
+	static void				_SetHeaderValue (XBOX::VJSParms_callStaticFunction& ioParms, XBOX::VHTTPHeader *inHeader);  // setValue(headerName, headerValue)
 
 private:
 	static void				_GetHeaderNameFromPropertyName (const XBOX::VString& inPropertyName, XBOX::VString& outHeaderName);
@@ -167,6 +164,11 @@ public:
 	static	void			_GetBody (XBOX::VJSParms_getProperty& ioParms, IHTTPRequest *inRequest);
 	static	void			_GetParts (XBOX::VJSParms_getProperty& ioParms, IHTTPRequest *inRequest);
 	static	void			_GetContentType (XBOX::VJSParms_getProperty& ioParms, IHTTPRequest *inRequest);
+	static	void			_GetLocalAddress (XBOX::VJSParms_getProperty& ioParms, IHTTPRequest *inRequest);
+	static	void			_GetLocalPort (XBOX::VJSParms_getProperty& ioParms, IHTTPRequest *inRequest);
+	static	void			_GetIsSSL (XBOX::VJSParms_getProperty& ioParms, IHTTPRequest *inRequest);
+	static	void			_GetRemoteAddress (XBOX::VJSParms_getProperty& ioParms, IHTTPRequest *inRequest);
+	static	void			_GetRemotePort (XBOX::VJSParms_getProperty& ioParms, IHTTPRequest *inRequest);
 };
 
 
@@ -194,44 +196,88 @@ public:
 // ----------------------------------------------------------------------------
 
 
-class VJSHTMLForm : public XBOX::VJSClass<VJSHTMLForm, IHTMLForm>
+class VJSMIMEMessage : public XBOX::VJSClass<VJSMIMEMessage, XBOX::VMIMEMessage>
 {
 public:
-	typedef XBOX::VJSClass<VJSHTMLForm, IHTMLForm>	inherited;
+	typedef XBOX::VJSClass<VJSMIMEMessage, XBOX::VMIMEMessage>	inherited;
 
-	static	void			Initialize (const XBOX::VJSParms_initialize& inParms, IHTMLForm *inHTMLForm);
-	static	void			Finalize (const XBOX::VJSParms_finalize& inParms, IHTMLForm *inHTMLForm);
-	static	void			GetProperty (XBOX::VJSParms_getProperty& ioParms, IHTMLForm *inHTMLForm);
-	static	void			GetPropertyNames (XBOX::VJSParms_getPropertyNames& ioParms, IHTMLForm *inHTMLForm);
+	static	void			Initialize (const XBOX::VJSParms_initialize& inParms, XBOX::VMIMEMessage *inMIMEMessage);
+	static	void			Finalize (const XBOX::VJSParms_finalize& inParms, XBOX::VMIMEMessage *inMIMEMessage);
+	static	void			GetProperty (XBOX::VJSParms_getProperty& ioParms, XBOX::VMIMEMessage *inMIMEMessage);
+	static	void			GetPropertyNames (XBOX::VJSParms_getPropertyNames& ioParms, XBOX::VMIMEMessage *inMIMEMessage);
 	static	void			GetDefinition (ClassDefinition& outDefinition);
 
-	static	void			_GetCount (XBOX::VJSParms_getProperty& ioParms, IHTMLForm *inHTMLForm);
-	static	void			_GetBoundary (XBOX::VJSParms_getProperty& ioParms, IHTMLForm *inHTMLForm);
-	static	void			_GetEncoding (XBOX::VJSParms_getProperty& ioParms, IHTMLForm *inHTMLForm);
+	static	void			_GetCount (XBOX::VJSParms_getProperty& ioParms, XBOX::VMIMEMessage *inMIMEMessage);
+	static	void			_GetBoundary (XBOX::VJSParms_getProperty& ioParms, XBOX::VMIMEMessage *inMIMEMessage);
+	static	void			_GetEncoding (XBOX::VJSParms_getProperty& ioParms, XBOX::VMIMEMessage *inMIMEMessage);
+
+	static	void			_ToBlob (XBOX::VJSParms_callStaticFunction& ioParms, XBOX::VMIMEMessage *inMIMEMessage);
+	static	void			_ToBuffer (XBOX::VJSParms_callStaticFunction& ioParms, XBOX::VMIMEMessage *inMIMEMessage);
 };
 
 
 // ----------------------------------------------------------------------------
 
 
-class VJSHTMLFormPart : public XBOX::VJSClass<VJSHTMLFormPart, IHTMLFormPart>
+class VJSMIMEMessagePart : public XBOX::VJSClass<VJSMIMEMessagePart, XBOX::VMIMEMessagePart>
 {
 public:
-	typedef XBOX::VJSClass<VJSHTMLFormPart, IHTMLFormPart>	inherited;
+	typedef XBOX::VJSClass<VJSMIMEMessagePart, XBOX::VMIMEMessagePart>	inherited;
 
-	static	void			Initialize (const XBOX::VJSParms_initialize& inParms, IHTMLFormPart *inHTMLFormPart);
-	static	void			Finalize (const XBOX::VJSParms_finalize& inParms, IHTMLFormPart *inHTMLFormPart);
+	static	void			Initialize (const XBOX::VJSParms_initialize& inParms, XBOX::VMIMEMessagePart *inMIMEPart);
+	static	void			Finalize (const XBOX::VJSParms_finalize& inParms, XBOX::VMIMEMessagePart *inMIMEPart);
 	static	void			GetDefinition (ClassDefinition& outDefinition);
 
-	static	void			_GetName (XBOX::VJSParms_getProperty& ioParms, IHTMLFormPart *inHTMLFormPart);
-	static	void			_GetFileName (XBOX::VJSParms_getProperty& ioParms, IHTMLFormPart *inHTMLFormPart);
-	static	void			_GetMediaType (XBOX::VJSParms_getProperty& ioParms, IHTMLFormPart *inHTMLFormPart);
-	static	void			_GetSize (XBOX::VJSParms_getProperty& ioParms, IHTMLFormPart *inHTMLFormPart);
-	static	void			_GetBodyAsText (XBOX::VJSParms_getProperty& ioParms, IHTMLFormPart *inHTMLFormPart);
-	static	void			_GetBodyAsPicture (XBOX::VJSParms_getProperty& ioParms, IHTMLFormPart *inHTMLFormPart);
-	static	void			_GetBodyAsBlob (XBOX::VJSParms_getProperty& ioParms, IHTMLFormPart *inHTMLFormPart);
+	static	void			_GetName (XBOX::VJSParms_getProperty& ioParms, XBOX::VMIMEMessagePart *inMIMEPart);
+	static	void			_GetFileName (XBOX::VJSParms_getProperty& ioParms, XBOX::VMIMEMessagePart *inMIMEPart);
+	static	void			_GetMediaType (XBOX::VJSParms_getProperty& ioParms, XBOX::VMIMEMessagePart *inMIMEPart);
+	static	void			_GetSize (XBOX::VJSParms_getProperty& ioParms, XBOX::VMIMEMessagePart *inMIMEPart);
+	static	void			_GetBodyAsText (XBOX::VJSParms_getProperty& ioParms, XBOX::VMIMEMessagePart *inMIMEPart);
+	static	void			_GetBodyAsPicture (XBOX::VJSParms_getProperty& ioParms, XBOX::VMIMEMessagePart *inMIMEPart);
+	static	void			_GetBodyAsBlob (XBOX::VJSParms_getProperty& ioParms, XBOX::VMIMEMessagePart *inMIMEPart);
 
-	static	void			_Save (XBOX::VJSParms_callStaticFunction& ioParms, IHTMLFormPart *inHTMLFormPart);
+	static	void			_Save (XBOX::VJSParms_callStaticFunction& ioParms, XBOX::VMIMEMessagePart *inMIMEPart);
+};
+
+// ----------------------------------------------------------------------------
+
+class VJSMIMEReader : public XBOX::VJSClass<VJSMIMEReader, void>
+{
+public:
+
+	static void	GetDefinition (ClassDefinition& outDefinition);
+	static void	Construct (XBOX::VJSParms_construct& inParms);
+
+private:
+
+	static void	_ParseMail (XBOX::VJSParms_callStaticFunction &ioParms, void *);
+
+	static bool _ParseMailHeader (XBOX::VJSContext inContext, XBOX::VJSObject &inMailObject, XBOX::VMemoryBufferStream *inStream, bool *outIsMIME, XBOX::VString *outBoundary);
+
+	static bool	_ParseTextBody (XBOX::VJSContext inContext, XBOX::VJSObject &inMailObject, XBOX::VMemoryBufferStream *inStream);
+	static bool _ParseMIMEBody (XBOX::VJSContext inContext, XBOX::VJSObject &inMailObject, XBOX::VMemoryBufferStream *inStream, const XBOX::VString &inBoundary);
+
+	static bool _GetLine (XBOX::VString *outString, XBOX::VMemoryBufferStream *inStream, bool inUnfoldLines);
+	static void _ParseBoundary (const XBOX::VString &inContentTypeBody, XBOX::VString *outBoundary);
+};
+
+// ----------------------------------------------------------------------------
+
+class VJSMIMEWriter : public XBOX::VJSClass<VJSMIMEWriter, XBOX::VMIMEWriter>
+{
+public:
+	typedef XBOX::VJSClass<VJSMIMEWriter, XBOX::VMIMEWriter>	inherited;
+
+	static	void			Initialize (const XBOX::VJSParms_initialize& inParms, XBOX::VMIMEWriter *inMIMEWriter);
+	static	void			Finalize (const XBOX::VJSParms_finalize& inParms, XBOX::VMIMEWriter *inMIMEWriter);
+	static	void			GetDefinition (ClassDefinition& outDefinition);
+
+	static	void			_GetMIMEBoundary (XBOX::VJSParms_callStaticFunction& ioParms, XBOX::VMIMEWriter *inMIMEWriter);
+	static	void			_GetMIMEMessage (XBOX::VJSParms_callStaticFunction& ioParms, XBOX::VMIMEWriter *inMIMEWriter);
+	static	void			_AddPart (XBOX::VJSParms_callStaticFunction& ioParms, XBOX::VMIMEWriter *inMIMEWriter);
+
+	/* To Instantiate MIMEWriter JSObject */
+	static	void			_Construct (XBOX::VJSParms_construct& inParms);
 };
 
 
@@ -245,22 +291,22 @@ class VJSHTTPServer : public XBOX::VJSClass<VJSHTTPServer, VRIAServerProject>
 public:
 	typedef XBOX::VJSClass<VJSHTTPServer, VRIAServerProject>	inherited;
 
-	static	void			Initialize( const XBOX::VJSParms_initialize& inParms, VRIAServerProject* inApplication);
-	static	void			Finalize( const XBOX::VJSParms_finalize& inParms, VRIAServerProject* inApplication);
-	static	void			GetDefinition( ClassDefinition& outDefinition);
+	static	void			Initialize (const XBOX::VJSParms_initialize& inParms, VRIAServerProject* inRIAServerProject);
+	static	void			Finalize (const XBOX::VJSParms_finalize& inParms, VRIAServerProject* inRIAServerProject);
+	static	void			GetDefinition (ClassDefinition& outDefinition);
 
 	// Functions
-	static	void			_start( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication);
-	static	void			_stop( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication);
+	static	void			_start (XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inRIAServerProject);
+	static	void			_stop (XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inRIAServerProject);
 
 	// Properties getters
-	static	void			_getStarted( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication);
-	static	void			_getPort( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication);
-	static	void			_getIpAddress( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication);
-	static	void			_getHostName( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication);
-	static	void			_getDefaultCharSet( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication);
-	static	void			_getSSL( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication);
-	static	void			_getCache( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication);
+	static	void			_getStarted (XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inRIAServerProject);
+	static	void			_getPort (XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inRIAServerProject);
+	static	void			_getIpAddress (XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inRIAServerProject);
+	static	void			_getHostName (XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inRIAServerProject);
+	static	void			_getDefaultCharSet (XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inRIAServerProject);
+	static	void			_getSSL (XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inRIAServerProject);
+	static	void			_getCache (XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inRIAServerProject);
 };
 
 
@@ -274,13 +320,13 @@ class VJSHTTPServerCache : public XBOX::VJSClass< VJSHTTPServerCache, VRIAServer
 public:
 	typedef XBOX::VJSClass< VJSHTTPServerCache, VRIAServerProject>	inherited;
 
-	static	void			Initialize( const XBOX::VJSParms_initialize& inParms, VRIAServerProject* inApplication);
-	static	void			Finalize( const XBOX::VJSParms_finalize& inParms, VRIAServerProject* inApplication);
-	static	void			GetDefinition( ClassDefinition& outDefinition);
+	static	void			Initialize (const XBOX::VJSParms_initialize& inParms, VRIAServerProject* inRIAServerProject);
+	static	void			Finalize (const XBOX::VJSParms_finalize& inParms, VRIAServerProject* inRIAServerProject);
+	static	void			GetDefinition (ClassDefinition& outDefinition);
 
 	// Properties getters
-	static	void			_getEnabled( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication);
-	static	void			_getMemorySize( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication);
+	static	void			_getEnabled (XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inRIAServerProject);
+	static	void			_getMemorySize (XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inRIAServerProject);
 };
 
 
@@ -292,98 +338,20 @@ public:
 class VJSSSL : public XBOX::VJSClass< VJSSSL, VRIAServerProject>
 {
 public:
-	typedef XBOX::VJSClass< VJSSSL, VRIAServerProject>	inherited;
+	typedef XBOX::VJSClass<VJSSSL, VRIAServerProject>	inherited;
 
-	static	void			Initialize( const XBOX::VJSParms_initialize& inParms, VRIAServerProject* inApplication);
-	static	void			Finalize( const XBOX::VJSParms_finalize& inParms, VRIAServerProject* inApplication);
-	static	void			GetDefinition( ClassDefinition& outDefinition);
+	static	void			Initialize (const XBOX::VJSParms_initialize& inParms, VRIAServerProject* inRIAServerProject);
+	static	void			Finalize (const XBOX::VJSParms_finalize& inParms, VRIAServerProject* inRIAServerProject);
+	static	void			GetDefinition (ClassDefinition& outDefinition);
 
 	// Function
-	static	void			_getCertificatePath( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication);	
+	static	void			_getCertificatePath (XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inRIAServerProject);	
 
 	// Properties getters
-	static	void			_getEnabled( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication);
-	static	void			_getPort( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication);
+	static	void			_getEnabled (XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inRIAServerProject);
+	static	void			_getPort (XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inRIAServerProject);
 };
 
-
-
-// ----------------------------------------------------------------------------
-
-
-
-class VJSWebAppService : public XBOX::VJSClass<VJSWebAppService, VRIAServerProject>
-{
-public:
-	typedef XBOX::VJSClass<VJSWebAppService, VRIAServerProject>	inherited;
-
-	static	void			Initialize( const XBOX::VJSParms_initialize& inParms, VRIAServerProject* inApplication);
-	static	void			Finalize( const XBOX::VJSParms_finalize& inParms, VRIAServerProject* inApplication);
-	static	void			GetDefinition( ClassDefinition& outDefinition);
-
-	// Functions
-	static	void			_enable( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication);
-	static	void			_disable( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication);
-	static	void			_getDocumentRootFolder( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication);
-
-	// Properties getters
-	static	void			_getEnabled( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication);
-	static	void			_getDirectoryIndex( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication);
-};
-
-
-
-// ----------------------------------------------------------------------------
-
-
-
-class VJSDataService : public XBOX::VJSClass<VJSDataService, VRIAServerProject>
-{
-public:
-	typedef XBOX::VJSClass<VJSDataService, VRIAServerProject>	inherited;
-
-	static	void			Initialize( const XBOX::VJSParms_initialize& inParms, VRIAServerProject* inApplication);
-	static	void			Finalize( const XBOX::VJSParms_finalize& inParms, VRIAServerProject* inApplication);
-	static	void			GetDefinition( ClassDefinition& outDefinition);
-
-	// Functions
-	static	void			_enable( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication);
-	static	void			_disable( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication);
-
-	// Properties getters
-	static	void			_getEnabled( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication);
-};
-
-
-
-// ----------------------------------------------------------------------------
-
-
-
-class VJSRPCService : public XBOX::VJSClass<VJSRPCService, VRIAServerProject>
-{
-public:
-	typedef XBOX::VJSClass<VJSRPCService, VRIAServerProject>	inherited;
-
-	static	void			Initialize( const XBOX::VJSParms_initialize& inParms, VRIAServerProject* inApplication);
-	static	void			Finalize( const XBOX::VJSParms_finalize& inParms, VRIAServerProject* inApplication);
-	static	void			GetDefinition( ClassDefinition& outDefinition);
-
-	// Functions
-	static	void			_enable( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication);
-	static	void			_disable( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication);
-	static	void			_getCatalog( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication);
-	static	void			_getCatalogByName( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication);
-	static	void			_getCatalogByFile( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication);
-	static	void			_getMethodFilePath( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication);
-
-	// Properties getters
-	static	void			_getEnabled( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication);
-};
-
-
-
-// ----------------------------------------------------------------------------
 
 
 #endif

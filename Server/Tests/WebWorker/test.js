@@ -59,16 +59,45 @@ var testCase = {
     },
     // Check error reporting from dedicated worker.
     testDedicatedWorkerErrorReporting: function() {
-        var myDedicatedWorker   = new Worker('syntaxError.js');        var test                = this;
-        myDedicatedWorker.onerror = function(event) {
-            test.resume(function() {
-                Y.Assert.isObject(event);                Y.Assert.isString(event.message);                Y.Assert.isString(event.filename);                Y.Assert.isNumber(event.lineno);                Y.Assert.isObject(event.initErrorEvent);
-            });
-        }        this.wait(1000);    },
+		var	hasException;
+		
+		// Try to run a non existing script.
+
+		hasException = false;
+		try {
+		
+			new Worker('noSuchFile.js');	
+			
+		} catch (exception) {
+		
+			hasException = true;
+		
+		}
+        Y.Assert.isTrue(hasException);
+		
+		// Try to run a script with syntax error.
+		
+		hasException = false;
+		try {
+		
+			new Worker('syntaxError.js');
+			
+		} catch (exception) {
+		
+			hasException = true;
+		
+		}        Y.Assert.isTrue(hasException);    },
     // Check that it is possible to create dedicated workers recursively.
     testRecursiveDedicatedWorkers: function() {
         var myDedicatedWorker   = new Worker('recursiveDedicatedWorker.js');        var test                = this;
-        myDedicatedWorker.onerror = function(event) {
+        myDedicatedWorker.onerror = function(event) {
+		
+            Y.Assert.isObject(event);
+            Y.Assert.isString(event.message);
+            Y.Assert.isString(event.filename);
+            Y.Assert.isNumber(event.lineno);
+			Y.Assert.isObject(event.initErrorEvent);
+		
             // Thrown exception, not possible to create dedicated workers recursively.
             webWorkersTest._should.ignore.testDedicatedWorkerErrorPropagation = true;            webWorkersTest._should.ignore.testDedicatedWorkerErrorCatching = true;
             test.resume(function() { Y.Assert.isTrue(false); });

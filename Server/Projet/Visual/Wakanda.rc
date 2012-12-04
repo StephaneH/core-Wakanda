@@ -57,19 +57,6 @@ HELPCURSOR              CURSOR  DISCARDABLE     "asihelp.cur"
 
 /////////////////////////////////////////////////////////////////////////////
 //
-// RT_MANIFEST
-//
-
-#ifdef _WIN64
-1                       RT_MANIFEST             "4D_64.manifest.xml"
-#else 
-#ifndef _VC80_UPGRADE
-1                       RT_MANIFEST             "4D.manifest.xml"
-#endif
-#endif
-
-/////////////////////////////////////////////////////////////////////////////
-//
 // Bitmap
 //
 

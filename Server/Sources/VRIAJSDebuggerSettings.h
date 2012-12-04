@@ -22,7 +22,13 @@
 class VRIAServerSolution;
 
 
-class VJSDebuggerSettings : public XBOX::VObject, public IJSWDebuggerSettings
+class VJSDebuggerSettings :
+	public XBOX::VObject,
+#if 0//!defined(WKA_USE_UNIFIED_DBG)
+	public IJSWDebuggerSettings
+#else
+	public IWAKDebuggerSettings
+#endif
 {
 	public :
 
@@ -32,13 +38,16 @@ class VJSDebuggerSettings : public XBOX::VObject, public IJSWDebuggerSettings
 		XBOX::VError Init ( );
 
 		virtual bool NeedsAuthentication ( ) const;
-		virtual bool UserCanDebug ( const UniChar* inUserName, const UniChar* inSeededHA1, const UniChar* inSeed ) const;
+		virtual bool UserCanDebug ( const UniChar* inUserName, const UniChar* inUserPassword ) const;
+		virtual bool UserCanDebug(IAuthenticationInfos* inAuthenticationInfos) const;
+		virtual bool HasDebuggerUsers ( ) const;
 
 	private :
 
 		VRIAServerSolution*					fServerSolution;
 		// UUIDs of groups that can access JS debugger functionlaity
 		std::vector<XBOX::VUUID>			fDebuggerGroups;
+		bool								fNeedsAuthentication; // true by default
 
 		VJSDebuggerSettings ( );
 };

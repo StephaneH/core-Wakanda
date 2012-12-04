@@ -46,7 +46,7 @@ exports.isServiceRegistered = isServiceRegistered;
 
 /* Returns true if the has been successfully registered
 */
-exports.registerService = function ( inServiceName) {
+exports.registerService = function ( inServiceName, inModulePath) {
 	
 	if ((inServiceName == null) || (typeof inServiceName == 'undefined')) {
 		return false;
@@ -54,6 +54,15 @@ exports.registerService = function ( inServiceName) {
 	
 	var name = inServiceName.toString();
 	if (name.length == 0) {
+		return false;
+	}
+	
+	if ((inModulePath == null) || (typeof inModulePath == 'undefined')) {
+		return false;
+	}
+	
+	var path = inModulePath.toString();
+	if (path.length == 0) {
 		return false;
 	}
 		
@@ -70,7 +79,7 @@ exports.registerService = function ( inServiceName) {
 		if (!servicesData.hasOwnProperty( name)) {
 		
 			// Register the service
-			servicesData[name] = {};
+			servicesData[name] = { "name":name, "modulePath":path};
 			_fApplication.storage.setItem( 'services', servicesData);
 			done = true;
 		}
@@ -96,14 +105,18 @@ exports.postServiceMessage = function ( inMessage) {
 	
 		for (var serviceName in servicesData) {
 		
-			var serviceModule = require( 'services/' + serviceName);
-			
-			if ((serviceModule != null) && (typeof serviceModule != 'undefined') && serviceModule.hasOwnProperty( 'getInstanceFor')) {
-				serviceModule = serviceModule.getInstanceFor( _fApplication);
-			}
-			
-			if ((serviceModule != null) && (typeof serviceModule != 'undefined') && serviceModule.hasOwnProperty( 'postMessage')) {
-				serviceModule.postMessage( inMessage);
+			var oneServiceData = servicesData[serviceName];
+			if (oneServiceData.hasOwnProperty( 'modulePath') && (oneServiceData.modulePath != null)) {
+				
+				var serviceModule = require( oneServiceData.modulePath);
+				
+				if ((serviceModule != null) && (typeof serviceModule != 'undefined') && serviceModule.hasOwnProperty( 'getInstanceFor')) {
+					serviceModule = serviceModule.getInstanceFor( _fApplication);
+				}
+				
+				if ((serviceModule != null) && (typeof serviceModule != 'undefined') && serviceModule.hasOwnProperty( 'postMessage')) {
+					serviceModule.postMessage( inMessage);
+				}
 			}
 		}
 	}

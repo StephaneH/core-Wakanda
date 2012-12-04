@@ -11,6 +11,9 @@ import java.util.Map.Entry;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -32,12 +35,13 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import com.wakanda.qa.http.CharSetUtil;
 import com.wakanda.qa.http.MediaTypeUtil;
-import com.wakanda.qa.http.Resources;
+import com.wakanda.qa.http.Utils;
 import com.wakanda.qa.http.test.extend.AbstractHttpTestCase;
 
 /**
@@ -49,21 +53,22 @@ import com.wakanda.qa.http.test.extend.AbstractHttpTestCase;
 public class MediaTypeTest extends AbstractHttpTestCase {
 
 	private static Logger logger = Logger.getLogger(MediaTypeTest.class);
-	
+	private static MediaTypeUtil mtUtil = new MediaTypeUtil();
+
 	@BeforeClass
-	public static void beforeClass() throws Exception{
+	public static void beforeClass() throws Exception {
 		// create all resources file.*
 		logger.debug("Setting media types resources...");
-		MediaTypeUtil.setMediaTypeResources();
+		mtUtil.setMediaTypeResources();
 	}
-	
+
 	@AfterClass
-	public static void afterClass() throws Exception{
+	public static void afterClass() throws Exception {
 		// delete all resources file.*
 		logger.debug("Deleting media types resources...");
-		MediaTypeUtil.removeMediaTypeResources();
+		mtUtil.removeMediaTypeResources();
 	}
-	
+
 	/**
 	 * <b>Implements:</b> MediaTypes01
 	 * <p/>
@@ -76,7 +81,8 @@ public class MediaTypeTest extends AbstractHttpTestCase {
 	@Test
 	public void testThatServerResponseContainsContentTypeHeaderField()
 			throws Exception {
-		HttpResponse response = executeDefaultRequest();
+		HttpGet request = new HttpGet("/");
+		HttpResponse response = executeRequest(request);
 		assertEqualsStatusCode(HttpStatus.SC_OK, response);
 		HttpEntity entity = response.getEntity();
 		assertNotNull("Response has no content", entity);
@@ -98,7 +104,8 @@ public class MediaTypeTest extends AbstractHttpTestCase {
 	public void testThatServerReturnsCorrectContentTypeFormat()
 			throws Exception {
 		String regex = "([a-zA-Z0-9]+)/([a-zA-Z0-9]+)(;([a-zA-Z0-9]+)=([a-zA-Z0-9]+))*";
-		HttpResponse response = executeDefaultRequest();
+		HttpGet request = new HttpGet("/");
+		HttpResponse response = executeRequest(request);
 		String contentType = response.getEntity().getContentType().getValue();
 		assertTrue("Content-Type header format is incorrect",
 				contentType.matches(regex));
@@ -128,15 +135,14 @@ public class MediaTypeTest extends AbstractHttpTestCase {
 		// check the returned content-type
 		String actualContentType = EntityUtils.getContentMimeType(response
 				.getEntity());
-		assertEquals("Wrong media type for [" + extension + "]",
-				expectedMimeType, actualContentType);
-		EntityUtils.consume(response.getEntity());
-
+		String[] expectedMimeTypes = expectedMimeType.split(";");
+		assertTrue("Wrong media type for [" + extension + "]",
+				ArrayUtils.contains(expectedMimeTypes, actualContentType));
 	}
 
 	@SuppressWarnings("unused")
 	private Object[] parameters() throws Exception {
-		Map<String, String> map = MediaTypeUtil.getMediaTypeMap();
+		Map<String, String> map = mtUtil.getMediaTypeMap();
 		int lenght = map.size();
 		Object[] tab = new Object[lenght];
 		int i = 0;
@@ -164,7 +170,7 @@ public class MediaTypeTest extends AbstractHttpTestCase {
 		String expected = "application/octet-stream";
 		String filename = "file.unknown";
 		// create a file with unknown extension
-		String mediaTypeFolder = Resources.getDefaultProjectWebFolderPath()
+		String mediaTypeFolder = getSettings().getDefaultProjectWebFolderPath()
 				+ "/mediaType";
 		File mediaTypeDir = new File(mediaTypeFolder);
 		if (!mediaTypeDir.exists())
@@ -189,7 +195,7 @@ public class MediaTypeTest extends AbstractHttpTestCase {
 	/**
 	 * <b>Implements:</b> MediaTypes05
 	 * <p/>
-	 * Check that the type, sub-type attribute names are case- insensitive
+	 * Check that the type, sub-type attribute names are case-insensitive
 	 * <p/>
 	 * <b>Reference:</b> SPEC689 (RFC2616) 3.7
 	 * 
@@ -199,18 +205,19 @@ public class MediaTypeTest extends AbstractHttpTestCase {
 	public void testThatMediaTypesTokensAreCaseInsensitive() throws Exception {
 		// create a file with xml extension
 		String filename = "file.xml";
-		File file = new File(Resources.getMediaTypeFolder() + "/" + filename);
+		File file = new File(getSettings().getMediaTypeFolder() + "/"
+				+ filename);
 		if (!file.exists()) {
 			file.createNewFile();
 		}
 		HttpGet request = new HttpGet("/mediaType/" + filename);
-		
+
 		// assume that server replay with 406 when media type is not acceptable
 		request.addHeader(HttpHeaders.ACCEPT, "text/html");
 		HttpResponse response = executeRequest(request);
 		int actual = response.getStatusLine().getStatusCode();
 		Assume.assumeThat(actual, Is.is(HttpStatus.SC_NOT_ACCEPTABLE));
-		
+
 		// add Accept header with the upper case value of the media type
 		String expectedMimeType = "TExT/XmL";
 		request.addHeader(HttpHeaders.ACCEPT, expectedMimeType);
@@ -222,7 +229,8 @@ public class MediaTypeTest extends AbstractHttpTestCase {
 		// check the returned content-type
 		String actualContentType = EntityUtils.getContentMimeType(response
 				.getEntity());
-		assertEquals("["+ expectedMimeType + "] Media type should be case-insensitive", expectedMimeType,
+		assertEquals("[" + expectedMimeType
+				+ "] Media type should be case-insensitive", expectedMimeType,
 				actualContentType);
 
 	}
@@ -253,7 +261,7 @@ public class MediaTypeTest extends AbstractHttpTestCase {
 		FormBodyPart part1 = new FormBodyPart("part1", contentBody1);
 
 		// generate boundary
-		String boundary = MediaTypeUtil.generateBoundary();
+		String boundary = Utils.generateBoundary();
 
 		// create request entity
 		MultipartEntity reqEntity = new MultipartEntity(null, boundary, null);
@@ -266,7 +274,7 @@ public class MediaTypeTest extends AbstractHttpTestCase {
 		// logger.debug(out.toString());
 
 		// execute request then parse the response
-		HttpResponse response = executeRequest(httppost);
+		HttpResponse response = executeRequest(httppost, false);
 		String respCnt = EntityUtils.toString(response.getEntity());
 
 		// logger.debug(respCnt);
@@ -288,8 +296,9 @@ public class MediaTypeTest extends AbstractHttpTestCase {
 				respCntPrts[5]);
 		assertEquals("Wrong part size", part0.getBody().getContentLength(),
 				Long.parseLong(respCntPrts[6]));
-		byte[] actuals = Resources.readFileAsBytes(Resources
-				.getMultipartFolder() + "/" + expectedFileName);
+		File file = new File(getSettings().getMultipartFolder() + "/"
+				+ expectedFileName);
+		byte[] actuals = FileUtils.readFileToByteArray(file);
 		Assert.assertArrayEquals("Wrong part content", content0, actuals);
 
 		// string part
@@ -302,8 +311,8 @@ public class MediaTypeTest extends AbstractHttpTestCase {
 		assertEquals("Wrong part size", part1.getBody().getContentLength(),
 				Long.parseLong(respCntPrts[10]));
 		assertEquals("Wrong part content",
-				Resources.convertStreamToString(((StringBody) part1.getBody())
-						.getReader()), respCntPrts[11]);
+				IOUtils.toString(((StringBody) part1.getBody()).getReader()),
+				respCntPrts[11]);
 	}
 
 	/**
@@ -323,7 +332,8 @@ public class MediaTypeTest extends AbstractHttpTestCase {
 			throws Exception {
 		// create a file with xml extension
 		String filename = "file.xml";
-		File file = new File(Resources.getMediaTypeFolder() + "/" + filename);
+		File file = new File(getSettings().getMediaTypeFolder() + "/"
+				+ filename);
 		if (!file.exists()) {
 			file.createNewFile();
 		}
@@ -377,18 +387,18 @@ public class MediaTypeTest extends AbstractHttpTestCase {
 		request.setEntity(reqEntity);
 
 		// response
-		HttpResponse response = executeRequest(request);
-		assertEqualsStatusCode(HttpStatus.SC_OK, response);
+		HttpResponse response = executeRequest(request, false);
+		// get the response content as string using response charset parameter
 		HttpEntity resEntity = response.getEntity();
+		String resSContent = EntityUtils.toString(resEntity);
+		
+		assertEqualsStatusCode(HttpStatus.SC_OK, response);
 		assertNotNull(resEntity);
 
 		// is content-length > 0
 		long resCLength = resEntity.getContentLength();
 		// logger.debug("Response content-length: " + resCLength);
 		assertTrue("Response must be > 0", resCLength > 0);
-
-		// get the response content as string using response charset parameter
-		String resSContent = EntityUtils.toString(resEntity);
 
 		// if server decodes request body using ISO_8859_1 charset, then its
 		// response content after being decoded would equal the request content.
@@ -402,11 +412,16 @@ public class MediaTypeTest extends AbstractHttpTestCase {
 	 * Check that server responds with 415 when the media type of the request
 	 * entity is in a format not supported.
 	 * <p/>
+	 * Le testé est ignoré car le serveur n'a aucun moyen de savoir si le
+	 * request handler accepte le media-type, c'est donc à chaque requestHandler
+	 * de vérifier si le media-Type est supporté/accepté.
+	 * <p/>
 	 * <b>Reference:</b> SPEC695 (RFC2616) 10.4.16
 	 * 
 	 * @throws Exception
 	 */
 	@Test
+	@Ignore
 	public void testThatServerReplaysWith415WhenMediaTypeOfRequestEntityIsNotSupported()
 			throws Exception {
 		// entity
@@ -426,7 +441,8 @@ public class MediaTypeTest extends AbstractHttpTestCase {
 	/**
 	 * <b>Implements:</b> MediaTypes10
 	 * <p/>
-	 * Check that server responds with 406 when the media type contains space between the type and subtype.
+	 * Check that server responds with 406 when the media type contains space
+	 * between the type and subtype.
 	 * <p/>
 	 * <b>Reference:</b> SPEC689 (RFC2616) 3.7
 	 * 
@@ -437,7 +453,8 @@ public class MediaTypeTest extends AbstractHttpTestCase {
 			throws Exception {
 		// create a file with xml extension
 		String filename = "file.html";
-		File file = new File(Resources.getMediaTypeFolder() + "/" + filename);
+		File file = new File(getSettings().getMediaTypeFolder() + "/"
+				+ filename);
 		if (!file.exists()) {
 			file.createNewFile();
 		}

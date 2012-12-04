@@ -36,11 +36,55 @@
 #include "VRPCCatalog.h"
 #include "VJSRPCCatalog.h"
 #include "VRIAServerComponentBridge.h"
+#include "VRIAServerHTTPSession.h"
 
 
 USING_TOOLBOX_NAMESPACE
 
 
+/**
+ * \brief Bridge between the VPRogressIndicator API and IDB4DToolInterface API
+ */
+class VProgressIndicatorBrigdeToIDB4DToolInterface: public XBOX::VProgressIndicator
+{
+private:
+	IDB4D_DataToolsIntf* fToolInterface;
+public:
+	 VProgressIndicatorBrigdeToIDB4DToolInterface(IDB4D_DataToolsIntf* inToolInterface):
+	  XBOX::VProgressIndicator(),
+		  fToolInterface(inToolInterface)
+	  {
+	  }
+	  virtual ~VProgressIndicatorBrigdeToIDB4DToolInterface(){}
+	  virtual void	DoBeginSession(sLONG inSessionNumber)
+	  {
+		  if (fToolInterface)
+		  {
+			  VString msg;
+			  fCurrent.GetMessage(msg);
+			  fToolInterface->OpenProgression(msg,fCurrent.GetMax());
+		  }
+	  }
+
+	  virtual void	DoEndSession(sLONG inSessionNumber)
+	  {
+		 if(fToolInterface)
+		 {
+			 fToolInterface->CloseProgression();
+		 }
+	  }
+	 virtual bool	DoProgress ()
+	 {
+		 if(fToolInterface)
+		 {
+			fToolInterface->Progress(fCurrent.GetValue(),fCurrent.GetMax());
+		 }
+		 return true;
+	 }
+	private:
+		VProgressIndicatorBrigdeToIDB4DToolInterface();
+		VProgressIndicatorBrigdeToIDB4DToolInterface(const VProgressIndicatorBrigdeToIDB4DToolInterface&);
+};
 
 void VJSApplicationGlobalObject::_addHttpRequestHandler( XBOX::VJSParms_callStaticFunction& ioParms, XBOX::VJSGlobalObject* inGlobalObject)
 {
@@ -174,6 +218,26 @@ void VJSApplicationGlobalObject::_getItemsWithRole( XBOX::VJSParms_callStaticFun
 }
 
 
+void VJSApplicationGlobalObject::_reloadModel( XBOX::VJSParms_callStaticFunction& ioParms, XBOX::VJSGlobalObject* inGlobalObject)
+{
+	bool done = false;
+	VRIAJSRuntimeContext *rtContext = VRIAJSRuntimeContext::GetFromJSGlobalObject( inGlobalObject);
+	if (rtContext != NULL)
+	{
+		VRIAServerProject *application = rtContext->GetRootApplication();
+		if (application != NULL)
+		{
+			VJSApplication::_reloadModel( ioParms, application);
+			done = true;
+		}
+	}
+
+	if (!done)
+	{
+		ThrowError( VE_RIA_JS_CANNOT_BE_USED_IN_THIS_CONTEXT);
+	}
+}
+
 
 void VJSApplicationGlobalObject::_verifyDataStore( XBOX::VJSParms_callStaticFunction& ioParms, XBOX::VJSGlobalObject* inGlobalObject)
 {
@@ -236,6 +300,67 @@ void VJSApplicationGlobalObject::_compactInto( XBOX::VJSParms_callStaticFunction
 		ioParms.ReturnUndefinedValue();
 	}
 }
+
+void VJSApplicationGlobalObject::_backupDataStore(XBOX::VJSParms_callStaticFunction& ioParms, XBOX::VJSGlobalObject* inGlobalObject)
+{
+	bool done = false;
+	VRIAJSRuntimeContext *rtContext = VRIAJSRuntimeContext::GetFromJSGlobalObject( inGlobalObject);
+	if (rtContext != NULL)
+	{
+		VRIAServerProject *application = rtContext->GetRootApplication();
+		if (application)
+		{
+			VJSApplication::_backupDataStore( ioParms, application);
+			done = true;
+		}
+	}
+	if (!done)
+	{
+		ioParms.ReturnNullValue();
+	}
+}
+
+void VJSApplicationGlobalObject::_getLastBackups(XBOX::VJSParms_callStaticFunction& ioParms, XBOX::VJSGlobalObject* inGlobalObject)
+{
+	bool done = false;
+	VRIAJSRuntimeContext *rtContext = VRIAJSRuntimeContext::GetFromJSGlobalObject( inGlobalObject);
+	if (rtContext != NULL)
+	{
+		VRIAServerProject *application = rtContext->GetRootApplication();
+		if (application != NULL)
+		{
+			VJSApplication::_getLastBackups( ioParms, application);
+			done = true;
+		}
+	}
+	if (!done)
+	{
+		ioParms.ReturnNullValue();
+	}
+}
+
+
+void VJSApplicationGlobalObject::_getBackupSettings( XBOX::VJSParms_callStaticFunction& ioParms, XBOX::VJSGlobalObject* inGlobalObject)
+{
+	bool done = false;
+	VRIAJSRuntimeContext *rtContext = VRIAJSRuntimeContext::GetFromJSGlobalObject( inGlobalObject);
+	if (rtContext != NULL)
+	{
+		VRIAServerProject *application = rtContext->GetRootApplication();
+		if (application != NULL)
+		{
+			VJSApplication::_getBackupSettings( ioParms, application);
+			done = true;
+		}
+	}
+
+	if (!done)
+	{
+		ioParms.ReturnUndefinedValue();
+	}
+
+}
+
 
 
 void VJSApplicationGlobalObject::_login( XBOX::VJSParms_callStaticFunction& ioParms, XBOX::VJSGlobalObject* inGlobalObject)
@@ -405,7 +530,6 @@ void VJSApplicationGlobalObject::_getWildChar( XBOX::VJSParms_getProperty& ioPar
 	}
 }
 
-
 void VJSApplicationGlobalObject::_getIsAdministrator( XBOX::VJSParms_getProperty& ioParms, XBOX::VJSGlobalObject* inGlobalObject)
 {
 	bool done = false;
@@ -437,69 +561,6 @@ void VJSApplicationGlobalObject::_getHttpServer( XBOX::VJSParms_getProperty& ioP
 		if (application != NULL)
 		{
 			VJSApplication::_getHttpServer( ioParms, application);
-			done = true;
-		}
-	}
-
-	if (!done)
-	{
-		ioParms.ReturnUndefinedValue();
-	}
-}
-
-
-void VJSApplicationGlobalObject::_getWebAppService( XBOX::VJSParms_getProperty& ioParms, XBOX::VJSGlobalObject* inGlobalObject)
-{
-	bool done = false;
-	VRIAJSRuntimeContext *rtContext = VRIAJSRuntimeContext::GetFromJSGlobalObject( inGlobalObject);
-	if (rtContext != NULL)
-	{
-		VRIAServerProject *application = rtContext->GetRootApplication();
-		if (application != NULL)
-		{
-			VJSApplication::_getWebAppService( ioParms, application);
-			done = true;
-		}
-	}
-
-	if (!done)
-	{
-		ioParms.ReturnUndefinedValue();
-	}
-}
-
-
-void VJSApplicationGlobalObject::_getDataService( XBOX::VJSParms_getProperty& ioParms, XBOX::VJSGlobalObject* inGlobalObject)
-{
-	bool done = false;
-	VRIAJSRuntimeContext *rtContext = VRIAJSRuntimeContext::GetFromJSGlobalObject( inGlobalObject);
-	if (rtContext != NULL)
-	{
-		VRIAServerProject *application = rtContext->GetRootApplication();
-		if (application != NULL)
-		{
-			VJSApplication::_getDataService( ioParms, application);
-			done = true;
-		}
-	}
-
-	if (!done)
-	{
-		ioParms.ReturnUndefinedValue();
-	}
-}
-
-
-void VJSApplicationGlobalObject::_getRPCService( XBOX::VJSParms_getProperty& ioParms, XBOX::VJSGlobalObject* inGlobalObject)
-{
-	bool done = false;
-	VRIAJSRuntimeContext *rtContext = VRIAJSRuntimeContext::GetFromJSGlobalObject( inGlobalObject);
-	if (rtContext != NULL)
-	{
-		VRIAServerProject *application = rtContext->GetRootApplication();
-		if (application != NULL)
-		{
-			VJSApplication::_getRPCService( ioParms, application);
 			done = true;
 		}
 	}
@@ -764,9 +825,15 @@ void VJSApplication::GetDefinition( ClassDefinition& outDefinition)
 		{ kSSJS_PROPERTY_NAME_GetSettingFile, js_callStaticFunction<_getSettingFile>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
 		{ kSSJS_PROPERTY_NAME_GetWalibFolder, js_callStaticFunction<_getWalibFolder>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
 		{ kSSJS_PROPERTY_NAME_GetItemsWithRole, js_callStaticFunction<_getItemsWithRole>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
+		{ "reloadModel", js_callStaticFunction<_reloadModel>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
 		{ kSSJS_PROPERTY_NAME_verifyDataStore, js_callStaticFunction<_verifyDataStore>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
 		{ kSSJS_PROPERTY_NAME_repairDataStore, js_callStaticFunction<_repairInto>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
 		{ kSSJS_PROPERTY_NAME_compactDataStore, js_callStaticFunction<_compactInto>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
+		{ kSSJS_PROPERTY_NAME_backupDataStore, js_callStaticFunction<_backupDataStore>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
+		{ "getLastBackups", js_callStaticFunction<_getLastBackups>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
+		{ "getBackupSettings", js_callStaticFunction<_getBackupSettings>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
+		{ "integrateDataStoreJournal", js_callStaticFunction<_integrateDataStoreJournal>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
+		{ "restoreDataStore", js_callStaticFunction<_restoreDataStore>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
 		{ kSSJS_PROPERTY_NAME_loginByKey, js_callStaticFunction<_login>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
 		{ kSSJS_PROPERTY_NAME_loginByPassword, js_callStaticFunction<_unsecureLogin>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
 		{ kSSJS_PROPERTY_NAME_currentUser, js_callStaticFunction<_getCurrentUser>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
@@ -781,9 +848,6 @@ void VJSApplication::GetDefinition( ClassDefinition& outDefinition)
 		{ kSSJS_PROPERTY_NAME_Name, js_getProperty<_getName>, NULL, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
 		{ kSSJS_PROPERTY_NAME_Administrator, js_getProperty<_getIsAdministrator>, NULL, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
 		{ kSSJS_PROPERTY_NAME_HTTPServer, js_getProperty<_getHttpServer>, NULL, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
-		{ kSSJS_PROPERTY_NAME_WebAppService, js_getProperty<_getWebAppService>, NULL, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
-		{ kSSJS_PROPERTY_NAME_DataService, js_getProperty<_getDataService>, NULL, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
-		{ kSSJS_PROPERTY_NAME_RPCService, js_getProperty<_getRPCService>, NULL, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
 		{ kSSJS_PROPERTY_NAME_Console, js_getProperty<_getConsole>, NULL, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
 		{ kSSJS_PROPERTY_NAME_Pattern, js_getProperty<_getPattern>, NULL, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
 		{ kSSJS_PROPERTY_NAME_Storage, js_getProperty<_getStorage>, NULL, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
@@ -939,10 +1003,23 @@ void VJSApplication::_logout( XBOX::VJSParms_callStaticFunction& ioParms, VRIASe
 	if (rtContext != NULL)
 	{
 		VError err = VE_OK;
+
+		session = rtContext->RetainUAGSession();
+		if (session != NULL)
+		{
+			VRIAHTTPSessionManager* sessionMgr = inApplication->RetainSessionMgr();
+			if (sessionMgr != NULL)
+			{
+				sessionMgr->RemoveSession( session);
+				sessionMgr->Release();
+			}
+		}
+		ReleaseRefCountable( &session);
+
 		CUAGDirectory* directory = inApplication->RetainUAGDirectory(err);
 		if (directory != NULL)
 		{
-			session = directory->MakeDefaultSession(nil, (VJSContext*)&(ioParms.GetContext()));
+			session = directory->MakeDefaultSession(nil, (VJSContext*)&(ioParms.GetContext()), true);
 			directory->Release();
 		}
 		rtContext->SetUAGSession(session, true);
@@ -1077,8 +1154,608 @@ void callToolsOnDB(XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject
 	ioParms.ReturnBool(ok);
 }
 
+void VJSApplicationGlobalObject::_getBackupRegistry(XBOX::VJSParms_callStaticFunction& ioParms, XBOX::VJSGlobalObject* inGlobalObject)
+{
+	bool done = false;
+	VJSArray arrayOfManifests(ioParms.GetContextRef());
+	if(!ioParms.IsNullParam(1) && ioParms.IsObjectParam(1))
+	{
+		VFile* registryFile = NULL;
+		VFolder* registryFolder = NULL;
+		
+		//false is to prevent RetailFXXParam() from converting the passed parameter to as string and trying to parse it as a path specification.
+		//If you don't do this, the followign JS call: getBackupRegistry(new Folder("c:/MyFolder/"));
+		//will cause RetailFileParam() to return a VFile with "[JSObject]" as path 
+		registryFile = ioParms.RetainFileParam(1,false);
+		if (registryFile == NULL)
+		{
+			registryFolder = ioParms.RetainFolderParam(1,false);
+			if (registryFolder)
+			{
+				VFilePath path;
+				registryFolder->GetPath( path);
+				path.SetFileName(CVSTR("lastBackup.json"));
+				registryFile = new VFile(path);
+			}
+		}
+
+		if (registryFile && registryFile->Exists())
+		{
+			VFilePath path;
+			CDB4DManager* db4D = NULL;
+			registryFile->GetPath( path);
+			db4D = VComponentManager::RetainComponentOfType<CDB4DManager>();
+			IBackupTool* bkpt = db4D->CreateBackupTool();
+			bkpt->ConvertBackupRegistryToJsObject(path,arrayOfManifests);
+			delete bkpt;bkpt = NULL;
+			XBOX::ReleaseRefCountable(&db4D);
+
+			ioParms.ReturnValue(arrayOfManifests);
+			done = true;
+		}
+		XBOX::ReleaseRefCountable(&registryFolder);
+		XBOX::ReleaseRefCountable(&registryFile);
+	}
+	if (!done)
+	{
+		ioParms.ReturnNullValue();
+	}
+}
+
+void VJSApplicationGlobalObject::_integrateDataStoreJournal(XBOX::VJSParms_callStaticFunction& ioParms, XBOX::VJSGlobalObject* inGlobalObject)
+{
+	bool done = false;
+	VRIAJSRuntimeContext *rtContext = VRIAJSRuntimeContext::GetFromJSGlobalObject( inGlobalObject);
+	if (rtContext != NULL)
+	{
+		VRIAServerProject *application = rtContext->GetRootApplication();
+		if (application != NULL)
+		{
+			VJSApplication::_integrateDataStoreJournal(ioParms,application);
+			done = true;
+		}
+	}
+	if (!done)
+	{
+		ioParms.ReturnBool(false);
+	}
+}
+
+void VJSApplicationGlobalObject::_restoreDataStore(XBOX::VJSParms_callStaticFunction& ioParms, XBOX::VJSGlobalObject* inGlobalObject)
+{
+	bool done = false;
+	VRIAJSRuntimeContext *rtContext = VRIAJSRuntimeContext::GetFromJSGlobalObject( inGlobalObject);
+	if (rtContext != NULL)
+	{
+		VRIAServerProject *application = rtContext->GetRootApplication();
+		if (application != NULL)
+		{
+			VJSApplication::_restoreDataStore(ioParms,application);
+			done = true;
+		}
+	}
+	if (!done)
+	{
+		ioParms.ReturnNullValue();
+	}
+}
 
 
+
+
+
+void VJSApplication::_getLastBackups( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication)
+{
+	bool done = false;
+	VJSArray arrayOfManifests(ioParms.GetContextRef());
+	if(inApplication == NULL ||inApplication->GetDesignProject() == NULL )
+	{
+		ioParms.ReturnNullValue();
+	}
+	else
+	{
+		VProjectItem* backupsFolder = inApplication->GetDesignProject()->GetProjectItemFromTag(kBackupsTag);
+		if(backupsFolder)
+		{
+			VFilePath path;
+			CDB4DManager* db4D = NULL;
+			backupsFolder->GetFilePath( path);
+			path.SetFileName(CVSTR("lastBackup.json"));
+
+			db4D = VComponentManager::RetainComponentOfType<CDB4DManager>();
+
+			IBackupTool* bkpt = db4D->CreateBackupTool();
+			bkpt->ConvertBackupRegistryToJsObject(path,arrayOfManifests);
+
+			delete bkpt;bkpt = NULL;
+			XBOX::ReleaseRefCountable(&db4D);
+		}
+		ioParms.ReturnValue(arrayOfManifests);
+	}
+}
+
+void VJSApplication::_getBackupSettings( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication)
+{
+	bool done = false;
+	VRIAContext *riaContext = VRIAJSRuntimeContext::GetApplicationContextFromJSContext( ioParms.GetContext(), inApplication);
+	CDB4DManager *db4d = VRIAServerApplication::Get()->GetComponentDB4D();
+
+	if (inApplication)
+	{
+		IBackupSettings* settings = inApplication->RetainBackupSettings(riaContext,NULL);
+		if (settings != NULL)
+		{
+			VJSObject settingsObj(ioParms.GetContextRef());
+			settingsObj.MakeEmpty();
+			settings->ToJSObject(settingsObj);
+			ioParms.ReturnValue(settingsObj);
+			done = true;
+		}
+		XBOX::ReleaseRefCountable(&settings);
+		
+	}
+	if (!done)
+		ioParms.ReturnUndefinedValue();
+}
+
+
+/**
+ * \brief Backs up a datastore that is *closed*.
+ * \details Command format: application.backupDataStore(model : File,data : File,config : Object [,options : Object])
+ * The config objects is mapped to an IBackupSettings instance and has the same syntax.
+ */
+void VJSApplication::_backupDataStore( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication)
+{
+	CDB4DBase* dbToBackup = NULL;
+	CDB4DManager* db4D = NULL;
+	VRIAContext *riaContext = NULL;
+	VFile* modelFile = NULL,*dataFile = NULL;
+	VFilePath backupManifestPath;
+	IBackupSettings *actualBackupSettings = NULL;
+	XBOX::VError error = VE_OK;
+	VJSObject progressObj(ioParms.GetContextRef());
+	VJSContext jsContext(ioParms.GetContextRef());
+	int configParamIndex = -1,optionsParamIndex = -1;
+	bool dbIsOpened = false;
+	bool currentApplicationIsTargetApplication = false;
+	bool currentApplicationInMaintenance = false;
+	VRIAServerProject* targetApplication = NULL;
+	VFilePath currentApplicationDataFilePath,currentApplicationDataFolderPath;
+	VFilePath currentApplicationDataModelPath;
+
+	StErrorContextInstaller errorContext(false);
+
+	//Establish environment to work
+	db4D = VComponentManager::RetainComponentOfType<CDB4DManager>();
+	riaContext = VRIAJSRuntimeContext::GetApplicationContextFromJSContext( ioParms.GetContext(), inApplication);
+
+	VFile* modelFileToBackup = NULL;
+	VFile* dataFileToBackup = NULL;
+
+	if(!ioParms.IsNullParam(1) && ioParms.IsObjectParam(1))
+	{
+		modelFileToBackup = ioParms.RetainFileParam(1);
+	}
+
+	if(!ioParms.IsNullParam(2) && ioParms.IsObjectParam(2))
+	{
+		dataFileToBackup = ioParms.RetainFileParam(2);
+	}
+	
+	if(!ioParms.IsNullParam(3) && ioParms.IsObjectParam(3))
+	{
+		VJSObject settingsObj(ioParms.GetContextRef());
+		actualBackupSettings = db4D->CreateBackupSettings();
+		ioParms.GetParamObject( 3, settingsObj);
+		if (!actualBackupSettings->FromJSObject(settingsObj))
+		{
+			error = VE_INVALID_PARAMETER;
+			vThrowError(error,CVSTR("Invalid custom settings specified"));
+			delete actualBackupSettings;
+			actualBackupSettings = NULL;
+		}
+	}
+
+	//Optional arg 4 is a progress object
+	if(ioParms.IsObjectParam(4) && !ioParms.IsNullParam(4))
+	{
+		ioParms.GetParamObject(4, progressObj);
+	}
+	else
+	{
+		progressObj.MakeEmpty();
+	}
+
+	//Sanity check
+	if (modelFileToBackup == NULL)
+	{
+		error = VE_INVALID_PARAMETER;
+		vThrowError(error,CVSTR("Invalid model file path specified"));
+	}
+
+	if (dataFileToBackup == NULL)
+	{
+		error = VE_INVALID_PARAMETER;
+		vThrowError(error,CVSTR("Invalid data file path specified"));
+	}
+
+	if (actualBackupSettings == NULL)
+	{
+		error = VE_INVALID_PARAMETER;
+		vThrowError(error,CVSTR("Invalid settings specified"));
+	}
+
+	if(errorContext.GetLastError() == VE_OK)
+	{
+		//Check that the data folder does not belong to an opened database
+		VFilePath path;
+		dataFileToBackup->GetPath(path);
+		path.ToParent();
+		bool dbIsOpened = false;
+
+		for(sLONG count = db4D->CountBases();count>0 && !dbIsOpened;--count)
+		{
+			CDB4DBase* enumeratedBase = db4D->RetainNthBase(count);
+			VFolder* dataFolder = enumeratedBase->RetainDataFolder();
+			const VFilePath& dataFolderPath = dataFolder->GetPath();
+			dbIsOpened = (dataFolderPath == path);
+			XBOX::ReleaseRefCountable(&dataFolder);
+			XBOX::ReleaseRefCountable(&enumeratedBase);
+		}
+
+		if(dbIsOpened)
+		{
+			error = VE_INVALID_PARAMETER;
+			vThrowError(error,CVSTR("Specified data file belongs to an operating base"));
+		}
+	}
+	
+	IDB4D_DataToolsIntf* toolintf = NULL;
+	IBackupTool* backupTool = NULL;
+	VFilePath manifestPath;
+	bool backupSucceeded = false;
+	if(errorContext.GetLastError() == VE_OK)
+	{
+		CDB4DBaseContext* baseContext = riaContext->GetBaseContext();
+		backupTool = db4D->CreateBackupTool();
+		toolintf = db4D->CreateJSDataToolsIntf(jsContext, progressObj);
+		backupSucceeded = backupTool->BackupClosedDatabase(*modelFileToBackup,*dataFileToBackup,baseContext,*actualBackupSettings,&manifestPath,toolintf);
+	}
+
+	error = errorContext.GetLastError();
+	if ( error == VE_OK && backupSucceeded)
+	{
+		xbox_assert(!manifestPath.IsEmpty() && manifestPath.IsValid() && manifestPath.IsFile());
+		ioParms.ReturnFilePathAsFileOrFolder(manifestPath);
+	}
+	else 
+	{
+		VValueBag errorBag;
+		VErrorBase* errorBase = NULL;
+		errorBase = errorContext.GetContext()->GetLast();
+		errorBag.SetLong(L"ErrorLevel",2);//normal error
+		if(errorBase)
+		{
+			VString errorString,temp;
+			errorBase->GetErrorString(errorString);
+			temp.Clear();
+			errorBase->GetLocation(temp);
+			if(temp.GetLength() > 0)
+			{
+				errorString.AppendCString(", ");
+				errorString.AppendString(temp);
+			}
+			temp.Clear();
+			errorBase->GetErrorDescription(temp);
+			if(temp.GetLength() > 0)
+			{
+				errorString.AppendCString(", ");
+				errorString.AppendString(temp);
+			}
+			temp.Clear();
+			errorBase->GetActionDescription(temp);
+			if(temp.GetLength() > 0)
+			{
+				errorString.AppendCString(", ");
+				errorString.AppendString(temp);
+			}
+			errorBag.SetString(L"ErrorText",errorString);
+		}
+		else
+		{
+			errorBag.SetString(L"ErrorText",CVSTR("Backup failed"));
+			errorBag.SetLong(L"ErrorNumber",ERRCODE_FROM_VERROR(error));
+		}
+		if (toolintf)
+		{
+			toolintf->AddProblem(errorBag);
+		}
+		ioParms.ReturnNullValue();
+	}
+	delete toolintf;toolintf = NULL;
+	delete backupTool;backupTool = NULL;
+	XBOX::ReleaseRefCountable(&actualBackupSettings);
+	XBOX::ReleaseRefCountable(&dataFileToBackup);
+	XBOX::ReleaseRefCountable(&modelFileToBackup);
+	XBOX::ReleaseRefCountable(&db4D);
+}
+
+
+/**
+ * \brief Restores an application data store using the specified backup
+ * Syntax: application.restoreDataStore(File: manifest,Folder: destination [, options])
+ * \param manifest a File object holding the backup manifest path to use for restoration
+ * \param destination a Folder object indicating where the data store's data folder will be restored. If that
+ * directory contains already a data folder the same will be renamed and returned in the response.
+ * \param options standard progress options block and async callbacks
+
+ * Response: a JS object 
+ * <pre>
+ * {
+ *    ok: boolean,
+ *    dataFolder: Folder(xxxx)
+ * } 
+ * </pre>
+ * @c ok indicates true if the restoration went well and false otherwise.
+ * @c dataFolder contains the new name of the former data folder that existed in @c destination (before restoration), if restoration went well. In other cases this parameter is undefined
+ */
+void VJSApplication::_restoreDataStore(XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication)
+{
+	VRIAContext *riaContext = NULL;
+	VFile* manifestFile(NULL);
+	VFolder* destFolder(NULL);
+	VError dbError = VE_OK;
+	XBOX::VFilePath existingDataFolderNewPath;
+	
+	XBOX::StErrorContextInstaller errContext(true,true);
+	
+	riaContext = VRIAJSRuntimeContext::GetApplicationContextFromJSContext( ioParms.GetContext(), inApplication);
+
+	if (!ioParms.IsNullParam(1) && ioParms.IsObjectParam(1))
+	{
+		manifestFile = ioParms.RetainFileParam(1);
+	}
+
+	if (!ioParms.IsNullParam(2) )
+	{
+		if (ioParms.IsObjectParam(2))
+		{
+			destFolder = ioParms.RetainFolderParam(2);
+		}
+	}
+	
+	if(manifestFile == NULL || destFolder == NULL)
+		dbError = vThrowError(VE_INVALID_PARAMETER);
+
+	if (dbError == VE_OK)
+	{
+		VJSObject optionsObj(ioParms.GetContextRef());
+		VJSContext jsContext(ioParms.GetContextRef());
+
+		IDB4D_DataToolsIntf* toolintf = NULL;
+		CDB4DManager* db4D = NULL;
+		IBackupTool*  backupTool = NULL;
+		
+		if (!ioParms.IsNullParam(3) && ioParms.IsObjectParam(3))
+		{
+			ioParms.GetParamObject(3, optionsObj);
+		}
+		else
+		{
+			optionsObj.MakeEmpty();
+		}
+		
+		dbError = VE_MEMORY_FULL;
+		db4D = VComponentManager::RetainComponentOfType<CDB4DManager>();
+		if (db4D)
+		{
+			toolintf = db4D->CreateJSDataToolsIntf(jsContext, optionsObj);
+			backupTool = db4D->CreateBackupTool();
+			if(backupTool)
+			{
+				dbError = VE_OK;
+				const VFilePath& manifestPath = manifestFile->GetPath();
+				const VFilePath& restoreFolderPath = destFolder->GetPath();
+
+				bool ok = backupTool->RestoreDataFolder(manifestPath,restoreFolderPath,existingDataFolderNewPath,toolintf);
+				if (ok )
+				{
+					//Restore went well. Restoration will typically bring back some journal information that will not be applicable
+					// now (it was when that particular backup was done) so we need
+					// to update them from the current application's data folder. However depending on the restore folder path
+					// that data folder may have been moved...
+					//e.g.: application.restoreDataFolder(File(manifest),application.getFolder())
+					//will have moved {applicationFolder}/DataFolder to {applicationFolder}/DataFolder_REPLACED_XXXXXX
+					VFilePath sourceDataFolder,destDataFolder;
+					VFolder* df = inApplication->RetainFolder();
+					if(df->GetPath()  == restoreFolderPath)
+					{
+						//The given restore path is actually the data folder's parent folder so the data folder has been renamed.
+						//Current journal infos are found in that renamed folder and need be synchronized from there
+						sourceDataFolder = existingDataFolderNewPath;
+					}
+					else
+					{
+						//The restore path is somewhere else and the current data folder has not been renamed so
+						df->GetPath(sourceDataFolder);
+						sourceDataFolder.ToSubFolder(CVSTR("DataFolder"));
+					}
+					destDataFolder = restoreFolderPath;
+					XBOX::ReleaseRefCountable(&df);
+					destDataFolder.ToSubFolder(CVSTR("DataFolder"));
+					dbError = inApplication->SynchronizeJournalInfos(sourceDataFolder,destDataFolder);
+				}
+			}
+		}
+		delete backupTool;backupTool = NULL;
+		delete toolintf;toolintf = NULL;
+		XBOX::ReleaseRefCountable(&db4D);
+	}
+
+	XBOX::ReleaseRefCountable(&destFolder);
+	XBOX::ReleaseRefCountable(&manifestFile);
+	
+	//Response: {ok:true|false[,dataFolder:Folder(xxxxx)]}
+	{
+		VJSObject statusObj(ioParms.GetContextRef());
+		
+		statusObj.MakeEmpty();
+		statusObj.SetProperty(CVSTR("ok"),errContext.GetLastError() == VE_OK);
+		if (!existingDataFolderNewPath.IsEmpty() 
+			&& testAssert(existingDataFolderNewPath.IsValid() && existingDataFolderNewPath.IsFolder()))
+		{
+			VJSObject folderObj(ioParms.GetContextRef());
+			folderObj.MakeFilePathAsFileOrFolder(existingDataFolderNewPath);
+			statusObj.SetProperty(CVSTR("dataFolder"),folderObj);
+		}
+		ioParms.ReturnValue(statusObj);
+	}
+}
+
+void VJSApplication::_integrateDataStoreJournal(XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication)
+{
+	VRIAContext *riaContext = NULL;
+	VFile* catalogFile(NULL),*dataFile(NULL),*journalFile(NULL);
+	VFile** params[3] = {&catalogFile,&dataFile,&journalFile};
+	uLONG8 fromOperation = 0, upToOperation = 0,operationCount = 0;
+	VError dbError = VE_OK;
+	XBOX::StErrorContextInstaller errContext(true,true);
+	
+	riaContext = VRIAJSRuntimeContext::GetApplicationContextFromJSContext( ioParms.GetContext(), inApplication);
+
+	if (!ioParms.IsNullParam(1) && ioParms.IsObjectParam(1))
+	{
+		catalogFile = ioParms.RetainFileParam(1);
+	}
+	if (!ioParms.IsNullParam(2) && ioParms.IsObjectParam(2))
+	{
+		dataFile = ioParms.RetainFileParam(2);
+	}
+	if (!ioParms.IsNullParam(3) && ioParms.IsObjectParam(3))
+	{
+		journalFile = ioParms.RetainFileParam(3);
+	}
+
+	if(catalogFile == NULL)
+		vThrowError(VE_DB4D_INVALID_PARAMETER,CVSTR("model"));
+
+	if(dataFile == NULL)
+		vThrowError(VE_DB4D_INVALID_PARAMETER,CVSTR("data"));
+	
+	if( journalFile == NULL )
+		vThrowError(VE_DB4D_INVALID_PARAMETER,CVSTR("journal"));
+
+	if (errContext.GetLastError() == VE_OK)
+	{
+		VJSObject optionsObj(ioParms.GetContextRef());
+		VJSContext jsContext(ioParms.GetContextRef());
+		sLONG flags = DB4D_Open_WithSeparateIndexSegment | DB4D_Open_As_XML_Definition;
+
+		if (!ioParms.IsNullParam(4) &&ioParms.IsObjectParam(4))
+		{
+			ioParms.GetParamObject(4, optionsObj);
+			bool exists = false;
+			upToOperation = optionsObj.GetPropertyAsLong(CVSTR("upToOperation"),NULL,&exists);
+			if(!exists)
+				upToOperation = 0;
+			fromOperation = optionsObj.GetPropertyAsLong(CVSTR("fromOperation"),NULL,&exists);
+			if (optionsObj.HasProperty(CVSTR("resultDataFile")))
+			{
+				VJSValue val(ioParms.GetContextRef());
+
+				val = optionsObj.GetProperty(CVSTR("resultDataFile"));
+				if (!val.IsNull() && val.IsObject())
+				{
+					XBOX::VFilePath path;
+					VFile* workingFile = val.GetFile();
+					if (workingFile)
+					{
+						const VFilePath& path1 = dataFile->GetPath();
+						const VFilePath& path2 = workingFile->GetPath();
+						if (path1 != path2)
+						{
+							dbError = dataFile->CopyTo(*workingFile,XBOX::FCP_Overwrite);
+							if (dbError == VE_OK)
+							{
+								XBOX::ReleaseRefCountable(&dataFile);
+								dataFile = XBOX::RetainRefCountable(workingFile);
+								workingFile = NULL; //obtained using Get() instead of Retain
+							}
+							else
+							{
+								vThrowError(dbError);
+							}
+						}
+					}
+				}
+			}
+			
+		}
+		else
+		{
+			optionsObj.MakeEmpty();
+		}
+		if (errContext.GetLastError() == VE_OK)
+		{
+			IDB4D_DataToolsIntf* toolintf = NULL;
+			CDB4DBaseContext *baseContext = NULL;
+			CDB4DBase* base = NULL;
+			CDB4DManager* db4D = NULL;
+			VProgressIndicatorBrigdeToIDB4DToolInterface* progressIndicator = NULL;
+
+			db4D = VComponentManager::RetainComponentOfType<CDB4DManager>();
+			toolintf = db4D->CreateJSDataToolsIntf(jsContext, optionsObj);
+			progressIndicator = new VProgressIndicatorBrigdeToIDB4DToolInterface(toolintf);
+
+			baseContext = (riaContext != NULL) ? riaContext->GetBaseContext() : NULL;
+		
+			base = db4D->OpenBase( *catalogFile, flags, NULL,XBOX::FA_READ_WRITE, NULL,NULL,NULL);
+			if(base && errContext.GetLastError() == VE_OK)
+			{
+				flags = DB4D_Open_WithSeparateIndexSegment | DB4D_Open_WITHOUT_JournalFile;
+				base->OpenData( *dataFile, flags, baseContext, NULL,XBOX::FA_READ_WRITE);
+				if (errContext.GetLastError() == VE_OK)
+				{
+					CDB4DJournalParser* journalParser = NULL;
+					uLONG8 totalOperationCount = 0;
+
+					journalParser = db4D->NewJournalParser();
+
+					dbError = journalParser->Init( journalFile, totalOperationCount, progressIndicator );
+					if(dbError == VE_OK)
+					{
+						operationCount = 0;
+						dbError = base->IntegrateJournal(journalParser, fromOperation, upToOperation, &operationCount, progressIndicator);
+					}
+					XBOX::ReleaseRefCountable( &journalParser);
+				}
+				base->CloseAndRelease(true);
+				base = NULL;
+			}
+			xbox_assert(base == NULL);
+			XBOX::ReleaseRefCountable(&progressIndicator);
+			delete toolintf; toolintf = NULL;
+			XBOX::ReleaseRefCountable(&db4D);
+		}
+	}
+	XBOX::ReleaseRefCountable(&journalFile);
+	XBOX::ReleaseRefCountable(&dataFile);
+	XBOX::ReleaseRefCountable(&catalogFile);
+
+	if (errContext.GetLastError() == VE_OK)
+	{
+		VJSObject statusObj(ioParms.GetContextRef());
+		statusObj.MakeEmpty();
+		statusObj.SetProperty(CVSTR("fromOperation"),static_cast<sLONG8>(fromOperation));
+		statusObj.SetProperty(CVSTR("upToOperation"),static_cast<sLONG8>(upToOperation));
+		statusObj.SetProperty(CVSTR("operationCount"),static_cast<sLONG8>(operationCount));
+		ioParms.ReturnValue(statusObj);
+	}
+	else
+	{
+		ioParms.ReturnNullValue();
+	}
+}
 
 void VJSApplication::_verifyDataStore( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication)
 {
@@ -1115,7 +1792,6 @@ void VJSApplication::_verifyDataStore( XBOX::VJSParms_callStaticFunction& ioParm
 		}
 		QuickReleaseRefCountable( newdb);
 		ReleaseRefCountable( &db4D);
-
 	}
 	ioParms.ReturnBool(ok);
 }
@@ -1317,6 +1993,17 @@ void VJSApplication::_getItemsWithRole( XBOX::VJSParms_callStaticFunction& ioPar
 }
 
 
+void VJSApplication::_reloadModel( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication)
+{
+	VReloadCatalogMessage *msg = new VReloadCatalogMessage( inApplication);
+	if (msg != NULL)
+	{
+		msg->PostTo( VTaskMgr::Get()->GetMainTask());
+		msg->Release();
+	}
+}
+
+
 void VJSApplication::_getSolution( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication)
 {
 	ioParms.ReturnValue( VJSSolution::CreateInstance( ioParms.GetContextRef(), inApplication->GetSolution()));
@@ -1339,6 +2026,8 @@ void VJSApplication::_getWildChar( XBOX::VJSParms_getProperty& ioParms, VRIAServ
 }
 
 
+
+
 void VJSApplication::_getIsAdministrator( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication)
 {
 	ioParms.ReturnBool( inApplication->IsAdministrator());
@@ -1348,24 +2037,6 @@ void VJSApplication::_getIsAdministrator( XBOX::VJSParms_getProperty& ioParms, V
 void VJSApplication::_getHttpServer( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication)
 {
 	ioParms.ReturnValue( VJSHTTPServer::CreateInstance( ioParms.GetContextRef(), inApplication));
-}
-
-
-void VJSApplication::_getWebAppService( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication)
-{
-	ioParms.ReturnValue( VJSWebAppService::CreateInstance( ioParms.GetContextRef(), inApplication));
-}
-
-
-void VJSApplication::_getDataService( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication)
-{
-	ioParms.ReturnValue( VJSDataService::CreateInstance( ioParms.GetContextRef(), inApplication));
-}
-
-
-void VJSApplication::_getRPCService( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication)
-{
-	ioParms.ReturnValue( VJSRPCService::CreateInstance( ioParms.GetContextRef(), inApplication));
 }
 
 

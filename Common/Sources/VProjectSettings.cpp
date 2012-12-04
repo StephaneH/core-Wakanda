@@ -145,14 +145,6 @@ sLONG VProjectSettings::GetListeningSSLPort() const
 }
 
 
-void VProjectSettings::GetSSLCertificatesPath( XBOX::VString& outSSLCertificatesPath) const
-{
-	const VValueBag *bag = RetainSettings( RIASettingID::http);
-	outSSLCertificatesPath = RIASettingsKeys::HTTP::SSLCertificatePath.Get( bag);
-	ReleaseRefCountable( &bag);
-}
-
-
 bool VProjectSettings::GetAllowSSL() const
 {
 	const VValueBag *bag = RetainSettings( RIASettingID::http);
@@ -228,7 +220,7 @@ sLONG VProjectSettings::GetKeepAliveTimeOut() const
 void VProjectSettings::GetLogFolderPath( XBOX::VString& outFolderPath) const
 {
 	const VValueBag *bag = RetainSettings( RIASettingID::http);
-	outFolderPath = RIASettingsKeys::HTTP::logFolderPath.Get( bag);
+	outFolderPath = RIASettingsKeys::HTTP::logPath.Get( bag);
 	ReleaseRefCountable( &bag);
 }
 
@@ -298,6 +290,122 @@ sLONG VProjectSettings::GetCompressionMaxThreshold() const
 	return result;
 }
 
+bool VProjectSettings::HasDatabaseJournalSettings()const
+{
+	bool hasSuchSettings = false;
+	const VValueBag *projBag = RetainSettings( RIASettingID::project);
+	if (projBag)
+	{
+		const VValueBag* projectDbBag = projBag->RetainUniqueElement(
+			RIASettingsKeys::Project::database);
+		if (projectDbBag)
+		{
+			const VValueBag* projectDbJournalBag = projectDbBag->RetainUniqueElement(RIASettingsKeys::Project::Database::journal);
+			if (projectDbJournalBag )
+			{
+				hasSuchSettings = true;
+				hasSuchSettings = hasSuchSettings && projectDbJournalBag->AttributeExists(RIASettingsKeys::Project::Database::Journal::enabled);
+				hasSuchSettings = hasSuchSettings && projectDbJournalBag->AttributeExists(RIASettingsKeys::Project::Database::Journal::journalFolder);
+			}
+			ReleaseRefCountable( &projectDbJournalBag);
+		}
+		ReleaseRefCountable( &projectDbBag);
+	}
+	ReleaseRefCountable( &projBag);
+	return hasSuchSettings;
+}
+
+void VProjectSettings::GetDatabaseJournalPath(XBOX::VString& outJournalPath)const
+{
+	const VValueBag *projBag = RetainSettings( RIASettingID::project);
+	if (projBag)
+	{
+		const VValueBag* projectDbBag = projBag->RetainUniqueElement(RIASettingsKeys::Project::database);
+		if (projectDbBag)
+		{
+			const VValueBag* projectDbJournalBag = projectDbBag->RetainUniqueElement(RIASettingsKeys::Project::Database::journal);
+			if (projectDbJournalBag )
+			{
+				outJournalPath = RIASettingsKeys::Project::Database::Journal::journalFolder.Get( projectDbJournalBag);
+			}
+			ReleaseRefCountable( &projectDbJournalBag);
+		}
+		ReleaseRefCountable( &projectDbBag);
+	}
+	ReleaseRefCountable( &projBag);
+}
+
+bool VProjectSettings::GetDatabaseJournalEnabled()const
+{
+	bool result = false;
+	const VValueBag *projBag = RetainSettings( RIASettingID::project);
+	if (projBag)
+	{
+		const VValueBag* projectDbBag = projBag->RetainUniqueElement(RIASettingsKeys::Project::database);
+		if (projectDbBag)
+		{
+			const VValueBag* projectDbJournalBag = projectDbBag->RetainUniqueElement(RIASettingsKeys::Project::Database::journal);
+			if (projectDbJournalBag )
+			{
+				result = RIASettingsKeys::Project::Database::Journal::enabled.Get( projectDbJournalBag);
+			}
+			ReleaseRefCountable( &projectDbJournalBag);
+		}
+		ReleaseRefCountable( &projectDbBag);
+	}
+	ReleaseRefCountable( &projBag);
+	return result;
+}
+
+bool VProjectSettings::HasDatabaseRecoverySettings()const
+{
+	return HasSettings(RIASettingsKeys::Project::Database::autoRecovery);
+}
+
+bool VProjectSettings::GetRecoverFromJournalOnIncompleteDatabase()const
+{
+	bool result = false;
+	const VValueBag *projBag = RetainSettings( RIASettingID::project);
+	if (projBag)
+	{
+		const VValueBag* projectDbBag = projBag->RetainUniqueElement(RIASettingsKeys::Project::database);
+		if (projectDbBag)
+		{
+			const VValueBag* projectDbJournalBag = projectDbBag->RetainUniqueElement(RIASettingsKeys::Project::Database::autoRecovery);
+			if (projectDbJournalBag )
+			{
+				result = RIASettingsKeys::Project::Database::AutoRecovery::integrateJournal.Get( projectDbJournalBag);
+			}
+			ReleaseRefCountable( &projectDbJournalBag);
+		}
+		ReleaseRefCountable( &projectDbBag);
+	}
+	ReleaseRefCountable( &projBag);
+	return result;
+}
+
+bool VProjectSettings::GetRecoverFromLastBackupOnCorruptedDatabase()const
+{
+	bool result = false;
+	const VValueBag *projBag = RetainSettings( RIASettingID::project);
+	if (projBag)
+	{
+		const VValueBag* projectDbBag = projBag->RetainUniqueElement(RIASettingsKeys::Project::database);
+		if (projectDbBag)
+		{
+			const VValueBag* projectDbRecoveryBag = projectDbBag->RetainUniqueElement(RIASettingsKeys::Project::Database::autoRecovery);
+			if (projectDbRecoveryBag)
+			{
+				result = RIASettingsKeys::Project::Database::AutoRecovery::restoreFromLastBackup.Get( projectDbRecoveryBag);
+			}
+			ReleaseRefCountable( &projectDbRecoveryBag);
+		}
+		ReleaseRefCountable( &projectDbBag);
+	}
+	ReleaseRefCountable( &projBag);
+	return result;
+}
+							
 
 bool VProjectSettings::HasJavaScriptSettings() const
 {
@@ -370,20 +478,4 @@ const XBOX::VValueBag* VProjectSettings::RetainServiceSettings( const XBOX::VStr
 	}
 
 	return RetainRefCountable( bag);
-}
-
-
-void VProjectSettings::GetDirectoryIndex( XBOX::VString& outDirectoryIndex) const
-{
-	outDirectoryIndex.Clear();
-	
-	const VValueBag *webAppSettings = RetainServiceSettings( L"webApp");
-	
-	if (webAppSettings == NULL)	// Check whether the settings contains the deprecated "webApp" service settings
-		webAppSettings = RetainSettings( RIASettingID::webApp);
-		
-	if (webAppSettings != NULL)
-		outDirectoryIndex = RIASettingsKeys::WebApp::directoryIndex.Get( webAppSettings);
-		
-	ReleaseRefCountable( &webAppSettings);
 }

@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Random;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -19,20 +18,19 @@ import org.w3c.dom.NodeList;
  * @author Ouissam
  * 
  */
-public class MediaTypeUtil {
+public class MediaTypeUtil{
 
 	//private static Logger logger = Logger.getLogger(MediaType.class);
+	
+	private static Settings settings = Utils.getSettingsInstance();
 
-	private final static char[] MULTIPART_CHARS = "-_1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	final static char[] MULTIPART_CHARS = "-_1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 			.toCharArray();
 
 	public static void main(String[] args) throws Exception {
-		getMimeTypesXMLFilePath();
+		new MediaTypeUtil().getMimeTypesXMLFilePath();
 	}
 
-	static {
-
-	}
 
 	/**
 	 * Returns a map of supported extensions with their corresponding media
@@ -41,7 +39,7 @@ public class MediaTypeUtil {
 	 * @return
 	 * @throws Exception
 	 */
-	public static Map<String, String> getMediaTypeMap() throws Exception {
+	public Map<String, String> getMediaTypeMap() throws Exception {
 
 		File mimeTypesFile = new File(getMimeTypesXMLFilePath());
 
@@ -64,8 +62,11 @@ public class MediaTypeUtil {
 						"\\s*;\\s*");
 				for (int y = 0; y < extensions.length; y++) {
 					String ext = extensions[y];
-					if (!ext.equals(""))
-						map.put(extensions[y], contentType);
+					if (!ext.equals("")){
+						String contentTypes_  = map.get(ext);
+						String contentTypes = contentTypes_ == null ? contentType : contentTypes_ + ";" + contentType;
+						map.put(extensions[y], contentTypes);
+					}
 				}
 			}
 
@@ -84,12 +85,12 @@ public class MediaTypeUtil {
 	 * 
 	 * @throws Exception
 	 */
-	public static void setMediaTypeResources() throws Exception {
+	public void setMediaTypeResources() throws Exception {
 
 		for (Entry<String, String> entry : getMediaTypeMap().entrySet()) {
 			String extension = entry.getKey();
 			// String contentType = entry.getValue();
-			String filePath = Resources.getMediaTypeFolder() + "/file."
+			String filePath = settings.getMediaTypeFolder() + "/file."
 					+ extension;
 			File file = new File(filePath);
 			if (!file.exists()) {
@@ -106,11 +107,11 @@ public class MediaTypeUtil {
 	 * 
 	 * @throws Exception
 	 */
-	public static void removeMediaTypeResources() throws Exception {
+	public void removeMediaTypeResources() throws Exception {
 		for (Entry<String, String> entry : getMediaTypeMap().entrySet()) {
 			String extension = entry.getKey();
 			// String contentType = entry.getValue();
-			String filePath = Resources.getMediaTypeFolder() + "/file."
+			String filePath = settings.getMediaTypeFolder() + "/file."
 					+ extension;
 			File file = new File(filePath);
 			if (file.exists()) {
@@ -121,21 +122,11 @@ public class MediaTypeUtil {
 
 	}
 
-	public static String generateBoundary() {
-		StringBuilder buffer = new StringBuilder();
-		Random rand = new Random();
-		int count = rand.nextInt(11) + 30; // a random size from 30 to 40
-		for (int i = 0; i < count; i++) {
-			buffer.append(MULTIPART_CHARS[rand.nextInt(MULTIPART_CHARS.length)]);
-		}
-		return buffer.toString();
-	}
-	
-	private static String getMimeTypesXMLFilePath() throws IOException{
+	private String getMimeTypesXMLFilePath() throws IOException{
 		String path;
 		String serverDirPath;
 		String os = System.getProperty("os.name");
-		String wakSrvEVName = Resources.getWakandaServerPathEVName();
+		String wakSrvEVName = settings.getWakandaServerPathEVName();
 		String env = System.getenv(wakSrvEVName);
 		if (env != null) {
 			// When Jenkins environement
@@ -157,7 +148,7 @@ public class MediaTypeUtil {
 				serverDirPath += ".app";
 		}
 
-		String relatPathFromServerDir = Resources.getEntitiesProp()
+		String relatPathFromServerDir = settings.getEntitiesSettings()
 		.getProperty("mimeTypes0");
 		path = serverDirPath + "/" + relatPathFromServerDir;
 
@@ -168,7 +159,7 @@ public class MediaTypeUtil {
 		// if the file is not found using server location.
 		if (!tmp.exists()) {
 			// then get the file from the local perforce workspace
-			path = Resources.getEntitiesProp().getProperty("mimeTypes1");
+			path = settings.getEntitiesSettings().getProperty("mimeTypes1");
 			tmp = new File(path);
 		}
 

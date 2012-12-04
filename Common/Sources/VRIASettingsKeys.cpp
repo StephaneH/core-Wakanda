@@ -24,7 +24,10 @@ namespace RIASettingID
 	CREATE_BAGKEY( project);
 	CREATE_BAGKEY( http);
 	CREATE_BAGKEY( database);
+	CREATE_BAGKEY( backup);
 	CREATE_BAGKEY( javaScript);
+	CREATE_BAGKEY( databaseJournal);
+	CREATE_BAGKEY( databaseRecovery);
 	CREATE_BAGKEY( service);
 	CREATE_BAGKEY( resources);
 	CREATE_BAGKEY( virtualFolder);
@@ -45,13 +48,14 @@ namespace RIASettingsKeys
 		CREATE_BAGKEY( serverStartup);
 		CREATE_PATHBAGKEY_WITH_DEFAULT_SCALAR( "serverStartup", stopIfProjectFails, XBOX::VBoolean, bool, true);
 		
-		CREATE_BAGKEY( display);
-		CREATE_PATHBAGKEY_WITH_DEFAULT_SCALAR( "display", hideExtensions, XBOX::VBoolean, bool, false);
-
 		CREATE_BAGKEY_WITH_DEFAULT_SCALAR( garbageCollect, XBOX::VBoolean, bool, false);
 
 		CREATE_BAGKEY( directory);
 		CREATE_PATHBAGKEY_WITH_DEFAULT( "directory", authenticationType, XBOX::VString, L"");
+		CREATE_BAGKEY_WITH_DEFAULT( cacheFolderPath, XBOX::VString, L"");
+
+		CREATE_BAGKEY( log);
+		CREATE_BAGKEY_WITH_DEFAULT( folderPath, XBOX::VString, L"$(solutionDir)Logs/");
 	}
 
 	// Project settings
@@ -61,10 +65,35 @@ namespace RIASettingsKeys
 		CREATE_BAGKEY_WITH_DEFAULT_SCALAR( administrator, XBOX::VBoolean, bool, false);
 		CREATE_BAGKEY_WITH_DEFAULT( hostName, XBOX::VString, L"localhost");
 		CREATE_BAGKEY_WITH_DEFAULT( pattern, XBOX::VString, L"");
+#if WITH_DEPRECATED_IPV4_API	
 		CREATE_BAGKEY_WITH_DEFAULT( listen, XBOX::VString, L"127.0.0.1");
+#else
+		CREATE_BAGKEY_WITH_DEFAULT( listen, XBOX::VString, L"localhost");
+#endif
+
 		CREATE_BAGKEY_WITH_DEFAULT( responseFormat, XBOX::VString, L"json");
 		CREATE_BAGKEY_NO_DEFAULT( authType, XBOX::VString);
+
+		CREATE_BAGKEY(database);
+
+		namespace Database
+		{
+			CREATE_BAGKEY(journal);
+			namespace Journal
+			{
+				CREATE_BAGKEY_WITH_DEFAULT_SCALAR( enabled, XBOX::VBoolean, bool,false); //whether journaling is enabled
+				CREATE_BAGKEY_WITH_DEFAULT( journalFolder, XBOX::VString,L"./");	 //Journal folder path
+			}
+
+			CREATE_BAGKEY(autoRecovery);
+			namespace AutoRecovery
+			{
+				CREATE_BAGKEY_WITH_DEFAULT_SCALAR( integrateJournal, XBOX::VBoolean, bool,false);		 //Automatically integrate journal when db opening fails
+				CREATE_BAGKEY_WITH_DEFAULT_SCALAR( restoreFromLastBackup, XBOX::VBoolean, bool,false); //Automatically recover from lastBackup when db opening fails
+			}
+		}
 	}
+
 
 	// HTTP Server settings
 	namespace HTTP
@@ -74,7 +103,7 @@ namespace RIASettingsKeys
 
 		CREATE_BAGKEY_WITH_DEFAULT_SCALAR( autoStart, XBOX::VBoolean, bool, true);
 		CREATE_BAGKEY_WITH_DEFAULT_SCALAR( port, XBOX::VLong, sLONG, 80);
-		CREATE_BAGKEY_WITH_DEFAULT( SSLCertificatePath, XBOX::VString, L"");
+		CREATE_BAGKEY_NO_DEFAULT( SSLCertificatePath, XBOX::VString);
 		CREATE_BAGKEY_WITH_DEFAULT_SCALAR( allowSSL, XBOX::VBoolean, bool, false);
 		CREATE_BAGKEY_WITH_DEFAULT_SCALAR( SSLMandatory, XBOX::VBoolean, bool, false);
 		CREATE_BAGKEY_WITH_DEFAULT_SCALAR( SSLPort, XBOX::VLong, sLONG, 443);
@@ -87,7 +116,7 @@ namespace RIASettingsKeys
 		CREATE_BAGKEY_WITH_DEFAULT_SCALAR( keepAliveTimeOut, XBOX::VLong, sLONG, 15);
 		CREATE_BAGKEY_WITH_DEFAULT( logFormat, XBOX::VString, L"No Log File");
 		CREATE_BAGKEY_WITH_DEFAULT( logTokens, XBOX::VString, L"");
-		CREATE_BAGKEY_WITH_DEFAULT( logFolderPath, XBOX::VString,  L"Logs/");
+		CREATE_BAGKEY_WITH_DEFAULT( logPath, XBOX::VString,  L"$(projectDir)Logs/");
 		CREATE_BAGKEY_WITH_DEFAULT( logFileName, XBOX::VString, L"HTTPServer.waLog");
 		CREATE_BAGKEY_WITH_DEFAULT_SCALAR( logMaxSize, XBOX::VLong, sLONG, 10 * 1024);	// Max size of log file in Ko
 		CREATE_BAGKEY_WITH_DEFAULT_SCALAR( allowCompression, XBOX::VBoolean, bool, true);
@@ -107,6 +136,30 @@ namespace RIASettingsKeys
 		CREATE_BAGKEY_WITH_DEFAULT_SCALAR( fixedSize, XBOX::VLong, sLONG, 200);
 		CREATE_BAGKEY_WITH_DEFAULT_SCALAR( keepCacheInMemory, XBOX::VBoolean, bool, true);
 		CREATE_BAGKEY_WITH_DEFAULT_SCALAR( flushDataCacheInterval, XBOX::VLong, sLONG, 15 * 60);	// 15 min (in seconds)
+	}
+
+	/*
+	namespace DatabaseJournal
+	{
+		// solution settings
+		CREATE_BAGKEY_WITH_DEFAULT_SCALAR( enabled, XBOX::VBoolean, bool, true);	//whether journaling is enabled
+		CREATE_BAGKEY_WITH_DEFAULT_SCALAR( maxSize, XBOX::VLong, sLONG,1024 * 2);	// max size in Ko for journal
+		CREATE_BAGKEY_WITH_DEFAULT( path, XBOX::VString,L"./DBJournal.journal");	//path name for journal file (empty means applicatio will generate a default name
+	}
+	
+
+	namespace DatabaseRecovery
+	{
+		// solution settings
+		CREATE_BAGKEY_WITH_DEFAULT_SCALAR( recoverFromJournal, XBOX::VBoolean, bool, true);	//integrate existing journal if database is incomplete
+		CREATE_BAGKEY_WITH_DEFAULT_SCALAR( recoverFromLastBackup, XBOX::VBoolean, bool, true);	//integrate from last backup if database is corrupted
+	}
+	*/
+
+	namespace Backup
+	{
+		//Solution and project-wide settings
+		CREATE_BAGKEY_WITH_DEFAULT( destination, XBOX::VString,  L"./Backups/");
 	}
 
 	// Resources settings
@@ -149,6 +202,7 @@ namespace RIASettingsKeys
 	{
 		CREATE_BAGKEY_NO_DEFAULT( name, XBOX::VString);
 		CREATE_BAGKEY_WITH_DEFAULT_SCALAR( enabled, XBOX::VBoolean, bool, true);
+		CREATE_BAGKEY_NO_DEFAULT( modulePath, XBOX::VString);
 	}
 
 	// Web App Service settings
@@ -156,7 +210,6 @@ namespace RIASettingsKeys
 	{
 		CREATE_BAGKEY_WITH_DEFAULT_SCALAR( enabled, XBOX::VBoolean, bool, true);	// DEPRECATED
 		CREATE_BAGKEY_WITH_DEFAULT( documentRoot, XBOX::VString, L"WebFolder");		// DEPRECATED
-		CREATE_BAGKEY_WITH_DEFAULT(directoryIndex, XBOX::VString, L"index.html");
 	}
 
 	// Data Service settings - DEPRECATED

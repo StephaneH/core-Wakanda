@@ -73,7 +73,6 @@ VProject::VProject( VSolution *inParentSolution)
 ,fSymbolTable(NULL)
 ,fBackgroundDeleteFileTask(NULL)
 ,fItemParsingCompleteSignal(NULL)
-,fRPCFilesParsingCompleteEvent(NULL)
 ,fProjectUser(NULL)
 ,fIsWatchingFileSystem(false)
 ,fIsUpdatingSymbolTable(false)
@@ -105,12 +104,6 @@ VProject::~VProject()
 
 	delete fProjectUser;
 	fProjectUser = NULL;
-
-	if (fRPCFilesParsingCompleteEvent != NULL)
-	{
-		if (fRPCFilesParsingCompleteEvent->Unlock())
-			ReleaseRefCountable( &fRPCFilesParsingCompleteEvent);
-	}
 
 	ReleaseRefCountable( &fItemParsingCompleteSignal);
 }
@@ -217,6 +210,74 @@ bool VProject::GetProjectFilePath( XBOX::VFilePath& outPath) const
 
 	if (fProjectItemProjectFile != NULL)
 		ok = fProjectItemProjectFile->GetFilePath( outPath);
+
+	return ok;
+}
+
+
+bool VProject::GetUserCacheFolderPath( XBOX::VFilePath& outPath) const
+{
+	bool ok = false;
+	
+	if (fSolution != NULL)
+	{
+		ok = fSolution->GetUserCacheFolderPath( outPath);
+		if (ok)
+		{
+			VString projectName;
+			ok = GetName( projectName);
+			if (ok)
+			{
+				outPath.ToSubFolder( L"Projects").ToSubFolder( projectName);
+			}
+		}
+	}
+
+	return ok;
+}
+
+
+bool VProject::ResolvePosixPathMacros( XBOX::VString& ioPosixPath) const
+{
+	bool ok = true;
+
+	if (ioPosixPath.BeginsWith( L"$(projectUserCacheDir)"))
+	{
+		VFilePath cacheFolderPath;
+		ok = GetUserCacheFolderPath( cacheFolderPath);
+		if (ok)
+		{
+			VString value( cacheFolderPath.GetPath());
+			VURL::Convert( value, eURL_NATIVE_STYLE, eURL_POSIX_STYLE, false);
+			ioPosixPath.Replace( value, 1, VString( L"$(projectUserCacheDir)").GetLength());
+		}
+	}
+	else if (ioPosixPath.BeginsWith( L"$(projectDir)"))
+	{
+		VFilePath projectFolderPath;
+		ok = GetProjectFolderPath( projectFolderPath);
+		if (ok)
+		{
+			VString value( projectFolderPath.GetPath());
+			VURL::Convert( value, eURL_NATIVE_STYLE, eURL_POSIX_STYLE, false);
+			ioPosixPath.Replace( value, 1, VString( L"$(projectDir)").GetLength());
+		}
+	}
+
+	if (ok)
+	{
+		VString projectName;
+		ok = GetName( projectName);
+		if (ok)
+		{
+			ioPosixPath.ExchangeAll( L"$(projectName)", projectName);
+		}
+	}
+
+	if (ok && (fSolution != NULL))
+	{
+		ok = fSolution->ResolvePosixPathMacros( ioPosixPath);
+	}
 
 	return ok;
 }
@@ -463,29 +524,29 @@ void VProject::FileSystemEventHandler( const std::vector< VFilePath > &inFilePat
 	// being edited, and if it is, bump the priority up.
 	if (inKind == VFileSystemNotifier::kFileModified) 
 	{
-		IDocumentParserManager *parsingManager = GetSolution()->GetDocumentParserManager();
-		if (parsingManager) 
-		{
-			// We need the webfolder item to know if new added files will be executed in
-			// client or server context
-			VProjectItem*	webFolderProjectItem = GetProjectItemFromTag(kWebFolderTag);
+		// We need the webfolder item to know if new added files will be executed in
+		// client or server context
+		VProjectItem*	webFolderProjectItem = GetProjectItemFromTag(kWebFolderTag);
 
-			for (std::vector< VFilePath >::const_iterator iter = inFilePaths.begin(); iter != inFilePaths.end(); ++iter) 
+		for (std::vector< VFilePath >::const_iterator iter = inFilePaths.begin(); iter != inFilePaths.end(); ++iter) 
+		{
+			VProjectItem *projectItem = GetProjectItemFromFullPath( iter->GetPath() );
+			if (projectItem) 
 			{
-				VProjectItem *projectItem = GetProjectItemFromFullPath( iter->GetPath() );
-				if (projectItem) 
+				if (projectItem->ConformsTo( RIAFileKind::kCatalogFileKind))
 				{
-					if (projectItem->ConformsTo( RIAFileKind::kCatalogFileKind))
+					if (GetSolution()->AcceptReloadCatalog())
 					{
-						if (GetSolution()->AcceptReloadCatalog())
-						{
-							// temporary fix to avoid reentrance when ReloadCatalog modifies the catalog file
-							GetSolution()->SetAcceptReloadCatalog(false);
-							GetSolution()->ReloadCatalog(projectItem);
-							GetSolution()->SetAcceptReloadCatalog(true);
-						}
+						// temporary fix to avoid reentrance when ReloadCatalog modifies the catalog file
+						GetSolution()->SetAcceptReloadCatalog(false);
+						GetSolution()->ReloadCatalog(projectItem);
+						GetSolution()->SetAcceptReloadCatalog(true);
 					}
-	
+				}
+
+				IDocumentParserManager *parsingManager = GetSolution()->GetDocumentParserManager();
+				if (parsingManager != NULL && fSymbolTable != NULL)
+				{
 					if (iter->MatchExtension( RIAFileKind::kJSFileExtension, false ) || (projectItem->ConformsTo( RIAFileKind::kCatalogFileKind)) ) 
 					{
 						IDocumentParserManager::Priority priority = IDocumentParserManager::kPriorityNormal;
@@ -712,38 +773,6 @@ void VProject::BackgroundParseFiles()
 	parsingManager->GetJobCompleteSignal().Connect( this, VTask::GetCurrent(), &VProject::CoreFileLoadComplete );
 	parsingManager->ScheduleTask( this, job, IDocumentParserManager::CreateCookie( 'Proj', this), fSymbolTable );
 	job->Release();
-
-#elif RIA_SERVER
-
-	VectorOfProjectItems itemsVector;
-	
-	GetProjectItemsFromTag( kRPCMethodTag, itemsVector);
-	if (!itemsVector.empty())
-	{
-		IDocumentParserManager::IJob *job = parsingManager->CreateJob();
-		if (job != NULL)
-		{
-			VFilePath path;
-			for (VectorOfProjectItemsIterator iter = itemsVector.begin() ; iter != itemsVector.end() ; ++iter)
-			{
-				(*iter)->GetFilePath( path);
-				job->ScheduleTask( VSymbolFileInfos	(path, eSymbolFileBaseFolderProject, eSymbolFileExecContextServer) );
-			}
-
-			if (fRPCFilesParsingCompleteEventMutex.Lock())
-			{
-				if (fRPCFilesParsingCompleteEvent == NULL)
-					fRPCFilesParsingCompleteEvent = new VSyncEvent();
-
-				fRPCFilesParsingCompleteEventMutex.Unlock();
-			}
-
-			parsingManager->GetJobCompleteSignal().Connect( this, VTask::GetCurrent(), &VProject::RPCFilesParsingComplete);
-			parsingManager->ScheduleTask( this, job, IDocumentParserManager::CreateCookie( 'RPPj', this), fSymbolTable);
-			ReleaseRefCountable( &job);
-		}
-	}
-
 #endif
 
 	fIsUpdatingSymbolTable = true;
@@ -780,26 +809,6 @@ void VProject::CoreFileLoadComplete( IDocumentParserManager::TaskCookie inCookie
 }
 
 
-void VProject::RPCFilesParsingComplete( IDocumentParserManager::TaskCookie inCookie)
-{
-	if (inCookie.fCookie != this)
-		return;
-
-	if (inCookie.fIdentifier == 'RPPj')
-	{
-		if (fRPCFilesParsingCompleteEventMutex.Lock())
-		{
-			if (fRPCFilesParsingCompleteEvent != NULL)
-			{
-				if (fRPCFilesParsingCompleteEvent->Unlock())
-					ReleaseRefCountable( &fRPCFilesParsingCompleteEvent);
-			}
-			fRPCFilesParsingCompleteEventMutex.Unlock();
-		}
-	}
-}
-
-
 void VProject::StopBackgroundDeleteFiles()
 {
 	if (fBackgroundDeleteFileTask) {
@@ -831,21 +840,6 @@ void VProject::StopBackgroundParseFiles()
 	parsingManager->UnscheduleTasksForHandler( this );
 
 	fIsUpdatingSymbolTable = false;
-}
-
-
-VSyncEvent* VProject::RetainRPCFilesParsingCompleteEvent() const
-{
-	VSyncEvent *syncEvent = NULL;
-
-	if (fRPCFilesParsingCompleteEventMutex.Lock())
-	{
-		syncEvent = RetainRefCountable( fRPCFilesParsingCompleteEvent);
-
-		fRPCFilesParsingCompleteEventMutex.Unlock();
-	}
-	
-	return syncEvent;
 }
 
 
@@ -986,7 +980,7 @@ VSolution* VProject::GetSolution()
 	return fSolution;
 }
 
-VError VProject::Load()
+VError VProject::Load( bool inOpenSymbolsTable)
 {
 	VError err = VE_OK;
 
@@ -1056,7 +1050,7 @@ VError VProject::Load()
 				_LoadSCCStatusOfProjectItems();
 		}
 
-		if (err == VE_OK)
+		if ((err == VE_OK) && inOpenSymbolsTable)
 		{
 			err = OpenSymbolTable();
 		}
@@ -1702,6 +1696,13 @@ void VProject::UnregisterProjectItemFromMapOfFullPathes(VProjectItem* inProjectI
 	}
 }
 
+
+VProjectItem* VProject::GetProjectItemFromFilePath( const XBOX::VFilePath& inPath) const
+{
+	return GetProjectItemFromFullPath( inPath.GetPath());
+}
+
+
 VProjectItem* VProject::GetProjectItemFromFullPath( const VString& inFullPath) const
 {
 #if SOLUTION_PROFILING_ENABLED
@@ -2137,13 +2138,21 @@ VProjectItem* VProject::GetMainPage()
 		VProjectItem *webFolder = GetProjectItemFromTag( kWebFolderTag);
 		if (webFolder != NULL)
 		{
-			VFilePath path;
-			VString directoryIndex;
+			VFilePath path, webFolderPath;
 
-			webFolder->GetFilePath( path);
-			settings->GetDirectoryIndex( directoryIndex);	// sc 23/02/2012
-			path.SetFileName( directoryIndex, true);
-			mainPage = GetProjectItemFromFullPath( path.GetPath());
+			webFolder->GetFilePath( webFolderPath );
+
+			path = webFolderPath;
+			path.ToSubFolder( "index.waPage" );
+			VFolder folder( path );
+
+			if ( ! folder.Exists() )
+			{
+				path = webFolderPath;
+				path.ToSubFile( "index.html" );
+			}
+
+			mainPage = GetProjectItemFromFullPath( path.GetPath() );
 		}
 	}
 	
@@ -2153,24 +2162,46 @@ VProjectItem* VProject::GetMainPage()
 }
 
 
-VError VProject::BuildFileURLString(VString &outFileURL, VProjectItem* inProjectItem)
+VError VProject::BuildFileURLString(VString &outFileURL, VProjectItem* inProjectItem, bool inWantSSL)
 {
 	VString hostName, ip, pattern;
 	sLONG port = -1;
+	sLONG sslPort = -1;
+	bool canSSL = false;
+	bool mandatorySSL = false;
 
 	outFileURL.Clear();
 	
-	VError err = GetPublicationSettings( hostName, ip, port, pattern);	// sc 06/01/2010 factorisation
+	VError err = GetPublicationSettings( hostName, ip, port, canSSL, mandatorySSL, sslPort);	// sc 06/01/2010 factorisation
 	if (err == VE_OK)
 	{
-		outFileURL = "http://127.0.0.1";
-
-		if (port != 80)
+		if ( mandatorySSL || ( inWantSSL && canSSL ) )
 		{
+		#if WITH_DEPRECATED_IPV4_API
+			outFileURL = "https://127.0.0.1";
+		#else
+			outFileURL = VString("https://") + ServerNetTools::GetLoopbackIP(true /*with brackets*/);
+		#endif
 			VString strPort;
-			strPort.FromLong(port);
+			strPort.FromLong(sslPort);
 			outFileURL += ":";
 			outFileURL += strPort;
+		}
+		else
+		{
+		#if WITH_DEPRECATED_IPV4_API
+			outFileURL = "http://127.0.0.1";
+		#else
+			outFileURL = VString("http://") + ServerNetTools::GetLoopbackIP(true /*with brackets*/);
+		#endif
+			
+			if (port != 80)
+			{
+				VString strPort;
+				strPort.FromLong(port);
+				outFileURL += ":";
+				outFileURL += strPort;
+			}
 		}
 
 		if (!pattern.IsEmpty())
@@ -2207,7 +2238,7 @@ VError VProject::BuildFileURLString(VString &outFileURL, VProjectItem* inProject
 	return err;
 }
 
-VError VProject::BuildAppliURLString(VString &outAppliURL, bool inWithIndexPage)
+VError VProject::BuildAppliURLString(VString &outAppliURL, bool inWithIndexPage, bool inWantSSL)
 {
 	VError err = VE_OK;
 
@@ -2215,19 +2246,19 @@ VError VProject::BuildAppliURLString(VString &outAppliURL, bool inWithIndexPage)
 	{
 		VProjectItem *indexPage = GetMainPage();
 		if (indexPage != NULL)
-			err = BuildFileURLString( outAppliURL, indexPage);
+			err = BuildFileURLString( outAppliURL, indexPage, inWantSSL);
 		else
 			err = VE_RIA_FILE_DOES_NOT_EXIST;
 	}
 	else
 	{
-		err = BuildFileURLString( outAppliURL, NULL);
+		err = BuildFileURLString( outAppliURL, NULL, inWantSSL);
 	}
 
 	return err;
 }
 
-XBOX::VError VProject::GetPublicationSettings( XBOX::VString& outHostName, XBOX::VString& outIP, sLONG& outPort, XBOX::VString& outPattern) const
+XBOX::VError VProject::GetPublicationSettings( XBOX::VString& outHostName, XBOX::VString& outIP, sLONG& outPort, bool& outAllowSSL, bool& outMandatorySSL, sLONG& outSSLPort) const
 {
 	VError vError = VE_OK;
 	VProjectSettings *settings = RetainSettings( vError );
@@ -2235,7 +2266,6 @@ XBOX::VError VProject::GetPublicationSettings( XBOX::VString& outHostName, XBOX:
 	outHostName.Clear();
 	outIP.Clear();
 	outPort = -1;
-	outPattern.Clear();
 	
 	if (vError == VE_OK && settings != NULL)
 	{
@@ -2247,9 +2277,6 @@ XBOX::VError VProject::GetPublicationSettings( XBOX::VString& outHostName, XBOX:
 		{
 			settings->GetHostName( outHostName);
 			settings->GetListeningAddress( outIP);
-		#if 0	// sc 25/03/2011 disable project pattern support
-			settings->GetPattern( outPattern);
-		#endif
 		}
 	}
 
@@ -2261,7 +2288,10 @@ XBOX::VError VProject::GetPublicationSettings( XBOX::VString& outHostName, XBOX:
 		}
 		else
 		{
+			outAllowSSL = settings->GetAllowSSL();
 			outPort = settings->GetListeningPort();
+			outSSLPort = settings->GetListeningSSLPort();
+			outMandatorySSL = settings->GetSSLMandatory();
 		}
 	}
 
@@ -2557,6 +2587,12 @@ VError VProject::_SynchronizeWithFileSystem( VProjectItem *inItem)
 		
 		if (iter->IsGhost())
 			continue;
+
+		if (iter->IsPhysicalLinkValid() && _IsItemReferenced( iter)  && !iter->ContentExists()) // if file is referenced (role is set), just ignore it
+		{
+			iter->SetPhysicalLinkValid( false);
+			continue;
+		}
 
 		if (!iter->IsPhysicalLinkValid() && iter->ContentExists())
 			iter->SetPhysicalLinkValid( true);	// sc 30/03/2012
@@ -2988,19 +3024,6 @@ VError VProject::_SaveProjectFile(bool inForceSave)
 				VFilePath projectFilePath;
 				projectFileProjectItem->GetFilePath(projectFilePath);
 				VFile projectFile(projectFilePath);
-
-				if (projectFile.Exists())
-				{
-					EFileAttributes fileAttributes;
-					projectFile.GetFileAttributes( fileAttributes);
-					if ((fileAttributes & FATT_LockedFile) == 0)
-					{
-						// creation d'un fichier backup
-						VFilePath backupProjectFilePath(projectFilePath);
-						backupProjectFilePath.SetExtension(RIAFileKind::kBackupFileExtension);
-						projectFile.CopyTo(backupProjectFilePath, NULL, FCP_Overwrite);
-					}
-				}
 
 				err = projectFile.Open(FA_READ_WRITE, &fd, FO_CreateIfNotFound | FO_Overwrite);
 				if (err == VE_OK && fd != NULL)
@@ -3498,12 +3521,28 @@ VError VCatalog::ParseCatalogAndCreateProjectItems(CDB4DBase* inDB4DBase)
 		VValueBag *newCatalogBag = new VValueBag;
 		if (inDB4DBase == NULL)
 		{
+			VProjectItem* permissionsItem = NULL;
+			VFilePath permissionsPath;
+			VFile* permissionsFile = NULL;
+			VProject* project = fCatalogItem->GetProjectOwner();
+
+			if ( project )
+				permissionsItem = project->GetProjectItemFromTag( kPermissionsTag );
+
+			if ( permissionsItem )
+			{
+				permissionsItem->GetFilePath( permissionsPath );
+				permissionsFile = new VFile( permissionsPath );
+			}
+
 			VFilePath catalogFilePath;
 			fCatalogItem->GetFilePath(catalogFilePath);
 			VFile catalogFile(catalogFilePath);
 			CDB4DManager *dB4DBaseManager = VComponentManager::RetainComponentOfType<CDB4DManager>();
 			sLONG flags = DB4D_Open_As_XML_Definition | DB4D_Open_No_Respart | DB4D_Open_StructOnly | DB4D_Open_Allow_Temporary_Convert_For_ReadOnly;
-			CDB4DBase *dB4DBase = dB4DBaseManager->OpenBase(catalogFile, flags, NULL /* outErr */, XBOX::FA_READ);
+			CDB4DBase *dB4DBase = dB4DBaseManager->OpenBase(catalogFile, flags, NULL /* outErr */, XBOX::FA_READ, 0, NULL, permissionsFile);
+
+			ReleaseRefCountable( &permissionsFile );
 
 			if (dB4DBase != NULL)
 			{

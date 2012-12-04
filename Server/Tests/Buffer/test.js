@@ -348,35 +348,35 @@ var testCase = {
     
     testBase64: function() {
 	
+		// base64Encoded is s as a UTF-8 string encoded using base64.
+	
         var s = "coucou patin couffin et v'lan passe moi l'\u00e9ponge";
         var base64Encoded = "Y291Y291IHBhdGluIGNvdWZmaW4gZXQgdidsYW4gcGFzc2UgbW9pIGwnw6lwb25nZQ==";
         
-        var size = Buffer.byteLength(s,"base64");
-        Y.Assert.isTrue(size == 68, "byteLength64('coucou patin couffin et v'lan passe moi l'\u00e9ponge') should be 68 but is " + size);
+        var size = Buffer.byteLength(base64Encoded,"base64");
+        Y.Assert.isTrue(size == 49, "utf8('coucou patin couffin et v'lan passe moi l'\u00e9ponge') should be 49 but is " + size);
 
         var b = new Buffer(size);
-        b.write(s,0,"base64");        
-        var encoded = b.toString("utf8");        
-        Y.Assert.isTrue(encoded === base64Encoded, "EncodeBase64('coucou patin couffin et v'lan passe moi l'\u00e9ponge') is wrong");
+        b.write(base64Encoded, 0, "base64");        
+        var decoded = b.toString("utf8");        
+        Y.Assert.isTrue(decoded === s, "DecodeBase64('coucou patin couffin et v'lan passe moi l'\u00e9ponge') is wrong");
         				  
         var s2 = base64Encoded;
         var size2 = Buffer.byteLength(s2,"utf8");
         Y.Assert.isTrue(size2 == 68, "byteLengthUTF8('Y291Y291IHBhdGluIGNvdWZmaW4gZXQgdidsYW4gcGFzc2UgbW9pIGwnw6lwb25nZQ==') should be 68 but is " + size2);
-        
-        var b2 = new Buffer(size2);
-        b2.write(s2,0,"utf8");
-        var decoded2 = b2.toString("base64");
-        Y.Assert.isTrue(decoded2 === s, "DecodeBase64('coucou patin couffin et v'lan passe moi l'\u00e9ponge') is wrong");
-        
+                
+        var encoded = b.toString("base64");
+        Y.Assert.isTrue(encoded === base64Encoded, "EncodeBase64('coucou patin couffin et v'lan passe moi l'\u00e9ponge') is wrong");
+                
         // same thing but with some white spaces
         var s3 = "   Y29 \t 1Y291 \n\r IHBhdGluIGNvdWZmaW4gZXQgdidsYW4gcGFzc2UgbW9pIGwnw6lwb25nZQ==   ";
-        var size3 = Buffer.byteLength(s3,"utf8");
-        Y.Assert.isTrue(size3 == 81, "byteLengthUTF8('   Y29 \t 1Y291 \n\r IHBhdGluIGNvdWZmaW4gZXQgdidsYW4gcGFzc2UgbW9pIGwnw6lwb25nZQ==   ') should be 81 but is " + size3);
+        var size3 = Buffer.byteLength(s3,"base64");
+        Y.Assert.isTrue(size3 == 49, "utf8('   Y29 \t 1Y291 \n\r IHBhdGluIGNvdWZmaW4gZXQgdidsYW4gcGFzc2UgbW9pIGwnw6lwb25nZQ==   ') should be 49 but is " + size3);
+
         var b3 = new Buffer(size3);
-        b3.write(s3,0,"utf8");
-        var decoded3 = b3.toString("base64");
-        Y.Assert.isTrue(decoded3 === s, "DecodeBase64('coucou patin couffin et v'lan passe moi l'\u00e9ponge') is wrong");
-        
+        b3.write(s3, 0, "base64");
+        var decoded3 = b3.toString("utf8");
+		Y.Assert.isTrue(decoded3 === s, "DecodeBase64('coucou patin couffin et v'lan passe moi l'\u00e9ponge') is wrong");        
 	},
 
 };

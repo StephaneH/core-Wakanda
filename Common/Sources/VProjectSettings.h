@@ -48,8 +48,6 @@ public:
 
 			sLONG					GetListeningSSLPort() const;
 
-			void					GetSSLCertificatesPath( XBOX::VString& outSSLCertificatesPath) const;
-			
 			bool					GetAllowSSL() const;
 
 			bool					GetSSLMandatory() const;
@@ -82,6 +80,23 @@ public:
 
 			sLONG					GetCompressionMaxThreshold() const;
 
+			//Specific Database journal settings accessor
+			bool					HasDatabaseJournalSettings()const;
+
+			void					GetDatabaseJournalPath(XBOX::VString& outJournalPath)const;					
+
+			//sLONG					GetDatabaseJournalMaxSize()const;
+
+			bool					GetDatabaseJournalEnabled()const;
+
+			//Specific Database recovery settings accessor
+			bool					HasDatabaseRecoverySettings()const;
+
+			bool					GetRecoverFromJournalOnIncompleteDatabase()const;					
+
+			bool					GetRecoverFromLastBackupOnCorruptedDatabase()const;
+
+
 
 			// Specific JavaScript settings accessors
 			bool					HasJavaScriptSettings() const;
@@ -98,9 +113,6 @@ public:
 			const XBOX::VBagArray*	RetainServicesSettings() const;
 
 			const XBOX::VValueBag*	RetainServiceSettings( const XBOX::VString& inServiceName) const;
-			
-			// "webApp" service accessors
-			void					GetDirectoryIndex( XBOX::VString& outDirectoryIndex) const;
 };
 
 

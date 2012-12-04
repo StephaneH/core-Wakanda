@@ -29,7 +29,7 @@ namespace SolutionStartupParametersBagKeys
 
 
 VSolutionStartupParameters::VSolutionStartupParameters()
-: fSolutionFileToOpen(NULL), fStoreInLinkFile(true)
+: fSolutionFileToOpen(NULL), fStoreInLinkFile(true), fOpenProjectSymbolsTable(true)
 {
 }
 

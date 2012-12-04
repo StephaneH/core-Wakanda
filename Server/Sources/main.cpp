@@ -18,11 +18,16 @@
 #include "VSolutionStartupParameters.h"
 #include "VRIAServerSolution.h"
 
+#include "../Projet/Visual/WakandaVersNum.h"
+
 
 USING_TOOLBOX_NAMESPACE
 
 
 const VString kARG_ADMINISTRATOR_PORT( "--admin-port");
+const VString kARG_ADMINISTRATOR_SSL_PORT( "--admin-ssl-port");
+const VString kVERSION_NUMBER("--version");
+const VString kLOG_DUMP("--netdump");
 
 
 int main (int inArgc, char * const inArgv[])
@@ -33,7 +38,16 @@ int main (int inArgc, char * const inArgv[])
 	// First, create the application. So, everything is initialized and ready to use
 	VRIAServerApplication application;
 	VProcess::InitOptions initOptions = VProcess::Init_Default & ~VProcess::Init_WithQuickTime;
+
+#if VERSION_LINUX
+	XBOX::VString versionString;
+	versionString.FromCString (STRPRODUCTVER); // 	YT 18-May-2012 - WAK0076647
+    VRIAServerApplication::Get()->SetProductVersion (versionString);
+#endif
 	
+    //jmo - We may want to quit after parsing the command line
+    bool shouldQuit=false;
+
 	if (application.Init( initOptions))
 	{
 		// Parse the command line argument
@@ -75,6 +89,55 @@ int main (int inArgc, char * const inArgv[])
 						{
 							err = VE_RIA_INVALID_COMMAND_LINE_ARGUMENTS;
 						}
+					}
+					else if (argument.BeginsWith( kARG_ADMINISTRATOR_SSL_PORT))
+					{
+						++curArg;
+						argument.Remove( 1, kARG_ADMINISTRATOR_SSL_PORT.GetLength());
+						if (!argument.IsEmpty() && argument.GetUniChar(1) == '=')
+						{
+							argument.Remove( 1, 1);
+							if (!argument.IsEmpty())
+							{
+								sLONG port = argument.GetLong();
+								if (port > 0)
+									startupParameters->SetAdministratorSSLPort( port);
+								else
+									err = VE_RIA_INVALID_COMMAND_LINE_ARGUMENTS;
+							}
+							else
+							{
+								err = VE_RIA_INVALID_COMMAND_LINE_ARGUMENTS;
+							}
+						}
+						else
+						{
+							err = VE_RIA_INVALID_COMMAND_LINE_ARGUMENTS;
+						}
+					}
+                    else if (argument.BeginsWith( kVERSION_NUMBER))
+					{
+						++curArg;
+						argument.Remove(1, kVERSION_NUMBER.GetLength());
+
+						VString version;
+						
+						VRIAServerApplication::Get()->GetProductVersion(version);
+						
+						char buf[100];
+						
+						version.ToCString(buf, sizeof(buf));
+						
+                        printf("Wakanda Server %s\n", buf);
+
+                        shouldQuit=true;
+					}
+					else if (argument.BeginsWith( kLOG_DUMP))
+					{
+						++curArg;
+						argument.Remove(1, kLOG_DUMP.GetLength());
+						
+						startupParameters->SetNetDump(true);
 					}
 					else
 					{
@@ -118,7 +181,7 @@ int main (int inArgc, char * const inArgv[])
 				}
 			}
 
-			if (err == VE_OK)
+			if (err == VE_OK && shouldQuit == false)
 			{
 				VRIAServerStartupMessage *msg = new VRIAServerStartupMessage( &application, startupParameters);
 				if (msg != NULL)

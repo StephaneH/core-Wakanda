@@ -13,7 +13,6 @@
 # d pour tous les modes sauf debug,
 # b pour tous les modes sauf beta,
 # r pour tous les modes sauf release,
-# * pour les fichier pdb qui seront copie pour debug et beta et les releases issues uniquement de la compilation
 #
 # Chaque fichier est contenu dans des sections pour indiquer leur destination 
 # ATTENTION NE PAS METTRE D ESPACE APRES LES [] SINON PLANTAGE
@@ -43,11 +42,22 @@ LA______mAsA %DEPOT%XToolbox/%BRANCH%/Frameworks %ARCHS%/KernelIPC%LibMode_SR%.f
 LA______mAsA %DEPOT%XToolbox/%BRANCH%/Frameworks %ARCHS%/ServerNet%LibMode_SR%.framework
 LA______mAsA %DEPOT%XToolbox/%BRANCH%/Frameworks %ARCHS%/XML%LibMode_SR%.framework
 LA______mAsA %DEPOT%XToolbox/%BRANCH%/Frameworks %ARCHS%/4DJavaScript%LibMode_SR%.framework
-LA______mAsA %DEPOT%webkit/742/JavaScriptCore/build_%ARCHS%/%LibModeCompil%/4DJavaScriptCore.framework
-LA______mAs_ %DEPOT%webkit/742/WebCore/build_%ARCHS%/%LibModeCompil%/4DWebCore.framework
-LA______mAs_ %DEPOT%webkit/742/WebKit/build_%ARCHS%/%LibModeCompil%/4DWebKit.framework
 
-LA______mAs_ %DEPOT%cppunit/1.11.4/Frameworks/CPPUnit%LibMode_SR%.framework
+LA______mBsB %DEPOT%XToolbox/%BRANCH%/Frameworks %ARCHS%/Graphics%LibMode_SR%.framework.dSYM
+LA______mBsB %DEPOT%XToolbox/%BRANCH%/Frameworks %ARCHS%/JSDebugger%LibMode_SR%.framework.dSYM
+LA______mBsB %DEPOT%XToolbox/%BRANCH%/Frameworks %ARCHS%/Kernel%LibMode_SR%.framework.dSYM
+LA______mBsB %DEPOT%XToolbox/%BRANCH%/Frameworks %ARCHS%/KernelIPC%LibMode_SR%.framework.dSYM
+#LA______mBsB %DEPOT%XToolbox/%BRANCH%/Frameworks %ARCHS%/ServerNet%LibMode_SR%.framework.dSYM
+LA______mBsB %DEPOT%XToolbox/%BRANCH%/Frameworks %ARCHS%/XML%LibMode_SR%.framework.dSYM
+LA______mBsB %DEPOT%XToolbox/%BRANCH%/Frameworks %ARCHS%/4DJavaScript%LibMode_SR%.framework.dSYM
+
+LA______mbsb %DEPOT%webkit/534.53/JavaScriptCore/build_%ARCHS%/%LibModeCompil%/4DJavaScriptCore.framework
+LA______mBsB %DEPOT%webkit/534.53/JavaScriptCore/build_%ARCHS%/Production/4DJavaScriptCore.framework
+LA______mbs_ %DEPOT%webkit/534.53/WebCore/build_%ARCHS%/%LibModeCompil%/4DWebCore.framework
+LA______mBs_ %DEPOT%webkit/534.53/WebCore/build_%ARCHS%/Production/4DWebCore.framework
+LA______mbs_ %DEPOT%webkit/534.53/WebKit/build_%ARCHS%/%LibModeCompil%/4DWebKit.framework
+LA______mBs_ %DEPOT%webkit/534.53/WebKit/build_%ARCHS%/Production/4DWebKit.framework
+
 LA______mAsA %DEPOT%icu/4.8/Frameworks %ARCHS%/icu%LibMode_SR%.framework
 LA______mpsp %DEPOT%libzip/0.10/Frameworks %ARCHS%/libzip%LibMode_SR%.framework
 LA______mPsP %DEPOT%libzip/0.10/Frameworks %ARCHS%/libzip.framework
@@ -73,6 +83,12 @@ LA______m_sA %DEPOT%HelperTools/1.0/Projects/build/%LibModeCompil%/InstallTool
 LA______mAsA [%TARGET%%DIR_COMPONENT%Native Components/]
 LA______mAs_ %DEPOT%Components/%BRANCH%/components %ARCHS%/%LibModeCompil%/CodeEditor%LibMode_SR%.bundle
 
+LA______mBsB %DEPOT%Components/%BRANCH%/components %ARCHS%/%LibModeCompil%/DB4D%LibMode_SR%.bundle.dSYM
+LA______mBsB %DEPOT%Components/%BRANCH%/components %ARCHS%/%LibModeCompil%/HTTPServer%LibMode_SR%.bundle.dSYM
+LA______mBsB %DEPOT%Components/%BRANCH%/components %ARCHS%/%LibModeCompil%/LanguageSyntax%LibMode_SR%.bundle.dSYM
+LA______mBsB %DEPOT%Components/%BRANCH%/components %ARCHS%/%LibModeCompil%/SecurityManager%LibMode_SR%.bundle.dSYM
+LA______mBsB %DEPOT%Components/%BRANCH%/components %ARCHS%/%LibModeCompil%/UsersAndGroups%LibMode_SR%.bundle.dSYM
+
 LA______mAsA [%TARGET%%DIR_COMPONENT%Native Components/DB4D%LibMode_SR%.bundle/Contents/]
 LA______mAsA %DEPOT%Components/%BRANCH%/components %ARCHS%/%LibModeCompil%/DB4D%LibMode_SR%.bundle/Contents/MacOS
 LA______mAsA %DEPOT%Components/%BRANCH%/components %ARCHS%/%LibModeCompil%/DB4D%LibMode_SR%.bundle/Contents/info.plist
@@ -88,11 +104,6 @@ LA______mAsA %DEPOT%Components/%BRANCH%/components %ARCHS%/%LibModeCompil%/Langu
 LA______mAsA %DEPOT%Components/%BRANCH%/components %ARCHS%/%LibModeCompil%/LanguageSyntax%LibMode_SR%.bundle/Contents/info.plist
 LA______mAsA %DEPOT%Components/%BRANCH%/Language Syntax/Resources
 
-LA______m_sA [%TARGET%%DIR_COMPONENT%Native Components/SQLServer%LibMode_SR%.bundle/Contents/]
-LA______m_sA %DEPOT%Components/%BRANCH%/components %ARCHS%/%LibModeCompil%/SQLServer%LibMode_SR%.bundle/Contents/MacOS
-LA______m_sA %DEPOT%Components/%BRANCH%/components %ARCHS%/%LibModeCompil%/SQLServer%LibMode_SR%.bundle/Contents/info.plist
-LA______m_sA %DEPOT%Components/%BRANCH%/SQL/Resources
-
 LA______mAsA [%TARGET%%DIR_COMPONENT%Native Components/SecurityManager%LibMode_SR%.bundle/Contents/]
 LA______mAsA %DEPOT%Components/%BRANCH%/components %ARCHS%/%LibModeCompil%/SecurityManager%LibMode_SR%.bundle/Contents/MacOS
 LA______mAsA %DEPOT%Components/%BRANCH%/components %ARCHS%/%LibModeCompil%/SecurityManager%LibMode_SR%.bundle/Contents/info.plist
@@ -105,11 +116,6 @@ LA______mAsA %DEPOT%Components/%BRANCH%/UsersAndGroups/Resources
 LA______mAs_ [%TARGET%%DIR_COMPONENT%Native Components/WebKitViewer%LibMode_SR%.bundle/Contents/]
 LA______mAs_ %DEPOT%Components/%BRANCH%/components %ARCHS%/%LibModeCompil%/WebKitViewer%LibMode_SR%.bundle/Contents/MacOS
 LA______mAs_ %DEPOT%Components/%BRANCH%/components %ARCHS%/%LibModeCompil%/WebKitViewer%LibMode_SR%.bundle/Contents/info.plist
-LA______mAs_ %DEPOT%Components/%BRANCH%/Web/Resources
-
-LA______mAs_ [%TARGET%%DIR_COMPONENT%Native Components/WebViewer%LibMode_SR%.bundle/Contents/]
-LA______mAs_ %DEPOT%Components/%BRANCH%/components %ARCHS%/%LibModeCompil%/WebViewer%LibMode_SR%.bundle/Contents/MacOS
-LA______mAs_ %DEPOT%Components/%BRANCH%/components %ARCHS%/%LibModeCompil%/WebViewer%LibMode_SR%.bundle/Contents/info.plist
 LA______mAs_ %DEPOT%Components/%BRANCH%/Web/Resources
 
 LA______mAsA [%TARGET%%DIR_COMPONENT%Native Components/Zip%LibMode_SR%.bundle/Contents/]
@@ -133,9 +139,9 @@ LA______mAsA [%TARGET%%PRODUCT_NAME%.app/Contents/Resources]
 LA______mAs_ %DEPOT%CoreRuntime/%branch%/Resources/Language Support
 LA______mAs_ %DEPOT%CoreRuntime/%branch%/Resources/ByteSwap.TXT
 LA______mAs_ %DEPOT%CoreRuntime/%branch%/Resources/KeyboardMapping.MAC.xml
+LA______mAs_ %DEPOT%CoreRuntime/%branch%/Resources/Images
 
 LA______mAs_ %DEPOT%Wakanda/%branch%/Studio/Resources/
-LA______m_sA %DEPOT%Wakanda/%branch%/Studio/Resources/JavaScript Support Files
 LA______m_sA %DEPOT%Wakanda/%branch%/Server/Resources/Wakanda Server.MAC.icns
 LA______m_sA %DEPOT%Wakanda/%branch%/Server/Resources/Default Solution
 LA______m_sA %DEPOT%Wakanda/%branch%/Server/Resources/debugger
@@ -149,22 +155,11 @@ LA______mAs_ %DEPOT%CoreRuntime/%branch%/Resources/OpenOptions.MAC.nib/
 LA______mAs_ %DEPOT%CoreRuntime/%branch%/Resources/OpenOptionsCocoa.MAC.nib/
 
 #Optimisation a faire en 1 ligne
-LA______m_sA [%TARGET%%PRODUCT_NAME%.app/Contents/walib/FileServices]
-LA______mAs_ [%TARGET%%PRODUCT_NAME%.app/Contents/Resources/Web Components/walib/FileServices]
-
-LA______m_sA [%TARGET%%PRODUCT_NAME%.app/Contents/walib/FileServices/Database]
-LA______mAs_ [%TARGET%%PRODUCT_NAME%.app/Contents/Resources/Web Components/walib/FileServices/Database]
-LA______mAsA %DEPOT%Wakanda/%branch%/walib/FileServices/bespin.4dbase/bespin.waCatalog
-LA______mAsA %DEPOT%Wakanda/%branch%/walib/FileServices/bespin.4dbase/bespin.waData
 
 LA______mAs_ [%TARGET%%PRODUCT_NAME%.app/Contents/Resources/Templates/Blank/WebFolder/images]
 
-LA______m_sA [%TARGET%%PRODUCT_NAME%.app/Contents/]
-L*M_S_E_m_sA %DEPOT%Wakanda/%branch%/Server/Resources/SSJS/Modules
-
-LA______m_sA [%TARGET%%PRODUCT_NAME%.app/Contents/Modules/fileService]
-LA______m_sA %DEPOT%Wakanda/%branch%/walib/FileServices/bespin.4dbase/bespin.waCatalog
-LA______m_sA %DEPOT%Wakanda/%branch%/walib/FileServices/bespin.4dbase/bespin.waData
+LA______mAsA [%TARGET%%PRODUCT_NAME%.app/Contents/]
+L*______mAsA %DEPOT%Wakanda/%branch%/Server/Resources/SSJS/Modules
 
 LA______m_sA [%TARGET%%PRODUCT_NAME%.app/Contents/walib]
 LA______mAs_ [%TARGET%%PRODUCT_NAME%.app/Contents/Resources/Web Components/walib]
@@ -175,19 +170,18 @@ LA______m_sA [%TARGET%%PRODUCT_NAME%.app/Contents/Resources/Templates]
 LA______m_sA %DEPOT%Wakanda/%branch%/Server/Resources/Default Solution/Admin
 
 LA______mAsA [%TARGET%%PRODUCT_NAME%.app/Contents/Resources/%LibLangueLproj%]
-LA______mAs_ %DEPOT%CoreRuntime/%branch%/Resources/structure_to_html.xsl
-LA______mAsA %DEPOT%CoreRuntime/%branch%/Resources/web_error_to_html.xsl
-
+LA______mAsA %DEPOT%XToolbox/%branch%/JavaScript/Resources/%LibLangueLproj%/Errors_javascript_%Lib2Langue%.xlf
+LA______mAsA %DEPOT%XToolbox/%branch%/Kernel/Resources/%LibLangueLproj%/Errors_xbox_%Lib2Langue%.xlf
+LA______mAsA %DEPOT%XToolbox/%branch%/ServerNet/Resources/%LibLangueLproj%/ServerNet%Lib2Langue%.xlf
 LA______mAs_ %DEPOT%CoreRuntime/%branch%/Resources/%LibLangueLproj%/4D_Themes%Lib2Langue%.xlf
 LA______mAs_ %DEPOT%CoreRuntime/%branch%/Resources/%LibLangueLproj%/4D_Constants%Lib2Langue%.xlf
-LA______mAsA %DEPOT%CoreRuntime/%branch%/Resources/%LibLangueLproj%/4DAppCommon%Lib2Langue%.xlf
-LA______mAsA %DEPOT%CoreRuntime/%branch%/Resources/%LibLangueLproj%/4DDBError%Lib2Langue%.xlf
+LA______mAs_ %DEPOT%CoreRuntime/%branch%/Resources/%LibLangueLproj%/4D_LangEditKeyWords%Lib2Langue%.xlf
+LA______mAs_ %DEPOT%CoreRuntime/%branch%/Resources/%LibLangueLproj%/4DAppCommon%Lib2Langue%.xlf
+LA______mAs_ %DEPOT%CoreRuntime/%branch%/Resources/%LibLangueLproj%/4DDBError%Lib2Langue%.xlf
 LA______mAs_ %DEPOT%CoreRuntime/%branch%/Resources/%LibLangueLproj%/4DDebugger%Lib2Langue%.xlf
-LA______mAsA %DEPOT%CoreRuntime/%branch%/Resources/%LibLangueLproj%/Common%Lib2Langue%.xlf
+LA______mAs_ %DEPOT%CoreRuntime/%branch%/Resources/%LibLangueLproj%/Common%Lib2Langue%.xlf
 LA______mAs_ %DEPOT%CoreRuntime/%branch%/Resources/%LibLangueLproj%/Errors_4d_%Lib2Langue%.xlf
-LA______m_sA %DEPOT%CoreRuntime/%branch%/Resources/%LibLangueLproj%/Errors_javascript_%Lib2Langue%.xlf
-LA______mAsA %DEPOT%CoreRuntime/%branch%/Resources/%LibLangueLproj%/Errors_xbox_%Lib2Langue%.xlf
-LA______mAsA %DEPOT%CoreRuntime/%branch%/Resources/%LibLangueLproj%/ServerNet%Lib2Langue%.xlf
-LA______m_sA %DEPOT%CoreRuntime/%branch%/Resources/%LibLangueLproj%/SQL%Lib2Langue%.xlf
 LA______mAs_ %DEPOT%CoreRuntime/%branch%/Resources/%LibLangueLproj%/ToolBox%Lib2Langue%.xlf
-LA______mAsA %DEPOT%CoreRuntime/%branch%/Resources/web_stats_to_html.xsl
+
+LA______m_sA [%TARGET%%PRODUCT_NAME%.app/Contents/Resources/wkhtmltopdf]
+LA______m_sA %DEPOT%Wakanda/%branch%/Server/Resources/wkhtmltopdf.MAC/

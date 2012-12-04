@@ -1,9 +1,11 @@
 package com.wakanda.qa.http.test.urls;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
-import java.net.URLEncoder;
+import java.io.File;
+import java.util.BitSet;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -12,6 +14,8 @@ import org.apache.http.util.EntityUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.wakanda.qa.http.RFC1738URLEncoder;
+import com.wakanda.qa.http.WWWFormURLEncoder;
 import com.wakanda.qa.http.test.extend.AbstractHttpTestCase;
 
 /**
@@ -25,28 +29,6 @@ public class URLTest extends AbstractHttpTestCase {
 	/**
 	 * <b>Implements:</b> URL01
 	 * <p/>
-	 * Check that the server can handle an URIs with length between 3-4ko
-	 * (boundary test)
-	 * <p/>
-	 * <b>Reference:</b> SPEC 689 (Yannick) 3.2.1
-	 * 
-	 * @throws Exception
-	 */
-	@Test
-	public void testThatServerHandlseURLBetween3And4ko() throws Exception {
-		// This URL contains 3724 characters (3-4Ko).
-		String url = getURLsProp().getProperty("longURL");
-		String request = "GET " + url + " HTTP/1.1" + CRLF 
-						+ "host:" + getDefaultHostHeaderValue()	+ CRLF
-						+ CRLF;
-		HttpResponse response = executeRequestString(request);
-		assertEqualsStatusCode(HttpStatus.SC_OK, response);
-
-	}
-
-	/**
-	 * <b>Implements:</b> URL02
-	 * <p/>
 	 * Check that server can handle an URL greater than 4Ko
 	 * <p/>
 	 * <b>Reference:</b> SPEC 689 (Yannick) 3.2.1
@@ -55,16 +37,19 @@ public class URLTest extends AbstractHttpTestCase {
 	 */
 	@Test
 	public void testThatServerHandlesURLGreaterThan4ko() throws Exception {
-		String url = "/?param="
+		String url = "/echoURL/?param="
 				+ RandomStringUtils.random(4097, 32, 127, true, true);
 		HttpGet request = new HttpGet(url);
-		HttpResponse response = executeRequest(request);
+		HttpResponse response = executeRequest(request, false);
+		String content = EntityUtils.toString(response.getEntity());
+		logger.debug(content);
 		assertEqualsStatusCode(HttpStatus.SC_OK, response);
+		assertEquals(url, content);
 
 	}
 
 	/**
-	 * <b>Implements:</b> URL03
+	 * <b>Implements:</b> URL02
 	 * <p/>
 	 * Check that server is case insensitive when dealing with URIs.
 	 * <p/>
@@ -78,18 +63,16 @@ public class URLTest extends AbstractHttpTestCase {
 		String url = "simple.html";
 
 		// expected
-		String request1 = "GET " + url + " HTTP/1.1" + CRLF 
-						+ "Host:" + getDefaultHostHeaderValue() + CRLF
-						+ CRLF;
-		HttpResponse response1 = executeRequestString(request1);
+		String request1 = "GET " + url + " HTTP/1.1" + CRLF + "Host:"
+				+ getDefaultHostHeaderValue() + CRLF + CRLF;
+		HttpResponse response1 = executeRawRequest(request1, false);
 		int exSC = response1.getStatusLine().getStatusCode();
 		byte[] exContent = EntityUtils.toByteArray(response1.getEntity());
 
 		// actual
 		String request2 = "GET " + url.toUpperCase() + " HTTP/1.1" + CRLF
-						+ "Host:" + getDefaultHostHeaderValue() + CRLF
-						+ CRLF;
-		HttpResponse response2 = executeRequestString(request2);
+				+ "Host:" + getDefaultHostHeaderValue() + CRLF + CRLF;
+		HttpResponse response2 = executeRawRequest(request2, false);
 		int acSC = response2.getStatusLine().getStatusCode();
 		byte[] acContent = EntityUtils.toByteArray(response2.getEntity());
 
@@ -101,29 +84,90 @@ public class URLTest extends AbstractHttpTestCase {
 	}
 
 	/**
-	 * <b>Implements:</b> URL04
+	 * <b>Implements:</b> URL03
 	 * <p/>
 	 * Check that server can decode and interpret properly a request URI encoded
-	 * with "% HEX HEX"
+	 * with "% HEX HEX" of RFC2396
 	 * <p/>
 	 * <b>Reference:</b> SPEC 689 (RFC2616) 5.1.2
 	 * 
 	 * @throws Exception
 	 */
 	@Test
-	public void testThatHexEncodedURLIsSupported() throws Exception {
+	public void testThatURLEncodedWithRFC2396IsSupported() throws Exception {
+		String path = "/ébah& ça# alors@.html";
+		String filePath = getSettings().getDefaultProjectWebFolderPath() + path;
+		File file = new File(filePath);
+		String expected = "HEX Encoded URL is supported";
+		FileUtils.writeStringToFile(file, expected);
+		//logger.debug(filePath + ":" + (new File(filePath)).exists());
+		try {
+			logger.debug("Non encoded: " + path);
+			// Encode the URL using RFC2396 encoding
+			String encodedPath = RFC1738URLEncoder.encodePath(path);
+			logger.debug("Encoded: " + encodedPath);
+			logger.debug("Encoded by firefox: " + "/url/%C3%A9bah&%20%C3%A7a#%20alors@.html");
 
-		// Encode the URL using a %HEX HEX encoding
-		String urlEncoded = URLEncoder.encode(
-				getURLsProp().getProperty("longURL"), "UTF-8");
-		// System.out.println(urlEncoded);
-		HttpGet request = new HttpGet(urlEncoded);
-		HttpResponse response = executeRequest(request);
+			// Request
+			HttpGet request = new HttpGet(encodedPath);
+			logger.debug("URI: " + request.getURI());
 
-		assertEquals(
-				"Server do not support URL encoded using % HEX HEX encoding",
-				HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
+			// Response
+			HttpResponse response = executeRequest(request, false);
+			// Content
+			String actual = EntityUtils.toString(response.getEntity());
+			logger.debug(actual);
 
+			assertEquals(
+					"Server does not support URL encoded using % HEX HEX encoding",
+					HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
+			assertEquals(expected, actual);
+		} finally {
+			file.delete();
+		}
 	}
 
+	/**
+	 * <b>Implements:</b> URL04
+	 * <p/>
+	 * Check that server can decode and interpret properly a request URI encoded
+	 * with "% HEX HEX" of application/x-www-form-urlencoded
+	 * <p/>
+	 * <b>Reference:</b>
+	 * http://www.w3.org/TR/html4/interact/forms.html#h-17.13.4.1
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void testThatURLEncodedWith_Application_x_www_form_urlencoded_IsSupported()
+			throws Exception {
+
+		String qs = "param 1=valeur/1&param@2=valeur{2}&param#3=valeur<3>&param&4=valeur[3]";
+		logger.debug("Non encoded: " + qs);
+
+		// Encode the URL using application/x-www-form-urlencoded
+		BitSet safe = WWWFormURLEncoder.getDefaultSafeCharacters();
+		safe.set('&');
+		safe.set('=');
+		String encodedQs = WWWFormURLEncoder.encode(qs, safe);
+		logger.debug("Encoded: " + encodedQs);
+
+		// Request
+		String url = "/echoQueryString/?" + encodedQs;
+		HttpGet request = new HttpGet(url);
+		logger.debug("URI: " + request.getURI());
+
+		// Response
+		HttpResponse response = executeRequest(request, false);
+
+		// Content
+		String content = EntityUtils.toString(response.getEntity());
+		logger.debug(content);
+
+		assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
+
+		assertEquals(
+				"Server does not support URL encoded using % HEX HEX encoding",
+				qs, content);
+	}
 }

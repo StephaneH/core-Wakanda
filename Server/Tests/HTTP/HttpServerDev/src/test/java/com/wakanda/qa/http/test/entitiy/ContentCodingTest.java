@@ -3,9 +3,11 @@ package com.wakanda.qa.http.test.entitiy;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.zip.DataFormatException;
@@ -15,6 +17,7 @@ import java.util.zip.GZIPOutputStream;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -36,13 +39,14 @@ import org.apache.http.util.EntityUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.wakanda.qa.http.Resources;
+import com.wakanda.qa.http.Settings;
+import com.wakanda.qa.http.Utils;
 import com.wakanda.qa.http.test.extend.AbstractHttpTestCase;
 
 /**
  * @author Ouissam
  * 
- * This class manages all test cases related with content coding.
+ *         This class manages all test cases related with content coding.
  * 
  */
 
@@ -66,24 +70,30 @@ public class ContentCodingTest extends AbstractHttpTestCase {
 		String ce = "deflate";
 		HttpGet request = new HttpGet(url);
 		request.addHeader(HttpHeaders.ACCEPT_ENCODING, ce);
-		HttpResponse response = executeRequest(request);
+		HttpResponse response = executeRequest(request, false);
+		HttpEntity entity = response.getEntity();
+		try {
+			// check the response content
+			assertEqualsStatusCode(HttpStatus.SC_OK, response);
+			Header ceHeader = entity.getContentEncoding();
+			assertNotNull("Missing \"Content-Encoding\" header", ceHeader);
+			assertEquals("Wrong \"Content-Encoding\" header value", ce,
+					ceHeader.getValue().toLowerCase());
 
-		// check the response content
-		assertEqualsStatusCode(HttpStatus.SC_OK, response);
-		Header ceHeader = response.getEntity().getContentEncoding();
-		assertNotNull("Missing \"Content-Encoding\" header", ceHeader);
-		assertEquals("Wrong \"Content-Encoding\" header value", ce, ceHeader
-				.getValue().toLowerCase());
+			// uncompress content
+			response.setEntity(new DecompressingEntity(entity, ce));
 
-		// uncompress content
-		response.setEntity(new DecompressingEntity(response.getEntity(), ce));
+			// check the content integrity
+			byte[] actuals = EntityUtils.toByteArray(response.getEntity());
+			File file = new File(getSettings().getDefaultProjectWebFolderPath()
+					+ url);
+			byte[] expecteds = FileUtils.readFileToByteArray(file);
 
-		// check the content integrity
-		byte[] actuals = EntityUtils.toByteArray(response.getEntity());
-		byte[] expecteds = Resources
-				.readFileAsBytes(getDefaultProjectWebFolderPath() + url);
-
-		Assert.assertArrayEquals("Wrong coding", expecteds, actuals);
+			Assert.assertArrayEquals("Wrong coding", expecteds, actuals);
+		} finally {
+			// Release all resources
+			EntityUtils.consume(entity);
+		}
 	}
 
 	/**
@@ -104,29 +114,35 @@ public class ContentCodingTest extends AbstractHttpTestCase {
 
 		HttpGet request = new HttpGet(url);
 		request.addHeader(HttpHeaders.ACCEPT_ENCODING, ce);
-		HttpResponse response = executeRequest(request);
-
-		// check the response content
-		assertEqualsStatusCode(HttpStatus.SC_OK, response);
-		Header ceHeader = response.getEntity().getContentEncoding();
-		assertNotNull("Missing \"Content-Encoding\" header", ceHeader);
-		assertEquals("Wrong \"Content-Encoding\" header value", ce,
-				ceHeader.getValue());
-
-		// uncompress content
-		HttpContext context = new BasicHttpContext();
-		HttpResponseInterceptor interceptor = new ResponseContentEncoding();
-		interceptor.process(response, context);
+		HttpResponse response = executeRequest(request, false);
 		HttpEntity entity = response.getEntity();
-		Assert.assertNotNull(entity);
-		Assert.assertTrue(entity instanceof GzipDecompressingEntity);
 
-		// check the content integrity
-		byte[] actuals = EntityUtils.toByteArray(entity);
-		byte[] expecteds = Resources
-				.readFileAsBytes(getDefaultProjectWebFolderPath() + url);
+		try {
+			// check the response content
+			assertEqualsStatusCode(HttpStatus.SC_OK, response);
+			Header ceHeader = entity.getContentEncoding();
+			assertNotNull("Missing \"Content-Encoding\" header", ceHeader);
+			assertEquals("Wrong \"Content-Encoding\" header value", ce,
+					ceHeader.getValue());
 
-		Assert.assertArrayEquals("Wrong coding", expecteds, actuals);
+			// uncompress content
+			HttpContext context = new BasicHttpContext();
+			HttpResponseInterceptor interceptor = new ResponseContentEncoding();
+			interceptor.process(response, context);
+			entity = response.getEntity();
+			Assert.assertNotNull(entity);
+			Assert.assertTrue(entity instanceof GzipDecompressingEntity);
+			
+			// check the content integrity
+			byte[] actuals = EntityUtils.toByteArray(entity);
+			File file = new File(getSettings().getDefaultProjectWebFolderPath()
+					+ url);
+			byte[] expecteds = FileUtils.readFileToByteArray(file);
+
+			Assert.assertArrayEquals("Wrong coding", expecteds, actuals);
+		} finally {
+			request.abort();
+		}
 	}
 
 	/**
@@ -145,29 +161,34 @@ public class ContentCodingTest extends AbstractHttpTestCase {
 
 		HttpGet request = new HttpGet(url);
 		request.addHeader(HttpHeaders.ACCEPT_ENCODING, ce);
-		HttpResponse response = executeRequest(request);
-
-		// check the response content
-		assertEqualsStatusCode(HttpStatus.SC_OK, response);
-		Header ceHeader = response.getEntity().getContentEncoding();
-		assertNotNull("Missing \"Content-Encoding\" header", ceHeader);
-		assertEquals("Wrong \"Content-Encoding\" header value", ce,
-				ceHeader.getValue());
-
-		// uncompress content
-		HttpContext context = new BasicHttpContext();
-		HttpResponseInterceptor interceptor = new ResponseContentEncoding();
-		interceptor.process(response, context);
+		HttpResponse response = executeRequest(request, false);
 		HttpEntity entity = response.getEntity();
-		Assert.assertNotNull(entity);
-		Assert.assertTrue(entity instanceof GzipDecompressingEntity);
+		try {
+			// check the response content
+			assertEqualsStatusCode(HttpStatus.SC_OK, response);
+			Header ceHeader = entity.getContentEncoding();
+			assertNotNull("Missing \"Content-Encoding\" header", ceHeader);
+			assertEquals("Wrong \"Content-Encoding\" header value", ce,
+					ceHeader.getValue());
 
-		// check the content integrity
-		byte[] actuals = EntityUtils.toByteArray(entity);
-		byte[] expecteds = Resources
-				.readFileAsBytes(getDefaultProjectWebFolderPath() + url);
+			// uncompress content
+			HttpContext context = new BasicHttpContext();
+			HttpResponseInterceptor interceptor = new ResponseContentEncoding();
+			interceptor.process(response, context);
+			entity = response.getEntity();
+			Assert.assertNotNull(entity);
+			Assert.assertTrue(entity instanceof GzipDecompressingEntity);
 
-		Assert.assertArrayEquals("Wrong coding", expecteds, actuals);
+			// check the content integrity
+			byte[] actuals = EntityUtils.toByteArray(entity);
+			File file = new File(getSettings().getDefaultProjectWebFolderPath()
+					+ url);
+			byte[] expecteds = FileUtils.readFileToByteArray(file);
+
+			Assert.assertArrayEquals("Wrong coding", expecteds, actuals);
+		} finally {
+			request.abort();
+		}
 	}
 
 	/**
@@ -187,24 +208,30 @@ public class ContentCodingTest extends AbstractHttpTestCase {
 		String ce = "identity";
 		HttpGet request = new HttpGet(url);
 		request.addHeader(HttpHeaders.ACCEPT_ENCODING, ce);
-		HttpResponse response = executeRequest(request);
+		HttpResponse response = executeRequest(request, false);
+		HttpEntity entity = response.getEntity();
 
-		// check status code
-		assertEqualsStatusCode(HttpStatus.SC_OK, response);
+		try {
+			// check status code
+			assertEqualsStatusCode(HttpStatus.SC_OK, response);
 
-		// check that CE header is missing
-		Header ceHeader = response.getEntity().getContentEncoding();
-		assertNull(
-				"No \"Content-Encoding\" header should be returned for \"identity\" content-coding",
-				ceHeader);
+			// check that CE header is missing
+			Header ceHeader = entity.getContentEncoding();
+			assertNull(
+					"No \"Content-Encoding\" header should be returned for \"identity\" content-coding",
+					ceHeader);
 
-		// check that content has not been transformed
-		byte[] expecteds = Resources
-				.readFileAsBytes(getDefaultProjectWebFolderPath() + url);
-		byte[] actuals = EntityUtils.toByteArray(response.getEntity());
-		Assert.assertArrayEquals(
-				"Identity content-coding should not transform the content",
-				expecteds, actuals);
+			// check that content has not been transformed
+			File file = new File(getSettings().getDefaultProjectWebFolderPath()
+					+ url);
+			byte[] expecteds = FileUtils.readFileToByteArray(file);
+			byte[] actuals = EntityUtils.toByteArray(entity);
+			Assert.assertArrayEquals(
+					"Identity content-coding should not transform the content",
+					expecteds, actuals);
+		} finally {
+			EntityUtils.consume(entity);
+		}
 
 	}
 
@@ -225,24 +252,31 @@ public class ContentCodingTest extends AbstractHttpTestCase {
 		String ce = "";
 		HttpGet request = new HttpGet(url);
 		request.addHeader(HttpHeaders.ACCEPT_ENCODING, ce);
-		HttpResponse response = executeRequest(request);
+		HttpResponse response = executeRequest(request, false);
+		HttpEntity entity = response.getEntity();
 
-		// check status code
-		assertEqualsStatusCode(HttpStatus.SC_OK, response);
+		try {
+			// check status code
+			assertEqualsStatusCode(HttpStatus.SC_OK, response);
 
-		// check that CE header is missing
-		Header ceHeader = response.getEntity().getContentEncoding();
-		assertNull(
-				"No \"Content-Encoding\" header should be returned for \"identity\" content-coding",
-				ceHeader);
+			// check that CE header is missing
+			Header ceHeader = entity.getContentEncoding();
+			assertNull(
+					"No \"Content-Encoding\" header should be returned for \"identity\" content-coding",
+					ceHeader);
 
-		// check that content has not been transformed
-		byte[] expecteds = Resources
-				.readFileAsBytes(getDefaultProjectWebFolderPath() + url);
-		byte[] actuals = EntityUtils.toByteArray(response.getEntity());
-		Assert.assertArrayEquals(
-				"Identity content-coding should not transform the content",
-				expecteds, actuals);
+			// check that content has not been transformed
+			File file = new File(getSettings().getDefaultProjectWebFolderPath()
+					+ url);
+			byte[] expecteds = FileUtils.readFileToByteArray(file);
+			byte[] actuals = EntityUtils.toByteArray(entity);
+			Assert.assertArrayEquals(
+					"Identity content-coding should not transform the content",
+					expecteds, actuals);
+
+		} finally {
+			EntityUtils.consume(entity);
+		}
 
 	}
 
@@ -263,24 +297,31 @@ public class ContentCodingTest extends AbstractHttpTestCase {
 		String ce = "*";
 		HttpGet request = new HttpGet(url);
 		request.addHeader(HttpHeaders.ACCEPT_ENCODING, ce);
-		HttpResponse response = executeRequest(request);
+		HttpResponse response = executeRequest(request, false);
+		HttpEntity entity = response.getEntity();
 
-		// check status code
-		assertEqualsStatusCode(HttpStatus.SC_OK, response);
+		try {
+			// check status code
+			assertEqualsStatusCode(HttpStatus.SC_OK, response);
 
-		// check that CE header is missing
-		Header ceHeader = response.getEntity().getContentEncoding();
-		assertNull(
-				"No \"Content-Encoding\" header should be returned for \"identity\" content-coding",
-				ceHeader);
+			// check that CE header is missing
+			Header ceHeader = entity.getContentEncoding();
+			assertNull(
+					"No \"Content-Encoding\" header should be returned for \"identity\" content-coding",
+					ceHeader);
 
-		// check that content has not been transformed
-		byte[] expecteds = Resources
-				.readFileAsBytes(getDefaultProjectWebFolderPath() + url);
-		byte[] actuals = EntityUtils.toByteArray(response.getEntity());
-		Assert.assertArrayEquals(
-				"Identity content-coding should not transform the content",
-				expecteds, actuals);
+			// check that content has not been transformed
+			File file = new File(getSettings().getDefaultProjectWebFolderPath()
+					+ url);
+			byte[] expecteds = FileUtils.readFileToByteArray(file);
+			byte[] actuals = EntityUtils.toByteArray(entity);
+			Assert.assertArrayEquals(
+					"Identity content-coding should not transform the content",
+					expecteds, actuals);
+		} finally {
+			EntityUtils.consume(entity);
+		}
+
 	}
 
 	/**
@@ -293,7 +334,7 @@ public class ContentCodingTest extends AbstractHttpTestCase {
 	@Test
 	public void testContentCodingValueIsCaseInsensitive() {
 		String url = "tocompress.html";
-		String[] formats = getSupportedContentCoding();
+		String[] formats = Settings.getSupportedContentCoding();
 		for (String ce : formats) {
 			try {
 				// Get response when ce value in lower case
@@ -447,7 +488,7 @@ public class ContentCodingTest extends AbstractHttpTestCase {
 
 		byte[] expecteds = "Hello".getBytes();// RandomStringUtils.random(125).getBytes(charset);
 
-		//logger.debug("Origin data length: " + expecteds.length);
+		// logger.debug("Origin data length: " + expecteds.length);
 
 		// Create the compressor with highest level of compression
 		Deflater compressor = new Deflater();
@@ -477,9 +518,9 @@ public class ContentCodingTest extends AbstractHttpTestCase {
 		// Get the compressed data
 		byte[] compressedData = bos.toByteArray();
 
-		//logger.debug("Compressed data length: " + compressedData.length);
-		//logger.debug("Compressed data as string: "
-				//+ new String(compressedData, "UTF-8"));
+		// logger.debug("Compressed data length: " + compressedData.length);
+		// logger.debug("Compressed data as string: "
+		// + new String(compressedData, "UTF-8"));
 
 		// entity
 		ByteArrayEntity reqEntity = new ByteArrayEntity(compressedData);
@@ -491,43 +532,50 @@ public class ContentCodingTest extends AbstractHttpTestCase {
 		request.setEntity(reqEntity);
 
 		// response
-		HttpResponse response = executeRequest(request);
-		assertEqualsStatusCode(HttpStatus.SC_OK, response);
-
+		HttpResponse response = executeRequest(request, false);
 		HttpEntity resEntity = response.getEntity();
 
-		byte[] actuals = EntityUtils.toByteArray(resEntity);
-		//logger.debug("Response data length: " + actuals.length);
-		//logger.debug("Response data as string: " + new String(actuals, "UTF-8"));
-
-		// Create the decompressor and give it the data to compress
-		Inflater decompressor = new Inflater();
-		decompressor.setInput(compressedData);
-
-		// Create an expandable byte array to hold the decompressed data
-		ByteArrayOutputStream bos1 = new ByteArrayOutputStream(
-				compressedData.length);
-
-		// Decompress the data
-		byte[] buf1 = new byte[1024];
-		while (!decompressor.finished()) {
-			try {
-				int count = decompressor.inflate(buf1);
-				bos1.write(buf1, 0, count);
-			} catch (DataFormatException e) {
-			}
-		}
 		try {
-			bos1.close();
-		} catch (IOException e) {
-		}
+			assertEqualsStatusCode(HttpStatus.SC_OK, response);
 
-		// Get the decompressed data
-		//byte[] decompressedData = bos1.toByteArray();
-		//logger.debug("Decompressed data length: " + decompressedData.length);
-		//logger.debug("Decompressed data as string: "
-				//+ new String(decompressedData));
-		Assert.assertArrayEquals("Wrong response content", expecteds, actuals);
+			byte[] actuals = EntityUtils.toByteArray(resEntity);
+			// logger.debug("Response data length: " + actuals.length);
+			// logger.debug("Response data as string: " + new String(actuals,
+			// "UTF-8"));
+
+			// Create the decompressor and give it the data to compress
+			Inflater decompressor = new Inflater();
+			decompressor.setInput(compressedData);
+
+			// Create an expandable byte array to hold the decompressed data
+			ByteArrayOutputStream bos1 = new ByteArrayOutputStream(
+					compressedData.length);
+
+			// Decompress the data
+			byte[] buf1 = new byte[1024];
+			while (!decompressor.finished()) {
+				try {
+					int count = decompressor.inflate(buf1);
+					bos1.write(buf1, 0, count);
+				} catch (DataFormatException e) {
+				}
+			}
+			try {
+				bos1.close();
+			} catch (IOException e) {
+			}
+
+			// Get the decompressed data
+			// byte[] decompressedData = bos1.toByteArray();
+			// logger.debug("Decompressed data length: " +
+			// decompressedData.length);
+			// logger.debug("Decompressed data as string: "
+			// + new String(decompressedData));
+			Assert.assertArrayEquals("Wrong response content", expecteds,
+					actuals);
+		} finally {
+			EntityUtils.consume(resEntity);
+		}
 
 	}
 
@@ -552,7 +600,7 @@ public class ContentCodingTest extends AbstractHttpTestCase {
 
 		byte[] expecteds = "Hello".getBytes();// RandomStringUtils.random(125).getBytes(charset);
 
-		//logger.debug("Origin data length: " + expecteds.length);
+		// logger.debug("Origin data length: " + expecteds.length);
 
 		// Create an expandable byte array to hold the compressed data.
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(expecteds.length);
@@ -565,9 +613,9 @@ public class ContentCodingTest extends AbstractHttpTestCase {
 		// Get the compressed data
 		byte[] compressedData = bos.toByteArray();
 
-		//logger.debug("Compressed data length: " + compressedData.length);
-		//logger.debug("Compressed data as string: "
-				//+ new String(compressedData, "UTF-8"));
+		// logger.debug("Compressed data length: " + compressedData.length);
+		// logger.debug("Compressed data as string: "
+		// + new String(compressedData, "UTF-8"));
 
 		// entity
 		ByteArrayEntity reqEntity = new ByteArrayEntity(compressedData);
@@ -579,14 +627,14 @@ public class ContentCodingTest extends AbstractHttpTestCase {
 		request.setEntity(reqEntity);
 
 		// response
-		HttpResponse response = executeRequest(request);
-		assertEqualsStatusCode(HttpStatus.SC_OK, response);
-
+		HttpResponse response = executeRequest(request, false);
 		HttpEntity resEntity = response.getEntity();
-
 		byte[] actuals = EntityUtils.toByteArray(resEntity);
-		//logger.debug("Response data length: " + actuals.length);
-		//logger.debug("Response data as string: " + new String(actuals, "UTF-8"));
+
+		assertEqualsStatusCode(HttpStatus.SC_OK, response);
+		// logger.debug("Response data length: " + actuals.length);
+		// logger.debug("Response data as string: " + new String(actuals,
+		// "UTF-8"));
 		Assert.assertArrayEquals("Wrong response content", expecteds, actuals);
 
 	}
@@ -612,7 +660,7 @@ public class ContentCodingTest extends AbstractHttpTestCase {
 
 		byte[] expecteds = RandomStringUtils.random(125).getBytes(charset);
 
-		//logger.debug("Origin data length: " + expecteds.length);
+		// logger.debug("Origin data length: " + expecteds.length);
 
 		// Create an expandable byte array to hold the compressed data.
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(expecteds.length);
@@ -625,7 +673,7 @@ public class ContentCodingTest extends AbstractHttpTestCase {
 		// Get the compressed data
 		byte[] compressedData = bos.toByteArray();
 
-		//logger.debug("Compressed data length: " + compressedData.length);
+		// logger.debug("Compressed data length: " + compressedData.length);
 
 		// entity
 		ByteArrayEntity reqEntity = new ByteArrayEntity(compressedData);
@@ -637,12 +685,10 @@ public class ContentCodingTest extends AbstractHttpTestCase {
 		request.setEntity(reqEntity);
 
 		// response
-		HttpResponse response = executeRequest(request);
-		assertEqualsStatusCode(HttpStatus.SC_OK, response);
-
+		HttpResponse response = executeRequest(request, false);
 		HttpEntity resEntity = response.getEntity();
-
 		byte[] actuals = EntityUtils.toByteArray(resEntity);
+		assertEqualsStatusCode(HttpStatus.SC_OK, response);
 		Assert.assertArrayEquals("Wrong response content", expecteds, actuals);
 
 	}
@@ -707,44 +753,55 @@ public class ContentCodingTest extends AbstractHttpTestCase {
 	@Test
 	public void testThatServercCompressOnlyWhenLengthGreaterThan1Ko()
 			throws Exception {
+		String path;
 		String url;
 		String ce;
 		HttpGet request;
 		HttpResponse response;
+		HttpEntity entity;
 		// create a resource with length less than 1ko
 		url = "/lessThan1ko.txt";
-		createRandomContent(url, 1023);
+		path = getSettings().getDefaultProjectWebFolderPath() + url;
+		assertTrue(Utils.createRandomContent(path, 1023));
 		// compress
 		ce = "gzip";
 		request = new HttpGet(url);
 		request.addHeader(HttpHeaders.ACCEPT_ENCODING, ce);
-		response = executeRequest(request);
+		response = executeRequest(request, false);
+		entity = response.getEntity();
 
-		// check the content-encoding
-		assertNull(
-				"Server should not compress content with length less than or equal 1ko",
-				response.getEntity().getContentEncoding());
+		try {
+			// check the content-encoding
+			assertNull(
+					"Server should not compress content with length less than or equal 1ko",
+					entity.getContentEncoding());
 
-		// check that content has not been transformed
-		byte[] expected = Resources
-				.readFileAsBytes(getDefaultProjectWebFolderPath() + url);
-		byte[] actual = EntityUtils.toByteArray(response.getEntity());
-		Assert.assertArrayEquals(
-				"Server should not compress content with length less than or equal 1ko",
-				expected, actual);
-
-		// create a resource with length greater 1ko
-		url = "/greaterThan1ko.txt";
-		createRandomContent(url, 1025);
-		// request compress
-		request = new HttpGet(url);
-		request.addHeader(HttpHeaders.ACCEPT_ENCODING, ce);
-		response = executeRequest(request);
-		assertNotNull(
-				"Server should compress content with length greater than 1ko",
-				response.getEntity().getContentEncoding());
-		// No need to check out the gzip compression when it has been done an
-		// aforementioned test
+			// check that content has not been transformed
+			File file = new File(getSettings().getDefaultProjectWebFolderPath()
+					+ url);
+			byte[] expecteds = FileUtils.readFileToByteArray(file);
+			byte[] actuals = EntityUtils.toByteArray(response.getEntity());
+			Assert.assertArrayEquals(
+					"Server should not compress content with length less than or equal 1ko",
+					expecteds, actuals);
+			// create a resource with length greater 1ko
+			url = "/greaterThan1ko.txt";
+			path = getSettings().getDefaultProjectWebFolderPath() + url;
+			assertTrue(Utils.createRandomContent(path, 1025));
+			// request compress
+			request = new HttpGet(url);
+			request.addHeader(HttpHeaders.ACCEPT_ENCODING, ce);
+			response = executeRequest(request);
+			entity = response.getEntity();
+			assertNotNull(
+					"Server should compress content with length greater than 1ko",
+					response.getEntity().getContentEncoding());
+			// No need to check out the gzip compression when it has been done
+			// an
+			// aforementioned test
+		} finally {
+			EntityUtils.consume(entity);
+		}
 	}
 
 }

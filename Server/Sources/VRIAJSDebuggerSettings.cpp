@@ -17,6 +17,7 @@
 #include "VRIAJSDebuggerSettings.h"
 #include "VSolution.h"
 #include "VRIAServerSolution.h"
+#include "VRIAServerProject.h"
 #include "VProjectItem.h"
 #include "VRIAServerTools.h"
 #include "UsersAndGroups/Sources/UsersAndGroups.h"
@@ -28,6 +29,7 @@ using namespace std;
 
 VJSDebuggerSettings::VJSDebuggerSettings ( VRIAServerSolution* inServerSolution )
 {
+	fNeedsAuthentication = true;
 	fServerSolution = inServerSolution;
 	if ( fServerSolution != 0 )
 		fServerSolution-> Retain ( );
@@ -35,7 +37,8 @@ VJSDebuggerSettings::VJSDebuggerSettings ( VRIAServerSolution* inServerSolution 
 
 VJSDebuggerSettings::~VJSDebuggerSettings ( )
 {
-	fServerSolution-> Release ( );
+	if ( fServerSolution != 0 )
+		fServerSolution-> Release ( );
 }
 
 VError VJSDebuggerSettings::Init ( )
@@ -48,70 +51,60 @@ VError VJSDebuggerSettings::Init ( )
 		return ThrowError ( VE_RIA_INVALID_DESIGN_SOLUTION );
 
 	VProjectItem*				pitemDirectory = vSolution-> GetProjectItemFromTag ( kUAGDirectoryTag );
-	//VProjectItem*				pitemPerms = fDesignSolution-> GetProjectItemFromTag ( kPermissionsTag );
-	if ( pitemDirectory == NULL )
-		return VE_OK; // No user directory so no access rights defined
+	VProjectItem*				pitemPerms = vSolution-> GetProjectItemFromTag ( kPermissionsTag );
 
-	CUAGManager*				cmpUAGManager = VComponentManager::RetainComponentOfType <CUAGManager> ( );
-	if ( cmpUAGManager == 0 )
-		return ThrowError ( VE_RIA_UAG_COMPONENT_NOT_FOUND );
+	fNeedsAuthentication = ( pitemDirectory != NULL && pitemPerms != NULL ); // If no user directory then no access rights defined
 
-	VError						vError = VE_OK;
-
-	CUAGDirectory*				uagDirectory = fServerSolution-> RetainUAGDirectory ( );
-	if ( uagDirectory != 0 )
-	{
-		VFilePath				pathPerms;
-		pitemDirectory-> GetFilePath ( pathPerms );
-		/*VFilePath	pathPerms;
-		if ( pitemPerms != NULL )
-			pitemPerms-> GetFilePath ( pathPerms );*/
-
-		// Load and parse premissions file
-		pathPerms. SetExtension ( CVSTR ( "waPerm" ) ); // Hardcoded to be at the same level as the directory file and to have the same name but different extension
-		VFile					vfPerms ( pathPerms );
-		VValueBag				vvbagPerms;
-		vError = LoadBagFromXML ( vfPerms, L"Permissions", vvbagPerms );
-		if ( vError == VE_OK )
-		{
-			const VBagArray*	bgaPerms = vvbagPerms. GetElements ( CVSTR ( "allow" ) ); // Use namespaced bag keys instead, like SolutionPerms::allow
-			if ( bgaPerms != 0 )
-			{
-				VIndex			nCount = bgaPerms-> GetCount ( );
-				for ( VIndex i = 1; i <= nCount && vError == VE_OK; i++ )
-				{
-					const VValueBag*		vvbagOnePerm = bgaPerms-> GetNth ( i );
-					if ( vvbagOnePerm == NULL )
-						continue;
-
-					VString		vstrAction;
-					vvbagOnePerm-> GetString ( CVSTR ( "action" ), vstrAction ); // Use namespaced bag keys instead, like SolutionPerms::action
-					VString		vstrGroupID;
-					vvbagOnePerm-> GetString ( CVSTR ( "groupID" ), vstrGroupID ); // Use namespaced bag keys instead, like SolutionPerms::groupID
-					//::DebugMsg ( CVSTR ( "Action is \"" ) + vstrAction + CVSTR ( "\"\r\n" ) );
-					//::DebugMsg ( CVSTR ( "GroupID is \"" ) + vstrGroupID + CVSTR ( "\"\r\n" ) );
-
-					if ( vstrAction. EqualToString ( CVSTR ( "debug" ) ) )
-					{
-						VUUID		vidGroup;
-						vidGroup. FromString ( vstrGroupID );
-						fDebuggerGroups. push_back ( vidGroup );
-					}
-				}
-			}
-		}
-		else
-			vError = VE_OK; // Failed to load file so no restrictions (SHOULD PROBABLY FILTER FILE_NOT_FOUND ONLY AND TREAT OTHER ERRORS AS REAL ERRORS)
-
-		uagDirectory-> Release ( );
-	}
-
-	ReleaseRefCountable ( &cmpUAGManager );
-
-	return vError;
+	return VE_OK;
 }
 
-bool VJSDebuggerSettings::UserCanDebug ( const UniChar* inUserName, const UniChar* inSeededHA1, const UniChar* inSeed ) const
+bool VJSDebuggerSettings::UserCanDebug(IAuthenticationInfos* inAuthenticationInfos) const
+{
+	bool			canDebug = false;
+	CUAGSession*	uagSession;
+
+	uagSession = inAuthenticationInfos->GetUAGSession();
+
+	if (!uagSession)
+	{
+		CUAGDirectory*	uagDirectory = fServerSolution->RetainUAGDirectory();
+		if (!uagDirectory)
+		{
+			// No directory defined at all so access is not protected
+			canDebug = true;
+		}
+		else
+		{
+			VError			vError = VE_OK;
+
+			uagSession = uagDirectory->MakeDefaultSession(&vError);
+			xbox_assert( vError == VE_OK );
+			inAuthenticationInfos->SetUAGSession(uagSession);
+			//inAuthenticationInfos->UAGSessionHasChanged();
+		}
+		ReleaseRefCountable( &uagDirectory );
+	}
+
+	if (!canDebug && uagSession)
+	{
+		CUAGDirectory*		uagDir = uagSession->GetDirectory();
+		XBOX::VUUID			uuid;
+		if (!uagDir->GetSpecialGroupID(CUAGDirectory::DebuggerGroup, uuid))
+		{
+			xbox_assert(false);
+		}
+		else
+		{
+			if (uagSession->BelongsTo(uuid))
+			{
+				canDebug = true;
+			}
+		}
+	}
+	return canDebug;
+}
+
+bool VJSDebuggerSettings::UserCanDebug ( const UniChar* inUserName, const UniChar* inUserPassword ) const
 {
 	if ( fServerSolution == 0 )
 	{
@@ -120,61 +113,61 @@ bool VJSDebuggerSettings::UserCanDebug ( const UniChar* inUserName, const UniCha
 		return false; // Something went really wrong
 	}
 
-	if ( fDebuggerGroups. size ( ) == 0 )
-		return true; // No debugger groups defined at all so access is not protected
+	if ( !NeedsAuthentication ( ) )
+		return true;
 
 	CUAGDirectory*						uagDirectory = fServerSolution-> RetainUAGDirectory ( );
 	if ( uagDirectory == 0 )
-		return true; // // No directory defined at all so access is not protected
+		return true; // No directory defined at all so access is not protected
 
 	VString								vstrUserName ( inUserName );
-	VString								vstrSeededHA1 ( inSeededHA1 );
-	VString								vstrSeed ( inSeed );
+	VString								vstrUserPassword ( inUserPassword );
 
 	bool								bCanDebug = false;
 	VError								vError = VE_OK;
+	CUAGSession*						cSession = NULL;
 
-	CUAGUser*							cUser = uagDirectory-> RetainUser ( vstrUserName, &vError );
-	if ( cUser != 0 && vError == VE_OK )
+	if ((uagDirectory != NULL) && uagDirectory->HasLoginListener())
 	{
-		// TODO: MUST STILL VERIFY THE HA1
-		VString							vstrValidHA1;
-		vError = cUser-> GetHA1 ( vstrValidHA1 );
-		if ( vError == VE_OK )
+		// sc 22/06/2012, custom JavaScript authentication support
+		VectorOfApplication applications;
+		fServerSolution->GetApplications( applications);
+		VRIAServerProject *app = (!applications.empty()) ? applications.front() : NULL;
+		if (app != NULL)
 		{
-			// Calculate seeded HA1
-			CSecurityManager*			cmpSecurityManager = ( CSecurityManager* ) VComponentManager::RetainUniqueComponent ( CSecurityManager::Component_Type );
-			if ( cmpSecurityManager != 0 )
+			VJSGlobalContext *globalContext = app->RetainJSContext( vError, true, NULL);
+			if (vError == VE_OK)
 			{
-				VString					vstrValidHA1Seeded = cmpSecurityManager-> ComputeDigestHA1 ( vstrValidHA1, vstrSeed, CVSTR ( "Wakanda" ) );
-				if ( vstrValidHA1Seeded. EqualToString ( vstrSeededHA1 ) )
+				if (testAssert(globalContext != NULL))
 				{
-					CUAGSession*		cSession = uagDirectory-> OpenSession ( cUser, &vError );
-					if ( cSession != 0 && vError  == VE_OK )
-					{
-						vector<VUUID>::const_iterator		iter = fDebuggerGroups. begin ( );
-						while ( iter != fDebuggerGroups. end ( ) )
-						{
-							if ( cSession-> BelongsTo ( *iter ) )
-							{
-								bCanDebug = true;
-
-								break;
-							}
-
-							iter++;
-						}
-					}
-					ReleaseRefCountable ( &cSession );
+					VJSContext jsContext( globalContext);
+					cSession = uagDirectory-> OpenSession ( inUserName, inUserPassword, &vError, &jsContext );
+				}
+				else
+				{
+					vError = VE_UNKNOWN_ERROR;
 				}
 			}
-			ReleaseRefCountable ( &cmpSecurityManager );
+			app->ReleaseJSContext( globalContext, NULL);
 		}
 	}
+	else
+	{
+		cSession = uagDirectory-> OpenSession ( inUserName, inUserPassword, &vError, NULL );
+	}
+	
+	if ( cSession != 0 && vError  == VE_OK )
+	{
+		VUUID			vuuidDebuggerGroup;
+		bool			bOK = uagDirectory-> GetSpecialGroupID ( CUAGDirectory::DebuggerGroup, vuuidDebuggerGroup );
+		xbox_assert ( bOK );
+		if ( cSession-> BelongsTo ( vuuidDebuggerGroup ) )
+			bCanDebug = true;
+	}
 
-	ReleaseRefCountable ( &cUser );
+	ReleaseRefCountable ( &cSession );
 	ReleaseRefCountable ( &uagDirectory );
-
+	
 	return bCanDebug;
 }
 
@@ -182,7 +175,57 @@ bool VJSDebuggerSettings::NeedsAuthentication ( ) const
 {
 	xbox_assert ( fServerSolution != 0 );
 
-	// NOT A  FINAL VERSION
-	return fDebuggerGroups. size ( ) != 0;
+	if ( !fNeedsAuthentication )
+		return false;
+
+	bool								bResult = true;
+
+	CUAGDirectory*						uagDirectory = fServerSolution-> RetainUAGDirectory ( );
+	xbox_assert ( uagDirectory != 0 );
+	if ( uagDirectory == 0 )
+		return fNeedsAuthentication;
+	else
+	{
+		// Let's verify the special case when the default session can debug
+		VError							vError = VE_OK;
+		CUAGSession*					cSession = uagDirectory-> MakeDefaultSession ( &vError );
+		xbox_assert ( vError == VE_OK );
+		VUUID							vuuidDebuggerGroup;
+		bool							bOK = uagDirectory-> GetSpecialGroupID ( CUAGDirectory::DebuggerGroup, vuuidDebuggerGroup );
+		xbox_assert ( bOK );
+		if ( cSession-> BelongsTo ( vuuidDebuggerGroup ) )
+			bResult = false;
+
+		ReleaseRefCountable ( &cSession );
+	}
+
+	ReleaseRefCountable ( &uagDirectory );
+
+	return bResult;
+}
+
+bool VJSDebuggerSettings::HasDebuggerUsers ( ) const
+{
+	bool								bResult = false;
+
+	CUAGDirectory*						uagDirectory = fServerSolution-> RetainUAGDirectory ( );
+	xbox_assert ( uagDirectory != 0 );
+	if ( uagDirectory == 0 )
+		return false;
+
+	VError								vError = VE_OK;
+	CUAGGroup*							groupDebuggers = uagDirectory-> RetainSpecialGroup ( CUAGDirectory::DebuggerGroup, &vError );
+	xbox_assert ( vError == VE_OK );
+	if ( vError == VE_OK && groupDebuggers != 0 )
+	{
+		CUAGUserVector					vctrUsers;
+		groupDebuggers-> RetainUsers ( vctrUsers, false );
+		bResult = ( vctrUsers. size ( ) > 0 );
+	}
+
+	ReleaseRefCountable ( &groupDebuggers );
+	ReleaseRefCountable ( &uagDirectory );
+
+	return bResult;
 }
 

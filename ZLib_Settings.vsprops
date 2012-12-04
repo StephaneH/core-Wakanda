@@ -6,7 +6,7 @@
 	>
 	<Tool
 		Name="VCCLCompilerTool"
-		AdditionalIncludeDirectories="$(SolutionDir)\..\..\zlib\1.2.5\"
+		AdditionalIncludeDirectories="&quot;$(SolutionDir)\..\..\zlib\1.2.5\&quot;;&quot;$(SolutionDir)\..\..\libzip\0.10\lib&quot;"
 	/>
 	<Tool
 		Name="VCLinkerTool"

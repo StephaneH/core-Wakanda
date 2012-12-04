@@ -18,7 +18,7 @@ var testCase = {
 	
 	_should: {
         ignore: {
-            testConstructorHasSetDefaultProxyMethod: true // Don't know yet if it's still planned or not...
+
         }
     },
 	
@@ -30,9 +30,6 @@ var testCase = {
 	testBasicInstanciation: function () {
         var myXHR = new XMLHttpRequest();
         Y.Assert.areSame("object", typeof myXHR);
-    },
-	testConstructorHasSetDefaultProxyMethod: function () {
-        Y.Assert.areSame("function", typeof XMLHttpRequest.setDefaultProxy);
     },
 	testInstanceHasGetResponseHeaderMethod: function () {
         var myXHR = new XMLHttpRequest();
@@ -151,7 +148,11 @@ var testCase = {
 		var myXHR = new XMLHttpRequest();
 		myXHR.open("POST", "http://127.0.0.1:8081/testEcho/foo?bar= baz", false);
 		myXHR.send("{\"foo\": 'bar baz',\n\t\"42\": 42}");
-		result = JSON.parse(myXHR.responseText);
+		try {
+			result = JSON.parse(myXHR.responseText);
+		} catch (e) {
+			Y.Assert.fail(e.message + ': ' + myXHR.responseText);
+		}
 		Y.Assert.areSame("object", typeof result);
 		Y.ObjectAssert.hasKeys([
 			"url", 
@@ -172,7 +173,7 @@ var testCase = {
 			"HOST"
 		], result.headers);
 		Y.Assert.areSame("/testEcho/foo?bar= baz", result.url);
-		Y.Assert.areSame("/testEcho/foo?bar= baz", result.rawURL);
+		Y.Assert.areSame("/testEcho/foo?bar=%20baz", result.rawURL);
 		Y.Assert.areSame("/testEcho/foo", result.urlPath);
 		Y.Assert.areSame("bar= baz", result.urlQuery);
 		Y.Assert.areSame("127.0.0.1:8081", result.host);
@@ -180,7 +181,7 @@ var testCase = {
 		Y.Assert.areSame("HTTP/1.1", result.version);
 		Y.Assert.areSame("", result.user);
 		Y.Assert.areSame("", result.password);
-		Y.Assert.areSame("POST /testEcho/foo?bar= baz HTTP/1.1", result.requestLine);
+		Y.Assert.areSame("POST /testEcho/foo?bar=%20baz HTTP/1.1", result.requestLine);
 		Y.Assert.areSame("*" + "/" + "*", result.headers.ACCEPT);
 		Y.Assert.areSame("127.0.0.1:8081", result.headers.HOST);
 		Y.Assert.areSame("{\"foo\": 'bar baz',\n\t\"42\": 42}", result.body);
@@ -194,5 +195,50 @@ var testCase = {
 		var status = xhr.status;
 	
 		Y.Assert.areSame(200, status);
+	},
+
+	testOnreadystatechange: function () {
+		var xhr = new XMLHttpRequest();
+		var stateSequence = [0];
+		xhr.onreadystatechange = function() {
+			var state = this.readyState;
+			stateSequence.push(state);
+			if (state !== 4) {
+				return;
+			}
+		};
+		xhr.open('GET', 'http://127.0.0.1:8081/testSimple');
+		xhr.send();
+		Y.ArrayAssert.itemsAreSimilar([0, 1, 2, 3, 4], stateSequence);
+	},
+
+	testOnreadystatechangeBis: function () {
+		var stateSequence = [0];
+		var expected = [0, 1, 2, 3, 4];
+
+		var stateHandler = function() {
+			var state = this.readyState;
+			stateSequence.push(state);
+			if (state !== 4) {
+				return;
+			}
+		};
+
+		var xhr = new XMLHttpRequest();
+		xhr.onreadystatechange = stateHandler;
+
+		try {
+			xhr.open('GET', 'http://www.google.fr/');
+			xhr.send();
+		}
+		catch (e) {
+			expected = [0, 1, 2, 1, 2, 3, 4];
+			xhr = new XMLHttpRequest({host: 'http://proxy.private.4d.fr', port: 80});
+			xhr.onreadystatechange = stateHandler;
+			xhr.open('GET', 'http://www.google.fr/');
+			xhr.send();
+		}
+		
+		Y.ArrayAssert.itemsAreSimilar(expected, stateSequence);
 	}
 };

@@ -27,6 +27,7 @@ namespace RIAFileKind
 	const XBOX::VString kDataFileExtension         ( "waData"         );
 	const XBOX::VString kDataIndexFileExtension    ( "waIndex"        );
 	const XBOX::VString kCatalogFileExtension      ( "waModel"        );
+	const XBOX::VString kPageFolderExtension       ( "waPage"         );
 	const XBOX::VString kSolutionLinkFileExtension ( "waSolutionLink" );
 	const XBOX::VString kFileLinkFileExtension     ( "waFileLink"     );
 	const XBOX::VString kDirectoryFileExtension    ( "waDirectory"    );
@@ -34,8 +35,7 @@ namespace RIAFileKind
 	const XBOX::VString kRPCCatalogFileExtension   ( "waRpc"          );
 	const XBOX::VString kSymbolFileExtension       ( "waSym"          );
 	const XBOX::VString kSymbolDataFileExtension   ( "waSymData"      );
-	const XBOX::VString kSymbolMatchFileExtension  ( "Match"          );
-	const XBOX::VString kBackupFileExtension       ( "waBackup"       );
+	const XBOX::VString kMatchFileExtension		   ( "Match"          );
 	const XBOX::VString kWebComponentFileExtension ( "waComponent"    );
 	const XBOX::VString kCacheUAGFileExtension     ( "cacheUAG"       );
 
@@ -72,8 +72,9 @@ namespace RIAFileKind
 	const XBOX::VString kLogFileKind		       ( "com.4d.wakanda.logfile"            );
 	const XBOX::VString kSymbolFileKind            ( "com.4d.wakanda.symbol"             );
 	const XBOX::VString kSymbolDataFileKind        ( "com.4d.wakanda.symbol-data"        );
-	const XBOX::VString kSymbolMatchFileKind       ( "com.4d.4d.match"					 );
+	const XBOX::VString kMatchFileKind		       ( "com.4d.4d.match"					 );
 	const XBOX::VString kWebComponentFileKind      ( "com.4d.wakanda.web-component"      );
+	const XBOX::VString kPageFolderFileKind        ( "com.4d.wakanda.page-folder"        );
 	const XBOX::VString kCSSFileKind			   ( "com.4d.wakanda.css"				 );
 	const XBOX::VString kJSONFileKind			   ( "com.4d.wakanda.json"				 );
 	// "public.sql" is defined in BasicUTIs.plist for Windows and Linux but does not seem to exist on Mac OS X.

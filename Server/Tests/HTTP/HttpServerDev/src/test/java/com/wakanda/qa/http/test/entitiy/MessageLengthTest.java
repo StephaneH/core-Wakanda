@@ -16,9 +16,9 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
+import org.junit.Ignore;
 import org.junit.Test;
 
-import com.wakanda.qa.http.Resources;
 import com.wakanda.qa.http.test.extend.AbstractHttpTestCase;
 /**
  * @author Ouissam
@@ -40,11 +40,12 @@ public class MessageLengthTest extends AbstractHttpTestCase {
 	 */
 	@Test
 	public void testThatResponseContainCorrectLength() throws Exception {
-		String uri = "/simple.html";
-		File ressource = new File(getDefaultProjectWebFolderPath() + uri);
+		String url = "/simple.html";
+		File ressource = new File(getSettings().getDefaultProjectWebFolderPath() + url);
 		long expected = ressource.length();
-
-		HttpResponse response = executeURL(uri);
+		
+		HttpGet request = new HttpGet(url);
+		HttpResponse response = executeRequest(request);
 		long actual = response.getEntity().getContentLength();
 
 		Header contentLengthHeader = response.getFirstHeader(HTTP.CONTENT_LEN);
@@ -74,9 +75,9 @@ public class MessageLengthTest extends AbstractHttpTestCase {
 	public void testThatServerRejectARequestWithMessageBodyButNoContentLength()
 			throws Exception {
 		String request = "POST /checkPostMethod/ HTTP/1.1" + CRLF + "Host: "
-				+ getDefaultHostHeaderValue() + CRLF + CRLF + "Hello!";
+				+ getDefaultTarget().toHostString() + CRLF + CRLF + "Hello!";
 
-		HttpResponse response = executeRequestString(request);
+		HttpResponse response = executeRawRequest(request);
 		int actual = response.getStatusLine().getStatusCode();
 		assertEquals(
 				"Server should respond with 400 or 411 if a request contains a message-body and a Content-Length is not given",
@@ -156,15 +157,16 @@ public class MessageLengthTest extends AbstractHttpTestCase {
 
 		// 304 response
 		// Get last modified date
-		HttpResponse respLmd = Resources.executeRequest(new HttpGet(Resources
-				.getDefaultUrl()));
+		HttpGet request1 = new HttpGet(getSettings()
+				.getDefaultUrl());
+		HttpResponse respLmd = executeRequest(request1);
 		String sLmd = respLmd.getFirstHeader(HttpHeaders.LAST_MODIFIED)
 				.getValue();
 
 		// Send request with If-Since-Modified header field.
-		HttpGet request = new HttpGet(getDefaultUrl());
-		request.addHeader(HttpHeaders.IF_MODIFIED_SINCE, sLmd);
-		HttpResponse response = executeRequest(request);
+		HttpGet request2 = new HttpGet(getSettings().getDefaultUrl());
+		request2.addHeader(HttpHeaders.IF_MODIFIED_SINCE, sLmd);
+		HttpResponse response = executeRequest(request2);
 
 		assertEqualsStatusCode(HttpStatus.SC_NOT_MODIFIED, response);
 		assertNull("304 reponse should not contain a message-body",
@@ -181,10 +183,12 @@ public class MessageLengthTest extends AbstractHttpTestCase {
 	 * the Content-Length is ignored.
 	 * <p>
 	 * <b>Reference:</b> SPEC690 (RFC2616) 4.4
-	 * 
+	 * The test is ignored for now because the feature is not yet implemented.
+	 * <p/>
 	 * @throws Exception
 	 */
 	@Test
+	@Ignore
 	public void testThatContentLengthIsIgnoredWhenRequestIncludesANonIdentityTransferCoding()
 			throws Exception {
 		String request = "POST /checkPostMethod/ HTTP/1.1" + CRLF
@@ -195,7 +199,7 @@ public class MessageLengthTest extends AbstractHttpTestCase {
 				+ "3;\n" + "123\n" + "2;\n" + "45\n" + "4;\n" + "6789\n"
 				+ "0;\n" + "\n";
 
-		HttpResponse response = executeRequestString(request);
+		HttpResponse response = executeRawRequest(request, false);
 		assertEqualsStatusCode(HttpStatus.SC_OK, response);
 
 		HttpEntity entity = response.getEntity();
@@ -211,15 +215,18 @@ public class MessageLengthTest extends AbstractHttpTestCase {
 
 	/**
 	 * <b>Implements:</b> MessageLength06
-	 * <p>
+	 * <p/>
 	 * Check that when the message does include an identity transfer-coding, the
 	 * Content-Length is used.
-	 * <p>
+	 * <p/>
+	 * The test is ignored for now because the feature is not yet implemented.
+	 * <p/>
 	 * <b>Reference:</b> SPEC690 (RFC2616) 4.4
 	 * 
 	 * @throws Exception
 	 */
 	@Test
+	@Ignore
 	public void testThatContentLengthIsUsedWhenRequestIncludesAnIdentityTransferCoding()
 			throws Exception {
 		String request = "POST /checkPostMethod/ HTTP/1.1" + CRLF
@@ -230,7 +237,7 @@ public class MessageLengthTest extends AbstractHttpTestCase {
 				+ CRLF
 				+ "123456789";
 
-		HttpResponse response = executeRequestString(request);
+		HttpResponse response = executeRawRequest(request, false);
 		assertEqualsStatusCode(HttpStatus.SC_OK, response);
 
 		HttpEntity entity = response.getEntity();
@@ -238,9 +245,7 @@ public class MessageLengthTest extends AbstractHttpTestCase {
 
 		String expected = "12345";
 		String actual = EntityUtils.toString(entity);
-
-		// if the server uses content-length it would return "3;\n123\n2;\n"
-		//logger.debug(actual);
+		logger.debug(actual);
 		assertEquals("Wrong content", expected, actual);
 	}
 

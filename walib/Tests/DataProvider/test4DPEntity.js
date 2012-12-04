@@ -463,17 +463,23 @@ var testCase = {
 				onSuccess : function(event) {
 					var entity = event.entity;
 					var id = entity.ID.getValue();
-					Y.Assert.areSame("Paris", entity.name.getValue(),"Retrieved Entity	doesn't match the query !");
+					var name = entity.name.getValue();
+					Y.Assert.areSame(1, id, "Retrieved Entity doesn't match the query (ID should be 1, not " + id + ")");
+					Y.Assert.areSame("Paris", name, "Retrieved Entity doesn't match the query (name should be Paris, not " + name + ")");
 					entity.remove({
 						'onSuccess' : function(event) {
 							testRunner.resume(function() {
 								var employee = ds.City.getEntity(1,{	
 									'onSuccess' : function(event) {
-										Y.Assert.fail("ds.City.getEntity should fail");
+										testRunner.resume(function() {
+											var entity = event.entity;
+											var id = entity.ID.getValue()
+											Y.Assert.fail("ds.City.getEntity should fail but returns the entity of ID " + id);
+										});
 									},
 									'onError' : function(error) {
 										testRunner.resume(function() {
-											// Y.Assert.fail("ds.City.getEntity fails: " + JSON.stringify(error));
+											
 										});
 									}
 								});

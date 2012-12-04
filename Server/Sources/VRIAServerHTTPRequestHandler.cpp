@@ -21,6 +21,8 @@
 #include "VRIAServerTools.h"
 #include "VRIAServerJSAPI.h"
 #include "VRIAServerLogger.h"
+#include "VRIAPermissions.h"
+#include "VRIAServerHTTPSession.h"
 #include "VRIAServerHTTPRequestHandler.h"
 
 
@@ -180,114 +182,193 @@ VError VDebugHTTPRequestHandler::HandleRequest( IHTTPResponse* inResponse)
 
 	if (fApplication != NULL)
 	{
-		if (inResponse->GetRequest().GetURL().EqualToUSASCIICString( "/debug/eval/file"))
+		// sc 16/05/2012, the debug handler is only available for users which are belong to Debugger group
+		bool accessGranted = false;
+
+		VRIAHTTPSessionManager *sessionMgr = fApplication->RetainSessionMgr();
+		if (sessionMgr != NULL)
 		{
-			// the parameter is a posix path relative to the application folder
-			VString param;
-			param.FromBlock( inResponse->GetRequest().GetRequestBody().GetDataPtr(), inResponse->GetRequest().GetRequestBody().GetDataSize(), VTC_UTF_8);
-
-			if (!param.IsEmpty())
+			CUAGDirectory *uagDirectory = fApplication->GetSolution()->RetainUAGDirectory();
+			if (uagDirectory != NULL)
 			{
-				VFilePath path;
-				fApplication->BuildPathFromRelativePath( path, param, FPS_POSIX);
-				if (!path.IsEmpty() && path.IsFile())
+				// sc 09/08/2012, retreive the session from the authentication infos instead of the cookie
+				CUAGSession *uagSession = NULL;
+				IAuthenticationInfos *authInfo = inResponse->GetRequest().GetAuthenticationInfos();
+				if (authInfo != nil)
+					uagSession = RetainRefCountable( authInfo->GetUAGSession());
+
+				if (uagSession != NULL)
 				{
-					VFile script( path);
-					if (script.Exists())
+					if (uagSession->hasExpired())
 					{
-						VJSGlobalContext *globalContext = fApplication->RetainJSContext( err, false, &inResponse->GetRequest());
-						if (globalContext != NULL && err == VE_OK)
+						sessionMgr->RemoveSession( uagSession);
+						ReleaseRefCountable( &uagSession);
+					}
+				}
+
+				if (uagSession != NULL)
+				{
+					CUAGGroup *uagDebuggerGroup = uagDirectory->RetainSpecialGroup( CUAGDirectory::DebuggerGroup);
+					if (uagDebuggerGroup != NULL)
+					{
+						accessGranted = uagSession->BelongsTo( uagDebuggerGroup);
+						
+						if (!accessGranted)
 						{
-							StErrorContextInstaller errorContext;
-
-							VString loggerID, result, format( L"text/plain");
-							VValueSingle *xvalue = NULL;
-
-							fApplication->GetMessagesLoggerID( loggerID);
-							StUseLogger logger;
-
-							globalContext->EvaluateScript( &script, &xvalue, true );
-
-							if (errorContext.GetLastError() != VE_OK)
-							{
-								// sc 02/06/2010 returns the error
-								VErrorContext *context = errorContext.GetContext();
-								if (context != NULL)
-								{
-									VString errorMessage;
-									for (std::vector<VRefPtr<VErrorBase> >::const_iterator iter = context->GetErrorStack().begin() ; iter != context->GetErrorStack().end() ; ++iter)
-									{
-										if (iter != context->GetErrorStack().begin())
-											result.AppendCString( "\r\n");
-
-										(*iter)->GetErrorDescription( errorMessage);
-										result.AppendString( errorMessage);
-									}
-								}
-
-								err = inResponse->ReplyWithStatusCode( HTTP_INTERNAL_SERVER_ERROR);
-							}
-							else if (xvalue != NULL)
-							{
-								xvalue->GetString( result);
-							}
-								
-							if (err == VE_OK)
-								err = SetHTTPResponseString( inResponse, result, &format);
-
-							logger.LogMessagesFromErrorContext( loggerID, errorContext.GetContext());
-
-							delete xvalue;
-
 							handled = true;
+							err = inResponse->ReplyWithStatusCode( HTTP_FORBIDDEN);
 						}
 
-						fApplication->ReleaseJSContext( globalContext, inResponse);
+						uagDebuggerGroup->Release();
 					}
 				}
-			}
-		}
-		else if (inResponse->GetRequest().GetURL().EqualToUSASCIICString( "/debug/isOpenedSolution"))
-		{
-			// the parameter is the full posix path of the solution file
-			VString param;
-			param.FromBlock( inResponse->GetRequest().GetRequestBody().GetDataPtr(), inResponse->GetRequest().GetRequestBody().GetDataSize(), VTC_UTF_8);
-
-			if (!param.IsEmpty())
-			{
-				VFilePath path( param, FPS_POSIX);
-				if (!path.IsEmpty() && path.IsFile())
+				else
 				{
-					VFile fileParam( path);
-					bool sameFile = false;
-
-					VSolution *solution = fApplication->GetSolution()->GetDesignSolution();
-					if (solution != NULL)
-					{
-						VProjectItem *item = solution->GetSolutionFileProjectItem();
-						if (item != NULL)
-						{
-							item->GetFilePath( path);
-							VFile openedFile( path);
-							sameFile = openedFile.IsSameFile( &fileParam);
-						}
-					}
-
 					handled = true;
-					VString format( L"text/plain"), result( (sameFile) ? L"yes" : L"no");
-					err = SetHTTPResponseString( inResponse, result, &format);
+					err = inResponse->ReplyWithStatusCode( HTTP_UNAUTHORIZED);
 				}
+
+				ReleaseRefCountable( &uagSession);
+				uagDirectory->Release();
 			}
+			else
+			{
+				handled = true;
+				err = inResponse->ReplyWithStatusCode( HTTP_INTERNAL_SERVER_ERROR);
+			}
+
+			sessionMgr->Release();
 		}
-		else if (inResponse->GetRequest().GetURL().EqualToUSASCIICString( "/debug/reloadCatalog"))
+		else
 		{
 			handled = true;
-			
-			err = fApplication->ReloadCatalog( NULL);
-			if (err == VE_OK)
-				err = inResponse->ReplyWithStatusCode( HTTP_OK);
-			else
-				err = inResponse->ReplyWithStatusCode( HTTP_INTERNAL_SERVER_ERROR);
+			err = inResponse->ReplyWithStatusCode( HTTP_INTERNAL_SERVER_ERROR);
+		}
+
+		if ((err == VE_OK) && accessGranted && !handled)
+		{
+		#if 1
+
+			if (inResponse->GetRequest().GetURL().EqualToUSASCIICString( "/debug/eval/file"))
+			{
+				// the parameter is a posix path relative to the application folder
+				VString param;
+				param.FromBlock( inResponse->GetRequest().GetRequestBody().GetDataPtr(), inResponse->GetRequest().GetRequestBody().GetDataSize(), VTC_UTF_8);
+
+		#else
+			// to make easy test from the browser
+			if (inResponse->GetRequest().GetURL().BeginsWith( L"/debug/eval/file/"))
+			{
+				// the parameter is a posix path relative to the application folder
+				VString param;
+				VIndex len = VString( L"/debug/eval/file/").GetLength();
+				inResponse->GetRequest().GetURL().GetSubString( len + 1, inResponse->GetRequest().GetURL().GetLength() - len, param);
+
+		#endif
+
+				if (!param.IsEmpty())
+				{
+					VFilePath path;
+					fApplication->BuildPathFromRelativePath( path, param, FPS_POSIX);
+					if (!path.IsEmpty() && path.IsFile())
+					{
+						VFile script( path);
+						if (script.Exists())
+						{
+							VJSGlobalContext *globalContext = fApplication->RetainJSContext( err, false, &inResponse->GetRequest());
+							if (globalContext != NULL && err == VE_OK)
+							{
+								StErrorContextInstaller errorContext;
+
+								VString loggerID, result, format( L"text/plain");
+								VValueSingle *xvalue = NULL;
+
+								fApplication->GetMessagesLoggerID( loggerID);
+								StUseLogger logger;
+
+								globalContext->EvaluateScript( &script, &xvalue, true );
+
+								if (errorContext.GetLastError() != VE_OK)
+								{
+									// sc 02/06/2010 returns the error
+									VErrorContext *context = errorContext.GetContext();
+									if (context != NULL)
+									{
+										VString errorMessage;
+										for (std::vector<VRefPtr<VErrorBase> >::const_iterator iter = context->GetErrorStack().begin() ; iter != context->GetErrorStack().end() ; ++iter)
+										{
+											if (iter != context->GetErrorStack().begin())
+												result.AppendCString( "\r\n");
+
+											(*iter)->GetErrorDescription( errorMessage);
+											result.AppendString( errorMessage);
+										}
+									}
+
+									err = inResponse->ReplyWithStatusCode( HTTP_INTERNAL_SERVER_ERROR);
+								}
+								else if (xvalue != NULL)
+								{
+									xvalue->GetString( result);
+								}
+									
+								if (err == VE_OK)
+									err = SetHTTPResponseString( inResponse, result, &format);
+
+								logger.LogMessagesFromErrorContext( loggerID, errorContext.GetContext());
+
+								delete xvalue;
+
+								handled = true;
+							}
+
+							fApplication->ReleaseJSContext( globalContext, inResponse);
+						}
+					}
+				}
+			}
+			else if (inResponse->GetRequest().GetURL().EqualToUSASCIICString( "/debug/isOpenedSolution"))
+			{
+				// the parameter is the full posix path of the solution file
+				VString param;
+				param.FromBlock( inResponse->GetRequest().GetRequestBody().GetDataPtr(), inResponse->GetRequest().GetRequestBody().GetDataSize(), VTC_UTF_8);
+
+				if (!param.IsEmpty())
+				{
+					VFilePath path( param, FPS_POSIX);
+					if (!path.IsEmpty() && path.IsFile())
+					{
+						VFile fileParam( path);
+						bool sameFile = false;
+
+						VSolution *solution = fApplication->GetSolution()->GetDesignSolution();
+						if (solution != NULL)
+						{
+							VProjectItem *item = solution->GetSolutionFileProjectItem();
+							if (item != NULL)
+							{
+								item->GetFilePath( path);
+								VFile openedFile( path);
+								sameFile = openedFile.IsSameFile( &fileParam);
+							}
+						}
+
+						handled = true;
+						VString format( L"text/plain"), result( (sameFile) ? L"yes" : L"no");
+						err = SetHTTPResponseString( inResponse, result, &format);
+					}
+				}
+			}
+			else if (inResponse->GetRequest().GetURL().EqualToUSASCIICString( "/debug/reloadCatalog"))
+			{
+				handled = true;
+				
+				err = fApplication->ReloadCatalog( NULL);
+				if (err == VE_OK)
+					err = inResponse->ReplyWithStatusCode( HTTP_OK);
+				else
+					err = inResponse->ReplyWithStatusCode( HTTP_INTERNAL_SERVER_ERROR);
+			}
 		}
 	}
 

@@ -23,6 +23,6 @@
 	/>
 	<UserMacro
 		Name="BranchName"
-		Value="WAK2"
+		Value="Main"
 	/>
 </VisualStudioPropertySheet>

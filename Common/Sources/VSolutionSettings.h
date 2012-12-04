@@ -33,6 +33,10 @@ public:
 
 			void			GetAuthenticationType( XBOX::VString& outType) const;
 
+			void			GetDirectoryCacheFolder( XBOX::VString& outPath) const;
+
+			void			GetLogFolder( XBOX::VString& outPath) const;
+
 			// Specific database settings accessors
 			bool			HasDatabaseSettings() const;
 
@@ -52,8 +56,6 @@ public:
 
 			// Returns the interval in seconds
 			sLONG			GetFlushDataInterval() const;
-
-			bool			GetHideExtensions() const;
 };
 
 

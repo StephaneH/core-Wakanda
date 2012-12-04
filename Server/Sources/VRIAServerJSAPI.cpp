@@ -32,6 +32,7 @@
 #include "Language Syntax/CLanguageSyntax.h"
 #include "JSDebugger/Interfaces/CJSWDebuggerFactory.h"
 #include "commonJSAPI.h"
+#include "ServerNet/Sources/HTTPTools.h"
 
 USING_TOOLBOX_NAMESPACE
 
@@ -44,9 +45,6 @@ const char kSSJS_CLASS_NAME_HTTPServer[] = "HttpServer";
 const char kSSJS_CLASS_NAME_SSL[] = "SSL";
 const char kSSJS_CLASS_NAME_HTTPServerCache[] = "HttpServerCache";
 const char kSSJS_CLASS_NAME_Console[] = "Console";
-const char kSSJS_CLASS_NAME_WebAppService[] = "WebAppService";
-const char kSSJS_CLASS_NAME_DataService[] = "DataService";
-const char kSSJS_CLASS_NAME_RPCService[] = "RPCService";
 const char kSSJS_CLASS_NAME_OS[] = "os";
 
 // Properties names constants
@@ -58,9 +56,6 @@ const char kSSJS_PROPERTY_NAME_HTTPServer[] = "httpServer";
 const char kSSJS_PROPERTY_NAME_SSL[] = "ssl";
 const char kSSJS_PROPERTY_NAME_HTTPServerCache[] = "cache";
 const char kSSJS_PROPERTY_NAME_Console[] = "console";
-const char kSSJS_PROPERTY_NAME_WebAppService[] = "webAppService";
-const char kSSJS_PROPERTY_NAME_DataService[] = "dataService";
-const char kSSJS_PROPERTY_NAME_RPCService[] = "rpcService";
 const char kSSJS_PROPERTY_NAME_SessionStorage[] = "oldSessionStorage";
 const char kSSJS_PROPERTY_NAME_AddHttpRequestHandler[] = "addHttpRequestHandler";
 const char kSSJS_PROPERTY_NAME_RemoveHttpRequestHandler[] = "removeHttpRequestHandler";
@@ -79,11 +74,13 @@ const char kSSJS_PROPERTY_NAME_Directory[] = "directory";
 const char kSSJS_PROPERTY_NAME_OS[] = "os";
 const char kSSJS_PROPERTY_NAME_Permissions[] = "permissions";
 const char kSSJS_PROPERTY_NAME_RPCCatalog[] = "rpcCatalog";
+const char kSSJS_PROPERTY_NAME_backupSettings[] = "backupSettings";
 const char kSSJS_PROPERTY_NAME_wildchar[] = "wildchar";
 
 const char kSSJS_PROPERTY_NAME_verifyDataStore[] = "verifyDataStore";
 const char kSSJS_PROPERTY_NAME_repairDataStore[] = "repairDataStore";
 const char kSSJS_PROPERTY_NAME_compactDataStore[] = "compactDataStore";
+const char kSSJS_PROPERTY_NAME_backupDataStore[] = "backupDataStore";
 
 const char kSSJS_PROPERTY_NAME_setCurrentUser[] = "setCurrentUser";
 const char kSSJS_PROPERTY_NAME_loginByKey[] = "loginByKey";
@@ -91,6 +88,7 @@ const char kSSJS_PROPERTY_NAME_loginByPassword[] = "loginByPassword";
 const char kSSJS_PROPERTY_NAME_currentUser[] = "currentUser";
 const char kSSJS_PROPERTY_NAME_currentSession[] = "currentSession";
 const char kSSJS_PROPERTY_NAME_logout[] = "logout";
+
 
 
 // ----------------------------------------------------------------------------
@@ -247,55 +245,81 @@ bool SendChunkedResponseFromJSValue (const XBOX::VJSValue& inValue, IHTTPRespons
 			result = true;
 		}
 	}
-	else
+	else if (inValue.IsObject())
 	{
-		XBOX::VValueSingle *value = inValue.CreateVValue();
+		XBOX::VError	error = XBOX::VE_OK;
+		VJSObject		object = inValue.GetObject();
 
-		if (NULL != value)
+		if (object.IsOfClass (VJSFileIterator::Class()))
 		{
-			XBOX::VError		error = XBOX::VE_OK;
-			XBOX::VPtrStream	stream;
+			JS4DFileIterator *	fileObject = object.GetPrivateData<VJSFileIterator>();
+			XBOX::VFile *		file = (fileObject) ? fileObject->GetFile() : NULL;
 
-			if (VK_IMAGE == value->GetValueKind())
+			xbox_assert (fileObject != NULL);
+			xbox_assert (file != NULL);	
+
+			if (file->Exists())
 			{
-#if !VERSION_LINUX
-				XBOX::VPicture *picture = (XBOX::VPicture *)value;
-				XBOX::VString	mimeType;
-				XBOX::VString	contentType;
-
-				if (!ioResponse->GetContentTypeHeader (contentType) || contentType.IsEmpty())
-					contentType.FromCString ("image/png;image/jpeg;image/gif");
-
-				if (XBOX::VE_OK == stream.OpenWriting())
-				{
-					error = ExtractBestPictureForWeb (*picture, stream, contentType, true, mimeType);
-					stream.CloseWriting();
-				}
-
-				if (contentType != mimeType)
-					ioResponse->SetContentTypeHeader (mimeType);
-#endif
+				ioResponse->AllowCompression (false);
+				ioResponse->SetCacheBodyMessage (false);
+				ioResponse->SetFileToSend (file);
 			}
-			else if (VK_BLOB == value->GetValueKind())
+			else
 			{
-				XBOX::VString	contentType;
+				ioResponse->ReplyWithStatusCode (HTTP_NOT_FOUND);
+			}
+		}
+		else
+		{
+			XBOX::VPtrStream		stream;
+			XBOX::VValueSingle *	value = inValue.CreateVValue();
 
-				if (!ioResponse->GetContentTypeHeader (contentType))
+			if (NULL != value)
+			{
+				if (VK_IMAGE == value->GetValueKind())
 				{
-					VJSObject object = inValue.GetObject();
-					if (!object.GetPropertyAsString (CVSTR ("type"), NULL, contentType) || contentType.IsEmpty())
-						contentType.FromString (CVSTR ("application/octet-stream"));
+#if !VERSION_LINUX
+					XBOX::VPicture *picture = (XBOX::VPicture *)value;
+					XBOX::VString	mimeType;
+					XBOX::VString	contentType;
 
-					ioResponse->SetContentTypeHeader (contentType);
+					if (!ioResponse->GetContentTypeHeader (contentType) || contentType.IsEmpty())
+						contentType.FromCString ("image/png;image/jpeg;image/gif");
+
+					if (XBOX::VE_OK == stream.OpenWriting())
+					{
+						error = ExtractBestPictureForWeb (*picture, stream, contentType, true, mimeType);
+						stream.CloseWriting();
+					}
+
+					if (contentType != mimeType)
+						ioResponse->SetContentTypeHeader (mimeType);
+#endif
 				}
-
-				if (XBOX::VE_OK == stream.OpenWriting())
+				else if (VK_BLOB == value->GetValueKind())
 				{
-					XBOX::VBlobWithPtr *blob = dynamic_cast<XBOX::VBlobWithPtr *>(value);
+					XBOX::VString	contentType;
 
-					error = stream.PutData (blob->GetDataPtr(), blob->GetSize());
+					if (!ioResponse->GetContentTypeHeader (contentType))
+					{
+						if (!object.GetPropertyAsString (CVSTR ("type"), NULL, contentType) || contentType.IsEmpty())
+							contentType.FromString (CVSTR ("application/octet-stream"));
 
-					stream.CloseWriting();
+						ioResponse->SetContentTypeHeader (contentType);
+					}
+
+					if (XBOX::VE_OK == stream.OpenWriting())
+					{
+						XBOX::VBlobWithPtr *blob = dynamic_cast<XBOX::VBlobWithPtr *>(value);
+
+						error = stream.PutData (blob->GetDataPtr(), blob->GetSize());
+
+						stream.CloseWriting();
+					}
+				}
+				else
+				{
+					error = XBOX::VE_INVALID_PARAMETER;
 				}
 			}
 			else
@@ -309,9 +333,13 @@ bool SendChunkedResponseFromJSValue (const XBOX::VJSValue& inValue, IHTTPRespons
 					error = ioResponse->SendData (stream.GetDataPtr(), stream.GetDataSize(), true);
 				stream.CloseReading();
 			}
-
-			result = (XBOX::VE_OK == error);
+			else
+			{
+				ioResponse->ReplyWithStatusCode (HTTP_INTERNAL_SERVER_ERROR);
+			}
 		}
+
+		result = (XBOX::VE_OK == error);
 	}
 
 	return result;
@@ -393,7 +421,7 @@ XBOX::VJSValue GetJSValueFromHTTPMessageBody (JS4D::ContextRef inContext, const 
 std::map<XBOX::VString, XBOX::VString> VJSHTTPRequestHeader::fCommonHeaders;
 
 
-void VJSHTTPRequestHeader::Initialize (const XBOX::VJSParms_initialize& inParms, IHTTPHeader *inHeader)
+void VJSHTTPRequestHeader::Initialize (const XBOX::VJSParms_initialize& inParms, XBOX::VHTTPHeader *inHeader)
 {
 	if (!fCommonHeaders.empty())
 		return;
@@ -426,7 +454,7 @@ void VJSHTTPRequestHeader::Initialize (const XBOX::VJSParms_initialize& inParms,
 }
 
 
-void VJSHTTPRequestHeader::Finalize (const XBOX::VJSParms_finalize& inParms, IHTTPHeader *inHeader)
+void VJSHTTPRequestHeader::Finalize (const XBOX::VJSParms_finalize& inParms, XBOX::VHTTPHeader *inHeader)
 {
 }
 
@@ -449,10 +477,13 @@ void VJSHTTPRequestHeader::_GetHeaderNameFromPropertyName (const XBOX::VString& 
 }
 
 
-void VJSHTTPRequestHeader::GetProperty (XBOX::VJSParms_getProperty& ioParms, IHTTPHeader *inHeader)
+void VJSHTTPRequestHeader::GetProperty (XBOX::VJSParms_getProperty& ioParms, XBOX::VHTTPHeader *inHeader)
 {
 	if (NULL == inHeader)
+	{
+		XBOX::vThrowError (XBOX::VE_INVALID_PARAMETER);
 		return;
+	}
 
 	XBOX::VString propertyName;
 	XBOX::VString headerName;
@@ -466,26 +497,32 @@ void VJSHTTPRequestHeader::GetProperty (XBOX::VJSParms_getProperty& ioParms, IHT
 }
 
 
-bool VJSHTTPRequestHeader::SetProperty (XBOX::VJSParms_setProperty& ioParms, IHTTPHeader *inHeader)
+bool VJSHTTPRequestHeader::SetProperty (XBOX::VJSParms_setProperty& ioParms, XBOX::VHTTPHeader *inHeader)
 {
 	return false;
 }
 
 
-void VJSHTTPRequestHeader::GetPropertyNames (XBOX::VJSParms_getPropertyNames& ioParms, IHTTPHeader *inHeader)
+void VJSHTTPRequestHeader::GetPropertyNames (XBOX::VJSParms_getPropertyNames& ioParms, XBOX::VHTTPHeader *inHeader)
 {
 	if (NULL == inHeader)
+	{
+		XBOX::vThrowError (XBOX::VE_INVALID_PARAMETER);
 		return;
+	}
 
 	for (std::map<XBOX::VString, XBOX::VString>::const_iterator it = fCommonHeaders.begin(); it != fCommonHeaders.end(); ++it)
 		ioParms.AddPropertyName ((*it).second);
 }
 
 
-void VJSHTTPRequestHeader::_GetHeaderValue (VJSParms_callStaticFunction& ioParms, IHTTPHeader *inHeader)
+void VJSHTTPRequestHeader::_GetHeaderValue (VJSParms_callStaticFunction& ioParms, XBOX::VHTTPHeader *inHeader)
 {
 	if (NULL == inHeader)
+	{
+		XBOX::vThrowError (XBOX::VE_INVALID_PARAMETER);
 		return;
+	}
 
 	XBOX::VString headerName;
 	XBOX::VString headerValue;
@@ -521,7 +558,7 @@ void VJSHTTPRequestHeader::GetDefinition (ClassDefinition& outDefinition)
 std::map<XBOX::VString, XBOX::VString> VJSHTTPResponseHeader::fCommonHeaders;
 
 
-void VJSHTTPResponseHeader::Initialize (const XBOX::VJSParms_initialize& inParms, IHTTPHeader *inHeader)
+void VJSHTTPResponseHeader::Initialize (const XBOX::VJSParms_initialize& inParms, XBOX::VHTTPHeader *inHeader)
 {
 	if (!fCommonHeaders.empty())
 		return;
@@ -557,7 +594,7 @@ void VJSHTTPResponseHeader::Initialize (const XBOX::VJSParms_initialize& inParms
 }
 
 
-void VJSHTTPResponseHeader::Finalize (const XBOX::VJSParms_finalize& inParms, IHTTPHeader *inHeader)
+void VJSHTTPResponseHeader::Finalize (const XBOX::VJSParms_finalize& inParms, XBOX::VHTTPHeader *inHeader)
 {
 }
 
@@ -580,10 +617,13 @@ void VJSHTTPResponseHeader::_GetHeaderNameFromPropertyName (const XBOX::VString&
 }
 
 
-void VJSHTTPResponseHeader::GetProperty (XBOX::VJSParms_getProperty& ioParms, IHTTPHeader *inHeader)
+void VJSHTTPResponseHeader::GetProperty (XBOX::VJSParms_getProperty& ioParms, XBOX::VHTTPHeader *inHeader)
 {
 	if (NULL == inHeader)
+	{
+		XBOX::vThrowError (XBOX::VE_INVALID_PARAMETER);
 		return;
+	}
 
 	XBOX::VString propertyName;
 	XBOX::VString headerName;
@@ -597,10 +637,13 @@ void VJSHTTPResponseHeader::GetProperty (XBOX::VJSParms_getProperty& ioParms, IH
 }
 
 
-bool VJSHTTPResponseHeader::SetProperty (XBOX::VJSParms_setProperty& ioParms, IHTTPHeader *inHeader)
+bool VJSHTTPResponseHeader::SetProperty (XBOX::VJSParms_setProperty& ioParms, XBOX::VHTTPHeader *inHeader)
 {
 	if (NULL == inHeader)
+	{
+		XBOX::vThrowError (XBOX::VE_INVALID_PARAMETER);
 		return false;
+	}
 
 	XBOX::VString propertyName;
 	XBOX::VString headerName;
@@ -618,20 +661,26 @@ bool VJSHTTPResponseHeader::SetProperty (XBOX::VJSParms_setProperty& ioParms, IH
 }
 
 
-void VJSHTTPResponseHeader::GetPropertyNames (XBOX::VJSParms_getPropertyNames& ioParms, IHTTPHeader* inHeader)
+void VJSHTTPResponseHeader::GetPropertyNames (XBOX::VJSParms_getPropertyNames& ioParms, XBOX::VHTTPHeader* inHeader)
 {
 	if (NULL == inHeader)
+	{
+		XBOX::vThrowError (XBOX::VE_INVALID_PARAMETER);
 		return;
+	}
 
 	for (std::map<XBOX::VString, XBOX::VString>::const_iterator it = fCommonHeaders.begin(); it != fCommonHeaders.end(); ++it)
 		ioParms.AddPropertyName ((*it).second);
 }
 
 
-void VJSHTTPResponseHeader::_GetHeaderValue (VJSParms_callStaticFunction& ioParms, IHTTPHeader *inHeader)
+void VJSHTTPResponseHeader::_GetHeaderValue (VJSParms_callStaticFunction& ioParms, XBOX::VHTTPHeader *inHeader)
 {
 	if (NULL == inHeader)
+	{
+		XBOX::vThrowError (XBOX::VE_INVALID_PARAMETER);
 		return;
+	}
 
 	XBOX::VString headerName;
 	XBOX::VString headerValue;
@@ -643,10 +692,13 @@ void VJSHTTPResponseHeader::_GetHeaderValue (VJSParms_callStaticFunction& ioParm
 }
 
 
-void VJSHTTPResponseHeader::_SetHeaderValue (VJSParms_callStaticFunction& ioParms, IHTTPHeader *inHeader)
+void VJSHTTPResponseHeader::_SetHeaderValue (VJSParms_callStaticFunction& ioParms, XBOX::VHTTPHeader *inHeader)
 {
 	if (NULL == inHeader)
+	{
+		XBOX::vThrowError (XBOX::VE_INVALID_PARAMETER);
 		return;
+	}
 
 	XBOX::VString headerName;
 	XBOX::VString headerValue;
@@ -690,105 +742,153 @@ void VJSHTTPRequest::Finalize (const XBOX::VJSParms_finalize& inParms, IHTTPRequ
 
 void VJSHTTPRequest::_GetURL (XBOX::VJSParms_getProperty& ioParms, IHTTPRequest *inRequest)
 {
-	if (NULL != inRequest)
-		ioParms.ReturnString (inRequest->GetURL());
+	if (NULL == inRequest)
+	{
+		XBOX::vThrowError (XBOX::VE_INVALID_PARAMETER);
+		return;
+	}
+
+	ioParms.ReturnString (inRequest->GetURL());
 }
 
 
 void VJSHTTPRequest::_GetRawURL (XBOX::VJSParms_getProperty& ioParms, IHTTPRequest *inRequest)
 {
-	if (NULL != inRequest)
-		ioParms.ReturnString (inRequest->GetRawURL());
+	if (NULL == inRequest)
+	{
+		XBOX::vThrowError (XBOX::VE_INVALID_PARAMETER);
+		return;
+	}
+
+	ioParms.ReturnString (inRequest->GetRawURL());
 }
 
 
 void VJSHTTPRequest::_GetURLPath (XBOX::VJSParms_getProperty& ioParms, IHTTPRequest *inRequest)
 {
-	if (NULL != inRequest)
-		ioParms.ReturnString (inRequest->GetURLPath());
+	if (NULL == inRequest)
+	{
+		XBOX::vThrowError (XBOX::VE_INVALID_PARAMETER);
+		return;
+	}
+
+	ioParms.ReturnString (inRequest->GetURLPath());
 }
 
 
 void VJSHTTPRequest::_GetURLQuery (XBOX::VJSParms_getProperty& ioParms, IHTTPRequest *inRequest)
 {
-	if (NULL != inRequest)
-		ioParms.ReturnString (inRequest->GetURLQuery());
+	if (NULL == inRequest)
+	{
+		XBOX::vThrowError (XBOX::VE_INVALID_PARAMETER);
+		return;
+	}
+
+	ioParms.ReturnString (inRequest->GetURLQuery());
 }
 
 
 void VJSHTTPRequest::_GetHost (XBOX::VJSParms_getProperty& ioParms, IHTTPRequest *inRequest)
 {
-	if (NULL != inRequest)
-		ioParms.ReturnString (inRequest->GetHost());
+	if (NULL == inRequest)
+	{
+		XBOX::vThrowError (XBOX::VE_INVALID_PARAMETER);
+		return;
+	}
+
+	ioParms.ReturnString (inRequest->GetHost());
 }
 
 
 void VJSHTTPRequest::_GetMethod (XBOX::VJSParms_getProperty& ioParms, IHTTPRequest *inRequest)
 {
-	if (NULL != inRequest)
+	if (NULL == inRequest)
 	{
-		XBOX::VString valueString;
-		inRequest->GetRequestMethodString (valueString);
-		ioParms.ReturnString (valueString);
+		XBOX::vThrowError (XBOX::VE_INVALID_PARAMETER);
+		return;
 	}
+
+	XBOX::VString valueString;
+	inRequest->GetRequestMethodString (valueString);
+	ioParms.ReturnString (valueString);
 }
 
 
 void VJSHTTPRequest::_GetVersion (XBOX::VJSParms_getProperty& ioParms, IHTTPRequest *inRequest)
 {
-	if (NULL != inRequest)
+	if (NULL == inRequest)
 	{
-		XBOX::VString valueString;
-		inRequest->GetRequestHTTPVersionString (valueString);
-		ioParms.ReturnString (valueString);
+		XBOX::vThrowError (XBOX::VE_INVALID_PARAMETER);
+		return;
 	}
+
+	XBOX::VString valueString;
+	inRequest->GetRequestHTTPVersionString (valueString);
+	ioParms.ReturnString (valueString);
 }
 
 
 void VJSHTTPRequest::_GetUser (XBOX::VJSParms_getProperty& ioParms, IHTTPRequest *inRequest)
 {
-	if (NULL != inRequest)
+	if (NULL == inRequest)
 	{
-		XBOX::VString valueString;
-		inRequest->GetAuthenticationInfos()->GetUserName (valueString);
-		ioParms.ReturnString (valueString);
+		XBOX::vThrowError (XBOX::VE_INVALID_PARAMETER);
+		return;
 	}
+
+	XBOX::VString valueString;
+	inRequest->GetAuthenticationInfos()->GetUserName (valueString);
+	ioParms.ReturnString (valueString);
 }
 
 
 void VJSHTTPRequest::_GetPassword (XBOX::VJSParms_getProperty& ioParms, IHTTPRequest *inRequest)
 {
-	if (NULL != inRequest)
+	if (NULL == inRequest)
 	{
-		XBOX::VString valueString;
-		inRequest->GetAuthenticationInfos()->GetPassword (valueString);
-		ioParms.ReturnString (valueString);
+		XBOX::vThrowError (XBOX::VE_INVALID_PARAMETER);
+		return;
 	}
+
+	XBOX::VString valueString;
+	inRequest->GetAuthenticationInfos()->GetPassword (valueString);
+	ioParms.ReturnString (valueString);
 }
 
 
 void VJSHTTPRequest::_GetRequestLine (XBOX::VJSParms_getProperty& ioParms, IHTTPRequest *inRequest)
 {
-	if (NULL != inRequest)
-		ioParms.ReturnString (inRequest->GetRequestLine());
+	if (NULL == inRequest)
+	{
+		XBOX::vThrowError (XBOX::VE_INVALID_PARAMETER);
+		return;
+	}
+
+	ioParms.ReturnString (inRequest->GetRequestLine());
 }
 
 
 void VJSHTTPRequest::_GetHeaders (XBOX::VJSParms_getProperty& ioParms, IHTTPRequest *inRequest)
 {
-	if (NULL != inRequest)
+	if (NULL == inRequest)
 	{
-		IHTTPHeader *header = const_cast<IHTTPHeader *> (&inRequest->GetHTTPHeaders());
-		VJSObject	resultObject = VJSHTTPRequestHeader::CreateInstance (ioParms.GetContext(), header);
-		ioParms.ReturnValue (resultObject);
+		XBOX::vThrowError (XBOX::VE_INVALID_PARAMETER);
+		return;
 	}
+
+	XBOX::VHTTPHeader *header = const_cast<XBOX::VHTTPHeader *> (&inRequest->GetHTTPHeaders());
+	VJSObject	resultObject = VJSHTTPRequestHeader::CreateInstance (ioParms.GetContext(), header);
+	ioParms.ReturnValue (resultObject);
 }
 
 
 void VJSHTTPRequest::_GetBody (XBOX::VJSParms_getProperty& ioParms, IHTTPRequest *inRequest)
 {
 	if (NULL == inRequest)
+	{
+		XBOX::vThrowError (XBOX::VE_INVALID_PARAMETER);
 		return;
+	}
 
 	MimeTypeKind		contentTypeKind = inRequest->GetContentTypeKind();
 	XBOX::VPtrStream *	stream = const_cast<XBOX::VPtrStream*> (&inRequest->GetRequestBody());
@@ -804,23 +904,89 @@ void VJSHTTPRequest::_GetBody (XBOX::VJSParms_getProperty& ioParms, IHTTPRequest
 
 void VJSHTTPRequest::_GetParts (XBOX::VJSParms_getProperty& ioParms, IHTTPRequest *inRequest)
 {
-	if (NULL != inRequest)
+	if (NULL == inRequest)
 	{
-		IHTMLForm *	form = const_cast<IHTMLForm *> (inRequest->GetHTMLForm());
-		VJSObject	resultObject = VJSHTMLForm::CreateInstance (ioParms.GetContext(), form);
-		ioParms.ReturnValue (resultObject);
+		XBOX::vThrowError (XBOX::VE_INVALID_PARAMETER);
+		return;
 	}
+
+	XBOX::VMIMEMessage * form = const_cast<XBOX::VMIMEMessage *> (inRequest->GetHTMLForm());
+	VJSObject	resultObject = VJSMIMEMessage::CreateInstance (ioParms.GetContext(), form);
+	ioParms.ReturnValue (resultObject);
 }
 
 
 void VJSHTTPRequest::_GetContentType (XBOX::VJSParms_getProperty& ioParms, IHTTPRequest *inRequest)
 {
-	if (NULL != inRequest)
+	if (NULL == inRequest)
 	{
-		XBOX::VString contentType;
-		inRequest->GetHTTPHeaders().GetHeaderValue (HEADER_CONTENT_TYPE, contentType);
-		ioParms.ReturnString (contentType);
+		XBOX::vThrowError (XBOX::VE_INVALID_PARAMETER);
+		return;
 	}
+
+	XBOX::VString contentType;
+	inRequest->GetHTTPHeaders().GetHeaderValue (HEADER_CONTENT_TYPE, contentType);
+	ioParms.ReturnString (contentType);
+}
+
+
+void VJSHTTPRequest::_GetLocalAddress (XBOX::VJSParms_getProperty& ioParms, IHTTPRequest *inRequest)
+{
+	if (NULL == inRequest)
+	{
+		XBOX::vThrowError (XBOX::VE_INVALID_PARAMETER);
+		return;
+	}
+
+	ioParms.ReturnString (inRequest->GetLocalIP());
+}
+
+
+void VJSHTTPRequest::_GetLocalPort (XBOX::VJSParms_getProperty& ioParms, IHTTPRequest *inRequest)
+{
+	if (NULL == inRequest)
+	{
+		XBOX::vThrowError (XBOX::VE_INVALID_PARAMETER);
+		return;
+	}
+
+	ioParms.ReturnNumber (inRequest->GetLocalPort());
+}
+
+
+void VJSHTTPRequest::_GetIsSSL (XBOX::VJSParms_getProperty& ioParms, IHTTPRequest *inRequest)
+{
+	if (NULL == inRequest)
+	{
+		XBOX::vThrowError (XBOX::VE_INVALID_PARAMETER);
+		return;
+	}
+
+	ioParms.ReturnBool (inRequest->IsSSL());
+}
+
+
+void VJSHTTPRequest::_GetRemoteAddress (XBOX::VJSParms_getProperty& ioParms, IHTTPRequest *inRequest)
+{
+	if (NULL == inRequest)
+	{
+		XBOX::vThrowError (XBOX::VE_INVALID_PARAMETER);
+		return;
+	}
+
+	ioParms.ReturnString (inRequest->GetPeerIP());
+}
+
+
+void VJSHTTPRequest::_GetRemotePort (XBOX::VJSParms_getProperty& ioParms, IHTTPRequest *inRequest)
+{
+	if (NULL == inRequest)
+	{
+		XBOX::vThrowError (XBOX::VE_INVALID_PARAMETER);
+		return;
+	}
+
+	ioParms.ReturnNumber (inRequest->GetPeerPort());
 }
 
 
@@ -847,6 +1013,11 @@ void VJSHTTPRequest::GetDefinition (ClassDefinition& outDefinition)
 		{ "body", js_getProperty<_GetBody>, nil, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
 		{ "parts", js_getProperty<_GetParts>, nil, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
 		{ "contentType", js_getProperty<_GetContentType>, nil, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
+		{ "localAddress", js_getProperty<_GetLocalAddress>, nil, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
+		{ "localPort", js_getProperty<_GetLocalPort>, nil, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
+		{ "isSSL", js_getProperty<_GetIsSSL>, nil, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
+		{ "remoteAddress", js_getProperty<_GetRemoteAddress>, nil, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
+		{ "remotePort", js_getProperty<_GetRemotePort>, nil, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
 		{ 0, 0, 0, 0}
 	};
 	
@@ -874,7 +1045,10 @@ void VJSHTTPResponse::Finalize (const XBOX::VJSParms_finalize& inParms, IHTTPRes
 void VJSHTTPResponse::GetProperty (XBOX::VJSParms_getProperty& ioParms, IHTTPResponse* inResponse)
 {
 	if (NULL == inResponse)
+	{
+		XBOX::vThrowError (XBOX::VE_INVALID_PARAMETER);
 		return;
+	}
 
 	XBOX::VString propertyName;
 	XBOX::VString stringValue;
@@ -899,7 +1073,7 @@ void VJSHTTPResponse::GetProperty (XBOX::VJSParms_getProperty& ioParms, IHTTPRes
 	}
 	else if (propertyName.EqualToUSASCIICString ("headers"))
 	{
-		IHTTPHeader *header = const_cast<IHTTPHeader *>(&inResponse->GetResponseHeader());
+		XBOX::VHTTPHeader *header = const_cast<XBOX::VHTTPHeader *>(&inResponse->GetResponseHeader());
 		VJSObject	resultObject = VJSHTTPResponseHeader::CreateInstance (ioParms.GetContext(), header);
 		ioParms.ReturnValue (resultObject);
 	}
@@ -915,7 +1089,10 @@ void VJSHTTPResponse::GetProperty (XBOX::VJSParms_getProperty& ioParms, IHTTPRes
 bool VJSHTTPResponse::SetProperty (XBOX::VJSParms_setProperty& ioParms, IHTTPResponse *inResponse)
 {
 	if (NULL == inResponse)
+	{
+		XBOX::vThrowError (XBOX::VE_INVALID_PARAMETER);
 		return false;
+	}
 
 	bool			result = false;
 	XBOX::VString	propertyName;
@@ -961,7 +1138,10 @@ void VJSHTTPResponse::GetPropertyNames (XBOX::VJSParms_getPropertyNames& ioParms
 void VJSHTTPResponse::_SendChunkedData (XBOX::VJSParms_callStaticFunction& ioParms, IHTTPResponse *inResponse)
 {
 	if (NULL == inResponse)
+	{
+		XBOX::vThrowError (XBOX::VE_INVALID_PARAMETER);
 		return;
+	}
 
 	SendChunkedResponseFromJSValue (ioParms.GetParamValue (1), inResponse);
 }
@@ -981,7 +1161,11 @@ void VJSHTTPResponse::_SetCompression (XBOX::VJSParms_callStaticFunction& ioParm
 			ioParms.GetLongParam(2, &maxThreshold);
 		}
 		inResponse->AllowCompression(true, minThreshold, maxThreshold);
-	}	
+	}
+	else
+	{
+		XBOX::vThrowError (XBOX::VE_INVALID_PARAMETER);
+	}
 }
 
 
@@ -998,6 +1182,10 @@ void VJSHTTPResponse::_SetCacheBodyMessage (XBOX::VJSParms_callStaticFunction& i
 
 		inResponse->SetCacheBodyMessage (bValue);
 	}	
+	else
+	{
+		XBOX::vThrowError (XBOX::VE_INVALID_PARAMETER);
+	}
 }
 
 
@@ -1024,29 +1212,27 @@ void VJSHTTPResponse::GetDefinition (ClassDefinition& outDefinition)
 // ----------------------------------------------------------------------------
 
 
-void VJSHTMLForm::Initialize (const XBOX::VJSParms_initialize& inParms, IHTMLForm *inHTMLForm)
+void VJSMIMEMessage::Initialize (const XBOX::VJSParms_initialize& inParms, XBOX::VMIMEMessage *inMIMEMessage)
 {
 }
 
 
-void VJSHTMLForm::Finalize (const XBOX::VJSParms_finalize& inParms, IHTMLForm *inHTMLForm)
+void VJSMIMEMessage::Finalize (const XBOX::VJSParms_finalize& inParms, XBOX::VMIMEMessage *inMIMEMessage)
 {
 }
 
 
-void VJSHTMLForm::GetProperty (XBOX::VJSParms_getProperty& ioParms, IHTMLForm *inHTMLForm)
+void VJSMIMEMessage::GetProperty (XBOX::VJSParms_getProperty& ioParms, XBOX::VMIMEMessage *inMIMEMessage)
 {
 	sLONG num = 0;
 
-	if ((NULL != inHTMLForm) && ioParms.GetPropertyNameAsLong (&num))
+	if ((NULL != inMIMEMessage) && ioParms.GetPropertyNameAsLong (&num))
 	{
-		std::vector<IHTMLFormPart *> formPartsList;
-
-		inHTMLForm->GetFormPartsList (formPartsList);
-		if ((formPartsList.size() > 0) && (num >= 0) && (num <= formPartsList.size()))
+		const XBOX::VectorOfMIMEPart partsList = inMIMEMessage->GetMIMEParts();
+		if ((partsList.size() > num) && (num >= 0))
 		{
-			IHTMLFormPart *	formPart = const_cast<IHTMLFormPart *> (formPartsList.at (num));
-			VJSObject		resultObject = VJSHTMLFormPart::CreateInstance (ioParms.GetContext(), formPart);
+			XBOX::VMIMEMessagePart	*	formPart = const_cast<XBOX::VMIMEMessagePart *> (partsList.at (num).Get());
+			VJSObject					resultObject = VJSMIMEMessagePart::CreateInstance (ioParms.GetContext(), formPart);
 			ioParms.ReturnValue (resultObject);
 		}
 		else
@@ -1060,165 +1246,247 @@ void VJSHTMLForm::GetProperty (XBOX::VJSParms_getProperty& ioParms, IHTMLForm *i
 
 		ioParms.GetPropertyName (propertyName);
 
-		if (propertyName.EqualToUSASCIICString ("count"))
+		if (propertyName.EqualToUSASCIICString ("count") || propertyName.EqualToUSASCIICString ("length"))
 		{
-			_GetCount (ioParms, inHTMLForm);
+			_GetCount (ioParms, inMIMEMessage);
 		}
 		else if (propertyName.EqualToUSASCIICString ("encoding"))
 		{
-			_GetEncoding (ioParms, inHTMLForm);
+			_GetEncoding (ioParms, inMIMEMessage);
 		}
 		else if (propertyName.EqualToUSASCIICString ("boundary"))
 		{
-			_GetBoundary (ioParms, inHTMLForm);
-		}
-		else
-		{
-			ioParms.ReturnUndefinedValue();
+			_GetBoundary (ioParms, inMIMEMessage);
 		}
 	}
 }
 
 
-void VJSHTMLForm::GetPropertyNames (XBOX::VJSParms_getPropertyNames& ioParms, IHTMLForm *inHTMLForm)
+void VJSMIMEMessage::GetPropertyNames (XBOX::VJSParms_getPropertyNames& ioParms, XBOX::VMIMEMessage *inMIMEMessage)
 {
 	ioParms.AddPropertyName (CVSTR ("count"));
+	ioParms.AddPropertyName (CVSTR ("length"));
 	ioParms.AddPropertyName (CVSTR ("encoding"));
 	ioParms.AddPropertyName (CVSTR ("boundary"));
 }
 
 
-void VJSHTMLForm::_GetCount (XBOX::VJSParms_getProperty& ioParms, IHTMLForm *inHTMLForm)
+void VJSMIMEMessage::_GetCount (XBOX::VJSParms_getProperty& ioParms, XBOX::VMIMEMessage *inMIMEMessage)
 {
-	if (NULL != inHTMLForm)
+	if (NULL != inMIMEMessage)
 	{
-		std::vector<IHTMLFormPart *> formPartsList;
-
-		inHTMLForm->GetFormPartsList (formPartsList);
-		ioParms.ReturnNumber (formPartsList.size());
+		const XBOX::VectorOfMIMEPart partsList = inMIMEMessage->GetMIMEParts();
+		ioParms.ReturnNumber (partsList.size());
 	}
 	else
 	{
-		ioParms.ReturnNullValue();
+		XBOX::vThrowError (XBOX::VE_INVALID_PARAMETER);
+		ioParms.ReturnUndefinedValue();
 	}
 }
 
 
-void VJSHTMLForm::_GetBoundary (XBOX::VJSParms_getProperty& ioParms, IHTMLForm *inHTMLForm)
+void VJSMIMEMessage::_GetBoundary (XBOX::VJSParms_getProperty& ioParms, XBOX::VMIMEMessage *inMIMEMessage)
 {
-	if (NULL != inHTMLForm)
+	if (NULL != inMIMEMessage)
 	{
-		ioParms.ReturnString (inHTMLForm->GetBoundary());
+		ioParms.ReturnString (inMIMEMessage->GetBoundary());
 	}
 	else
 	{
-		ioParms.ReturnNullValue();
+		XBOX::vThrowError (XBOX::VE_INVALID_PARAMETER);
+		ioParms.ReturnUndefinedValue();
 	}
 }
 
 
-void VJSHTMLForm::_GetEncoding (XBOX::VJSParms_getProperty& ioParms, IHTMLForm *inHTMLForm)
+void VJSMIMEMessage::_GetEncoding (XBOX::VJSParms_getProperty& ioParms, XBOX::VMIMEMessage *inMIMEMessage)
 {
-	if (NULL != inHTMLForm)
+	if (NULL != inMIMEMessage)
 	{
-		ioParms.ReturnString (inHTMLForm->GetEncoding());
+		ioParms.ReturnString (inMIMEMessage->GetEncoding());
 	}
 	else
 	{
-		ioParms.ReturnNullValue();
+		XBOX::vThrowError (XBOX::VE_INVALID_PARAMETER);
+		ioParms.ReturnUndefinedValue();
 	}
 }
 
 
-void VJSHTMLForm::GetDefinition (ClassDefinition& outDefinition)
+void VJSMIMEMessage::_ToBlob (XBOX::VJSParms_callStaticFunction& ioParms, XBOX::VMIMEMessage *inMIMEMessage)
+{
+	if (NULL == inMIMEMessage)
+	{
+		XBOX::vThrowError (XBOX::VE_INVALID_PARAMETER);
+		return;
+	}
+
+	XBOX::VString		mimeType;
+	XBOX::VPtrStream	stream;
+	XBOX::VError		error = XBOX::VE_OK;
+	
+	if (ioParms.CountParams() > 0)
+		ioParms.GetStringParam (1, mimeType);
+
+	if (mimeType.IsEmpty())
+		mimeType.FromCString ("application/octet-stream");
+
+	if (XBOX::VE_OK == (error = inMIMEMessage->ToStream (stream, XBOX::VMIMEMessage::ENCODING_BINARY_ONLY)))	// YT 13-Sep-2012 - WAK0078232
+	{
+		VJSBlobValue_Slice * blob = VJSBlobValue_Slice::Create (stream.GetDataPtr(), stream.GetSize(), mimeType);
+		if (NULL == blob)
+		{
+			XBOX::vThrowError (VE_MEMORY_FULL);
+			ioParms.ReturnUndefinedValue();
+		}
+		else
+		{
+			ioParms.ReturnValue (VJSBlob::CreateInstance (ioParms.GetContextRef(), blob));
+		}
+
+		XBOX::ReleaseRefCountable( &blob);
+	}
+
+	XBOX::vThrowError (error);
+}
+
+void VJSMIMEMessage::_ToBuffer (XBOX::VJSParms_callStaticFunction& ioParms, XBOX::VMIMEMessage *inMIMEMessage)
+{
+	xbox_assert(inMIMEMessage != NULL);
+	
+	sLONG	encoding	= 0;
+
+	if (ioParms.CountParams() > 0 && !ioParms.GetLongParam(1, &encoding) || encoding < 0 || encoding > 2) {
+
+		XBOX::vThrowError(XBOX::VE_JVSC_WRONG_PARAMETER_TYPE_NUMBER, "1");
+		return;	
+
+	}
+
+	XBOX::VError		error;
+	XBOX::VPtrStream	stream;
+
+	if ((error = inMIMEMessage->ToStream(stream, encoding)) == XBOX::VE_OK) {
+
+		VJSBufferObject	*bufferObject;
+		
+		if ((bufferObject = new VJSBufferObject(stream.GetDataSize(), stream.GetDataPtr(), true)) != NULL) {
+
+			ioParms.ReturnValue(VJSBufferClass::CreateInstance(ioParms.GetContext(), bufferObject));
+			stream.StealData();
+			XBOX::ReleaseRefCountable<VJSBufferObject>(&bufferObject);
+
+		} else 
+
+			XBOX::vThrowError(XBOX::VE_MEMORY_FULL);
+		
+	} else
+
+		XBOX::vThrowError(error);
+}
+
+void VJSMIMEMessage::GetDefinition (ClassDefinition& outDefinition)
 {
 	static inherited::StaticFunction functions[] =
 	{
+		{ "toBlob", js_callStaticFunction<_ToBlob>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
+		{ "toBuffer", js_callStaticFunction<_ToBuffer>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
 		{ 0, 0, 0}
 	};
 
-	outDefinition.className = "HTMLForm";
+	static inherited::StaticValue values[] = 
+	{
+		{ 0, 0, 0, 0}
+	};
+
+	outDefinition.className = "MIMEMessage";
 	outDefinition.initialize = js_initialize<Initialize>;
 	outDefinition.finalize = js_finalize<Finalize>;
 	outDefinition.getProperty = js_getProperty<GetProperty>;
 	outDefinition.getPropertyNames = js_getPropertyNames<GetPropertyNames>;
 	outDefinition.staticFunctions = functions;
+	outDefinition.staticValues = values;
 }
 
 
 // ----------------------------------------------------------------------------
 
 
-void VJSHTMLFormPart::Initialize (const XBOX::VJSParms_initialize& inParms, IHTMLFormPart *inHTMLFormPart)
+void VJSMIMEMessagePart::Initialize (const XBOX::VJSParms_initialize& inParms, XBOX::VMIMEMessagePart *inMIMEPart)
 {
 }
 
 
-void VJSHTMLFormPart::Finalize (const XBOX::VJSParms_finalize& inParms, IHTMLFormPart *inHTMLFormPart)
+void VJSMIMEMessagePart::Finalize (const XBOX::VJSParms_finalize& inParms, XBOX::VMIMEMessagePart *inMIMEPart)
 {
 }
 
 
-void VJSHTMLFormPart::_GetName (XBOX::VJSParms_getProperty& ioParms, IHTMLFormPart *inHTMLFormPart)
+void VJSMIMEMessagePart::_GetName (XBOX::VJSParms_getProperty& ioParms, XBOX::VMIMEMessagePart *inMIMEPart)
 {
-	if (NULL != inHTMLFormPart)
+	if (NULL != inMIMEPart)
 	{
-		ioParms.ReturnString (inHTMLFormPart->GetName());
+		ioParms.ReturnString (inMIMEPart->GetName());
 	}
 	else
 	{
-		ioParms.ReturnNullValue();
+		XBOX::vThrowError (XBOX::VE_INVALID_PARAMETER);
+		ioParms.ReturnUndefinedValue();
 	}
 }
 
 
-void VJSHTMLFormPart::_GetFileName (XBOX::VJSParms_getProperty& ioParms, IHTMLFormPart *inHTMLFormPart)
+void VJSMIMEMessagePart::_GetFileName (XBOX::VJSParms_getProperty& ioParms, XBOX::VMIMEMessagePart *inMIMEPart)
 {
-	if (NULL != inHTMLFormPart)
+	if (NULL != inMIMEPart)
 	{
-		ioParms.ReturnString (inHTMLFormPart->GetFileName());
+		ioParms.ReturnString (inMIMEPart->GetFileName());
 	}
 	else
 	{
-		ioParms.ReturnNullValue();
+		XBOX::vThrowError (XBOX::VE_INVALID_PARAMETER);
+		ioParms.ReturnUndefinedValue();
 	}
 }
 
 
-void VJSHTMLFormPart::_GetMediaType (XBOX::VJSParms_getProperty& ioParms, IHTMLFormPart *inHTMLFormPart)
+void VJSMIMEMessagePart::_GetMediaType (XBOX::VJSParms_getProperty& ioParms, XBOX::VMIMEMessagePart *inMIMEPart)
 {
-	if (NULL != inHTMLFormPart)
+	if (NULL != inMIMEPart)
 	{
-		ioParms.ReturnString (inHTMLFormPart->GetMediaType());
+		ioParms.ReturnString (inMIMEPart->GetMediaType());
 	}
 	else
 	{
-		ioParms.ReturnNullValue();
+		XBOX::vThrowError (XBOX::VE_INVALID_PARAMETER);
+		ioParms.ReturnUndefinedValue();
 	}
 }
 
 
-void VJSHTMLFormPart::_GetSize (XBOX::VJSParms_getProperty& ioParms, IHTMLFormPart *inHTMLFormPart)
+void VJSMIMEMessagePart::_GetSize (XBOX::VJSParms_getProperty& ioParms, XBOX::VMIMEMessagePart *inMIMEPart)
 {
-	if (NULL != inHTMLFormPart)
+	if (NULL != inMIMEPart)
 	{
-		ioParms.ReturnNumber (inHTMLFormPart->GetSize());
+		ioParms.ReturnNumber (inMIMEPart->GetSize());
 	}
 	else
 	{
-		ioParms.ReturnNullValue();
+		XBOX::vThrowError (XBOX::VE_INVALID_PARAMETER);
+		ioParms.ReturnUndefinedValue();
 	}
 }
 
 
-void VJSHTMLFormPart::_GetBodyAsText (XBOX::VJSParms_getProperty& ioParms, IHTMLFormPart *inHTMLFormPart)
+void VJSMIMEMessagePart::_GetBodyAsText (XBOX::VJSParms_getProperty& ioParms, XBOX::VMIMEMessagePart *inMIMEPart)
 {
-	if (NULL != inHTMLFormPart)
+	if (NULL != inMIMEPart)
 	{
-		XBOX::VPtrStream&	stream = const_cast<XBOX::VPtrStream &>(inHTMLFormPart->GetData());
-		XBOX::VString		contentType = inHTMLFormPart->GetMediaType();
-		MimeTypeKind		mimeTypeKind = inHTMLFormPart->GetMediaTypeKind();
-		XBOX::CharSet		charSet = inHTMLFormPart->GetMediaTypeCharSet();
+		XBOX::VPtrStream&	stream = const_cast<XBOX::VPtrStream &>(inMIMEPart->GetData());
+		XBOX::VString		contentType = inMIMEPart->GetMediaType();
+		MimeTypeKind		mimeTypeKind = inMIMEPart->GetMediaTypeKind();
+		XBOX::CharSet		charSet = inMIMEPart->GetMediaTypeCharSet();
 
 		if (MIMETYPE_TEXT == mimeTypeKind)
 		{
@@ -1232,18 +1500,19 @@ void VJSHTMLFormPart::_GetBodyAsText (XBOX::VJSParms_getProperty& ioParms, IHTML
 	}
 	else
 	{
-		ioParms.ReturnNullValue();
+		XBOX::vThrowError (XBOX::VE_INVALID_PARAMETER);
+		ioParms.ReturnUndefinedValue();
 	}
 }
 
 
-void VJSHTMLFormPart::_GetBodyAsPicture (XBOX::VJSParms_getProperty& ioParms, IHTMLFormPart *inHTMLFormPart)
+void VJSMIMEMessagePart::_GetBodyAsPicture (XBOX::VJSParms_getProperty& ioParms, XBOX::VMIMEMessagePart *inMIMEPart)
 {
-	if (NULL != inHTMLFormPart)
+	if (NULL != inMIMEPart)
 	{
-		XBOX::VPtrStream&	stream = const_cast<XBOX::VPtrStream &>(inHTMLFormPart->GetData());
-		XBOX::VString		contentType = inHTMLFormPart->GetMediaType();
-		MimeTypeKind		mimeTypeKind = inHTMLFormPart->GetMediaTypeKind();
+		XBOX::VPtrStream&	stream = const_cast<XBOX::VPtrStream &>(inMIMEPart->GetData());
+		XBOX::VString		contentType = inMIMEPart->GetMediaType();
+		MimeTypeKind		mimeTypeKind = inMIMEPart->GetMediaTypeKind();
 
 		if (MIMETYPE_IMAGE == mimeTypeKind)
 		{
@@ -1257,39 +1526,41 @@ void VJSHTMLFormPart::_GetBodyAsPicture (XBOX::VJSParms_getProperty& ioParms, IH
 	}
 	else
 	{
-		ioParms.ReturnNullValue();
+		XBOX::vThrowError (XBOX::VE_INVALID_PARAMETER);
+		ioParms.ReturnUndefinedValue();
 	}
 }
 
 
-void VJSHTMLFormPart::_GetBodyAsBlob (XBOX::VJSParms_getProperty& ioParms, IHTMLFormPart *inHTMLFormPart)
+void VJSMIMEMessagePart::_GetBodyAsBlob (XBOX::VJSParms_getProperty& ioParms, XBOX::VMIMEMessagePart *inMIMEPart)
 {
-	if (NULL != inHTMLFormPart)
+	if (NULL != inMIMEPart)
 	{
-		XBOX::VPtrStream&	stream = const_cast<XBOX::VPtrStream &>(inHTMLFormPart->GetData());
-		XBOX::VString		contentType = inHTMLFormPart->GetMediaType();
+		XBOX::VPtrStream&	stream = const_cast<XBOX::VPtrStream &>(inMIMEPart->GetData());
+		XBOX::VString		contentType = inMIMEPart->GetMediaType();
 
 		XBOX::VJSValue result = GetJSValueFromHTTPMessageBody (ioParms.GetContextRef(), MIMETYPE_BINARY, XBOX::VTC_UNKNOWN, &stream);
 		ioParms.ReturnValue (result);
 	}
 	else
 	{
-		ioParms.ReturnNullValue();
+		XBOX::vThrowError (XBOX::VE_INVALID_PARAMETER);
+		ioParms.ReturnUndefinedValue();
 	}
 }
 
 
-void VJSHTMLFormPart::_Save (XBOX::VJSParms_callStaticFunction& ioParms, IHTMLFormPart *inHTMLFormPart)
+void VJSMIMEMessagePart::_Save (XBOX::VJSParms_callStaticFunction& ioParms, XBOX::VMIMEMessagePart *inMIMEPart)
 {
 	XBOX::VString	string;
 	XBOX::VError	error = XBOX::VE_INVALID_PARAMETER;
 	
-	if ((NULL != inHTMLFormPart) && ioParms.GetStringParam (1, string))
+	if ((NULL != inMIMEPart) && ioParms.GetStringParam (1, string))
 	{
 		XBOX::VFilePath filePath (string, FPS_POSIX);
 		
 		if (filePath.IsFolder())
-			filePath.ToSubFile (inHTMLFormPart->GetFileName());
+			filePath.ToSubFile (inMIMEPart->GetFileName());
 
 		if (!filePath.IsEmpty() && filePath.IsFile())
 		{
@@ -1308,7 +1579,7 @@ void VJSHTMLFormPart::_Save (XBOX::VJSParms_callStaticFunction& ioParms, IHTMLFo
 				{
 					if ((fileStream = new XBOX::VFileStream (file)) != NULL)
 					{
-						XBOX::VPtrStream& stream = const_cast<XBOX::VPtrStream &>(inHTMLFormPart->GetData());
+						XBOX::VPtrStream& stream = const_cast<XBOX::VPtrStream &>(inMIMEPart->GetData());
 
 						if (XBOX::VE_OK == (error = fileStream->OpenWriting()))
 						{
@@ -1344,7 +1615,7 @@ void VJSHTMLFormPart::_Save (XBOX::VJSParms_callStaticFunction& ioParms, IHTMLFo
 }
 
 
-void VJSHTMLFormPart::GetDefinition (ClassDefinition& outDefinition)
+void VJSMIMEMessagePart::GetDefinition (ClassDefinition& outDefinition)
 {
 	static inherited::StaticFunction functions[] =
 	{
@@ -1364,7 +1635,7 @@ void VJSHTMLFormPart::GetDefinition (ClassDefinition& outDefinition)
 		{ 0, 0, 0, 0}
 	};
 
-	outDefinition.className = "HTMLFormPart";
+	outDefinition.className = "MIMEMessagePart";
 	outDefinition.initialize = js_initialize<Initialize>;
 	outDefinition.finalize = js_finalize<Finalize>;
 	outDefinition.staticValues = values;
@@ -1372,24 +1643,297 @@ void VJSHTMLFormPart::GetDefinition (ClassDefinition& outDefinition)
 }
 
 
+// ----------------------------------------------------------------------------
+
+
+
+void VJSMIMEWriter::Initialize (const XBOX::VJSParms_initialize& inParms, XBOX::VMIMEWriter *inMIMEWriter)
+{
+}
+
+
+void VJSMIMEWriter::Finalize (const XBOX::VJSParms_finalize& inParms, XBOX::VMIMEWriter *inMIMEWriter)
+{
+}
+
+
+void VJSMIMEWriter::GetDefinition (ClassDefinition& outDefinition)
+{
+	static inherited::StaticFunction functions[] =
+	{
+		{ "getMIMEBoundary", js_callStaticFunction<_GetMIMEBoundary>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
+		{ "getMIMEMessage", js_callStaticFunction<_GetMIMEMessage>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
+		{ "addPart", js_callStaticFunction<_AddPart>, JS4D::PropertyAttributeDontDelete },
+		{ 0, 0, 0}
+	};
+
+	static inherited::StaticValue values[] = 
+	{
+		{ 0, 0, 0, 0}
+	};
+
+	outDefinition.className = "MIMEWriter";
+	outDefinition.initialize = js_initialize<Initialize>;
+	outDefinition.finalize = js_finalize<Finalize>;
+	outDefinition.staticValues = values;
+	outDefinition.staticFunctions = functions;
+}
+
+
+void VJSMIMEWriter::_GetMIMEBoundary (XBOX::VJSParms_callStaticFunction& ioParms, XBOX::VMIMEWriter *inMIMEWriter)
+{
+	if (NULL != inMIMEWriter)
+	{
+		ioParms.ReturnString (inMIMEWriter->GetBoundary());
+	}
+	else
+	{
+		XBOX::vThrowError (XBOX::VE_INVALID_PARAMETER);
+		ioParms.ReturnUndefinedValue();
+	}
+}
+
+
+void VJSMIMEWriter::_GetMIMEMessage (XBOX::VJSParms_callStaticFunction& ioParms, XBOX::VMIMEWriter *inMIMEWriter)
+{
+	if (NULL != inMIMEWriter)
+	{
+		XBOX::VMIMEMessage *	message = const_cast<XBOX::VMIMEMessage *> (&inMIMEWriter->GetMIMEMessage());
+		VJSObject				resultObject = VJSMIMEMessage::CreateInstance (ioParms.GetContext(), message);
+
+		ioParms.ReturnValue (resultObject);
+	}
+	else
+	{
+		XBOX::vThrowError (XBOX::VE_INVALID_PARAMETER);
+		ioParms.ReturnUndefinedValue();
+	}
+}
+
+
+void VJSMIMEWriter::_AddPart (XBOX::VJSParms_callStaticFunction& ioParms, XBOX::VMIMEWriter *inMIMEWriter)
+{
+	XBOX::VError	error = XBOX::VE_INVALID_PARAMETER;
+
+	if ((NULL != inMIMEWriter) && (ioParms.CountParams() > 0))
+	{
+		XBOX::VJSValue		jsValue = ioParms.GetParamValue (1);
+		XBOX::VString		name;
+		XBOX::VString		fileName;
+		XBOX::VString		mimeType;
+		XBOX::VString		contentID;
+		bool				isInline;
+		XBOX::VPtrStream	stream;
+
+// 		if (!ioParms.GetStringParam (2, name) || name.IsEmpty())
+// 			name.FromCString ("Untitled");
+		if (!ioParms.GetStringParam (2, name)) {
+
+			XBOX::vThrowError(XBOX::VE_JVSC_WRONG_PARAMETER_TYPE_STRING, "2");
+			return;
+
+		}
+
+		if (!ioParms.GetStringParam (3, mimeType)) {
+
+			XBOX::vThrowError(XBOX::VE_JVSC_WRONG_PARAMETER_TYPE_STRING, "3");
+			return;
+
+		}
+
+		if (ioParms.CountParams() >= 4 && ioParms.IsStringParam(4) && !ioParms.GetStringParam(4, contentID)) {
+
+			XBOX::vThrowError(XBOX::VE_JVSC_WRONG_PARAMETER_TYPE_STRING, "4");
+			return;
+
+		}
+
+		if (ioParms.CountParams() >= 5) {
+
+			if (!ioParms.GetBoolParam(5, &isInline))
+
+				isInline = false;
+
+		} else
+
+			isInline = false;
+
+		if (XBOX::VE_OK == (error = stream.OpenWriting()))
+		{
+			if (jsValue.IsString())
+			{
+				XBOX::VString valueString;
+
+				if (jsValue.GetString (valueString))
+				{
+					XBOX::CharSet	charset = XBOX::VTC_UTF_8;
+
+					if (mimeType.IsEmpty())
+						mimeType.FromCString ("text/plain");
+
+					XBOX::StStringConverter<char> buffer (valueString, charset);
+					error = stream.PutData (buffer.GetCPointer(), buffer.GetSize());
+				}				
+			}
+			else if (!jsValue.IsObject()) 
+			{
+				// All other supported types are objects.
+
+				error = XBOX::VE_JVSC_WRONG_PARAMETER;
+			}
+			else
+			{
+				XBOX::VJSObject	object(ioParms.GetContext());
+				
+				jsValue.GetObject(object);
+				if (object.IsOfClass(VJSBufferClass::Class())) {
+
+					VJSBufferObject	*bufferObject	= object.GetPrivateData<VJSBufferClass>();
+
+					xbox_assert(bufferObject != NULL);
+					error = stream.PutData(bufferObject->GetDataPtr(), bufferObject->GetDataSize());
+
+					fileName.FromString(name);
+
+				} else if (object.IsOfClass(VJSFileIterator::Class())) {
+
+					JS4DFileIterator	*fileObject;
+					XBOX::VFile			*file;
+					VMemoryBuffer<>		buffer;
+
+					fileObject = object.GetPrivateData<VJSFileIterator>();
+					xbox_assert(fileObject != NULL);
+
+					file = fileObject->GetFile();
+					xbox_assert(file != NULL);			
+
+					if ((error = file->GetContent(buffer)) == XBOX::VE_OK && stream.CloseWriting() == XBOX::VE_OK) {
+						
+						stream.SetDataPtr(buffer.GetDataPtr(), buffer.GetDataSize());							
+						buffer.ForgetData();
+						file->GetName(fileName);
+
+					}
+								
+				} else {
+
+					XBOX::VValueSingle *value = jsValue.CreateVValue();
+
+					if (NULL != value)
+					{
+						if (VK_IMAGE == value->GetValueKind())
+						{
+	#if !VERSION_LINUX
+							XBOX::VPicture *	picture = (XBOX::VPicture *)value;
+							XBOX::VString		contentType;
+
+							contentType.FromCString ("image/png;image/jpeg;image/gif");
+
+							error = ExtractBestPictureForWeb (*picture, stream, contentType, true, mimeType);
+
+							if (contentType != mimeType)
+								mimeType.FromString (contentType);
+
+							fileName.FromString (name);
+	#endif						
+						}
+						else if (VK_BLOB == value->GetValueKind())
+						{
+							if (mimeType.IsEmpty())
+							{
+								VJSObject object = jsValue.GetObject();
+								if (!object.GetPropertyAsString (CVSTR ("type"), NULL, mimeType) || mimeType.IsEmpty())
+									mimeType.FromCString ("application/octet-stream");
+							}
+
+							XBOX::VBlobWithPtr *blob = dynamic_cast<XBOX::VBlobWithPtr *>(value);
+							error = stream.PutData (blob->GetDataPtr(), blob->GetSize());
+
+							fileName.FromString (name);
+						}
+						else
+						{
+							error = XBOX::VE_JVSC_WRONG_PARAMETER;
+						}
+					}
+					else // Object is null...
+					{
+						error = XBOX::VE_JVSC_WRONG_PARAMETER;
+					}
+				}
+
+			}
+
+			if (stream.IsWriting()) {
+
+				if (error == XBOX::VE_OK)
+
+					error = stream.CloseWriting();
+
+				else
+
+					stream.CloseWriting();				
+
+			}
+
+		}
+
+		if (XBOX::VE_OK == error) {
+
+			if (fileName.GetLength())
+
+				inMIMEWriter->AddFilePart(name, fileName, isInline, mimeType, contentID, stream);
+
+			else 
+
+				inMIMEWriter->AddTextPart(name, isInline, mimeType, contentID, stream);
+
+		}
+	}
+
+	XBOX::vThrowError (error);
+}
+
+
+void VJSMIMEWriter::_Construct (XBOX::VJSParms_construct& ioParms)
+{
+	XBOX::VString		boundary;
+	XBOX::VMIMEWriter *	mimeWriter = NULL;
+
+	if (ioParms.CountParams() > 0)
+		ioParms.GetStringParam (1, boundary);
+
+	mimeWriter = new XBOX::VMIMEWriter (boundary);
+
+	if (NULL != mimeWriter)
+	{
+		ioParms.ReturnConstructedObject (VJSMIMEWriter::CreateInstance (ioParms.GetContextRef(), mimeWriter));
+	}
+	else
+	{
+		XBOX::vThrowError (XBOX::VE_MEMORY_FULL);
+		ioParms.ReturnUndefined();
+	}
+}
+
 
 // ----------------------------------------------------------------------------
 
 
 
-void VJSHTTPServer::Initialize( const XBOX::VJSParms_initialize& inParms, VRIAServerProject* inApplication)
+void VJSHTTPServer::Initialize (const XBOX::VJSParms_initialize& inParms, VRIAServerProject* inRIAServerProject)
 {
-	inApplication->Retain();
+	inRIAServerProject->Retain();
 }
 
 
-void VJSHTTPServer::Finalize( const XBOX::VJSParms_finalize& inParms, VRIAServerProject* inApplication)
+void VJSHTTPServer::Finalize (const XBOX::VJSParms_finalize& inParms, VRIAServerProject* inRIAServerProject)
 {
-	inApplication->Release();
+	inRIAServerProject->Release();
 }
 
 
-void VJSHTTPServer::GetDefinition( ClassDefinition& outDefinition)
+void VJSHTTPServer::GetDefinition (ClassDefinition& outDefinition)
 {
 	static inherited::StaticFunction functions[] =
 	{
@@ -1418,31 +1962,55 @@ void VJSHTTPServer::GetDefinition( ClassDefinition& outDefinition)
 }
 
 
-void VJSHTTPServer::_start( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication)
+void VJSHTTPServer::_start (XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inRIAServerProject)
 {
-	VRIAContext *riaContext = VRIAJSRuntimeContext::GetApplicationContextFromJSContext( ioParms.GetContext(), inApplication);
-	inApplication->StartHTTPServerProject (riaContext);
+	if (NULL == inRIAServerProject)
+	{
+		XBOX::vThrowError (XBOX::VE_INVALID_PARAMETER);
+		return;
+	}
+
+	VRIAContext *riaContext = VRIAJSRuntimeContext::GetApplicationContextFromJSContext (ioParms.GetContext(), inRIAServerProject);
+	inRIAServerProject->StartHTTPServerProject (riaContext);
 }
 
 
-void VJSHTTPServer::_stop( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication)
+void VJSHTTPServer::_stop (XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inRIAServerProject)
 {
-	VRIAContext *riaContext = VRIAJSRuntimeContext::GetApplicationContextFromJSContext( ioParms.GetContext(), inApplication);
-	inApplication->StopHTTPServerProject (riaContext);
+	if (NULL == inRIAServerProject)
+	{
+		XBOX::vThrowError (XBOX::VE_INVALID_PARAMETER);
+		return;
+	}
+
+	VRIAContext *riaContext = VRIAJSRuntimeContext::GetApplicationContextFromJSContext (ioParms.GetContext(), inRIAServerProject);
+	inRIAServerProject->StopHTTPServerProject (riaContext);
 }
 
 
-void VJSHTTPServer::_getStarted( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication)
+void VJSHTTPServer::_getStarted (XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inRIAServerProject)
 {
-	VRIAContext *riaContext = VRIAJSRuntimeContext::GetApplicationContextFromJSContext( ioParms.GetContext(), inApplication);
-	ioParms.ReturnBool (inApplication->IsHTTPServerProjectStarted (riaContext));
+	if (NULL == inRIAServerProject)
+	{
+		XBOX::vThrowError (XBOX::VE_INVALID_PARAMETER);
+		return;
+	}
+
+	VRIAContext *riaContext = VRIAJSRuntimeContext::GetApplicationContextFromJSContext (ioParms.GetContext(), inRIAServerProject);
+	ioParms.ReturnBool (inRIAServerProject->IsHTTPServerProjectStarted (riaContext));
 }
 
 
-void VJSHTTPServer::_getPort( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication)
+void VJSHTTPServer::_getPort (XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inRIAServerProject)
 {
-	VRIAContext *					riaContext = VRIAJSRuntimeContext::GetApplicationContextFromJSContext (ioParms.GetContext(), inApplication);
-	IHTTPServerProject *			serverProject = inApplication->RetainHTTPServerProject (riaContext);
+	if (NULL == inRIAServerProject)
+	{
+		XBOX::vThrowError (XBOX::VE_INVALID_PARAMETER);
+		return;
+	}
+
+	VRIAContext *					riaContext = VRIAJSRuntimeContext::GetApplicationContextFromJSContext (ioParms.GetContext(), inRIAServerProject);
+	IHTTPServerProject *			serverProject = inRIAServerProject->RetainHTTPServerProject (riaContext);
 	IHTTPServerProjectSettings *	settings = (serverProject != NULL) ? serverProject->GetSettings() : NULL;
 
 	if (settings != NULL)
@@ -1458,10 +2026,16 @@ void VJSHTTPServer::_getPort( XBOX::VJSParms_getProperty& ioParms, VRIAServerPro
 }
 
 
-void VJSHTTPServer::_getIpAddress (XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication)
+void VJSHTTPServer::_getIpAddress (XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inRIAServerProject)
 {
-	VRIAContext *					riaContext = VRIAJSRuntimeContext::GetApplicationContextFromJSContext (ioParms.GetContext(), inApplication);
-	IHTTPServerProject *			serverProject = inApplication->RetainHTTPServerProject (riaContext);
+	if (NULL == inRIAServerProject)
+	{
+		XBOX::vThrowError (XBOX::VE_INVALID_PARAMETER);
+		return;
+	}
+
+	VRIAContext *					riaContext = VRIAJSRuntimeContext::GetApplicationContextFromJSContext (ioParms.GetContext(), inRIAServerProject);
+	IHTTPServerProject *			serverProject = inRIAServerProject->RetainHTTPServerProject (riaContext);
 	IHTTPServerProjectSettings *	settings = (serverProject != NULL) ? serverProject->GetSettings() : NULL;
 
 	if (settings != NULL)
@@ -1479,8 +2053,9 @@ void VJSHTTPServer::_getIpAddress (XBOX::VJSParms_getProperty& ioParms, VRIAServ
 		ServerNetTools::GetIPAdress (ip, dottedIp);
 		ioParms.ReturnString (dottedIp);
 	
-#elif DEPRECATED_IPV4_API_SHOULD_NOT_COMPILE
-	#error NEED AN IP V6 UPDATE
+#else
+		VString ip=ServerNetTools::GetFirstLocalAddress();
+		ioParms.ReturnString (ip);
 #endif
 	}
 	else
@@ -1492,18 +2067,30 @@ void VJSHTTPServer::_getIpAddress (XBOX::VJSParms_getProperty& ioParms, VRIAServ
 }
 
 
-void VJSHTTPServer::_getHostName( VJSParms_getProperty& ioParms, VRIAServerProject* inApplication)
+void VJSHTTPServer::_getHostName (VJSParms_getProperty& ioParms, VRIAServerProject* inRIAServerProject)
 {
+	if (NULL == inRIAServerProject)
+	{
+		XBOX::vThrowError (XBOX::VE_INVALID_PARAMETER);
+		return;
+	}
+
 	VString hostName;
-	inApplication->GetHostName( hostName);
-	ioParms.ReturnString( hostName);
+	inRIAServerProject->GetHostName (hostName);
+	ioParms.ReturnString (hostName);
 }
 
 
-void VJSHTTPServer::_getDefaultCharSet (XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication)
+void VJSHTTPServer::_getDefaultCharSet (XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inRIAServerProject)
 {
-	VRIAContext *					riaContext = VRIAJSRuntimeContext::GetApplicationContextFromJSContext (ioParms.GetContext(), inApplication);
-	IHTTPServerProject *			serverProject = inApplication->RetainHTTPServerProject (riaContext);
+	if (NULL == inRIAServerProject)
+	{
+		XBOX::vThrowError (XBOX::VE_INVALID_PARAMETER);
+		return;
+	}
+
+	VRIAContext *					riaContext = VRIAJSRuntimeContext::GetApplicationContextFromJSContext (ioParms.GetContext(), inRIAServerProject);
+	IHTTPServerProject *			serverProject = inRIAServerProject->RetainHTTPServerProject (riaContext);
 	IHTTPServerProjectSettings *	settings = (serverProject != NULL) ? serverProject->GetSettings() : NULL;
 
 	if (settings != NULL)
@@ -1519,15 +2106,27 @@ void VJSHTTPServer::_getDefaultCharSet (XBOX::VJSParms_getProperty& ioParms, VRI
 }
 
 
-void VJSHTTPServer::_getSSL( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication)
+void VJSHTTPServer::_getSSL (XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inRIAServerProject)
 {
-	ioParms.ReturnValue( VJSSSL::CreateInstance( ioParms.GetContextRef(), inApplication));
+	if (NULL == inRIAServerProject)
+	{
+		XBOX::vThrowError (XBOX::VE_INVALID_PARAMETER);
+		return;
+	}
+
+	ioParms.ReturnValue (VJSSSL::CreateInstance (ioParms.GetContextRef(), inRIAServerProject));
 }
 
 
-void VJSHTTPServer::_getCache( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication)
+void VJSHTTPServer::_getCache (XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inRIAServerProject)
 {
-	ioParms.ReturnValue( VJSHTTPServerCache::CreateInstance( ioParms.GetContextRef(), inApplication));
+	if (NULL == inRIAServerProject)
+	{
+		XBOX::vThrowError (XBOX::VE_INVALID_PARAMETER);
+		return;
+	}
+
+	ioParms.ReturnValue (VJSHTTPServerCache::CreateInstance (ioParms.GetContextRef(), inRIAServerProject));
 }
 
 
@@ -1536,19 +2135,19 @@ void VJSHTTPServer::_getCache( XBOX::VJSParms_getProperty& ioParms, VRIAServerPr
 
 
 
-void VJSHTTPServerCache::Initialize( const XBOX::VJSParms_initialize& inParms, VRIAServerProject* inApplication)
+void VJSHTTPServerCache::Initialize (const XBOX::VJSParms_initialize& inParms, VRIAServerProject* inRIAServerProject)
 {
-	inApplication->Retain();
+	inRIAServerProject->Retain();
 }
 
 
-void VJSHTTPServerCache::Finalize( const XBOX::VJSParms_finalize& inParms, VRIAServerProject* inApplication)
+void VJSHTTPServerCache::Finalize (const XBOX::VJSParms_finalize& inParms, VRIAServerProject* inRIAServerProject)
 {
-	inApplication->Release();
+	inRIAServerProject->Release();
 }
 
 
-void VJSHTTPServerCache::GetDefinition( ClassDefinition& outDefinition)
+void VJSHTTPServerCache::GetDefinition (ClassDefinition& outDefinition)
 {
 	static inherited::StaticValue values[] =
 	{
@@ -1564,15 +2163,17 @@ void VJSHTTPServerCache::GetDefinition( ClassDefinition& outDefinition)
 }
 
 
-void VJSHTTPServerCache::_getEnabled( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication)
+void VJSHTTPServerCache::_getEnabled (XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inRIAServerProject)
 {
-	VRIAContext *					riaContext = VRIAJSRuntimeContext::GetApplicationContextFromJSContext (ioParms.GetContext(), inApplication);
-	IHTTPServerProject *			serverProject = inApplication->RetainHTTPServerProject (riaContext);
-#if HTTP_SERVER_GLOBAL_SETTINGS
-	IHTTPServerSettings *			settings = (serverProject != NULL) ? serverProject->GetHTTPServerSettings() : NULL;
-#else
+	if (NULL == inRIAServerProject)
+	{
+		XBOX::vThrowError (XBOX::VE_INVALID_PARAMETER);
+		return;
+	}
+
+	VRIAContext *					riaContext = VRIAJSRuntimeContext::GetApplicationContextFromJSContext (ioParms.GetContext(), inRIAServerProject);
+	IHTTPServerProject *			serverProject = inRIAServerProject->RetainHTTPServerProject (riaContext);
 	IHTTPServerProjectSettings *	settings = (serverProject != NULL) ? serverProject->GetSettings() : NULL;
-#endif
 
 	if (settings != NULL)
 	{
@@ -1583,19 +2184,21 @@ void VJSHTTPServerCache::_getEnabled( XBOX::VJSParms_getProperty& ioParms, VRIAS
 		ioParms.ReturnNullValue();
 	}
 
-	QuickReleaseRefCountable( serverProject);
+	QuickReleaseRefCountable (serverProject);
 }
 
 
-void VJSHTTPServerCache::_getMemorySize (XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication)
+void VJSHTTPServerCache::_getMemorySize (XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inRIAServerProject)
 {
-	VRIAContext *					riaContext = VRIAJSRuntimeContext::GetApplicationContextFromJSContext (ioParms.GetContext(), inApplication);
-	IHTTPServerProject *			serverProject = inApplication->RetainHTTPServerProject (riaContext);
-#if HTTP_SERVER_GLOBAL_SETTINGS
-	IHTTPServerSettings *			settings = (serverProject != NULL) ? serverProject->GetHTTPServerSettings() : NULL;
-#else
+	if (NULL == inRIAServerProject)
+	{
+		XBOX::vThrowError (XBOX::VE_INVALID_PARAMETER);
+		return;
+	}
+
+	VRIAContext *					riaContext = VRIAJSRuntimeContext::GetApplicationContextFromJSContext (ioParms.GetContext(), inRIAServerProject);
+	IHTTPServerProject *			serverProject = inRIAServerProject->RetainHTTPServerProject (riaContext);
 	IHTTPServerProjectSettings *	settings = (serverProject != NULL) ? serverProject->GetSettings() : NULL;
-#endif
 
 	if (settings != NULL)
 	{
@@ -1614,19 +2217,19 @@ void VJSHTTPServerCache::_getMemorySize (XBOX::VJSParms_getProperty& ioParms, VR
 
 
 
-void VJSSSL::Initialize( const XBOX::VJSParms_initialize& inParms, VRIAServerProject* inApplication)
+void VJSSSL::Initialize (const XBOX::VJSParms_initialize& inParms, VRIAServerProject* inRIAServerProject)
 {
-	inApplication->Retain();
+	inRIAServerProject->Retain();
 }
 
 
-void VJSSSL::Finalize( const XBOX::VJSParms_finalize& inParms, VRIAServerProject* inApplication)
+void VJSSSL::Finalize (const XBOX::VJSParms_finalize& inParms, VRIAServerProject* inRIAServerProject)
 {
-	inApplication->Release();
+	inRIAServerProject->Release();
 }
 
 
-void VJSSSL::GetDefinition( ClassDefinition& outDefinition)
+void VJSSSL::GetDefinition (ClassDefinition& outDefinition)
 {
 	static inherited::StaticFunction functions[] =
 	{
@@ -1649,10 +2252,16 @@ void VJSSSL::GetDefinition( ClassDefinition& outDefinition)
 }
 
 
-void VJSSSL::_getCertificatePath (XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication)
+void VJSSSL::_getCertificatePath (XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inRIAServerProject)
 {
-	VRIAContext *					riaContext = VRIAJSRuntimeContext::GetApplicationContextFromJSContext (ioParms.GetContext(), inApplication);
-	IHTTPServerProject *			serverProject = inApplication->RetainHTTPServerProject (riaContext);
+	if (NULL == inRIAServerProject)
+	{
+		XBOX::vThrowError (XBOX::VE_INVALID_PARAMETER);
+		return;
+	}
+
+	VRIAContext *					riaContext = VRIAJSRuntimeContext::GetApplicationContextFromJSContext (ioParms.GetContext(), inRIAServerProject);
+	IHTTPServerProject *			serverProject = inRIAServerProject->RetainHTTPServerProject (riaContext);
 	IHTTPServerProjectSettings *	settings = (serverProject != NULL) ? serverProject->GetSettings() : NULL;
 
 	if (settings != NULL)
@@ -1669,10 +2278,16 @@ void VJSSSL::_getCertificatePath (XBOX::VJSParms_callStaticFunction& ioParms, VR
 }
 
 
-void VJSSSL::_getEnabled (XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication)
+void VJSSSL::_getEnabled (XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inRIAServerProject)
 {
-	VRIAContext *					riaContext = VRIAJSRuntimeContext::GetApplicationContextFromJSContext (ioParms.GetContext(), inApplication);
-	IHTTPServerProject *			serverProject = inApplication->RetainHTTPServerProject (riaContext);
+	if (NULL == inRIAServerProject)
+	{
+		XBOX::vThrowError (XBOX::VE_INVALID_PARAMETER);
+		return;
+	}
+
+	VRIAContext *					riaContext = VRIAJSRuntimeContext::GetApplicationContextFromJSContext (ioParms.GetContext(), inRIAServerProject);
+	IHTTPServerProject *			serverProject = inRIAServerProject->RetainHTTPServerProject (riaContext);
 	IHTTPServerProjectSettings *	settings = (serverProject != NULL) ? serverProject->GetSettings() : NULL;
 
 	if (settings != NULL)
@@ -1688,10 +2303,16 @@ void VJSSSL::_getEnabled (XBOX::VJSParms_getProperty& ioParms, VRIAServerProject
 }
 
 
-void VJSSSL::_getPort (XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication)
+void VJSSSL::_getPort (XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inRIAServerProject)
 {
-	VRIAContext *					riaContext = VRIAJSRuntimeContext::GetApplicationContextFromJSContext (ioParms.GetContext(), inApplication);
-	IHTTPServerProject *			serverProject = inApplication->RetainHTTPServerProject (riaContext);
+	if (NULL == inRIAServerProject)
+	{
+		XBOX::vThrowError (XBOX::VE_INVALID_PARAMETER);
+		return;
+	}
+
+	VRIAContext *					riaContext = VRIAJSRuntimeContext::GetApplicationContextFromJSContext (ioParms.GetContext(), inRIAServerProject);
+	IHTTPServerProject *			serverProject = inRIAServerProject->RetainHTTPServerProject (riaContext);
 	IHTTPServerProjectSettings *	settings = (serverProject != NULL) ? serverProject->GetSettings() : NULL;
 
 	if (settings != NULL)
@@ -1706,384 +2327,520 @@ void VJSSSL::_getPort (XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* i
 	QuickReleaseRefCountable (serverProject);
 }
 
-
-
-// ----------------------------------------------------------------------------
-
-
-
-void VJSWebAppService::Initialize( const XBOX::VJSParms_initialize& inParms, VRIAServerProject* inApplication)
+void VJSMIMEReader::GetDefinition (ClassDefinition& outDefinition)
 {
-	inApplication->Retain();
-}
+	static XBOX::VJSClass<VJSMIMEReader, void>::StaticFunction functions[] = {
 
+		{	"parseMail",		js_callStaticFunction<_ParseMail>,			JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete	},
+		{	0,					0,											0																	},
 
-void VJSWebAppService::Finalize( const XBOX::VJSParms_finalize& inParms, VRIAServerProject* inApplication)
-{
-	inApplication->Release();
-}
-
-
-void VJSWebAppService::GetDefinition( ClassDefinition& outDefinition)
-{
-	static inherited::StaticFunction functions[] =
-	{
-		{ "enable", js_callStaticFunction<_enable>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
-		{ "disable", js_callStaticFunction<_disable>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
-		{ "getDocumentRootFolder", js_callStaticFunction<_getDocumentRootFolder>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
-		{ 0, 0, 0}
 	};
 
-	static inherited::StaticValue values[] =
-	{
-		{ "enabled", js_getProperty<_getEnabled>, NULL, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
-		{ "directoryIndex", js_getProperty<_getDirectoryIndex>, NULL, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
-		{ 0, 0, 0}
-	};
-
-	outDefinition.className = kSSJS_CLASS_NAME_WebAppService;
-	outDefinition.initialize = js_initialize<Initialize>;
-	outDefinition.finalize = js_finalize<Finalize>;
+	outDefinition.className = "MIMEReader";
 	outDefinition.staticFunctions = functions;
-	outDefinition.staticValues = values;
 }
 
-
-void VJSWebAppService::_enable( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication)
+void VJSMIMEReader::Construct (XBOX::VJSParms_construct& inParms)
 {
-	VRIAContext *riaContext = VRIAJSRuntimeContext::GetApplicationContextFromJSContext( ioParms.GetContext(), inApplication);
-	inApplication->SetWebAppServiceEnabled(  riaContext, true);
+	XBOX::VJSObject	createdObject(inParms.GetContext());
+
+	createdObject = VJSMIMEReader::CreateInstance(inParms.GetContext(), NULL);
+	inParms.ReturnConstructedObject(createdObject);		
 }
 
-
-void VJSWebAppService::_disable( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication)
+void VJSMIMEReader::_ParseMail (XBOX::VJSParms_callStaticFunction &ioParms, void *)
 {
-	VRIAContext *riaContext = VRIAJSRuntimeContext::GetApplicationContextFromJSContext( ioParms.GetContext(), inApplication);
-	inApplication->SetWebAppServiceEnabled(  riaContext, false);
-}
+	XBOX::VJSObject	mailObject(ioParms.GetContext());
 
+	if (!ioParms.GetParamObject(1, mailObject)) {
 
-void VJSWebAppService::_getDocumentRootFolder (XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication)
-{
-	VRIAContext *					riaContext = VRIAJSRuntimeContext::GetApplicationContextFromJSContext (ioParms.GetContext(), inApplication);
-	IHTTPServerProject *			serverProject = inApplication->RetainHTTPServerProject (riaContext);
-	IHTTPServerProjectSettings *	settings = (serverProject != NULL) ? serverProject->GetSettings() : NULL;
+		XBOX::vThrowError(XBOX::VE_JVSC_WRONG_PARAMETER_TYPE_OBJECT, "1");
+		return;
 
-	if (settings != NULL)
-	{
-		VFilePath webFolderPath = settings->GetWebFolderPath();
-		VFolder *folder = inApplication->RetainFolder();
-
-		JSReturnFolderOrFile (webFolderPath, folder, ioParms, 1, 2);
-
-		QuickReleaseRefCountable( folder);
-	}
-	else
-	{
-		ioParms.ReturnNullValue();
 	}
 
-	QuickReleaseRefCountable (serverProject);
+	// Retrieve the addField() method from Mail object. Use it as a (poor) way to check 
+	// that object given is indeed a Mail object.
+
+	XBOX::VJSObject	addFieldFunction	= mailObject.GetPropertyAsObject("addField");
+
+	if (!addFieldFunction.IsFunction()) {
+
+		XBOX::vThrowError(XBOX::VE_JVSC_WRONG_PARAMETER_TYPE_OBJECT, "1");
+		return;
+
+	}
+
+	XBOX::VJSArray	memoryBufferArray(ioParms.GetContext());
+
+	if (!ioParms.GetParamArray(2, memoryBufferArray) || !memoryBufferArray.GetLength()) {
+
+		XBOX::vThrowError(XBOX::VE_JVSC_WRONG_PARAMETER_TYPE_ARRAY, "2");
+		return;
+
+	}
+	
+	XBOX::VMemoryBuffer<>	*memoryBuffers;
+
+	if ((memoryBuffers = new XBOX::VMemoryBuffer<>[memoryBufferArray.GetLength()]) == NULL) {
+
+		XBOX::vThrowError(XBOX::VE_MEMORY_FULL);
+		return;
+
+	}
+
+	sLONG	i;
+
+	for (i = 0; i < memoryBufferArray.GetLength(); i++) {
+
+		XBOX::VJSValue	value	= memoryBufferArray.GetValueAt(i);
+
+		if (!value.IsObject())
+			
+			break;
+
+		else {
+
+			XBOX::VJSObject	bufferObject	= value.GetObject();
+
+			if (!bufferObject.IsOfClass(XBOX::VJSBufferClass::Class()))
+
+				break;
+
+			else {
+
+				XBOX::VJSBufferObject	*buffer;
+
+				buffer = bufferObject.GetPrivateData<XBOX::VJSBufferClass>();
+				xbox_assert(buffer != NULL);
+
+				memoryBuffers[i].SetDataPtr(buffer->GetDataPtr(), buffer->GetDataSize(), buffer->GetDataSize());
+
+			}
+
+		}
+
+	}
+
+	// Parse mail.
+
+	if (i == memoryBufferArray.GetLength()) {
+
+		XBOX::VMemoryBufferStream	stream(memoryBuffers, i);
+		bool						isMIME;
+		XBOX::VString				boundary;
+	
+		if (stream.OpenReading() == XBOX::VE_OK) {
+
+			if (_ParseMailHeader(ioParms.GetContext(), mailObject, &stream, &isMIME, &boundary)) {
+
+				if (isMIME) {
+
+					if (boundary.IsEmpty()) {
+
+//** No boundary string found in header ! Will be unable to parse MIME parts.
+
+					}
+
+					// Make an XBOX::VMemoryBufferStream that "contains" only the MIME stream.
+					// Patch the memory buffers to make it starts at MIME boundary.
+
+					VSize	index, total, offset, size;
+					sLONG	j;
+					uBYTE	*p;
+
+					index = stream.GetPos();
+					total = 0;
+					j = 0;
+					for ( ; ; ) {
+
+						total += memoryBuffers[j].GetDataSize();
+						if (index < total)
+
+							break;
+
+						if (j == i) {
+	
+							// Impossible, stream.GetPos() should return an index within bound.
+
+							xbox_assert(false);
+
+						} else
+
+							j++;
+
+					}
+
+					total -= memoryBuffers[j].GetDataSize();
+					offset = index - total;
+					size = memoryBuffers[j].GetDataSize() - offset;
+					p = (uBYTE *) memoryBuffers[j].GetDataPtr() + offset;
+
+					memoryBuffers[j].ForgetData();	// Prevent memory from being freed.
+					memoryBuffers[j].SetDataPtr(p, size, size);
+
+					// _ParseMIMEBody() will open mimeStream and then close it when done.
+
+					XBOX::VMemoryBufferStream	mimeStream(&memoryBuffers[j], i - j);
+			
+					_ParseMIMEBody(ioParms.GetContext(), mailObject, &mimeStream, boundary);
+
+				} else {
+
+					_ParseTextBody(ioParms.GetContext(), mailObject, &stream);
+				
+				}
+
+			}
+			stream.CloseReading();
+
+		} else {
+
+			//** stream opening failed
+
+		}
+
+	}
+
+	for (i = 0; i < memoryBufferArray.GetLength(); i++)
+
+		memoryBuffers[i].ForgetData();
+
+	delete[] memoryBuffers;
 }
 
+// Return true if header was parsed successfully. outIsMIME content is valid only if parsing was successful. 
+// If *outIsMIME is true, then *outBoundary should contain the "boundary" string.
 
-void VJSWebAppService::_getEnabled( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication)
+bool VJSMIMEReader::_ParseMailHeader (XBOX::VJSContext inContext, XBOX::VJSObject &inMailObject, XBOX::VMemoryBufferStream *inStream, bool *outIsMIME, XBOX::VString *outBoundary)
 {
-	VRIAContext *riaContext = VRIAJSRuntimeContext::GetApplicationContextFromJSContext( ioParms.GetContext(), inApplication);
-	ioParms.ReturnBool( inApplication->IsWebAppServiceEnabled( riaContext));
-}
+	xbox_assert(inStream != NULL);
+	xbox_assert(outIsMIME != NULL);
+	xbox_assert(outBoundary != NULL);
 
+	XBOX::VString	line;
 
-void VJSWebAppService::_getDirectoryIndex (XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication)
-{
-	VRIAContext *					riaContext = VRIAJSRuntimeContext::GetApplicationContextFromJSContext (ioParms.GetContext(), inApplication);
-	IHTTPServerProject *			serverProject = inApplication->RetainHTTPServerProject (riaContext);
-	IHTTPServerProjectSettings *	settings = (serverProject != NULL) ? serverProject->GetSettings() : NULL;
+	// Skip "+OK" line from POP server.
+
+	if (!_GetLine(&line, inStream, false))
+
+		return false;
+
+	// Parse header fields.
+
+	XBOX::VJSObject			addFieldFunction(inContext);
+	std::vector<VJSValue>	arguments;
+	XBOX::VJSValue			result(inContext);
+	
+	addFieldFunction = inMailObject.GetPropertyAsObject("addField");	// Must succeed.
+	arguments.push_back(XBOX::VJSValue(inContext));
+	arguments.push_back(XBOX::VJSValue(inContext));
+
+	bool			isMIME;
+	sLONG			i, j, k;
+	XBOX::VString	fieldName, fieldBody;
+
+	isMIME = false;
+	for ( ; ; ) {
+
+		bool	isFullLine;
+
+		isFullLine = _GetLine(&line, inStream, true);
+
+		// A blank line separate the header from the body.
+
+		if (line.IsEmpty())
+
+			break;
+
+		// Read field name, skipping leading spaces.
+
+		for (i = 0; i < line.GetLength(); i++)
+
+			if (line.GetUniChar(i + 1) != ' ' || line.GetUniChar(i + 1) != '\t')
+
+				break;
+
+		for (j = i; j < line.GetLength(); j++)
+
+			if (line.GetUniChar(j + 1) == ':')
+
+				break;
+
+		// If field name is zero length or there is no ':' then skip and ignore line.
+
+		if (i == j || j == line.GetLength())
+
+			continue;
+	
+		line.GetSubString(1, j - i, fieldName);
+		fieldName.RemoveWhiteSpaces(false, true);
+
+		// If mail has an "MIME-Version" header field, consider it as MIME. 
+		// Do not check version number.
+
+		if (fieldName.EqualToString("MIME-Version"))
+
+			isMIME = true;
+
+		// Read field body, skipping leading spaces. An empty field body is possible.
+
+		for (k = j + 2; k < line.GetLength(); k++)
+
+			if (line.GetUniChar(k + 1) != ' ' || line.GetUniChar(k + 1) != '\t')
+
+				break;
 		
-	if (settings != NULL)
-	{
-		ioParms.ReturnString (settings->GetIndexPageName());
+		if (k < line.GetLength()) {
+
+			line.GetSubString(k + 1, line.GetLength() - k, fieldBody);
+			fieldBody.RemoveWhiteSpaces(false, true);
+
+		} else
+
+			fieldBody.Clear();
+
+		// Try to find boundary string, do not care if mail is MIME. 
+
+		if (fieldName.EqualToString("Content-Type"))
+
+			_ParseBoundary(fieldBody, outBoundary);
+
+		// Add field to Mail object.
+
+		arguments[0].SetString(fieldName);
+		arguments[1].SetString(fieldBody);
+		inMailObject.CallFunction(addFieldFunction, &arguments, &result, NULL);
+
 	}
-	else
-	{
-		ioParms.ReturnNullValue();
+
+	*outIsMIME = isMIME;
+
+	return true;
+}
+
+// Parse basic mail body, that is a sequence of lines. Set the body property as an array of string(s) (lines).
+// Return true if successful.
+
+bool VJSMIMEReader::_ParseTextBody (XBOX::VJSContext inContext, XBOX::VJSObject &inMailObject, XBOX::VMemoryBufferStream *inStream)
+{
+	xbox_assert(inStream != NULL);
+
+	XBOX::VJSArray	lines(inContext);
+	XBOX::VJSObject	arrayObject	= lines;
+
+	if (!arrayObject.IsArray())
+
+		return false;
+
+	bool			isOk;
+	XBOX::VString	line;
+
+	for ( ; ; ) {
+
+		if (!_GetLine(&line, inStream, false)) {
+
+			isOk = line.EqualToUSASCIICString(".");
+			break;
+
+		} else if (line.EqualToUSASCIICString(".")) {
+
+			// Last line should also be the end of stream. 
+			// But still consider that as ok.
+
+			isOk = true;
+			break;
+
+		} else 
+
+			lines.PushString(line);
+
 	}
 
-	QuickReleaseRefCountable (serverProject);
+	inMailObject.SetProperty("body", lines);
+
+	return isOk;
 }
 
-
-// ----------------------------------------------------------------------------
-
-
-
-void VJSDataService::Initialize( const XBOX::VJSParms_initialize& inParms, VRIAServerProject* inApplication)
+bool VJSMIMEReader::_ParseMIMEBody (XBOX::VJSContext inContext, XBOX::VJSObject &inMailObject, XBOX::VMemoryBufferStream *inStream, const XBOX::VString &inBoundary)
 {
-	inApplication->Retain();
-}
+	VMIMEMessage	*mimeMessage;
 
+	if ((mimeMessage = new VMIMEMessage()) == NULL) {
 
-void VJSDataService::Finalize( const XBOX::VJSParms_finalize& inParms, VRIAServerProject* inApplication)
-{
-	inApplication->Release();
-}
+		XBOX::vThrowError(XBOX::VE_MEMORY_FULL);
+		return false; 
 
+	} else {
 
-void VJSDataService::GetDefinition( ClassDefinition& outDefinition)
-{
-	static inherited::StaticFunction functions[] =
-	{
-		{ "enable", js_callStaticFunction<_enable>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
-		{ "disable", js_callStaticFunction<_disable>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
-		{ 0, 0, 0}
-	};
-	
-	static inherited::StaticValue values[] =
-	{
-		{ "enabled", js_getProperty<_getEnabled>, NULL, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
-		{ 0, 0, 0}
-	};
+		XBOX::VJSObject	mimeMessageObject(inContext);
 
-	outDefinition.className = kSSJS_CLASS_NAME_DataService;
-	outDefinition.initialize = js_initialize<Initialize>;
-	outDefinition.finalize = js_finalize<Finalize>;
-	outDefinition.staticFunctions = functions;
-	outDefinition.staticValues = values;
-}
+		mimeMessage->LoadMail(inBoundary, *inStream);		
 
+		mimeMessageObject = VJSMIMEMessage::CreateInstance(inContext, mimeMessage);
+		inMailObject.SetProperty("messageParts", mimeMessageObject);
 
-void VJSDataService::_enable( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication)
-{
-	VRIAContext *riaContext = VRIAJSRuntimeContext::GetApplicationContextFromJSContext( ioParms.GetContext(), inApplication);
-	inApplication->SetDataServiceEnabled(  riaContext, true);
-}
+		return true;
 
-
-void VJSDataService::_disable( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication)
-{
-	VRIAContext *riaContext = VRIAJSRuntimeContext::GetApplicationContextFromJSContext( ioParms.GetContext(), inApplication);
-	inApplication->SetDataServiceEnabled(  riaContext, false);
-}
-
-
-void VJSDataService::_getEnabled( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication)
-{
-	VRIAContext *riaContext = VRIAJSRuntimeContext::GetApplicationContextFromJSContext( ioParms.GetContext(), inApplication);
-	ioParms.ReturnBool( inApplication->IsDataServiceEnabled( riaContext));
-}
-
-
-
-// ----------------------------------------------------------------------------
-
-
-
-void VJSRPCService::Initialize( const VJSParms_initialize& inParms, VRIAServerProject* inApplication)
-{
-	inApplication->Retain();
-}
-
-
-void VJSRPCService::Finalize( const VJSParms_finalize& inParms, VRIAServerProject* inApplication)
-{
-	inApplication->Release();
-}
-
-
-void VJSRPCService::GetDefinition( ClassDefinition& outDefinition)
-{
-	static inherited::StaticFunction functions[] =
-	{
-		{ "enable", js_callStaticFunction<_enable>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
-		{ "disable", js_callStaticFunction<_disable>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
-		{ "getCatalog", js_callStaticFunction<_getCatalog>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
-		{ "getCatalogByName", js_callStaticFunction<_getCatalogByName>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
-		{ "getCatalogByFile", js_callStaticFunction<_getCatalogByFile>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
-		{ "getMethodFilePath", js_callStaticFunction<_getMethodFilePath>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
-		{ 0, 0, 0}
-	};
-
-	static inherited::StaticValue values[] =
-	{
-		{ "enabled", js_getProperty<_getEnabled>, NULL, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
-		{ 0, 0, 0}
-	};
-
-	outDefinition.className = kSSJS_CLASS_NAME_RPCService;
-	outDefinition.initialize = js_initialize<Initialize>;
-	outDefinition.finalize = js_finalize<Finalize>;
-	outDefinition.staticFunctions = functions;
-	outDefinition.staticValues = values;
-}
-
-
-void VJSRPCService::_enable( VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication)
-{
-	VRIAContext *riaContext = VRIAJSRuntimeContext::GetApplicationContextFromJSContext( ioParms.GetContext(), inApplication);
-	inApplication->SetRPCServiceEnabled(  riaContext, true);
-}
-
-
-void VJSRPCService::_disable( VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication)
-{
-	VRIAContext *riaContext = VRIAJSRuntimeContext::GetApplicationContextFromJSContext( ioParms.GetContext(), inApplication);
-	inApplication->SetRPCServiceEnabled(  riaContext, false);
-}
-
-
-void VJSRPCService::_getCatalog( VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication)
-{
-	VRIAContext *riaContext = VRIAJSRuntimeContext::GetApplicationContextFromJSContext( ioParms.GetContext(), inApplication);
-	
-	VString catalog;
-
-	MapOfRPCSchema schemas;
-	VRPCCatalog *rpcCatalog = inApplication->RetainRPCCatalog( riaContext, NULL, NULL, NULL);
-	if (rpcCatalog != NULL)
-	{
-		rpcCatalog->RetainAllSchemas( schemas);
-		rpcCatalog->Release();
 	}
-	VRPCCatalog::BuildCatalog( schemas, catalog);
-
-	ioParms.ReturnString( catalog);
 }
 
+// Return a line. Return true if it is a full line, with carriage return. Return false if end of stream
+// has been reached. Set inUnfoldLines to true for header parsing.
 
-void VJSRPCService::_getCatalogByName( VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication)
+bool VJSMIMEReader::_GetLine (XBOX::VString *outString, XBOX::VMemoryBufferStream *inStream, bool inUnfoldLines)
 {
-	VRIAContext *riaContext = VRIAJSRuntimeContext::GetApplicationContextFromJSContext( ioParms.GetContext(), inApplication);
+	xbox_assert(outString != NULL);
+	xbox_assert(inStream != NULL);
 
-	VString catalog;
+	bool	isFullLine;
 
-	MapOfRPCSchema schemas;
-	VRPCCatalog *rpcCatalog = inApplication->RetainRPCCatalog( riaContext, NULL, NULL, NULL);
-	if (rpcCatalog != NULL)
-	{
-		VString name;
+	isFullLine = false;
+	outString->Clear();	
+	for ( ; ; ) {
 
-		if (ioParms.IsArrayParam( 1))
-		{
-			std::vector<VRPCSchemaIdentifier> names;
-			VJSArray arrayName( ioParms.GetContextRef());
+		sLONG	c;
 
-			ioParms.GetParamArray( 1, arrayName);
-			for (size_t cpt = 0 ; cpt < arrayName.GetLength() ; ++cpt)
-			{
-				VJSValue value = arrayName.GetValueAt( cpt);
-				if (value.IsString())
-				{
-					value.GetString( name);
-					names.push_back( VRPCSchemaIdentifier( name, L""));
+		if ((c = inStream->GetNextByte()) < 0)
+
+			break;
+
+		if (c != '\r') {
+
+			outString->AppendChar(c);
+			continue;
+
+		} 
+
+		if ((c = inStream->GetNextByte()) < 0)
+
+			break;
+
+		if (c != '\n') {
+
+			outString->AppendChar('\r');
+			outString->AppendChar(c);
+			continue;
+
+		}
+
+		// A full line has been read, check for lines to fold if needed.
+
+		isFullLine = true;
+		if (inUnfoldLines) {
+			
+			if ((c = inStream->GetNextByte()) < 0) 
+				
+				break;
+
+			if (c == ' ' || c == '\t') {
+
+				// Fold line, replacing leading space(s) with a single space.
+
+				outString->AppendChar(' ');
+				for ( ; ; ) {
+
+					if ((c = inStream->GetNextByte()) < 0) 
+				
+						break;
+
+					if (c != ' ' && c != '\t') {
+
+						inStream->PutBackByte(c);
+						break;
+
+					}
+
 				}
+				continue;
+
+			} else {
+
+				inStream->PutBackByte(c);				
+				break;
+
 			}
-			rpcCatalog->RetainSchemasByNames( names, schemas);
-		}
-		else if (ioParms.GetStringParam( 1, name))
-		{
-			VRPCSchemaIdentifier identifier( name, L"");
-			VRPCSchema *schema = rpcCatalog->RetainSchemaByName( identifier);
-			schemas[identifier] = schema;
-			QuickReleaseRefCountable( schema);
-		}
-		rpcCatalog->Release();
-	}
-	VRPCCatalog::BuildCatalog( schemas, catalog);
 
-	ioParms.ReturnString( catalog);
+		} else
+
+			break;
+	
+	}
+
+	return isFullLine;
 }
 
+// Parse the field body of "Content-Type". Look for boundary="<boundary string>". 
+// Return the boundary string in *outBoundary, or leave it untouched if not found.
 
-void VJSRPCService::_getCatalogByFile( VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication)
+void VJSMIMEReader::_ParseBoundary (const XBOX::VString &inContentTypeBody, XBOX::VString *outBoundary)
 {
-	VRIAContext *riaContext = VRIAJSRuntimeContext::GetApplicationContextFromJSContext( ioParms.GetContext(), inApplication);
+	xbox_assert(outBoundary != NULL);
 
-	VError err = VE_OK;
-	VString catalog;
+	VIndex	i;
 
-	MapOfRPCSchema schemas;
+	if (!(i = inContentTypeBody.Find("boundary")))
 
-	VRPCCatalog *rpcCatalog = inApplication->RetainRPCCatalog( riaContext, NULL, NULL, NULL);
-	if (rpcCatalog != NULL && err == VE_OK)
-	{
-		VString relativePath;
+		return;
 
-		if (ioParms.IsArrayParam( 1))
-		{
-			VectorOfVString fileNames;
-			std::vector< VRefPtr<VFile> > methodsFiles;
-			VJSArray arrayPath( ioParms.GetContextRef());
+	VSize	length;
+	UniChar	c;
+	
+	length = inContentTypeBody.GetLength();
+	i += 8;	
+	for ( ; ; )
 
-			ioParms.GetParamArray( 1, arrayPath);
-			for (size_t cpt = 0 ; cpt < arrayPath.GetLength() ; ++cpt)
-			{
-				VJSValue value = arrayPath.GetValueAt( cpt);
-				if (value.IsString())
-				{
-					value.GetString( relativePath);
-					VFile *file = inApplication->RetainRPCMethodsFileFromRelativePath( err, relativePath, FPS_POSIX);
-					methodsFiles.push_back( file);
-					QuickReleaseRefCountable( file);
-				}
-			}
-			rpcCatalog->RetainSchemasByFiles( methodsFiles, schemas);
+		if (i > length)
+
+			return;
+
+		else if ((c = inContentTypeBody.GetUniChar(i)) == '=')
+
+			break;
+
+		else
+
+			i++;
+
+	// Read boundary string, quotes are optionnal.
+
+	outBoundary->Clear();
+
+	i++;
+	for ( ; ; )
+
+		if (i > length)
+
+			return;
+
+		else if ((c = inContentTypeBody.GetUniChar(i)) == '\"') 
+		
+			break;
+
+		else if (c != ' ' && c != '\t') {
+
+			// Variable i will be incremented below, out of loop.
+
+			outBoundary->AppendUniChar(c);
+			break;
+
+		} else
+
+			i++;
+
+	i++;	
+	for ( ; ; ) 
+
+		if (i > length 
+		|| (c = inContentTypeBody.GetUniChar(i)) == '\"'
+		|| c == ' ' || c == '\t')
+
+			break;
+
+		else {
+
+			outBoundary->AppendUniChar(c);
+			i++;
+		
 		}
-		else if (ioParms.GetStringParam( 1, relativePath))
-		{
-			VFile *methodsFile = inApplication->RetainRPCMethodsFileFromRelativePath( err, relativePath, FPS_POSIX);
-			rpcCatalog->RetainSchemasByFile( methodsFile, schemas);
-			QuickReleaseRefCountable( methodsFile);
-		}
-	}
-	QuickReleaseRefCountable( rpcCatalog);
-
-	VRPCCatalog::BuildCatalog( schemas, catalog);
-
-	ioParms.ReturnString( catalog);
 }
-
-
-void VJSRPCService::_getMethodFilePath( VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication)
-{
-	VRIAContext *riaContext = VRIAJSRuntimeContext::GetApplicationContextFromJSContext( ioParms.GetContext(), inApplication);
-
-	VString posixPath;
-	VFilePath path;
-
-	VRPCCatalog *rpcCatalog = inApplication->RetainRPCCatalog( riaContext, NULL, NULL, NULL);
-	if (rpcCatalog != NULL)
-	{
-		VString name;
-		if (ioParms.GetStringParam( 1, name))
-		{
-			const VFile *file = rpcCatalog->RetainFileByMethodName( VRPCSchemaIdentifier( name, L""));
-			if (file != NULL)
-			{
-				file->GetPath( path);
-				file->Release();
-			}
-		}
-		rpcCatalog->Release();
-	}
-
-	if (!path.IsEmpty())
-	{
-		VURL url( path);
-		url.GetPath( posixPath, eURL_POSIX_STYLE, false);
-	}
-
-	ioParms.ReturnString( posixPath);
-}
-
-
-void VJSRPCService::_getEnabled( VJSParms_getProperty& ioParms, VRIAServerProject* inApplication)
-{
-	VRIAContext *riaContext = VRIAJSRuntimeContext::GetApplicationContextFromJSContext( ioParms.GetContext(), inApplication);
-	ioParms.ReturnBool( inApplication->IsRPCServiceEnabled( riaContext));
-}
-
-
-
-// ----------------------------------------------------------------------------
-
-

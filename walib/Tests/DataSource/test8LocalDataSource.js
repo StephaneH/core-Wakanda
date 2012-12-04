@@ -23,7 +23,7 @@ var testCase = {
 		
 		_should: {
             ignore: {
-                testLocalSourceSaveLogicUpdateUsingPropertyAccess: true // todo
+
             }
         },
 		
@@ -226,9 +226,9 @@ var testCase = {
 		/**
  		 * SD-00 save method busniess logic
  		 */
-		testLocalSourceSaveLogicUpdateUsingPropertyAccess: function () {
+		/*testLocalSourceSaveLogicUpdateUsingPropertyAccess: function () {
 			//
-		},
+		},*/
 
 		
 		/**

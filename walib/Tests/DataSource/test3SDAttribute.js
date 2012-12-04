@@ -21,7 +21,7 @@ var testCase = {
 		
         _should: {
             ignore: {
-                  testSourceAttributeGetOldValueLogic: true // Not sure about the doc.
+
             }
         },
         
@@ -106,8 +106,7 @@ var testCase = {
 				source.CompaniesDS.select(0, { onSuccess: function () {
 					testRunner.resume(function(){ 
 						var attribute =  source.CompaniesDS.getAttribute("ca");
-						var oldValue = attribute.getOldValue();
-						//Y.Assert.areSame(15000000, oldValue);
+						var oldValue = attribute.getValue();
 						attribute.setValue(oldValue + 1);
 						Y.Assert.areSame(oldValue, attribute.getOldValue(), "Should return the old value");
 					});
@@ -136,7 +135,8 @@ var testCase = {
 						var valueForInput = source.EmpsDS.getAttribute("integration").getValueForInput();
 						Y.Assert.areNotSame("undefined", valueForInput );
 						Y.Assert.areSame("string", typeof valueForInput);
-						Y.Assert.areSame("12/09/2011", valueForInput);
+						if (/fr/i.test(navigator.language)) Y.Assert.areSame("09/12/2011", valueForInput);
+						else Y.Assert.areSame("12/09/2011", valueForInput);
 	
 						valueForInput = source.EmpsDS.getAttribute("salary").getValueForInput();
 						Y.Assert.areNotSame("undefined", valueForInput );

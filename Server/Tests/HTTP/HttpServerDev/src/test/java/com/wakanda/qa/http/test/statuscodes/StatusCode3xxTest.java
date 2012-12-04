@@ -32,14 +32,15 @@ public class StatusCode3xxTest extends AbstractHttpTestCase{
 		// get last modified date
 		String validator = HeaderConstants.LAST_MODIFIED;
 		HttpGet request = new HttpGet(url);
-		String lmd = executeRequest(request).getFirstHeader(validator)
+		HttpResponse response = executeRequest(request);
+		String lmd = response.getFirstHeader(validator)
 				.getValue();
 
 		// build conditional request
 		request.addHeader(HeaderConstants.IF_MODIFIED_SINCE, lmd);
 
 		// get the response
-		HttpResponse response = executeRequest(request);
+		response = executeRequest(request);
 
 		// check status code & reason phrase
 		assertEqualsStatusCode(expected, response);

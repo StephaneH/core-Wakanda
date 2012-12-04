@@ -21,11 +21,11 @@
 
 
 
-#define FILEVER         2,0,00,000
+#define FILEVER         0,0,00,000
 
-#define PRODUCTVER      2,0,0,0
+#define PRODUCTVER      0,0,0,0
 
-#define STRFILEVER      "2.0.0.0\0"
+#define STRFILEVER      "0.0.0.0\0"
 
-#define STRPRODUCTVER   "2.0.0.0\0"
+#define STRPRODUCTVER   "0.0.0.0\0"
 

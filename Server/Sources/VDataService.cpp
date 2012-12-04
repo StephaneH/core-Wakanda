@@ -16,6 +16,7 @@
 #include "headers4d.h"
 #include "VRIAServerProject.h"
 #include "VRIAServerTools.h"
+#include "VRIAServerApplication.h"
 #include "VDataService.h"
 
 
@@ -66,15 +67,16 @@ VError VDataService::SetEnabled( bool inEnabled)
 		{
 			if (fRequestHandler == NULL)
 			{
-				if (fDatabase != NULL)
+				CDB4DManager *cdb4dManager = VRIAServerApplication::Get()->GetComponentDB4D();
+				if (cdb4dManager != NULL)
 				{
-					fRequestHandler = fDatabase->AddRestRequestHandler( err, fHTTPServerProject, (RIApplicationRef)fApplication, fPattern, true);
+					fRequestHandler = cdb4dManager->AddRestRequestHandler( err, fDatabase, fHTTPServerProject, (RIApplicationRef)fApplication, fPattern, true);
 					if (err != VE_OK)
 						ReleaseRefCountable( &fRequestHandler);
 				}
 				else
 				{
-					err = ThrowError( VE_RIA_NONE_OPENED_DATABASE_FOUND);
+					err = ThrowError( VE_RIA_DB4D_COMPONENT_NOT_FOUND);
 				}
 			}
 		}

@@ -16,7 +16,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.cookie.DateUtils;
 import org.junit.Test;
 
-import com.wakanda.qa.http.Resources;
 import com.wakanda.qa.http.test.extend.AbstractHttpTestCase;
 /**
  * This class manages all test cases related with the date format.
@@ -155,7 +154,8 @@ public class DateFormatTest extends AbstractHttpTestCase {
 	 */
 	@Test
 	public void testThatServerRespondsWithRFC1123DateFormatWithDateHeader() throws Exception {
-		HttpResponse response = executeDefaultRequest();
+		HttpGet request = new HttpGet("/");
+		HttpResponse response = executeRequest(request);
 		String headerName = HttpHeaders.DATE;
 		Header header = response.getFirstHeader(headerName);
 		assertNotNull("\"" + headerName + "\" is missing !");
@@ -175,7 +175,8 @@ public class DateFormatTest extends AbstractHttpTestCase {
 	 */
 	@Test
 	public void testThatServerRespondsWithRFC1123DateFormatWithLastModifiedHeader() throws Exception {
-		HttpResponse response = executeDefaultRequest();
+		HttpGet request = new HttpGet("/");
+		HttpResponse response = executeRequest(request);
 		String headerName = HttpHeaders.LAST_MODIFIED;
 		Header header = response.getFirstHeader(headerName);
 		assertNotNull("\"" + headerName + "\" is missing !");
@@ -194,7 +195,8 @@ public class DateFormatTest extends AbstractHttpTestCase {
 	 */
 	@Test
 	public void testThatServerRespondsWithRFC1123DateFormatWithExipresHeader() throws Exception {
-		HttpResponse response = executeRequest(new HttpGet("/checkURI/"));
+		HttpGet request = new HttpGet("/checkURI/");
+		HttpResponse response = executeRequest(request);
 		String headerName = HttpHeaders.EXPIRES;
 		Header header = response.getFirstHeader(headerName);
 		if (header != null) {
@@ -236,7 +238,7 @@ public class DateFormatTest extends AbstractHttpTestCase {
 	
 	private void testThatIfModifiedSinceLogicWorks(String dateFormat, int expectedSC, boolean assume) throws Exception{
 		HttpGet request = new HttpGet("/");
-		HttpResponse respLmd = Resources.executeRequest(request);
+		HttpResponse respLmd = executeRequest(request);
 		String sLmd = respLmd
 				.getFirstHeader(HttpHeaders.LAST_MODIFIED).getValue();
 		Date dLmd = DateUtils.parseDate(sLmd);

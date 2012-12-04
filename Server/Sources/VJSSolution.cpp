@@ -149,7 +149,10 @@ void VJSSolution::_open( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerS
 			{
 				startupParams = new VSolutionStartupParameters();
 				if (startupParams != NULL)
+				{
 					startupParams->SetSolutionFileToOpen( file);
+					startupParams->SetOpenProjectSymbolsTable( false);	// sc 25/05/2012, on Server, do not use the symbols table anymore
+				}
 			}
 			QuickReleaseRefCountable( file);
 		}
@@ -180,6 +183,8 @@ void VJSSolution::_openRecent( VJSParms_callStaticFunction& ioParms, VRIAServerS
 				startupParams = new VSolutionStartupParameters();
 				if (startupParams != NULL)
 				{
+					startupParams->SetOpenProjectSymbolsTable( false);	// sc 25/05/2012, on Server, do not use the symbols table anymore
+
 					VFile file( iter->second.second);
 					if (LoadSolutionStartupParametersFromLinkFile( file, *startupParams) != VE_OK)
 					{
@@ -250,20 +255,22 @@ void VJSSolution::_quitServer( XBOX::VJSParms_callStaticFunction& ioParms, VRIAS
 	VRIAServerApplication::Get()->QuitAsynchronously();
 }
 
+
 void VJSSolution::_getDebuggerPort( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerSolution* inSolution)
 {
-#if defined(WKA_USE_CHR_REM_DBG)
-	xbox_assert(false);
-	ioParms.ReturnNumber(12345);
-#else
+
 	JSWDebuggerFactory		fctry;
+#if 0//!defined(WKA_USE_UNIFIED_DBG)
 	IJSWDebugger*			jswDebugger = fctry. Get ( );
+#else
+	IWAKDebuggerServer*		jswDebugger = fctry.Get();
+#endif
 	short					nDebuggerPort = -1;
 	if ( jswDebugger != 0 )
 		nDebuggerPort = jswDebugger-> GetServerPort ( );
 
 	ioParms. ReturnNumber ( nDebuggerPort );
-#endif
+
 }
 
 

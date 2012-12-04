@@ -361,8 +361,8 @@ var getAll = function (address, port, isSSL, username, password, allMails, doMar
 	var	status		= false;
 	
 	if (typeof address != 'string' || typeof port != 'number' || typeof isSSL != 'boolean'
-		|| typeof username != 'string' || typeof password != 'string' 
-		|| !(allMails instanceof Array) || allMails.length)
+	|| typeof username != 'string' || typeof password != 'string' 
+	|| !(allMails instanceof Array) || allMails.length)
 		
 		throw new pop3.POP3Exception(pop3.POP3Exception.INVALID_ARGUMENT);	
 
@@ -409,8 +409,8 @@ var getAll = function (address, port, isSSL, username, password, allMails, doMar
 	
 	}
 		
-	retrievalState = function (isOk, response, numberMessages) {
-
+	retrievalState = function (isOk, response, numberMessages) {		
+	
 		if (!isOk)
 				
 			exit();
@@ -421,7 +421,7 @@ var getAll = function (address, port, isSSL, username, password, allMails, doMar
 			
 		else {
 			
-			var	i = 1;
+			var	i = 1;	//** numberMessages - 1
 			
 			// Callbacks for retrieval "asynchronous" loop.
 			
@@ -457,7 +457,7 @@ var getAll = function (address, port, isSSL, username, password, allMails, doMar
 					exit();
 										
 				else {
-					
+										
 					allMails.push(response);
 					if (doMarkForDeletion) 
 						

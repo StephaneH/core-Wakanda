@@ -1,4 +1,6 @@
 
+
+
 onmessage = function(event) {
 if (!event.data.method)
 return;

@@ -2,6 +2,9 @@ package com.wakanda.qa.http.test.messages;
 
 import static junitparams.JUnitParamsRunner.$;
 import static org.junit.Assert.assertTrue;
+
+import java.util.GregorianCalendar;
+
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
 
@@ -16,6 +19,7 @@ import org.apache.http.params.SyncBasicHttpParams;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import com.wakanda.qa.http.Utils;
 import com.wakanda.qa.http.test.extend.AbstractHttpTestCase;
 
 /**
@@ -43,7 +47,7 @@ public class HttpVersionTest extends AbstractHttpTestCase {
 					+ "Host:" + getDefaultHostHeaderValue() + CRLF 
 					+ CRLF;
 		
-		HttpResponse response = executeRequestString(request);
+		HttpResponse response = executeRawRequest(request);
 		assertEqualsStatusCode(HttpStatus.SC_OK, response);
 		
 		HttpVersion exVersion = HttpVersion.HTTP_1_1;
@@ -74,9 +78,9 @@ public class HttpVersionTest extends AbstractHttpTestCase {
 	@Parameters
 	public void testHttpVersionGreaterLowerThan_1_1_AreNotSupported(String version)throws Exception {
 		String request = "GET / HTTP/" + version + CRLF
-				+ getDefaultHeadersFieldsAsString()	+ CRLF
+				+ Utils.getDefaultHeadersFieldsAsString()	+ CRLF
 				+ CRLF;
-		HttpResponse response = executeRequestString(request);
+		HttpResponse response = executeRawRequest(request);
 		assertEqualsStatusCode(HttpStatus.SC_HTTP_VERSION_NOT_SUPPORTED, response);
 	}
 	@SuppressWarnings("unused")
@@ -99,7 +103,7 @@ public class HttpVersionTest extends AbstractHttpTestCase {
 	public void testHostHeaderIsMandatoryIn_1_1_HttpVersion() throws Exception {
 		String request = "GET / HTTP/1.1" + CRLF
 						+ CRLF;
-		HttpResponse response = executeRequestString(request);
+		HttpResponse response = executeRawRequest(request);
 		assertEqualsStatusCode(HttpStatus.SC_BAD_REQUEST, response);
 	}
 
@@ -164,11 +168,15 @@ public class HttpVersionTest extends AbstractHttpTestCase {
 	 * 
 	 * @throws Exception
 	 */
+
 	@Test
 	public void testHostHeaderIsOptionalIn_1_0_HttpVersion() throws Exception {
 		String request = "GET / HTTP/1.0" + CRLF
 						+ CRLF;
-		HttpResponse response = executeRequestString(request);
+		long start = GregorianCalendar.getInstance().getTimeInMillis();
+		HttpResponse response = executeRawRequest(request);
+		long duration = GregorianCalendar.getInstance().getTimeInMillis() - start;
+		logger.debug("Duration: " + duration + " ms");
 		assertEqualsStatusCode(HttpStatus.SC_OK, response);
 
 	}

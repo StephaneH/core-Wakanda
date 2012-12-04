@@ -37,10 +37,18 @@ public:
 	static	void			_getSettingFile( XBOX::VJSParms_callStaticFunction& ioParms, XBOX::VJSGlobalObject* inGlobalObject);
 	static	void			_getWalibFolder( XBOX::VJSParms_callStaticFunction& ioParms, XBOX::VJSGlobalObject* inGlobalObject);
 	static	void			_getItemsWithRole( XBOX::VJSParms_callStaticFunction& ioParms, XBOX::VJSGlobalObject* inGlobalObject);
+	static	void			_reloadModel( XBOX::VJSParms_callStaticFunction& ioParms, XBOX::VJSGlobalObject* inGlobalObject);
 
 	static void				_verifyDataStore(XBOX::VJSParms_callStaticFunction& ioParms, XBOX::VJSGlobalObject* inGlobalObject); // bool : verifyDataStore(File: catalog, File: data, Object: paramObj)
 	static void				_repairInto(XBOX::VJSParms_callStaticFunction& ioParms, XBOX::VJSGlobalObject* inGlobalObject); // bool : repairInto(File: catalog, File: data, Object: paramObj, File: outData)
 	static void				_compactInto(XBOX::VJSParms_callStaticFunction& ioParms, XBOX::VJSGlobalObject* inGlobalObject); // bool : compactInto(File: catalog, File: data, Object: paramObj, File: outData)
+	static void				_backupDataStore(XBOX::VJSParms_callStaticFunction& ioParms, XBOX::VJSGlobalObject* inGlobalObject); // 
+	static void				_getLastBackups(XBOX::VJSParms_callStaticFunction& ioParms, XBOX::VJSGlobalObject* inGlobalObject); // 
+	static void			    _getBackupSettings( XBOX::VJSParms_callStaticFunction& ioParms, XBOX::VJSGlobalObject* inGlobalObject);
+	static void			    _getBackupRegistry(XBOX::VJSParms_callStaticFunction& ioParms, XBOX::VJSGlobalObject* inGlobalObject);//array or null: getBackupRegistry(File: registry)
+	static void			    _integrateDataStoreJournal(XBOX::VJSParms_callStaticFunction& ioParms, XBOX::VJSGlobalObject* inGlobalObject);//bool: integrateDataStoreJournal(FILE: model, FILE: data,File:journal[,Object: options])
+	static void			    _restoreDataStore(XBOX::VJSParms_callStaticFunction& ioParms, XBOX::VJSGlobalObject* inGlobalObject);
+	
 
 	static void				_login(XBOX::VJSParms_callStaticFunction& ioParms, XBOX::VJSGlobalObject* inGlobalObject); // bool : loginByKey(userName, ha1)
 	static void				_unsecureLogin(XBOX::VJSParms_callStaticFunction& ioParms, XBOX::VJSGlobalObject* inGlobalObject); // bool : loginByPassword(userName, password)
@@ -53,9 +61,6 @@ public:
 	static	void			_getName( XBOX::VJSParms_getProperty& ioParms, XBOX::VJSGlobalObject* inGlobalObject);
 	static	void			_getIsAdministrator( XBOX::VJSParms_getProperty& ioParms, XBOX::VJSGlobalObject* inGlobalObject);
 	static	void			_getHttpServer( XBOX::VJSParms_getProperty& ioParms, XBOX::VJSGlobalObject* inGlobalObject);
-	static	void			_getWebAppService( XBOX::VJSParms_getProperty& ioParms, XBOX::VJSGlobalObject* inGlobalObject);
-	static	void			_getDataService( XBOX::VJSParms_getProperty& ioParms, XBOX::VJSGlobalObject* inGlobalObject);
-	static	void			_getRPCService( XBOX::VJSParms_getProperty& ioParms, XBOX::VJSGlobalObject* inGlobalObject);
 	static	void			_getConsole( XBOX::VJSParms_getProperty& ioParms, XBOX::VJSGlobalObject* inGlobalObject);
 	static	void			_getPattern( XBOX::VJSParms_getProperty& ioParms, XBOX::VJSGlobalObject* inGlobalObject);	
 	static	void			_getStorage( XBOX::VJSParms_getProperty& ioParms, XBOX::VJSGlobalObject* inGlobalObject);	
@@ -65,6 +70,8 @@ public:
 	static	void			_getPermissions( XBOX::VJSParms_getProperty& ioParms, XBOX::VJSGlobalObject* inGlobalObject);
 	static	void			_getRPCCatalog( XBOX::VJSParms_getProperty& ioParms, XBOX::VJSGlobalObject* inGlobalObject);
 	static	void			_getWildChar( XBOX::VJSParms_getProperty& ioParms, XBOX::VJSGlobalObject* inGlobalObject);
+	
+	
 };
 
 
@@ -93,6 +100,13 @@ public:
 	static	void			_getSettingFile( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication);
 	static	void			_getWalibFolder( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication);
 	static	void			_getItemsWithRole( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication);
+	static	void			_reloadModel( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication);
+
+	static void				_getLastBackups( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication);// array: _getLastBackups()
+	static	void			_getBackupSettings( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication); // object: _getBackupSettings()
+	static void				_backupDataStore(XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication); //string: backupClosedDataStore(File: catalog, File: data, Object: backup config [,object options])
+	static void				_integrateDataStoreJournal(XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication); //Folder restoreDataStore(File: manifest [,Object: options])
+	static void				_restoreDataStore(XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication);
 
 	static void				_verifyDataStore(XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication); // bool : verifyDataStore(File: catalog, File: data, Object: paramObj)
 	static void				_repairInto(XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication); // bool : repairInto(File: catalog, File: data, Object: paramObj, File: outData)
@@ -109,9 +123,6 @@ public:
 	static	void			_getName( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication);
 	static	void			_getIsAdministrator( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication);
 	static	void			_getHttpServer( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication);
-	static	void			_getWebAppService( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication);
-	static	void			_getDataService( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication);
-	static	void			_getRPCService( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication);
 	static	void			_getConsole( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication);
 	static	void			_getPattern( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication);
 	static	void			_getStorage( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication);
@@ -121,6 +132,7 @@ public:
 	static	void			_getPermissions( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication);
 	static	void			_getRPCCatalog( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication);
 	static	void			_getWildChar( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication);
+	
 };
 
 

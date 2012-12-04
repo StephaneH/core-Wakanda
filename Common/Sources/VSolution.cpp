@@ -27,13 +27,6 @@
 #include "VProjectSettings.h"
 #include "VRIAServerConstants.h"
 
-#if !RIA_SERVER
-#include "VRIAStudioApplication.h"
-#else
-#include "VRIAServerApplication.h"
-#include "VRIAServerTools.h"
-#endif
-
 
 USING_TOOLBOX_NAMESPACE
 
@@ -485,6 +478,14 @@ XBOX::VError VSolution::CreateFromTemplate( const XBOX::VFolder& inSolutionFolde
 				}
 			}
 		}
+
+		if (err == VE_OK)
+		{
+			// create the certificates folder
+			VFolder certificatesFolder( inSolutionFolder, L"Certificates");
+			if (!certificatesFolder.Exists())
+				err = certificatesFolder.Create();
+		}
 	}
 
 	return err;
@@ -538,6 +539,76 @@ bool VSolution::GetSolutionFilePath( XBOX::VFilePath& outPath) const
 
 	if (fSolutionFileProjectItem != NULL)
 		ok = fSolutionFileProjectItem->GetFilePath( outPath);
+
+	return ok;
+}
+
+
+bool VSolution::GetUserCacheFolderPath( XBOX::VFilePath& outPath) const
+{
+	bool ok = true;
+	VString solutionName;
+
+	ok = GetName( solutionName);
+	if (ok)
+	{
+		VFolder *tempFolder = VProcess::Get()->RetainProductSystemFolder( eFK_UserCache, true);
+		if (tempFolder != NULL)
+		{
+			VString solutionFolder( solutionName);
+			solutionFolder.AppendUniChar( L'-').AppendULong8( VProcess::Get()->GetSystemID());
+
+			tempFolder->GetPath( outPath);
+			outPath.ToSubFolder( solutionFolder);
+
+			tempFolder->Release();
+		}
+		else
+		{
+			ok = false;
+		}
+	}
+
+	return ok;
+}
+
+
+bool VSolution::ResolvePosixPathMacros( XBOX::VString& ioPosixPath) const
+{
+	bool ok = true;
+
+	if (ioPosixPath.BeginsWith( L"$(solutionUserCacheDir)"))
+	{
+		VFilePath cacheFolderPath;
+		ok = GetUserCacheFolderPath( cacheFolderPath);
+		if (ok)
+		{
+			VString value( cacheFolderPath.GetPath());
+			VURL::Convert( value, eURL_NATIVE_STYLE, eURL_POSIX_STYLE, false);
+			ioPosixPath.Replace( value, 1, VString( L"$(solutionUserCacheDir)").GetLength());
+		}
+	}
+	else if (ioPosixPath.BeginsWith( L"$(solutionDir)"))
+	{
+		VFilePath solutionFolderPath;
+		ok = GetSolutionFolderPath( solutionFolderPath);
+		if (ok)
+		{
+			VString value( solutionFolderPath.GetPath());
+			VURL::Convert( value, eURL_NATIVE_STYLE, eURL_POSIX_STYLE, false);
+			ioPosixPath.Replace( value, 1, VString( L"$(solutionDir)").GetLength());
+		}
+	}
+
+	if (ok)
+	{
+		VString solutionName;
+		ok = GetName( solutionName);
+		if (ok)
+		{
+			ioPosixPath.ExchangeAll( L"$(solutionName)", solutionName);
+		}
+	}
 
 	return ok;
 }
@@ -673,55 +744,57 @@ VProject* VSolution::GetProjectFromFilePathOfProjectFile(const XBOX::VFilePath& 
 }
 
 
-// ICI ON SAIT que la reponse est unique
-VProjectItem* VSolution::GetProjectItemFromFullPath(const XBOX::VString& inFullPath)
+VProject* VSolution::GetParentProject( const XBOX::VFilePath& inPath) const
 {
-	VProjectItem* projectItem = NULL;
+	VProject *project = NULL;
 
-	if (!inFullPath.IsEmpty())
+	for (VectorOfProjectsConstIterator projectIter = fProjects.begin() ; (projectIter != fProjects.end()) && (project == NULL) ; ++projectIter)
 	{
-		// d'abord chercher l'occurrence physique de l'item : celle-ci est forcement unique
-		VString currentItemFullPath;
-		fSolutionItem->BuildFullPath(currentItemFullPath);
-
-		if (inFullPath == currentItemFullPath) // au cas ou ce serait le path de la solution...
+		VFilePath projectFolderPath;
+		if ((*projectIter)->GetProjectFolderPath( projectFolderPath))
 		{
-			projectItem = fSolutionItem;
+			if (inPath.IsChildOf( projectFolderPath))
+				project = *projectIter;
 		}
-		else
-		{
-			for (VProjectItemIterator it(fSolutionItem); it.IsValid(); ++it)
-			{
-				it->BuildFullPath(currentItemFullPath);
+	}
 
-				if (it->GetKind() == VProjectItem::ePROJECT)
-				{
-					if (inFullPath.BeginsWith(currentItemFullPath, false))
-					{
-						if (inFullPath == currentItemFullPath)
-						{
-							projectItem = it;
-							break;
-						}
-						else
-						{
-							VProject* project = it->GetProjectOwner();
-							if (NULL != project)
-								projectItem = project->GetProjectItemFromFullPath(inFullPath);
-							if (projectItem != NULL)
-								break;
-						}
-					}
-				}
-				else
-				{
-					if (currentItemFullPath == inFullPath)
-					{
-						projectItem = it;
-						break;
-					}
-				}
+	return project;
+}
+
+
+VProjectItem* VSolution::GetProjectItemFromFullPath( const XBOX::VString& inFullPath, FilePathStyle inFullPathStyle) const
+{
+	VFilePath path( inFullPath, inFullPathStyle);
+	return GetProjectItemFromFilePath( path);
+}
+
+
+VProjectItem* VSolution::GetProjectItemFromFilePath( const VFilePath& inPath) const
+{
+	VProjectItem *projectItem = NULL;
+
+	if (!inPath.IsEmpty())
+	{
+		// search for solution child item
+		VURL url( inPath);
+		projectItem = _GetProjectItemFromURL( url);
+
+		if (projectItem == NULL)
+		{
+			// search for project child item
+			for (VectorOfProjectsConstIterator prjIter = fProjects.begin() ; (prjIter != fProjects.end()) && (projectItem == NULL) ; ++prjIter)
+			{
+				projectItem = (*prjIter)->GetProjectItemFromFilePath( inPath);
 			}
+		}
+
+		if ((projectItem == NULL) && inPath.IsFolder())
+		{
+			// it may be the solution item
+			VFilePath path;
+			fSolutionItem->GetFilePath( path);
+			if (path == inPath)
+				projectItem = fSolutionItem;
 		}
 	}
 
@@ -940,6 +1013,7 @@ void VSolution::GetProjectItemsFromTag( const VProjectItemTag& inTag, VectorOfPr
 	bool applyToFiles = ((projectItemTagProperties & ePITP_ApplyToSingleFile) != 0) || ((projectItemTagProperties & ePITP_ApplyToMultipleFiles) != 0);
 	bool applyToFolders = ((projectItemTagProperties & ePITP_ApplyToSingleFolder) != 0) || ((projectItemTagProperties & ePITP_ApplyToMultipleFolders) != 0);
 	bool applyToFolderContent = (projectItemTagProperties & ePITP_ApplyToFolderContent) != 0;
+	VectorOfProjectItems defaultFolders;
 
 	// First, search through the referenced items.
 	for (VectorOfProjectItemsConstIterator iter = fReferencedItems.begin() ; iter != fReferencedItems.end() && !done ; ++iter)
@@ -976,33 +1050,111 @@ void VSolution::GetProjectItemsFromTag( const VProjectItemTag& inTag, VectorOfPr
 		}
 	}
 
-	if (!done && (inTag == kSettingTag))
+	if (!done)
 	{
-		// Particular case for settings file: search into the solution folder
-		VFileKind *fileKind = VProjectItemTagManager::Get()->RetainDefaultFileKind( inTag);
-
-		for (VProjectItemIterator iter(fSolutionItem) ; iter.IsValid() && !done ; ++iter)
+		// Search into default folders: default folders are defined by a posix path relative to the solution folder
+		VectorOfVString defaultFoldersPaths;
+		if (VProjectItemTagManager::Get()->GetDefaultFolders( inTag, defaultFoldersPaths))
 		{
-			if (iter->IsPhysicalFile())
+			// Build the list of default folders
+			for (VectorOfVString::iterator iter = defaultFoldersPaths.begin() ; iter != defaultFoldersPaths.end() && !done ; ++iter)
 			{
-				VFilePath path;
-				if (iter->GetFilePath( path))
+				VString strDefaultFolderRelativePath( *iter);
+				VFilePath defaultFolderFilePath;
+
+				if (!strDefaultFolderRelativePath.IsEmpty() && (strDefaultFolderRelativePath[strDefaultFolderRelativePath.GetLength()-1] != POSIX_FOLDER_SEPARATOR))
+					strDefaultFolderRelativePath += POSIX_FOLDER_SEPARATOR;
+
+				BuildPathFromRelativePath( defaultFolderFilePath, strDefaultFolderRelativePath, FPS_POSIX);
+				VProjectItem *projectItem = GetProjectItemFromFilePath( defaultFolderFilePath);
+				if (projectItem != NULL)
 				{
-					VFile file (path);
-					if (file.ConformsTo( *fileKind))
+					defaultFolders.push_back( projectItem);
+				}
+			}
+
+			VFileKind *fileKind = VProjectItemTagManager::Get()->RetainDefaultFileKind( inTag);
+
+			for (VectorOfProjectItemsIterator iter = defaultFolders.begin() ; iter != defaultFolders.end() && !done ; ++iter)
+			{
+				if (applyToFolderContent)
+				{
+					for (VProjectItemIterator itemsIter( *iter) ; itemsIter.IsValid() && !done ; ++itemsIter)
 					{
-						if (std::find( outProjectItems.begin(), outProjectItems.end(), (VProjectItem*)iter) == outProjectItems.end())
+						if (itemsIter->IsPhysicalFile())
 						{
-							outProjectItems.push_back( iter);
-							if (singleProjectItem)
-								done = true;
+							if (applyToFiles && (fileKind != NULL))
+							{
+								VFilePath path;
+								if (itemsIter->GetFilePath( path))
+								{
+									VFile file (path);
+									if (file.ConformsTo( *fileKind))
+									{
+										if (std::find( outProjectItems.begin(), outProjectItems.end(), (VProjectItem*) itemsIter) == outProjectItems.end())
+										{
+											outProjectItems.push_back( itemsIter);
+											if (singleProjectItem)
+												done = true;
+										}
+									}
+								}
+							}
 						}
+						else if (itemsIter->IsPhysicalFolder())
+						{
+							if (applyToFolders)
+							{
+								if (std::find( outProjectItems.begin(), outProjectItems.end(), (VProjectItem*) itemsIter) == outProjectItems.end())
+								{
+									outProjectItems.push_back( itemsIter);
+									if (singleProjectItem)
+										done = true;
+								}
+							}
+						}
+					}
+				}
+				else if (applyToFolders)
+				{
+					if (std::find( outProjectItems.begin(), outProjectItems.end(), *iter) == outProjectItems.end())
+					{
+						outProjectItems.push_back( *iter);
+						if (singleProjectItem)
+							done = true;
+					}
+				}
+			}
+
+			ReleaseRefCountable( &fileKind);
+		}
+	}
+
+	if (!done)
+	{
+		// Search for default files: default files are defined by a posix path relative to the solution folder
+		VectorOfVString defaultFiles;
+		if (VProjectItemTagManager::Get()->GetDefaultFiles( inTag, defaultFiles))
+		{
+			for (VectorOfVString::iterator iter = defaultFiles.begin() ; iter != defaultFiles.end() && !done ; ++iter)
+			{
+				VFilePath defaultFilePath;
+
+				VString strDefaultFileRelativePath( *iter);
+				BuildPathFromRelativePath( defaultFilePath, strDefaultFileRelativePath, FPS_POSIX);
+
+				VProjectItem *projectItem = GetProjectItemFromFilePath( defaultFilePath);
+				if (projectItem != NULL)
+				{
+					if (std::find( outProjectItems.begin(), outProjectItems.end(), projectItem) == outProjectItems.end())
+					{
+						outProjectItems.push_back( projectItem);
+						if (singleProjectItem)
+							done = true;
 					}
 				}
 			}
 		}
-
-		ReleaseRefCountable( &fileKind);
 	}
 }
 
@@ -1051,6 +1203,93 @@ bool VSolution::_IsVectorContainsReferencedItems( const VectorOfProjectItems& in
 		}
 	}
 
+	return result;
+}
+
+
+VProjectItem* VSolution::_CreateFileItemFromPath( XBOX::VError& outError, const XBOX::VFilePath& inPath, bool inRecursive, bool inTouchSolutionFile)
+{
+	VProjectItem *result = NULL;
+
+	if (inPath.IsFile())
+	{
+		VProject *parentProject = GetParentProject( inPath);
+		if (parentProject == NULL)
+		{
+			VFilePath parentPath, solutionFolderPath;
+			if (inPath.GetParent( parentPath) && GetSolutionFolderPath( solutionFolderPath))
+			{
+				if ((solutionFolderPath == parentPath) || parentPath.IsChildOf( solutionFolderPath))
+				{
+					VProjectItem *parentItem = GetProjectItemFromFilePath( parentPath);
+					if ((parentItem == NULL) && inRecursive)
+					{
+						parentItem = _CreateFolderItemFromPath( outError, parentPath, true, inTouchSolutionFile, false);
+					}
+
+					if (parentItem != NULL)
+					{
+						VFile file(inPath);
+						VString fileName;
+						inPath.GetFileName( fileName);
+
+						result = VProjectItemFile::Instantiate( fileName, parentItem);
+						if (result != NULL)
+						{
+							_DoItemAdded( result, inTouchSolutionFile);
+						}
+					}
+				}
+			}
+		}
+		else
+		{
+			result = parentProject->CreateFileItemFromPath( outError, inPath, inRecursive);
+		}
+	}
+	return result;
+}
+
+
+VProjectItem* VSolution::_CreateFolderItemFromPath( XBOX::VError& outError, const XBOX::VFilePath& inPath, bool inRecursive, bool inTouchSolutionFile, bool inSynchronizeWithFileSystem)
+{
+	VProjectItem *result = NULL;
+
+	if (inPath.IsFolder())
+	{
+		VProject *parentProject = GetParentProject( inPath);
+		if (parentProject == NULL)
+		{
+			VFilePath parentPath, solutionFolderPath;
+			if (inPath.GetParent( parentPath) && GetSolutionFolderPath( solutionFolderPath))
+			{
+				if ((solutionFolderPath == parentPath) || parentPath.IsChildOf( solutionFolderPath))
+				{
+					VProjectItem *parentItem = GetProjectItemFromFilePath( parentPath);
+					if ((parentItem == NULL) && inRecursive)
+					{
+						parentItem = _CreateFolderItemFromPath( outError, parentPath, true, inTouchSolutionFile, false);
+					}
+
+					if (parentItem != NULL)
+					{
+						VString folderName;
+						inPath.GetFolderName( folderName);
+
+						result = VProjectItemFolder::Instantiate( folderName, parentItem);
+						if (result != NULL)
+						{
+							_DoItemAdded( result, inTouchSolutionFile);
+						}
+					}
+				}
+			}
+		}
+		else
+		{
+			result = parentProject->CreateFolderItemFromPath( outError, inPath, inRecursive, inSynchronizeWithFileSystem);
+		}
+	}
 	return result;
 }
 
@@ -1218,26 +1457,8 @@ bool VSolution::Open()
 
 	if (fSuccessfulLoading)
 	{
-// TEST ONLY
-//DisableDebuggerGroup ( );
-/*VError	vErrTEST = VE_OK;
-RetainUserGroups ( vErrTEST );*/
-/*VUUID		vUUID;
-vUUID. Regenerate ( );
-SetDebuggerGroup ( vUUID );*/
-/*VError	vErrTEST = VE_OK;
-VValueBag* vbGroups = RetainUserGroups ( vErrTEST );
-if ( vbGroups != 0 )
-	vbGroups-> Release ( );*/
-/*VString	vstrName;
-VUUID	vUUID;
-VError	vErrTEST = GetDebuggerGroup ( vstrName, vUUID );
-VString	vstrID;
-vUUID. GetString ( vstrID );*/
-	}
+		_SynchronizeWithFileSystem( GetSolutionItem());
 
-	if (fSuccessfulLoading)
-	{
 		CLanguageSyntaxComponent *languageEngine = VComponentManager::RetainComponentOfType< CLanguageSyntaxComponent >();
 		if (languageEngine != NULL)
 		{
@@ -1346,7 +1567,7 @@ VError VSolution::GetDebuggerGroup ( XBOX::VString& outName, XBOX::VUUID& outUUI
 
 	const VValueBag*		vbagDebuggerGroup = fPermissions-> RetainUniqueElementWithAttribute ( SolutionPermissions::allow, SolutionPermissions::action, CVSTR ( "debug" ) );
 	if ( vbagDebuggerGroup == 0 )
-		return VE_SOMA_DEBUGGER_GROUP_NOT_DEFINED;
+		return VE_SOMA_DEBUGGER_ACTION_NOT_DEFINED;
 
 	bool					bResult = vbagDebuggerGroup-> GetVUUID ( SolutionPermissions::groupID, outUUID );
 	xbox_assert ( bResult );
@@ -1507,11 +1728,15 @@ VError VSolution::DisableDebuggerGroup ( )
 VError VSolution::LoadProjects()
 {
 	VError err = VE_OK;
+	VSolutionStartupParameters *startupParams = RetainStartupParameters();
 
 	for (VectorOfProjectsIterator iter = fProjects.begin() ; iter != fProjects.end() && err == VE_OK ; ++iter)
 	{
-		err = (*iter)->Load();
+		err = (*iter)->Load( (startupParams != NULL) ? startupParams->GetOpenProjectSymbolsTable() : true);
 	}
+
+	ReleaseRefCountable( &startupParams);
+
 	return err;
 }
 
@@ -1598,6 +1823,13 @@ void VSolution::FileSystemEventHandler( const std::vector< VFilePath > &inFilePa
 			}
 		}
 	}
+	else
+	{
+		_SynchronizeWithFileSystem( GetSolutionItem());
+
+		if (fDelegate != NULL)
+			fDelegate->SynchronizeFromSolution();
+	}
 }
 
 
@@ -1652,8 +1884,21 @@ void VSolution::LoadFromUserFile()
 // synchronisation de toute la solution
 void VSolution::SynchronizeWithFileSystem()
 {
-	// TBD: synchronize the children of the solution
+	VSolutionFileStampSaver stampSaver(this);
 	
+	VError err = _SynchronizeWithFileSystem( fSolutionItem);	// sc 05/07/2012, synchronize the solution folder
+
+	if ((err == VE_OK) && stampSaver.StampHasBeenChanged())
+	{
+		e_Save_Action saveAction = e_SAVE;
+
+		if (fDelegate != NULL)
+			saveAction = fDelegate->DoActionRequireSolutionFileSaving( fSolutionFileProjectItem, eSA_SynchronizeWithFileSystem, false);
+
+		if (saveAction == e_SAVE)
+			_SaveSolutionFile();
+	}
+
 	for (VectorOfProjectsIterator iter = fProjects.begin() ; iter != fProjects.end() ; ++iter)
 	{
 		(*iter)->SynchronizeWithFileSystem( (*iter)->GetProjectItem());
@@ -1751,7 +1996,26 @@ VError VSolution::_LoadSolutionFile()
 					}
 					else
 					{
-						VProjectItem* projectItem = fSolutionItem->NewChild( VURL(externalFileVFilePath), VProjectItem::eFILE);
+						VProjectItem *projectItem = GetProjectItemFromFilePath( externalFileVFilePath);
+
+						if (projectItem == NULL)
+						{
+							// either the physical file is outside the solution folder or the physical file doesn't exist
+							VFilePath solutionFolderPath;
+							GetSolutionFolderPath( solutionFolderPath);
+							if (externalFileVFilePath.IsChildOf( solutionFolderPath))
+							{
+								VError lError = VE_OK;
+								projectItem = _CreateFileItemFromPath( lError, externalFileVFilePath, true, false);
+								xbox_assert(lError == VE_OK);
+							}
+							else
+							{
+								// TBD: support external reference
+								xbox_assert(false);
+							}
+						}
+
 						if (projectItem != NULL)
 						{
 							// Read the item tags
@@ -1892,7 +2156,27 @@ VError VSolution::InitializeDefaultFileContent( const VFilePath& inPath, const V
 	else if (strExtension == RIAFileKind::kXMLFileExtension)
 		strInitialization.FromCString(INTRO_XML_UTF8);
 	else if (strExtension == RIAFileKind::kJSFileExtension)
-		strInitialization.FromCString(INTRO_JAVASCRIPT);
+	{
+		VFolder* resourcesFolder = VProcess::Get()->RetainFolder( VProcess::eFS_Resources);
+		VFilePath sourcePath;
+		resourcesFolder->GetPath( sourcePath);
+		resourcesFolder->Release();
+
+		sourcePath.ToSubFolder( VString( DEFAULT_FILES_PATH ));
+		sourcePath.ToSubFile( inSubType );
+
+		VFile sourceFile( sourcePath );
+		VMemoryBuffer<> buffer;
+		sourceFile.GetContent( buffer );
+		strInitialization.FromBlock( buffer.GetDataPtr(), buffer.GetDataSize(), XBOX::VTC_UTF_8);
+
+		if ((inSubType == INTRO_MODULE_JS) || (inSubType == INTRO_MODULE_RPC) || (inSubType == INTRO_MODULE_SERVICE))
+		{
+			VString modulePath;
+			inPath.GetFileName( modulePath, false);
+			strInitialization.ExchangeAll( L"$(modulePath)", modulePath);
+		}
+	}
 	else if (strExtension == RIAFileKind::kCSSFileExtension)
 		strInitialization.FromCString(INTRO_CSS);
 	else if (strExtension == RIAFileKind::kPHPFileExtension)
@@ -2037,6 +2321,8 @@ void VSolution::_RemoveProject( VProject *inProject, bool inTouchSolutionFile)
 
 void VSolution::_DoItemAdded( VProjectItem *inItem, bool inTouchSolutionFile)
 {
+	_RegisterProjectItem( inItem);
+
 	// Append the item
 	if (inItem->IsTagged() && !_IsItemReferenced( inItem))
 		_ReferenceItem( inItem, inTouchSolutionFile);
@@ -2060,6 +2346,230 @@ void VSolution::_DoItemRemoved( VProjectItem *inItem, bool inTouchSolutionFile)
 	// Remove the item
 	if (_IsItemReferenced( inItem))
 		_UnreferenceItem( inItem, inTouchSolutionFile);
+
+	_UnregisterProjectItem( inItem);
+}
+
+
+bool VSolution::_RegisterProjectItem( VProjectItem *inItem)
+{
+	bool result = false;
+	
+	if (inItem != NULL)
+	{
+		VURL url;
+		if (inItem->GetURL( url) && !url.IsEmpty())
+		{
+			VString urlString;
+			url.GetAbsoluteURL( urlString, true);
+			MapOfProjectItemByURL::iterator found = fProjectItemsMapByURL.find( urlString);
+			if (found == fProjectItemsMapByURL.end())
+			{
+				fProjectItemsMapByURL.insert( MapOfProjectItemByURL::value_type( urlString, inItem));
+				result = true;
+			}
+		}
+	}
+	return result;
+}
+
+
+bool VSolution::_UnregisterProjectItem( VProjectItem *inItem)
+{
+	bool result = false;
+	
+	if (inItem != NULL)
+	{
+		VURL url;
+		if (inItem->GetURL( url) && !url.IsEmpty())
+		{
+			VString urlString;
+			url.GetAbsoluteURL( urlString, true);
+			MapOfProjectItemByURL::iterator found = fProjectItemsMapByURL.find( urlString);
+			if (found != fProjectItemsMapByURL.end())
+			{
+				fProjectItemsMapByURL.erase( found);
+				result = true;
+			}
+		}
+	}
+	return result;
+}
+
+
+VProjectItem* VSolution::_GetProjectItemFromURL( const XBOX::VURL& inURL) const
+{
+	VProjectItem *item = NULL;
+
+	if (!inURL.IsEmpty())
+	{
+		VString urlString;
+		inURL.GetAbsoluteURL( urlString, true);
+		MapOfProjectItemByURL::const_iterator found = fProjectItemsMapByURL.find( urlString);
+		if (found != fProjectItemsMapByURL.end())
+			item = (*found).second;
+	}
+
+	return item;
+}
+
+
+VError VSolution::_SynchronizeWithFileSystem( VProjectItem *inItem)
+{
+	VError err = VE_OK;
+
+	// Synchronize the children and check for deleted items
+	VectorOfProjectItems deletedItems;
+
+	for (VProjectItemIterator iter(inItem) ; iter.IsValid() && (err == VE_OK) ; ++iter)
+	{
+		if (iter == fSolutionFileProjectItem)
+			continue;
+
+		if (iter->GetKind() == VProjectItem::ePROJECT)
+			continue;
+		
+		if (iter->IsPhysicalLinkValid() && _IsItemReferenced( iter)  && !iter->ContentExists()) // if file is referenced (role is set), just ignore it
+		{
+			iter->SetPhysicalLinkValid( false);
+			continue;
+		}
+
+		if (!iter->IsPhysicalLinkValid())
+		{
+			if (iter->ContentExists())
+				iter->SetPhysicalLinkValid( true);
+			else
+				continue;
+		}
+
+		if (iter->IsPhysicalFileOrFolder())
+		{
+			if (!iter->ContentExists())
+			{
+				deletedItems.push_back( iter);
+			}
+			else
+			{
+				err = _SynchronizeWithFileSystem( iter);
+			}
+		}
+	}
+
+	VectorOfFilePathes deletedPathes;
+
+	for (VectorOfProjectItemsIterator iter = deletedItems.begin() ; iter != deletedItems.end() ; ++iter)
+	{
+		VFilePath path;
+		
+		if ( (*iter)->GetFilePath(path) )
+			deletedPathes.push_back( path );
+
+		_DoItemRemoved( *iter, true);
+	
+		(*iter)->DeleteChildren();
+	}
+	
+	if ( deletedPathes.size() && fDelegate )
+		fDelegate->DoProjectItemsDeleted( deletedPathes );
+
+	for (VectorOfProjectItemsIterator iter = deletedItems.begin() ; iter != deletedItems.end() ; ++iter)
+		(*iter)->Release();
+
+	if (err == VE_OK)
+	{
+		// Check for new items
+		if (inItem->IsPhysicalFolder())
+		{
+			VFilePath folderPath;
+			if (inItem->GetFilePath( folderPath))
+			{
+				// Build the list of projects folder
+				std::vector< VRefPtr<VFolder> > projectsFolders;
+
+				for (VectorOfProjectsIterator projectIter = fProjects.begin() ; projectIter != fProjects.end() ; ++projectIter)
+				{
+					VFilePath projectFolderPath;
+					if ((*projectIter)->GetProjectFolderPath( projectFolderPath))
+						projectsFolders.push_back( VRefPtr<VFolder>( new VFolder( projectFolderPath), false));
+				}
+
+				VFolder *folder = new VFolder(folderPath);
+				if (folder != NULL)
+				{
+					for (VFolderIterator folderIter( folder, FI_WANT_FOLDERS | FI_WANT_INVISIBLES); folderIter.IsValid() && (err == VE_OK) ; ++folderIter)
+					{
+						VString folderName;
+						folderIter->GetName( folderName);
+						if (folderName == "__MACOSX")
+							continue;
+
+						if (folderName == "Internal Files")
+							continue;
+
+						// projects folder synchronisation is done by the projects themselves, so we ignore them
+						bool isProjectFolder = false;
+
+						for (std::vector< VRefPtr<VFolder> >::iterator projectFolderIter = projectsFolders.begin() ; (projectFolderIter != projectsFolders.end()) && !isProjectFolder ; ++projectFolderIter)
+							isProjectFolder = (*projectFolderIter)->IsSameFolder( &(*folderIter));
+
+						if (!isProjectFolder)
+						{
+							// Check whether the child folder exists
+							VString relativePath( folderName);
+							relativePath += FOLDER_SEPARATOR;
+							VProjectItem *folderItem = inItem->FindChildByRelativePath( relativePath);
+							if (folderItem == NULL)
+							{
+								folderItem = VProjectItemFolder::Instantiate( folderName, inItem);
+								if (folderItem != NULL)
+								{
+									_DoItemAdded( folderItem, true);
+									err = _SynchronizeWithFileSystem( folderItem);
+								}
+							}
+						}
+					}
+
+					for (VFileIterator fileIter( folder, FI_WANT_FILES | FI_WANT_INVISIBLES) ; fileIter.IsValid() && (err == VE_OK) ; ++fileIter )
+					{
+						VString fileName;
+						fileIter->GetName( fileName);
+						if (fileName == L".DS_Store")
+							continue;
+
+						if (fileName.BeginsWith( L"studio_log", true))
+							continue;
+
+						if (	fileIter->ConformsTo( RIAFileKind::kSolutionFileKind)
+							||	fileIter->ConformsTo( RIAFileKind::kUAGCacheFileKind)
+							||	fileIter->ConformsTo( RIAFileKind::kMatchFileKind)
+							||	fileIter->ConformsTo( RIAFileKind::kStudioPreferencesFileKind)
+							||	fileIter->MatchExtension( L"breakpoints")		// TBD: a file kind is missing
+							||	fileIter->MatchExtension( L"waPreferences") )	// TBD: a file kind is missing
+						{
+							continue;
+						}
+						
+						// Check whether the child file exists
+						VString relativePath( fileName);
+						VProjectItem *fileItem = inItem->FindChildByRelativePath( relativePath);
+						if (fileItem == NULL)
+						{
+							fileItem = VProjectItemFile::Instantiate( fileName, inItem);
+							if (fileItem != NULL)
+							{
+								_DoItemAdded( fileItem, true);
+							}
+						}
+					}
+				}
+				ReleaseRefCountable( &folder);
+			}
+		}
+	}
+
+	return err;
 }
 
 
@@ -2088,112 +2598,86 @@ VError VSolution::_InitializeProjectItem(VProjectItem* inProjectItem, const VStr
 }
 
 
-VError VSolution::ImportFromExistingFile(VProjectItem* inNewProjectItem, const VURL& inExistingURL)
+VProjectItem* VSolution::ImportExistingFile( XBOX::VError& outError, VProjectItem *inParentItem, const XBOX::VFilePath& inSourceFilePath)
 {
-	VError err = VE_OK;
-
-	if (inNewProjectItem != NULL)
+	VProjectItem *result = NULL;
+	outError = VE_OK;
+	
+	if (inParentItem != NULL)
 	{
-		if (fDelegate != NULL)
-			fDelegate->DoStartPossibleLongTimeOperation();
-
-        // copier l'item physique correspondant
-		if (inNewProjectItem->CopyPhysicalItemFrom(inExistingURL))
+		VFile sourceFile( inSourceFilePath);
+		if (sourceFile.Exists())
 		{
-			VFilePath filePath;
-			inNewProjectItem->GetFilePath(filePath);
-			VFile file(filePath);
-
-			VProject* project = inNewProjectItem->GetProjectOwner();
-			assert(project != NULL);
-			if (project)
+			VFilePath destinationPath;
+			if (inParentItem->GetFilePath( destinationPath) && destinationPath.IsFolder())
 			{
-				project->RegisterProjectItemInMapOfFullPathes(inNewProjectItem);
+				VString fileName;
+				inSourceFilePath.GetFileName( fileName);
+				destinationPath.ToSubFile( fileName);
+				
+				outError = sourceFile.CopyTo( destinationPath, NULL);
+				if (outError == VE_OK)
+				{
+					result = CreateFileItemFromPath( outError, destinationPath, false);
+				}
+			}
+			else
+			{
+				outError = VE_FOLDER_NOT_FOUND;
 			}
 		}
 		else
 		{
-			err = VE_FILE_CANNOT_COPY;
+			outError = VE_FILE_NOT_FOUND;
 		}
-
-		if (fDelegate != NULL)
-			fDelegate->DoEndPossibleLongTimeOperation();
 	}
 
-	return err;
+	return result;
 }
 
 
-VProjectItem* VSolution::ImportFromExistingFolder( XBOX::VError& outError, VProjectItem* inProjectItem, const XBOX::VFilePath& inNewParentFolderPath, const XBOX::VFilePath& inSrcFolderPath, bool inIncludeSrcFolder, XBOX::VProgressIndicator* inProgressIndicator)
+VProjectItem* VSolution::ImportExistingFolder( XBOX::VError& outError, VProjectItem *inParentItem, const XBOX::VFilePath& inSourceFolderPath)
 {
-	VProjectItem *newProjectItem = NULL;
-	
+	VProjectItem *result = NULL;
 	outError = VE_OK;
-
-	VFilePath newParentFolderPath(inNewParentFolderPath);
-	VString strSrcFolderName;
-	inSrcFolderPath.GetName(strSrcFolderName);
-	if ((newParentFolderPath == inSrcFolderPath) || newParentFolderPath.IsChildOf(inSrcFolderPath))
+	
+	if (inParentItem != NULL)
 	{
-		outError = VE_SOMA_DEST_FOLDER_IS_SUBFOLDER_OF_SRC_FOLDER;
-		if (fSolutionMessageManager)
-		{		
-			VErrorBase errorBase(outError, 0);
-			errorBase.GetBag()->SetString(kSOMA_SOURCE_FOLDER_NAME, strSrcFolderName);
-			VString strNewParentFolderName;
-			newParentFolderPath.GetName(strNewParentFolderName);
-			errorBase.GetBag()->SetString(kSOMA_DESTINATION_FOLDER_NAME, strNewParentFolderName);
-			VString localizedMessage;
-			errorBase.GetErrorDescription(localizedMessage);
-			fSolutionMessageManager->DisplayMessage(localizedMessage);
-		}
-	}
-	else
-	{
-		VString strDestFolderPath;
-		newParentFolderPath.GetPath(strDestFolderPath);
-		if (inIncludeSrcFolder)
+		VFolder sourceFolder( inSourceFolderPath);
+		if (sourceFolder.Exists())
 		{
-			strDestFolderPath += strSrcFolderName;
-			strDestFolderPath += FOLDER_SEPARATOR;
-		}
-		VFilePath destFolderPath(strDestFolderPath);
-		// test prealable
-		VProjectItem* projectItem = GetProjectItemFromFullPath(strDestFolderPath);
-		if (projectItem)
-		{
-			if (fSolutionMessageManager)
+			VFilePath destinationPath;
+			if (inParentItem->GetFilePath( destinationPath) && destinationPath.IsFolder())
 			{
-				VString localizedMessage;
-				fSolutionMessageManager->GetLocalizedStringFromResourceName(kSOMA_DESTINATION_FOLDER_ALREADY_EXISTS_NO_IMPORT, localizedMessage);
-				fSolutionMessageManager->DisplayMessage(localizedMessage);
+				if ((destinationPath == inSourceFolderPath) || destinationPath.IsChildOf( inSourceFolderPath))
+				{
+					outError = VE_SOMA_DEST_FOLDER_IS_SUBFOLDER_OF_SRC_FOLDER;
+				}
+				else
+				{
+					VString folderName;
+					inSourceFolderPath.GetFolderName( folderName);
+					destinationPath.ToSubFolder( folderName);
+
+					outError = sourceFolder.CopyContentsTo( VFolder( destinationPath));
+					if (outError == VE_OK)
+					{
+						result = CreateFolderItemFromPath( outError, destinationPath, false, true);
+					}
+				}
 			}
-			outError = VE_FOLDER_ALREADY_EXISTS;
+			else
+			{
+				outError = VE_FOLDER_NOT_FOUND;
+			}
 		}
 		else
 		{
-			VURL srcFolderURL(inSrcFolderPath);
-			VURL destFolderURL(destFolderPath);
-
-			bool userAbort = false;
-			// on se base seulement sur le nombre de fichiers pour le progressIndicator
-			sLONG allFilesCount = VProjectItemManager::GetFilesCountInFolderAndSubfolder(VFolder(inSrcFolderPath));
-			if (inProgressIndicator)
-				// TO DO a localiser !!!
-				inProgressIndicator->BeginSession(allFilesCount, CVSTR("Copying files..."), true);
-
-			// copier l'item physique correspondant
-			bool ok = VProjectItemManager::FolderCopyTo(inSrcFolderPath, destFolderPath, inProgressIndicator, &userAbort);
-			if (ok)
-			{
-				VProject *project = inProjectItem->GetProjectOwner();
-				project->SynchronizeWithFileSystem( inProjectItem);
-				newProjectItem = project->GetProjectItemFromFullPath( destFolderPath.GetPath());
-			}
+			outError = VE_FOLDER_NOT_FOUND;
 		}
 	}
 
-	return newProjectItem;
+	return result;
 }
 
 
@@ -2231,6 +2715,18 @@ VProjectItem* VSolution::ReferenceExternalFile( XBOX::VError& outError, VProject
 }
 
 
+VProjectItem* VSolution::CreateFileItemFromPath( XBOX::VError& outError, const XBOX::VFilePath& inPath, bool inRecursive)
+{
+	return _CreateFileItemFromPath( outError, inPath, inRecursive, true);
+}
+
+
+VProjectItem* VSolution::CreateFolderItemFromPath( XBOX::VError& outError, const XBOX::VFilePath& inPath, bool inRecursive, bool inSynchronizeWithFileSystem)
+{
+	return _CreateFolderItemFromPath( outError, inPath, inRecursive, true, inSynchronizeWithFileSystem);
+}
+
+
 VProject* VSolution::AddExistingProject(const VURL& inProjectFileURL, bool inReferenceIt)
 {
 	if (IsProjectInSolution(inProjectFileURL))
@@ -2258,10 +2754,11 @@ VProject* VSolution::AddExistingProject(const VURL& inProjectFileURL, bool inRef
 		if ((saveAction == e_SAVE) || (saveAction == e_NO_SAVE))
 		{
 			VSolutionFileStampSaver stampSaver( this);
+			VSolutionStartupParameters *startupParams = RetainStartupParameters();
 			
 			_AddProject( project, inReferenceIt, true);
 
-			project->Load();
+			project->Load( (startupParams != NULL) ? startupParams->GetOpenProjectSymbolsTable() : true);
 
 			if (fStartupProject == NULL)
 			{
@@ -2271,6 +2768,8 @@ VProject* VSolution::AddExistingProject(const VURL& inProjectFileURL, bool inRef
 
 			if ((saveAction == e_SAVE) && stampSaver.StampHasBeenChanged())
 				_SaveSolutionFile();
+
+			ReleaseRefCountable( &startupParams);
 		}
 		else
 		{
@@ -2413,34 +2912,40 @@ XBOX::VError VSolution::RemoveItems( const VectorOfProjectItems& inProjectItems,
 		{
 			if ((*itemIter != fSolutionItem) && (*itemIter != fSolutionFileProjectItem))
 			{
-				if (fSolutionItem->IsParentOf( *itemIter))
+				if ((*itemIter)->GetSolutionOwner() == this)
 				{
+					VProject *projectOwner = (*itemIter)->GetProjectOwner();
+
 					if ((*itemIter)->GetKind() == VProjectItem::ePROJECT)
 					{
+						// remove the project from the solution
 						VProject *project = (*itemIter)->GetBehaviour()->GetProject();
 						if (testAssert(project != NULL))
 						{
 							_RemoveProject( project, inDeletePhysicalItems, true);
 							ReleaseRefCountable( &project);
 						}
+						(*itemIter)->SetGhost(true);
+						(*itemIter)->DeleteChildren();
+						(*itemIter)->Release();
 					}
-					else
+					else if (projectOwner == NULL)
 					{
+						// remove an item owned by the solution
 						_DoItemRemoved( *itemIter, true);
 
 						if (inDeletePhysicalItems)
 							(*itemIter)->DeleteContent();
-					}
 
-					(*itemIter)->SetGhost(true);
-					(*itemIter)->DeleteChildren();
-					(*itemIter)->Release();
-				}
-				else
-				{
-					VProject *project = (*itemIter)->GetProjectOwner();
-					if (testAssert(project != NULL))
-						project->RemoveItem( *itemIter, inDeletePhysicalItems);
+						(*itemIter)->SetGhost(true);
+						(*itemIter)->DeleteChildren();
+						(*itemIter)->Release();
+					}
+					else
+					{
+						// forward to project owner
+						err = projectOwner->RemoveItem( *itemIter, inDeletePhysicalItems);
+					}
 				}
 			}
 		}
@@ -2469,13 +2974,16 @@ XBOX::VError VSolution::RenameItem( VProjectItem *inProjectItem, const XBOX::VSt
 		}
 		else
 		{
-			if (fSolutionItem->IsParentOf( inProjectItem))
+			if (inProjectItem->GetSolutionOwner() == this)
 			{
-				VSolutionFileStampSaver stampSaver( this);
-				e_Save_Action saveAction = e_SAVE;
+				VProject *projectOwner = inProjectItem->GetProjectOwner();
 
 				if (inProjectItem->GetKind() == VProjectItem::ePROJECT)
 				{
+					// rename a project
+					VSolutionFileStampSaver stampSaver( this);
+					e_Save_Action saveAction = e_SAVE;
+
 					if (fDelegate != NULL)
 						saveAction = fDelegate->DoActionRequireSolutionFileSaving( fSolutionFileProjectItem, eSA_RenameProject, true);
 
@@ -2494,9 +3002,16 @@ XBOX::VError VSolution::RenameItem( VProjectItem *inProjectItem, const XBOX::VSt
 								_TouchSolutionFile();
 						}
 					}
+
+					if ((saveAction == e_SAVE) && stampSaver.StampHasBeenChanged())
+						_SaveSolutionFile();
 				}
-				else
+				else if (projectOwner == NULL)
 				{
+					// rename a project owned by the solution
+					VSolutionFileStampSaver stampSaver( this);
+					e_Save_Action saveAction = e_SAVE;
+
 					VString name;
 					inProjectItem->GetName( name);
 					if (name != inNewName)
@@ -2515,16 +3030,15 @@ XBOX::VError VSolution::RenameItem( VProjectItem *inProjectItem, const XBOX::VSt
 							_DoItemAdded( inProjectItem, true);
 						}
 					}
-				}
 
-				if ((saveAction == e_SAVE) && stampSaver.StampHasBeenChanged())
-					_SaveSolutionFile();
-			}
-			else
-			{
-				VProject *project = inProjectItem->GetProjectOwner();
-				if (testAssert(project != NULL))
-					err = project->RenameItem( inProjectItem, inNewName);
+					if ((saveAction == e_SAVE) && stampSaver.StampHasBeenChanged())
+						_SaveSolutionFile();
+				}
+				else
+				{
+					// forward to project owner
+					err = projectOwner->RenameItem( inProjectItem, inNewName);
+				}
 			}
 		}
 	}
@@ -2563,16 +3077,16 @@ VError VSolution::ReloadCatalog(VProjectItem* inProjectItem)
 	return err;
 }
 
-void VSolution::SaveProjectItemPosition( const VFilePath& inFilePath, bool inMaximized, sLONG inMaxX, sLONG inMaxY, sLONG inX, sLONG inY, sLONG inWidth, sLONG inHeight )
+void VSolution::SaveProjectItemPosition( const VFilePath& inFilePath, bool inMaximized, sLONG inX, sLONG inY, sLONG inWidth, sLONG inHeight )
 {
 	if ( fSolutionUser )
-		fSolutionUser->SaveProjectItemPosition( inFilePath, inMaximized, inMaxX, inMaxY, inX, inY, inWidth, inHeight );
+		fSolutionUser->SaveProjectItemPosition( inFilePath, inMaximized, inX, inY, inWidth, inHeight );
 }
 
-bool VSolution::GetProjectItemPosition( const VFilePath& inFilePath, bool& outMaximized, sLONG& outMaxX, sLONG& outMaxY, sLONG& outX, sLONG& outY, sLONG& outWidth, sLONG& outHeight )
+bool VSolution::GetProjectItemPosition( const VFilePath& inFilePath, bool& outMaximized, sLONG& outX, sLONG& outY, sLONG& outWidth, sLONG& outHeight )
 {
 	if ( fSolutionUser )
-		return fSolutionUser->GetProjectItemPosition( inFilePath, outMaximized, outMaxX, outMaxY, outX, outY, outWidth, outHeight );
+		return fSolutionUser->GetProjectItemPosition( inFilePath, outMaximized, outX, outY, outWidth, outHeight );
 	else
 		return false;
 }
@@ -2583,6 +3097,24 @@ void VSolution::SetSolutionStartupParameters(VSolutionStartupParameters* inSolut
 	XBOX::CopyRefCountable(&fSolutionStartupParameters, inSolutionStartupParameters);
 }
 
+void VSolution::ForceSavingSolutionFile(VProjectItem* inProjectItem, const VProjectItemTag& inTag)
+{
+	e_Save_Action saveAction = e_SAVE;
+
+	if (GetDelegate() != NULL)
+		saveAction = GetDelegate()->DoActionRequireSolutionFileSaving( inProjectItem, eSA_ChangeStartupProject, true);
+
+	if ((saveAction == e_SAVE) || (saveAction == e_NO_SAVE))
+	{
+		VSolutionFileStampSaver stampSaver(this);
+		inProjectItem->AddTag( inTag);
+		_ReferenceItem( inProjectItem, true);
+		inProjectItem->Touch();
+
+		if ((saveAction == e_SAVE) && stampSaver.StampHasBeenChanged()) 
+			_SaveSolutionFile();
+	}
+}
 
 void VSolution::GetPreferencesUserFilePath( VFilePath& outPath )
 {
@@ -2918,6 +3450,12 @@ VProject* VSolution::CreateProjectFromTemplate( VError& outError, const VFolder&
 									ProjectItemBagKeys::path.Set( folderBag, relativePath);
 									++changesCount;
 								}
+								VFilePath parentFolder;
+								projectFilePath.GetParent( parentFolder );
+								VFilePath folderPath( parentFolder, relativePath, FPS_POSIX );
+								VFolder folder( folderPath );
+								if ( ! folder.Exists() )
+									folder.CreateRecursive();
 							}
 						}
 
@@ -2962,9 +3500,11 @@ VProject* VSolution::CreateProjectFromTemplate( VError& outError, const VFolder&
 			project = VProject::Instantiate( outError, this, projectFilePath);
 			if (outError == VE_OK && project != NULL)
 			{
+				VSolutionStartupParameters *startupParams = RetainStartupParameters();
+				
 				_AddProject( project, true, true);
 
-				project->Load();
+				project->Load(  (startupParams != NULL) ? startupParams->GetOpenProjectSymbolsTable() : true);
 
 				if (fStartupProject == NULL)
 				{
@@ -3023,6 +3563,7 @@ VProject* VSolution::CreateProjectFromTemplate( VError& outError, const VFolder&
 					}
 				}
 				ReleaseRefCountable( &settings);
+				ReleaseRefCountable( &startupParams);
 			}
 			else
 			{
@@ -3370,7 +3911,7 @@ VSolution* VSolutionManager::OpenSolution( VSolutionStartupParameters* inSolutio
 }
 
 
-VSolution* VSolutionManager::OpenSolution( const VFilePath& inSolutionFilePath, ISolutionMessageManager* inSolutionMessageManager, ISolutionBreakPointsManager* inSolutionBreakPointsManager, ISolutionUser* inSolutionUser)
+VSolution* VSolutionManager::OpenSolution( const VFilePath& inSolutionFilePath, ISolutionMessageManager* inSolutionMessageManager, ISolutionBreakPointsManager* inSolutionBreakPointsManager, ISolutionUser* inSolutionUser, bool inOpenProjectSymbolsTable)
 {
 	VSolution *solution = NULL;
 
@@ -3381,6 +3922,7 @@ VSolution* VSolutionManager::OpenSolution( const VFilePath& inSolutionFilePath, 
 		if (startupParams != NULL && file != NULL)
 		{
 			startupParams->SetSolutionFileToOpen( file);
+			startupParams->SetOpenProjectSymbolsTable( inOpenProjectSymbolsTable);
 			solution = OpenSolution( startupParams, inSolutionMessageManager, inSolutionBreakPointsManager, inSolutionUser);
 		}
 		ReleaseRefCountable( &startupParams);
