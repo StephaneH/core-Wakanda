@@ -1,0 +1,56 @@
+﻿<?xml version="1.0" encoding="UTF-8"?><EntityModelCatalog>
+
+<dbInfo name="solutionB" uuid="DEB2380315EE8E47AF7052ECFC4FADBC"/>
+
+<dataClasses collectionName="DataClass1Collection" className="DataClass1" uuid="1BF944A84BC27B44A0A8730C50EAC0FC" tablePos="1">
+
+	<extraProperties ____objectunic="true" panelColor="#C4BD97">
+
+		<panel ____objectunic="true" isOpen="true" pathVisible="true">
+
+			<position ____objectunic="true" X="418" Y="133"/>
+
+		</panel>
+
+	</extraProperties>
+
+	<attributes name="ID" kind="storage" type="long" uuid="3B2255AB0C8F9A4991E5E95B60E6E211" fieldPos="1" autosequence="true" unique="true" primKey="true"/>
+
+	<attributes name="City" scope="public" uuid="C47D6D8DA5F55C43ACF382AAEE90DCB0" fieldPos="2" type="string" kind="storage"/>
+
+	<attributes name="Fname" scope="public" uuid="16CCBC7B9A0D944AA4C90386E7E47E89" fieldPos="3" type="string" kind="storage"/>
+
+	<attributes name="Sname" scope="public" uuid="A0858BDA2B3E454F8124F6B2B8853DDD" fieldPos="4" type="string" kind="storage"/>
+
+	<attributes name="Age" scope="public" uuid="4BC65812C450174AA250519D735599BF" fieldPos="5" type="number" kind="storage"/>
+
+	<attributes name="Date" scope="public" uuid="C4569D175049784FA5381ADECAEF0FF6" fieldPos="6" type="date" kind="storage"/>
+
+	<attributes name="School" scope="public" uuid="E54C50C56246B44AB4B94B54B38AA306" fieldPos="7" type="string" kind="storage"/>
+
+	<attributes name="dataClass2" kind="relatedEntity" type="DataClass2" uuid="1125030F6BB23D4CB7A856A1168978CC" fieldPos="8" path="DataClass2" scope="public"/>
+
+</dataClasses>
+
+<dataClasses collectionName="DataClass2Collection" className="DataClass2" uuid="C85563BE32F2CA49BC041C23552F9185" tablePos="2">
+
+	<extraProperties ____objectunic="true" panelColor="#4FA997">
+
+		<panel ____objectunic="true" isOpen="true" pathVisible="true">
+
+			<position ____objectunic="true" X="92" Y="303"/>
+
+		</panel>
+
+	</extraProperties>
+
+	<attributes name="ID" kind="storage" type="long" uuid="D3E8017FCADBCB44833D32DC6EBE5B95" fieldPos="1" autosequence="true" unique="true" primKey="true"/>
+
+	<attributes name="School" scope="public" uuid="DD569C4CF0CDAF408182D02BCDFEFD84" fieldPos="2" type="string" kind="storage"/>
+
+	<attributes name="City" scope="public" uuid="A7FB18EBE9BF914EB78E5337E2B2AAEC" fieldPos="3" type="string" kind="storage"/>
+
+	<attributes name="Studients" scope="public" type="DataClass1Collection" kind="relatedEntities" reversePath="true" path="dataClass2"/>
+
+</dataClasses>
+</EntityModelCatalog>

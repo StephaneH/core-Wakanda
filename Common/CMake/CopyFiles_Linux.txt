@@ -1,0 +1,125 @@
+# Les fichiers sont classes par rpertoire de destination
+# Le 1er et le 2eme flag indique la langue L suivit de l'initial de la langue 
+# F pour French, E pour English, A pour automatique, et * pour toutes les langues 
+# le 3eme & le 4eme flag indique le produit Wakanda Server : s et son Mode
+# 
+# Pour le mode on peut avoir 
+# A pour tous les modes, D pour debug, B pour beta et R pour release
+# ou les complements
+# d pour tous les modes sauf debug,
+# b pour tous les modes sauf beta,
+# r pour tous les modes sauf release,
+# * pour les fichier pdb qui seront copie pour debug et beta et les releases issues uniquement de la compilation
+#
+# Chaque fichier est contenu dans des sections pour indiquer leur destination 
+# ATTENTION NE PAS METTRE D ESPACE APRES LES [] SINON PLANTAGE
+#
+# Voici les variables que vous avez a dispo
+# %DEPOT% pour l'emplacement du depot sur votre poste
+# %PRODUCT_NAME%
+# %DIR_COMPONENT%
+# %LibModeCompil% libele du mode Debug, Beta, ou Final
+# %Lib2Langue%
+# %LibMode_SR% libl du mode Debug, Beta ou vide pour Release
+#
+# Si le chemin est un nom de repertoire 
+#    sans / correspond  une copy du repertoire (arboresence compris)
+#    avec / correspond  une copy de tout le contenue du repertoire (arboresence compris) 
+#
+
+
+#LE SERVEUR#######################
+LAsA [%TARGET%%PRODUCT_NAME%]
+LAsA %DEPOT%Wakanda/main/Server/Projet/CMake/Build/%LibMode%/Wakanda
+
+#LES FRAMEWORKS#######################
+LAsA [%TARGET%%PRODUCT_NAME%/Libs]
+LAsA %DEPOT%XToolbox/Main/JSDebugger/Projects/CMake/Build/%LibMode%/JsDebugger%LibMode_SR%.so
+LAsA %DEPOT%XToolbox/Main/Kernel/Projects/CMake/Build/%LibMode%/Kernel%LibMode_SR%.so
+LAsA %DEPOT%XToolbox/Main/KernelIPC/Projects/CMake/Build/%LibMode%/KernelIPC%LibMode_SR%.so
+LAsA %DEPOT%XToolbox/Main/ServerNet/Projects/CMake/Build/%LibMode%/ServerNet%LibMode_SR%.so
+LAsA %DEPOT%XToolbox/Main/XML/Projects/CMake/Build/%LibMode%/Xml%LibMode_SR%.so
+LAsA %DEPOT%XToolbox/Main/JavaScript/Projects/CMake/Build/%LibMode%/JavaScript%LibMode_SR%.so
+
+LAsA %DEPOT%webkit/534.53/JavaScriptCore/CMake/Build/%LibMode%/JsCore%LibMode_SR%.so
+LAsA %DEPOT%curl/7.19.7/CMake/Build/%LibMode%/Curl%LibMode_SR%.so
+LAsA %DEPOT%icu/4.8/projets/CMake/Build/%LibMode%/Icu%LibMode_SR%.so
+
+LAsA %DEPOT%libzip/0.10/Projects/CMake/Build/%LibMode%/LibZip%LibMode_SR%.so
+LAsA %DEPOT%openssl/1.0.0d/openssl/libcrypto.so.1.0.0
+LAsA %DEPOT%openssl/1.0.0d/openssl/libssl.so.1.0.0
+LAsA %DEPOT%xerces/3.0.1/xerces/projects/CMake/Build/%LibMode%/Xerces%LibMode_SR%.so
+LAsA %DEPOT%zlib/1.2.5/projects/CMake/Build/%LibMode%/ZLib%LibMode_SR%.so
+#zlib
+
+#LES PLUGINS#######################
+
+#LES COMPOSANTS#######################
+
+#LES COMPOSANTS INTERNES#######################
+LAsA [%TARGET%%DIR_COMPONENT%Native Components/DB4D%LibMode_SR%.bundle/Contents/Linux]
+LAsA %DEPOT%Components/Main/DB4D/projects/CMake/Build/%LibMode%/DB4D%LibMode_SR%.so
+
+LAsA [%TARGET%%DIR_COMPONENT%Native Components/HTTPServer%LibMode_SR%.bundle/Contents/Linux]
+LAsA %DEPOT%Components/Main/HTTPServer/Projects/CMake/Build/%LibMode%/HTTPServer%LibMode_SR%.so
+
+LAsA [%TARGET%%DIR_COMPONENT%Native Components/LanguageSyntax%LibMode_SR%.bundle/Contents/Linux]
+LAsA %DEPOT%Components/Main/Language Syntax/Projects/CMake/Build/%LibMode%/LanguageSyntax%LibMode_SR%.so
+
+LAsA [%TARGET%%DIR_COMPONENT%Native Components/UsersAndGroups%LibMode_SR%.bundle/Contents/Linux]
+LAsA %DEPOT%Components/Main/UsersAndGroups/projects/CMake/Build/%LibMode%/UsersAndGroups%LibMode_SR%.so
+
+LAsA [%TARGET%%DIR_COMPONENT%Native Components/SecurityManager%LibMode_SR%.bundle/Contents/Linux]
+LAsA %DEPOT%Components/Main/Security Manager/Projects/CMake/Build/%LibMode%/SecurityManager%LibMode_SR%.so
+
+LAsA [%TARGET%%DIR_COMPONENT%Native Components/Zip%LibMode_SR%.bundle/Contents/Linux]
+LAsA %DEPOT%Components/Main/Zip/Projects/CMake/Build/%LibMode%/Zip%LibMode_SR%.so
+
+#LES XLIFF COMPOSANTS#######################
+LAsA [%TARGET%%DIR_COMPONENT%Native Components/DB4D%LibMode_SR%.bundle/Contents/]
+LAsA %DEPOT%Components/Main/DB4D/Resources
+
+LAsA [%TARGET%%DIR_COMPONENT%Native Components/HTTPServer%LibMode_SR%.bundle/Contents/]
+LAsA %DEPOT%Components/Main/HTTPServer/Resources
+
+LAsA [%TARGET%%DIR_COMPONENT%Native Components/LanguageSyntax%LibMode_SR%.bundle/Contents/]
+LAsA %DEPOT%Components/Main/Language Syntax/Resources
+
+LAsA [%TARGET%%DIR_COMPONENT%Native Components/UsersAndGroups%LibMode_SR%.bundle/Contents/]
+LAsA %DEPOT%Components/Main/UsersAndGroups/Resources
+
+LAsA [%TARGET%%DIR_COMPONENT%Native Components/Zip%LibMode_SR%.bundle/Contents/]
+LAsA %DEPOT%Components/Main/Zip/Resources
+
+#LES RESSOURCES#######################
+LAsA [%TARGET%%PRODUCT_NAME%/Resources]
+LAsA %DEPOT%Wakanda/main/Server/Resources/Info.plist
+LAsA %DEPOT%Wakanda/main/Server/Resources/Default Solution
+LAsA %DEPOT%Wakanda/main/Server/Resources/debugger
+LAsA %DEPOT%Wakanda/main/Server/Resources/%LibLangueLproj%
+LAsA %DEPOT%Wakanda/main/Server/Resources/Templates
+#jmo - Build fixFaut-il supprimer ce rep ou a-t-il simplement bouge ?
+#LAsA %DEPOT%Wakanda/main/Studio/Resources/JavaScript Support Files
+LAsA %DEPOT%Wakanda/main/Common/Resources/
+
+LAsA %DEPOT%XToolbox/Main/Kernel/Resources/BasicUTIs.WIN.plist
+
+LAsA [%TARGET%%PRODUCT_NAME%/Resources/Templates/Blank/WebFolder/images]
+
+LAsA [%TARGET%%PRODUCT_NAME%/walib]
+LAsA %DEPOT%Wakanda/main/walib/WAF
+LAsA %DEPOT%Wakanda/main/walib/dataBrowser
+
+LAsA [%TARGET%%PRODUCT_NAME%]
+L*sA %DEPOT%Wakanda/main/Server/Resources/SSJS/Modules
+
+LAsA [%TARGET%%PRODUCT_NAME%/Resources/Templates]
+LAsA %DEPOT%Wakanda/main/Server/Resources/Default Solution/Admin
+
+LAsA [%TARGET%%PRODUCT_NAME%/Resources/%LibLangueLproj%]
+LAsA %DEPOT%XToolbox/Main/Kernel/Resources/%LibLangueLproj%/Errors_xbox_%Lib2Langue%.xlf
+LAsA %DEPOT%XToolbox/Main/JavaScript/Resources/%LibLangueLproj%/Errors_javascript_%Lib2Langue%.xlf
+LAsA %DEPOT%XToolbox/Main/ServerNet/Resources/%LibLangueLproj%/ServerNet%Lib2Langue%.xlf
+
+LAsA [%TARGET%%PRODUCT_NAME%/Resources/wkhtmltopdf]
+LAsA %DEPOT%Wakanda/main/Server/Resources/wkhtmltopdf.LINUX/
