@@ -40,6 +40,20 @@ public:
 	static	void			_error( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication);
 
 private:
+
+	class VJSConsoleLogListener : public XBOX::VObject, public XBOX::ILogListener
+	{
+	public:
+						VJSConsoleLogListener();
+		virtual	void	Put( std::vector< const XBOX::VValueBag* >& inValuesVector );
+
+		std::vector<const XBOX::VValueBag*>		fValues;
+
+		XBOX::VCriticalSection					fLock;
+	};
+
+	static	VJSConsoleLogListener*			sJSConsoleLogListener;
+
 	static	void			_LogParms( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication, const XBOX::ELog4jMessageLevel& inLevel);
 };
 

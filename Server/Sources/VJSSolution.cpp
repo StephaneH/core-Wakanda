@@ -260,11 +260,9 @@ void VJSSolution::_getDebuggerPort( XBOX::VJSParms_callStaticFunction& ioParms, 
 {
 
 	JSWDebuggerFactory		fctry;
-#if 0//!defined(WKA_USE_UNIFIED_DBG)
-	IJSWDebugger*			jswDebugger = fctry. Get ( );
-#else
-	IWAKDebuggerServer*		jswDebugger = fctry.Get();
-#endif
+
+	IRemoteDebuggerServer*	jswDebugger = fctry.Get();
+
 	short					nDebuggerPort = -1;
 	if ( jswDebugger != 0 )
 		nDebuggerPort = jswDebugger-> GetServerPort ( );

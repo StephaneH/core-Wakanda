@@ -26,13 +26,41 @@
 USING_TOOLBOX_NAMESPACE
 
 
+VJSConsole::VJSConsoleLogListener*			VJSConsole::sJSConsoleLogListener = NULL;
 
 void VJSConsole::Initialize( const VJSParms_initialize& inParms, VRIAServerProject* inApplication)
 {
 	if (inApplication != NULL)
 		inApplication->Retain();
+
+	if (!sJSConsoleLogListener)
+	{
+		sJSConsoleLogListener = new VJSConsoleLogListener();
+		VProcess::Get()->GetLogger()->AddLogListener(sJSConsoleLogListener);
+	}
 }
 
+VJSConsole::VJSConsoleLogListener::VJSConsoleLogListener()
+{
+}
+
+void VJSConsole::VJSConsoleLogListener::Put( std::vector< const XBOX::VValueBag* >& inValuesVector )
+{
+	fLock.Lock();
+	
+	for( std::vector<const XBOX::VValueBag*>::size_type idx = 0; idx < fValues.size(); idx++ )
+	{
+		fValues[idx]->Release();
+	}
+	fValues.clear();
+
+	fValues = inValuesVector;
+	for( std::vector<const XBOX::VValueBag*>::size_type idx = 0; idx < fValues.size(); idx++ )
+	{
+		fValues[idx]->Retain();
+	}
+	fLock.Unlock();
+}
 
 void VJSConsole::Finalize( const VJSParms_finalize& inParms, VRIAServerProject* inApplication)
 {
@@ -73,20 +101,24 @@ void VJSConsole::GetProperty( VJSParms_getProperty& ioParms, VRIAServerProject* 
 
 		if (inApplication != NULL)
 		{
-			VLog4jMsgFileReader *reader = inApplication->GetMessagesReader();
-			if (reader != NULL)
+			sJSConsoleLogListener->fLock.Lock();
+
+			for( std::vector<const XBOX::VValueBag*>::size_type idx = 0; idx < sJSConsoleLogListener->fValues.size(); idx++ )
 			{
-				VectorOfVString messages;
+				VString			loggerID;
+				EMessageLevel	level;
+				VString			message;
+				VLog4jMsgFileLogger::GetLogInfosFromBag( sJSConsoleLogListener->fValues[idx], loggerID, level, message );
+				
+				VJSValue jsValue(ioParms.GetContextRef());
+				jsValue.SetString(message);
+				result.PushValue(jsValue);
 
-				reader->PeekMessages( messages);
-
-				for( VectorOfVString::iterator iter = messages.begin() ; iter != messages.end() ; ++iter)
-				{
-					VJSValue jsValue( ioParms.GetContextRef());
-					jsValue.SetString( *iter);
-					result.PushValue( jsValue);
-				}
+				sJSConsoleLogListener->fValues[idx]->Release();
 			}
+			sJSConsoleLogListener->fValues.clear();
+			sJSConsoleLogListener->fLock.Unlock();
+
 		}
 
 		ioParms.ReturnValue( result);
@@ -250,7 +282,7 @@ void VJSConsole::_LogParms( VJSParms_callStaticFunction& ioParms, VRIAServerProj
 					}
 					else
 					{
-						jsonParamsArray.AddString( strVal, JSON_WithQuotesIfNecessary | JSON_AlreadyEscapedChars);
+						jsonParamsArray.AddString( strVal, JSON_WithQuotesIfNecessary /* | JSON_AlreadyEscapedChars */);
 					}
 				}
 				else
@@ -307,18 +339,28 @@ void VJSConsole::_LogParms( VJSParms_callStaticFunction& ioParms, VRIAServerProj
 	if (inApplication != NULL)
 	{
 		// append json formatted message for debugger
-		VString strArray, jsonObjectString;
+		VString					strArray, jsonObjectString;
 		VJSONSingleObjectWriter object;
 
 		jsonParamsArray.GetArray( strArray, false);
 		object.AddMember( L"data", strArray, JSON_AlreadyEscapedChars);
 		object.GetObject( jsonObjectString);
-
-		StUseLogger logger;
 		inApplication->GetMessagesLoggerID( loggerID);
-		logger.Log( loggerID, inLevel, jsonObjectString);
+		
+		VValueBag*	bag = new VValueBag;
+		ILoggerBagKeys::source.Set( bag, loggerID);
+		ILoggerBagKeys::level.Set( bag, inLevel);
+		ILoggerBagKeys::message.Set( bag, message/*jsonObjectString*/);
+		sLONG8		debugContext = JS4D::GetDebugContextId(ioParms.GetContextRef());
+		ILoggerBagKeys::debug_context.Set( bag, debugContext);
+		
+		VProcess::Get()->GetLogger()->LogBag(bag);
+		ReleaseRefCountable(&bag);
+		
+		StUseLogger logger;
 		loggerID.AppendString( L".console");
 		logger.Log( loggerID, inLevel, jsonObjectString);
+
 	}
 	else
 	{

@@ -1,0 +1,5 @@
+{
+    "desc": "Tests of the Buffer API",
+    "kind": "ssjs",
+    "oldJenkinsName": "TestServerBuffer"
+}

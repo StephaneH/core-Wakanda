@@ -24,6 +24,7 @@
 #include "VRIAServerJSContextMgr.h"
 #include "JSDebugger/Headers/JSWDebugger.h"
 
+
 class VRIAServerSolution;
 class VRIAServerProject;
 class VProject;
@@ -150,7 +151,6 @@ public:
 			XBOX::VJSGlobalContext*		RetainJSContext( XBOX::VError& outError, bool inReusable, const IHTTPRequest* inRequest);
 			/**	@brief	HTTP session handling: if inResponse is not null, the cookie is set according to the session storage object */
 			void						ReleaseJSContext( XBOX::VJSGlobalContext* inContext, IHTTPResponse* inResponse);
-			void						DropAllJSContexts();
 
 			/**
 			 * \brief Migrates journal info for the specified application 
@@ -175,12 +175,11 @@ public:
 			/** @brief	Returns the settings file which contains the setting. */
 			const VRIASettingsFile*		RetainSettingsFile( const RIASettingsID& inSettingsID) const;
 
-			XBOX::VError				GetPublicationSettings( XBOX::VString& outHostName, XBOX::VString& outIP, sLONG& outPort, XBOX::VString& outPattern, XBOX::VString &outPublishName) const;
+			XBOX::VError				GetPublicationSettings( XBOX::VString& outHostName, XBOX::VString& outIP, sLONG& outPort, sLONG& outSSLPort, XBOX::VString& outPattern, XBOX::VString &outPublishName, bool& outAllowSSL, bool& outSSLMandatory) const;
 
 			VRIAHTTPSessionManager*		RetainSessionMgr() const;
 
 			// Logging
-			XBOX::VLog4jMsgFileReader*	GetMessagesReader() const;
 			void						GetMessagesLoggerID( XBOX::VString& outLoggerID) const;
 
 			/** @brief	Build a path from the project folder path and the relative path inRelativePath */
@@ -192,9 +191,24 @@ public:
 			XBOX::VJSSessionStorageObject	*GetApplicationStorage ()	{	return fApplicationStorage;	}
 			XBOX::VJSSessionStorageObject	*GetApplicationSettings ()	{	return fApplicationSettings;	}
 
-			XBOX::VError				SetDebuggerServer(VRIAContext* inContext, WAKDebuggerType_t inWAKDebuggerType);
-			WAKDebuggerType_t			GetDebuggerServer(VRIAContext* inContext);
+			XBOX::VFileSystemNamespace*		GetFileSystemNamespace() const		{ return fFileSystemNamespace;}
 
+			WAKDebuggerType_t			GetDebuggerServer(VRIAContext* inContext);
+			sLONG						IsDebugging(VRIAContext* inContext);
+			sLONG						StartDebugger(VRIAContext* inContext);
+			sLONG						StopDebugger(VRIAContext* inContext);
+			sLONG						CanSetDebuggerServer(VRIAContext* inContext, WAKDebuggerType_t inWAKDebuggerType);
+			sLONG						SetBreakpoint(VRIAContext* inContext, const XBOX::VString& inUrl, sLONG inLineNb);
+			sLONG						RemoveBreakpoint(VRIAContext* inContext, const XBOX::VString& inUrl, sLONG inLineNb);
+			sLONG						GetDebuggerStatus(
+											WAKDebuggerType_t&	outWAKDebuggerType,
+											bool&				outStarted,
+											sLONG&				outbreakpointsTimeStamp,
+											bool&				outConnected,
+											sLONG&				outDebuggingEventsTimeStamp,
+											bool&				outPendingContexts);
+
+			sLONG						GetBreakpoints(XBOX::VJSContext* inContext, XBOX::VJSArray& ioBreakpoints);
 private:
 
 			// Inherited from IJSContextPoolDelegate
@@ -202,6 +216,8 @@ private:
 			// @brief	Create a runtime context and attach it to the JavaScript context, set the global object properties. */
 	virtual	XBOX::VError				InitializeJSContext( XBOX::VJSGlobalContext* inContext);
 	virtual	XBOX::VError				UninitializeJSContext( XBOX::VJSGlobalContext* inContext);
+	
+			XBOX::VError				_SetDebuggerServer(VRIAContext* inContext,WAKDebuggerType_t inWAKDebuggerType);
 
 			XBOX::VError				_Open( VProject* inDesignProject, VRIAServerProjectOpeningParameters *inOpeningParameters);
 
@@ -211,6 +227,8 @@ private:
 			VRIAPermissions*			_LoadPermissionFile( XBOX::VError& outError);
 
 			XBOX::VError				_LoadBackupSettings();
+
+			XBOX::VError				_LoadFileSystemDefinitions();
 
 			/** @brief	Open the default database of the project.
 						If none default database is found and if inCreateEmptyDatabaseIfNeed is true, an empty database is created */
@@ -283,7 +301,6 @@ private:
 			VRIAServerSolution			*fSolution;
 			VProject					*fDesignProject;
 			XBOX::VString				fName;
-			XBOX::VLog4jMsgFileReader	*fLogReader;
 			XBOX::VString				fLoggerID;
 			VProjectSettings			fSettings;
 			VRIAPermissions				*fPermissions;
@@ -332,8 +349,11 @@ private:
 			XBOX::VJSSessionStorageObject		*fApplicationStorage;
 			XBOX::VJSSessionStorageObject		*fApplicationSettings;
 
+			XBOX::VFileSystemNamespace*			fFileSystemNamespace;
+
 	friend	class VStopHTTPServerMessage;
 	friend	class VReloadCatalogMessage;
+	friend	class VSetDebuggerServerMessage;
 };
 
 
@@ -350,6 +370,7 @@ public:
 
 	virtual	XBOX::VFolder*					RetainScriptsFolder();
 	virtual XBOX::VProgressIndicator*		CreateProgressIndicator( const XBOX::VString& inTitle);
+	virtual	XBOX::VFileSystemNamespace*		RetainRuntimeFileSystemNamespace();
 
 private:
 			VRIAServerProject				*fApplication;
@@ -372,6 +393,43 @@ protected:
 
 private:
 			VRIAServerProject	*fApplication;
+};
+
+
+
+// ----------------------------------------------------------------------------
+
+
+
+class VSetDebuggerServerMessage : public XBOX::VMessage
+{
+public:
+	VSetDebuggerServerMessage( VRIAServerProject* inApplication, VRIAContext* inContext, WAKDebuggerType_t inWAKDebuggerType);
+	virtual ~VSetDebuggerServerMessage();
+
+protected:
+	virtual	void DoExecute();
+
+private:
+			VRIAServerProject	*fApplication;
+			VRIAContext			*fContext;
+			WAKDebuggerType_t	fDebuggerType;
+};
+
+
+
+class VStartDebuggerMessage : public XBOX::VMessage
+{
+public:
+	VStartDebuggerMessage( VRIAServerProject* inApplication, VRIAContext* inContext );
+	virtual ~VStartDebuggerMessage();
+
+protected:
+	virtual	void DoExecute();
+
+private:
+			VRIAServerProject	*fApplication;
+			VRIAContext			*fContext;
 };
 
 
@@ -414,6 +472,7 @@ public:
 	XBOX::VError				LoadFromJSONValue (const XBOX::VJSONValue& inJSONValue);
 
 	bool						FindMatchingRule (const XBOX::VString& inString, XBOX::VString& outMatchingRuleSuffix);
+	bool						AcceptRuleSuffix (const XBOX::VString& inString);
 
 private:
 	typedef std::vector<VRoutingRuleRefPtr>	VRoutingRulesVector;	

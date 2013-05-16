@@ -898,9 +898,9 @@ var testCase = {
 		}
 		if (os.isLinux) {
 			// On ignore le test suivant sous Linux :
-			this._should.ignore.testToArray_DataClassWithImageAttribute_ValuesShouldNotBeNull = true;
-			this._should.ignore.testToArray_DatastoreWithImageAttribute = true;
-			this._should.ignore.testFromArray_ArrayWhithDataContainingImages = true;
+			// this._should.ignore.testToArray_DataClassWithImageAttribute_ValuesShouldNotBeNull = true;
+			// this._should.ignore.testToArray_DatastoreWithImageAttribute = true;
+			// this._should.ignore.testFromArray_ArrayWhithDataContainingImages = true;
 		}
     },
 	
@@ -3999,7 +3999,7 @@ var testCase = {
 	//test second param as 'true' should transform unsorted collection to a sorted collection
 	testAdd_UnsortedToSortedCollection: function(){
 		var isGood = true;
-		var array = [1,2,4,5,3];
+		var array = [2,1,4,5,3];
 		var entityColl = ds.MyClass1.createEntityCollection();
 		var entity1 = ds.MyClass1.find("ID=2");
 		var entity2 = ds.MyClass1.find("ID=1");
@@ -4011,11 +4011,21 @@ var testCase = {
 		entityColl.add(entity4,true);
 		entityColl.add(entity5);
 		entityColl.add(entity3);
-		for(var i= 0;i<5;i++)
+		for(var i= 2;i<5;i++)
 			if(entityColl[i].ID!=array[i])
 				isGood = false;
 		if(!isGood)
 			Y.Assert.fail("Second didn't transform unsorted collection to a sorted collection");
+	},
+	//test adding colletion to another entity colletion
+	testAdd_CollectionIntoCollection: function(){
+		var coll = ds.MyCalss1.query("ID < 3");
+		var len_coll = coll.length;
+		var coll2 = ds.MyClass1.query("ID == 5");
+		coll.add(coll2);
+		
+		if(coll.length != len_coll+1)
+			Y.Assert.fail("fail to add entity colletion to another entity collection");
 	},
 	//test duplicated entity for sorted entity collection ( should not be duplicated )
 	testAdd_TestDuplication: function(){

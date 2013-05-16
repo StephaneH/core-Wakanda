@@ -139,6 +139,18 @@ VError VRIAServerJSContextMgr::ReleaseJSContext( VJSGlobalContext* inContext)
 }
 
 
+void VRIAServerJSContextMgr::GetAllPools( std::vector<VJSContextPool*>& outPools) const
+{
+	outPools.clear();
+	if (fSetOfPoolMutex.Lock())
+	{
+		for (SetOfPool_citer iter = fSetOfPool.begin() ; iter != fSetOfPool.end() ; ++iter)
+			outPools.push_back( *iter);
+
+		fSetOfPoolMutex.Unlock();
+	}
+}
+
 
 void VRIAServerJSContextMgr::_RegisterPool( VJSContextPool *inPool)
 {
@@ -174,6 +186,48 @@ void VRIAServerJSContextMgr::_UnRegisterPool( VJSContextPool *inPool)
 
 
 // ----------------------------------------------------------------------------
+
+
+
+VJSContextPoolCleaner::VJSContextPoolCleaner()
+{
+	// retreive the list of JS context pool and save the enabled state for each pool
+	std::vector<VJSContextPool*> pools;
+	
+	VRIAServerApplication::Get()->GetJSContextMgr()->GetAllPools( pools);
+	for (std::vector<VJSContextPool*>::iterator iter = pools.begin() ; iter != pools.end() ; ++iter)
+	{
+		sPoolInfo poolInfo = { *iter, (*iter)->IsEnabled()};
+		fPoolToClean.push_back( poolInfo);
+	}
+}
+
+
+VJSContextPoolCleaner::~VJSContextPoolCleaner()
+{
+	// restore the enabled state of each pool
+	for (std::vector<sPoolInfo>::iterator iter = fPoolToClean.begin() ; iter != fPoolToClean.end() ; ++iter)
+		(*iter).fPool->SetEnabled( (*iter).fEnabledState);
+}
+
+
+VError VJSContextPoolCleaner::CleanAll()
+{
+	VError err = VE_OK;
+	
+	for (std::vector<sPoolInfo>::iterator iter = fPoolToClean.begin() ; (iter != fPoolToClean.end()) && (err == VE_OK) ; ++iter)
+	{
+		(*iter).fPool->SetEnabled( false);
+		err = (*iter).fPool->Clear();
+	}
+
+	return err;
+}
+
+
+
+// ----------------------------------------------------------------------------
+
 
 
 VRIAJSRuntimeContext::VRIAJSRuntimeContext()
@@ -702,10 +756,31 @@ VJSGlobalContext* VJSContextPool::RetainContext( VError& outError, bool inReusab
 					}
 					else
 					{
-						// The context becomes used
-						globalContext = iter->first;
-						fUsedContexts[globalContext] = iter->second;
-						fUnusedContexts.erase( iter);
+						bool	willBeReused = false;
+						VJSContextInfo *info = iter->second;
+						if (info)
+						{
+							if (VJSGlobalContext::IsDebuggerActive())
+							{
+								willBeReused = info->IsDebuggerActive();
+							}
+							else
+							{
+								willBeReused = !info->IsDebuggerActive();
+							}
+						}
+						if (willBeReused)
+						{
+							// The context becomes used
+							globalContext = iter->first;
+							fUsedContexts[globalContext] = iter->second;
+							fUnusedContexts.erase( iter);
+						}
+						else
+						{
+							globalContext = NULL;
+							iter++;
+						}
 					}
 				}
 				fPoolMutex.Unlock();
@@ -743,13 +818,13 @@ VJSGlobalContext* VJSContextPool::RetainContext( VError& outError, bool inReusab
 					else
 					{
 						outError = ThrowError( VE_MEMORY_FULL);
-					}					
-
+					}
 					fPoolMutex.Unlock();
 				}
 			}
 		}
 	}
+
 	return globalContext;
 }
 
@@ -1004,29 +1079,6 @@ VJSGlobalContext* VJSContextPool::_RetainNewContext( VError& outError)
 	VJSGlobalContext *globalContext = RetainNewContext( runtimeDelegate);
 	if (globalContext != NULL)
 	{
-		// Evaluating required scripts
-		if (fRequiredScriptsMutex.Lock()) // attention possibilite importante d'engorgement, voir L.R
-		{
-			for (std::vector<VFilePath>::iterator iter = fRequiredScripts.begin() ; iter != fRequiredScripts.end() ; ++iter)
-			{
-				VFile *script = new VFile( *iter);
-				if (script != NULL)
-				{
-					if (script->Exists())
-					{
-						VJSContext jsContext( globalContext);
-						VJSGlobalObject *globalObject = jsContext.GetGlobalObjectPrivateInstance();
-						if (testAssert(globalObject != NULL))
-							globalObject->RegisterIncludedFile( script);	// sc 17/01/2011 to invalid the context when the entity Entity Model script is modified
-
-						globalContext->EvaluateScript( script, NULL);
-					}
-				}
-				ReleaseRefCountable( &script);
-			}
-			fRequiredScriptsMutex.Unlock();
-		}
-
 		CDB4DManager *db4d = VRIAServerApplication::Get()->GetComponentDB4D();
 		if (db4d != NULL)
 		{
@@ -1049,6 +1101,29 @@ VJSGlobalContext* VJSContextPool::_RetainNewContext( VError& outError)
 				}
 				ReleaseRefCountable( &script);
 			}
+		}
+
+		// Evaluating required scripts
+		if (fRequiredScriptsMutex.Lock()) // attention possibilite importante d'engorgement, voir L.R
+		{
+			for (std::vector<VFilePath>::iterator iter = fRequiredScripts.begin() ; iter != fRequiredScripts.end() ; ++iter)
+			{
+				VFile *script = new VFile( *iter);
+				if (script != NULL)
+				{
+					if (script->Exists())
+					{
+						VJSContext jsContext( globalContext);
+						VJSGlobalObject *globalObject = jsContext.GetGlobalObjectPrivateInstance();
+						if (testAssert(globalObject != NULL))
+							globalObject->RegisterIncludedFile( script);	// sc 17/01/2011 to invalid the context when the entity Entity Model script is modified
+
+						globalContext->EvaluateScript( script, NULL);
+					}
+				}
+				ReleaseRefCountable( &script);
+			}
+			fRequiredScriptsMutex.Unlock();
 		}
 
 		if (fDelegate != NULL)
@@ -1132,6 +1207,7 @@ void VJSContextPool::_InitGlobalClasses()
 		VJSGlobalClass::AddStaticFunction( "getLastBackups", VJSGlobalClass::js_callStaticFunction<VJSApplicationGlobalObject::_getLastBackups>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete);
 		VJSGlobalClass::AddStaticFunction( "integrateDataStoreJournal", VJSGlobalClass::js_callStaticFunction<VJSApplicationGlobalObject::_integrateDataStoreJournal>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete);
 		VJSGlobalClass::AddStaticFunction( "restoreDataStore", VJSGlobalClass::js_callStaticFunction<VJSApplicationGlobalObject::_restoreDataStore>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete);
+		VJSGlobalClass::AddStaticFunction( "parseJournal", VJSGlobalClass::js_callStaticFunction<VJSApplicationGlobalObject::_parseJournal>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete);
 		VJSGlobalClass::AddStaticFunction( "getBackupRegistry", VJSGlobalClass::js_callStaticFunction<VJSApplicationGlobalObject::_getBackupRegistry>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete);
 		VJSGlobalClass::AddStaticFunction( "getBackupSettings", VJSGlobalClass::js_callStaticFunction<VJSApplicationGlobalObject::_getBackupSettings>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete);
 
@@ -1167,8 +1243,6 @@ void VJSContextPool::_InitGlobalClasses()
 
 		VJSGlobalClass::AddStaticValue( kSSJS_PROPERTY_NAME_Permissions, VJSGlobalClass::js_getProperty<VJSApplicationGlobalObject::_getPermissions>, NULL, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete);
 
-		VJSGlobalClass::AddStaticValue( kSSJS_PROPERTY_NAME_RPCCatalog, VJSGlobalClass::js_getProperty<VJSApplicationGlobalObject::_getRPCCatalog>, NULL, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete);
-
 		VJSGlobalClass::AddStaticValue( kSSJS_PROPERTY_NAME_wildchar, VJSGlobalClass::js_getProperty<VJSApplicationGlobalObject::_getWildChar>, NULL, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete);
 
 
@@ -1188,8 +1262,8 @@ void VJSContextPool::_InitGlobalClasses()
 		VJSRPCServiceCore::Class();
 		VRIAServerJSCore::Class();
 
-		VJSGlobalClass::AddConstructorObjectStaticValue ("MIMEWriter", VJSParms_construct::Callback<VJSMIMEWriter::_Construct>);
-		VJSGlobalClass::AddConstructorObjectStaticValue("MIMEReader", VJSParms_construct::Callback<VJSMIMEReader::Construct>);
+		VJSGlobalClass::AddConstructorObjectStaticValue ("MIMEWriter",	VJSParms_construct::Callback<VJSMIMEWriter::_Construct>);
+		VJSGlobalClass::AddConstructorObjectStaticValue("MIMEReader",	VJSParms_construct::Callback<VJSMIMEReader::Construct>);
 	}
 }
 

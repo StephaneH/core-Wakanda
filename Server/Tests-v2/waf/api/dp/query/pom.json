@@ -1,0 +1,5 @@
+{
+    "desc": "Tests of the DataProvider API (query)",
+    "kind": "csjs",
+    "oldJenkinsName": "TestClientQueryDP1SimpleOperators"
+}

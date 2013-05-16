@@ -70,7 +70,9 @@ VError VDataService::SetEnabled( bool inEnabled)
 				CDB4DManager *cdb4dManager = VRIAServerApplication::Get()->GetComponentDB4D();
 				if (cdb4dManager != NULL)
 				{
-					fRequestHandler = cdb4dManager->AddRestRequestHandler( err, fDatabase, fHTTPServerProject, (RIApplicationRef)fApplication, fPattern, true);
+					// L.R  le 1er fevrier 2013 : voir avec Stephane pour la pattern qui n'est plus hard codee et qui est maintenant un simple prefix
+//					fRequestHandler = cdb4dManager->AddRestRequestHandler( err, fDatabase, fHTTPServerProject, (RIApplicationRef)fApplication, fPattern, true);
+					fRequestHandler = cdb4dManager->AddRestRequestHandler( err, fDatabase, fHTTPServerProject, (RIApplicationRef)fApplication, "rest", true);
 					if (err != VE_OK)
 						ReleaseRefCountable( &fRequestHandler);
 				}

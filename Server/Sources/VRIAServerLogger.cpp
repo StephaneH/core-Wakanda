@@ -22,15 +22,11 @@ USING_TOOLBOX_NAMESPACE
 
 
 VRIARequestLogger::VRIARequestLogger()
-: fLogger(NULL), fEnable(true)
+: fEnable(true)
 {
+	fLogger = VProcess::Get()->GetLogger();
 }
 
-
-VRIARequestLogger::VRIARequestLogger( VLog4jMsgFileLogger* inLogger)
-: fLogger(inLogger), fEnable(true)
-{
-}
 
 
 VRIARequestLogger::~VRIARequestLogger()
@@ -98,9 +94,12 @@ void VRIARequestLogger::Log( OsType inComponentID, void* inCDB4DBaseContext, con
 	#if SMALLENDIAN
 		ByteSwapLong( &ctype[0]);
 	#endif
-
-		fLogger->Log( (const char*)&ctype, eL4JML_Information, inMessage, NULL);
-		fLogger->Flush();
+		VValueBag*	bag = new VValueBag();
+		ILoggerBagKeys::source.Set( bag, VString(ctype) );
+		ILoggerBagKeys::level.Set( bag, eL4JML_Information);
+		ILoggerBagKeys::message.Set( bag, VString(inMessage) );
+		fLogger->LogBag(bag);
+		ReleaseRefCountable(&bag);
 	}
 }
 
@@ -109,20 +108,12 @@ void VRIARequestLogger::Log( OsType inComponentID, void* inCDB4DBaseContext, con
 
 StUseLogger::StUseLogger()
 {
-	fLogger = VRIAServerApplication::Get()->RetainLogger();
+	fLogger = VProcess::Get()->GetLogger();
 }
 
 
 StUseLogger::~StUseLogger()
 {
-	if (fLogger != NULL)
-	{
-		XBOX::VLog4jMsgFileLogger *log4jLogger = dynamic_cast<XBOX::VLog4jMsgFileLogger*>(fLogger);
-		if (log4jLogger != NULL)
-			log4jLogger->Flush();
-
-		fLogger->Release();
-	}
 }
 
 
@@ -130,12 +121,13 @@ void StUseLogger::Log( const XBOX::VString& inLoggerID, XBOX::ELog4jMessageLevel
 {
 	if (fLogger != NULL)
 	{
-		VValueBag bag;
-		ILoggerBagKeys::source.Set( &bag, inLoggerID);
-		ILoggerBagKeys::level.Set( &bag, inLevel);
-		ILoggerBagKeys::message.Set( &bag, inMessage);
+		VValueBag* bag = new VValueBag;
+		ILoggerBagKeys::source.Set( bag, inLoggerID);
+		ILoggerBagKeys::level.Set( bag, inLevel);
+		ILoggerBagKeys::message.Set( bag, inMessage);
 
-		fLogger->LogBag( &bag);
+		fLogger->LogBag( bag);
+		ReleaseRefCountable(&bag);
 	}
 }
 

@@ -25,10 +25,6 @@ class VSolution;
 class VProjectItem;
 class VCatalog;
 class ISymbolTable;
-class VProjectUser;
-class ISourceControlConnector;
-class ISourceControl;
-class ISourceControlInterface;
 class VRIASettingsCollection;
 class VProjectFileStampSaver;
 class VProjectSettings;
@@ -40,8 +36,6 @@ class VProject : public XBOX::VObject , public XBOX::IRefCountable , public XBOX
 public:
 	
 	friend class VProjectFileStampSaver;
-
-	typedef	XBOX::VSignalT_2< VProject*, VProjectItem* > ItemParsingCompleteSignal;
 
 	VProject( VSolution *inParentSolution);
 	virtual ~VProject();
@@ -63,9 +57,6 @@ public:
 
 			XBOX::VError					ReloadCatalogs();
 
-
-	void						LoadOrSaveProjectUserFile(bool inLoad);
-		
 			// High level accessors
 
 			const XBOX::VUUID&			GetUUID() const;
@@ -118,10 +109,7 @@ public:
 			// Should be used only if the tag can be applied to one item
 			VProjectItem*		GetProjectItemFromTag( const VProjectItemTag& inTag) const;
 
-	XBOX::VError				BuildAppliURLString(XBOX::VString &outAppliURL, bool inWithIndexPage, bool inWantSSL );
-	XBOX::VError				BuildFileURLString(XBOX::VString &outFileURL, VProjectItem* inProjectItem, bool inWantSSL );
-
-	VProjectItem*				GetMainPage();
+			VProjectItem*		GetMainPage();
 
 			// Symbol table handling
 			XBOX::VError				OpenSymbolTable();
@@ -139,25 +127,6 @@ public:
 
 	void						ParseProjectItemForEditor( VProjectItem *inItem, XBOX::VString& inContents );
 	
-	/** @brief	The parsing complete signal is triggered each time a project item is parsed. */
-	ItemParsingCompleteSignal*	RetainItemParsingCompleteSignal() const;
-
-	// ---------------------------------------
-	// Source Control
-	// ---------------------------------------
-	bool						ConnectToSourceControl(XBOX::VString& inSourceControlId);
-	ISourceControlConnector*	GetSourceControlConnector() {return fSourceControlConnector;}
-	ISourceControl*				GetSourceControl() const;
-	XBOX::VString				GetSourceControlID() const;
-	bool						IsConnectedToSourceControl() const;
-	XBOX::VError				AddToSourceControl(const VectorOfProjectItems& inProjectItems);
-	XBOX::VError				GetLatestVersion(const VectorOfProjectItems& inProjectItems);
-	XBOX::VError				CheckOut(const VectorOfProjectItems& inProjectItems, bool inCheckOutProjectFiles = false);
-	XBOX::VError				CheckIn(const VectorOfProjectItems& inProjectItems);
-	XBOX::VError				Revert(const VectorOfProjectItems& inProjectItems);
-
-	class ISourceControlInterface*	GetSCCInterfaceForCodeEditor();
-
 	// ---------------------------------------
 	// Pour retrouver rapidement un VProjectItem a partir d'un full path
 	// ---------------------------------------
@@ -213,12 +182,8 @@ private:
 			VProjectItem*		_CreateFolderItemFromPath( XBOX::VError& outError, const XBOX::VFilePath& inPath, bool inRecursive, bool inSynchronizeWithFileSystem, bool inTouchProjectFile);
 
 	virtual void FileSystemEventHandler( const std::vector< XBOX::VFilePath > &inFilePaths, XBOX::VFileSystemNotifier::EventKind inKind );
-	virtual void ParsingComplete( XBOX::VFilePath inFile, sLONG inStatus, IDocumentParserManager::TaskCookie inCookie );
 
-	void						_LoadSCCStatusOfProjectItems();
-	
-	XBOX::VError				_LoadSCCStatusOfProjectItems(const VectorOfProjectItems& inProjectItems);
-	XBOX::VError				_LoadSCCStatusOfProjectItems(const VectorOfProjectItems& inProjectItems, std::vector<XBOX::VFilePath>& inFileFullPathes);
+	void						_LoadFromFolderChildren(const XBOX::VFolder& inCurrent, IDocumentParserManager::IJob *inJob, const ESymbolFileBaseFolder& inBaseFolder);
 
 			// On conserve certains pointeurs pour optimisation
 	XBOX::VUUID					fUUID;
@@ -235,14 +200,10 @@ private:
 	// toutes les formulations utiles en interne
 	MapFullPathProjectItem		fMapFullPathProjectItem;
 
-	ISourceControlConnector*	fSourceControlConnector;
-	VProjectUser*				fProjectUser;
-
 	VectorOfProjectItems		fReferencedItems;
 
 	ISymbolTable*				fSymbolTable;
 	XBOX::VTask *				fBackgroundDeleteFileTask;
-	ItemParsingCompleteSignal	*fItemParsingCompleteSignal;
 
 	std::vector<XBOX::VFilePath>	fDeletedFilePaths;
 
@@ -251,17 +212,19 @@ private:
 
 
 	void LoadDefaultSymbols( ISymbolTable *inTable );
-	void LoadCoreFiles( const XBOX::VFolder &inFolder, const XBOX::VString &inName, ESymbolFileExecContext inExecContext, IDocumentParserManager::IJob *inJob );
-	void CoreFileLoadComplete( IDocumentParserManager::TaskCookie inCookie );
+	void LoadCoreFiles( const XBOX::VFolder &inFolder, const XBOX::VString &inName, ESymbolFileExecContext inExecContext, IDocumentParserManager::IJob *inJob, const ESymbolFileBaseFolder& inBaseFolder );
+	void LoadCatalog();
 
 	void LoadKludgeSymbols( ISymbolTable *inTable );
-	void LoadKludgeFile( const XBOX::VFolder &inFolder, const XBOX::VString &inName, ESymbolFileExecContext inExecContext, IDocumentParserManager::IJob *inJob );
+	void LoadKludgeFile( const XBOX::VFolder &inFolder, const XBOX::VString &inName, ESymbolFileExecContext inExecContext, IDocumentParserManager::IJob *inJob, const ESymbolFileBaseFolder& inBaseFolder );
 
 	static sLONG BackgroundDeleteFile( XBOX::VTask *inTask );
 
 	void _GetProjectItemsByExtension( const XBOX::VString &inExtension, VectorOfProjectItems &outItems );
 	void _GetProjectItemsByExtension( VProjectItem *inProjectItem, const XBOX::VString &inExtension, VectorOfProjectItems &outItems );
 	VProjectItem *_GetEntityModelProjectItem( VProjectItem *inCurItemToSearch = NULL );
+	
+	bool fCoreSymbolsNotLoaded;
 };
 
 // -----------------------------------------------------------------------------
@@ -330,23 +293,5 @@ private:
 	XBOX::VString fName;
 	XBOX::VString fType;
 };
-
-// ----------------------------------------------------------------------------
-// Classe VProjectUser
-// ----------------------------------------------------------------------------
-class VProjectUser : public XBOX::VObject
-{
-public:
-	VProjectUser(VProject* inProject);
-	virtual ~VProjectUser();
-
-	void			SetProject(VProject* inProject) {fProject = inProject;}
-	XBOX::VError	LoadFromUserFile(XBOX::VFile& inUserFile);
-	XBOX::VError	SaveToUserFile(XBOX::VFile& inUserFile) const;
-
-private:
-	VProject* fProject;
-};
-
 
 #endif

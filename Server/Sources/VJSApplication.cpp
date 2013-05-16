@@ -33,8 +33,6 @@
 #include "VJSSolution.h"
 #include "VRIAPermissions.h"
 #include "VJSPermissions.h"
-#include "VRPCCatalog.h"
-#include "VJSRPCCatalog.h"
 #include "VRIAServerComponentBridge.h"
 #include "VRIAServerHTTPSession.h"
 
@@ -725,27 +723,6 @@ void VJSApplicationGlobalObject::_getPermissions( XBOX::VJSParms_getProperty& io
 }
 
 
-void VJSApplicationGlobalObject::_getRPCCatalog( XBOX::VJSParms_getProperty& ioParms, XBOX::VJSGlobalObject* inGlobalObject)
-{
-	bool done = false;
-	VRIAJSRuntimeContext *rtContext = VRIAJSRuntimeContext::GetFromJSGlobalObject( inGlobalObject);
-	if (rtContext != NULL)
-	{
-		VRIAServerProject *application = rtContext->GetRootApplication();
-		if (application != NULL)
-		{
-			VJSApplication::_getRPCCatalog( ioParms, application);
-			done = true;
-		}
-	}
-
-	if (!done)
-	{
-		ioParms.ReturnUndefinedValue();
-	}
-}
-
-
 
 // ----------------------------------------------------------------------------
 
@@ -834,6 +811,8 @@ void VJSApplication::GetDefinition( ClassDefinition& outDefinition)
 		{ "getBackupSettings", js_callStaticFunction<_getBackupSettings>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
 		{ "integrateDataStoreJournal", js_callStaticFunction<_integrateDataStoreJournal>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
 		{ "restoreDataStore", js_callStaticFunction<_restoreDataStore>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
+		{ "parseJournal", js_callStaticFunction<_parseJournal>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
+	
 		{ kSSJS_PROPERTY_NAME_loginByKey, js_callStaticFunction<_login>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
 		{ kSSJS_PROPERTY_NAME_loginByPassword, js_callStaticFunction<_unsecureLogin>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
 		{ kSSJS_PROPERTY_NAME_currentUser, js_callStaticFunction<_getCurrentUser>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
@@ -855,7 +834,6 @@ void VJSApplication::GetDefinition( ClassDefinition& outDefinition)
 		{ kSSJS_PROPERTY_NAME_Directory, js_getProperty<_getDirectory>, NULL, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
 		{ kSSJS_PROPERTY_NAME_Internal, js_getProperty<_getInternal>, NULL, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontEnum | JS4D::PropertyAttributeDontDelete },
 		{ kSSJS_PROPERTY_NAME_Permissions, js_getProperty<_getPermissions>, NULL, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontEnum | JS4D::PropertyAttributeDontDelete },
-		{ kSSJS_PROPERTY_NAME_RPCCatalog, js_getProperty<_getRPCCatalog>, NULL, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontEnum | JS4D::PropertyAttributeDontDelete },
 		{ kSSJS_PROPERTY_NAME_wildchar, js_getProperty<_getWildChar>, NULL, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
 		{ 0, 0, 0}
 	};
@@ -1093,7 +1071,7 @@ void callToolsOnDB(XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject
 		else
 			paramObj.MakeEmpty();
 
-		CDB4DManager* db4D = VComponentManager::RetainComponentOfType<CDB4DManager>();
+		CDB4DManager* db4D = CDB4DManager::RetainManager();
 		VError err = VE_OK;
 		CDB4DBase* newdb = db4D->OpenBase(*catalogFile, DB4D_Open_WithSeparateIndexSegment | DB4D_Open_As_XML_Definition | DB4D_Open_No_Respart, &err, FA_READ);
 		if (err == VE_OK)
@@ -1184,7 +1162,7 @@ void VJSApplicationGlobalObject::_getBackupRegistry(XBOX::VJSParms_callStaticFun
 			VFilePath path;
 			CDB4DManager* db4D = NULL;
 			registryFile->GetPath( path);
-			db4D = VComponentManager::RetainComponentOfType<CDB4DManager>();
+			db4D = CDB4DManager::RetainManager();
 			IBackupTool* bkpt = db4D->CreateBackupTool();
 			bkpt->ConvertBackupRegistryToJsObject(path,arrayOfManifests);
 			delete bkpt;bkpt = NULL;
@@ -1240,6 +1218,26 @@ void VJSApplicationGlobalObject::_restoreDataStore(XBOX::VJSParms_callStaticFunc
 	}
 }
 
+void VJSApplicationGlobalObject::_parseJournal(XBOX::VJSParms_callStaticFunction& ioParms, XBOX::VJSGlobalObject* inGlobalObject)
+{
+	bool done = false;
+	VRIAJSRuntimeContext *rtContext = VRIAJSRuntimeContext::GetFromJSGlobalObject( inGlobalObject);
+	if (rtContext != NULL)
+	{
+		VRIAServerProject *application = rtContext->GetRootApplication();
+		if (application != NULL)
+		{
+			VJSApplication::_parseJournal(ioParms,application);
+			done = true;
+		}
+	}
+	if (!done)
+	{
+		ioParms.ReturnNullValue();
+	}
+}
+
+
 
 
 
@@ -1262,7 +1260,7 @@ void VJSApplication::_getLastBackups( XBOX::VJSParms_callStaticFunction& ioParms
 			backupsFolder->GetFilePath( path);
 			path.SetFileName(CVSTR("lastBackup.json"));
 
-			db4D = VComponentManager::RetainComponentOfType<CDB4DManager>();
+			db4D = CDB4DManager::RetainManager();
 
 			IBackupTool* bkpt = db4D->CreateBackupTool();
 			bkpt->ConvertBackupRegistryToJsObject(path,arrayOfManifests);
@@ -1326,7 +1324,7 @@ void VJSApplication::_backupDataStore( XBOX::VJSParms_callStaticFunction& ioParm
 	StErrorContextInstaller errorContext(false);
 
 	//Establish environment to work
-	db4D = VComponentManager::RetainComponentOfType<CDB4DManager>();
+	db4D = CDB4DManager::RetainManager();
 	riaContext = VRIAJSRuntimeContext::GetApplicationContextFromJSContext( ioParms.GetContext(), inApplication);
 
 	VFile* modelFileToBackup = NULL;
@@ -1372,11 +1370,21 @@ void VJSApplication::_backupDataStore( XBOX::VJSParms_callStaticFunction& ioParm
 		error = VE_INVALID_PARAMETER;
 		vThrowError(error,CVSTR("Invalid model file path specified"));
 	}
+	else if (!modelFileToBackup->Exists())
+	{
+		error = VE_FILE_NOT_FOUND;
+		vThrowError(error,CVSTR("Model file not found"));
+	}
 
 	if (dataFileToBackup == NULL)
 	{
 		error = VE_INVALID_PARAMETER;
 		vThrowError(error,CVSTR("Invalid data file path specified"));
+	}
+	else if (!dataFileToBackup->Exists())
+	{
+		error = VE_FILE_NOT_FOUND;
+		vThrowError(error,CVSTR("Data file not found"));
 	}
 
 	if (actualBackupSettings == NULL)
@@ -1396,10 +1404,16 @@ void VJSApplication::_backupDataStore( XBOX::VJSParms_callStaticFunction& ioParm
 		for(sLONG count = db4D->CountBases();count>0 && !dbIsOpened;--count)
 		{
 			CDB4DBase* enumeratedBase = db4D->RetainNthBase(count);
-			VFolder* dataFolder = enumeratedBase->RetainDataFolder();
-			const VFilePath& dataFolderPath = dataFolder->GetPath();
-			dbIsOpened = (dataFolderPath == path);
-			XBOX::ReleaseRefCountable(&dataFolder);
+			if(enumeratedBase)
+			{
+				VFolder* dataFolder = enumeratedBase->RetainDataFolder();
+				if(dataFolder)
+				{
+					const VFilePath& dataFolderPath = dataFolder->GetPath();
+					dbIsOpened = (dataFolderPath == path);
+				}
+				XBOX::ReleaseRefCountable(&dataFolder);
+			}
 			XBOX::ReleaseRefCountable(&enumeratedBase);
 		}
 
@@ -1505,7 +1519,7 @@ void VJSApplication::_restoreDataStore(XBOX::VJSParms_callStaticFunction& ioParm
 	VFile* manifestFile(NULL);
 	VFolder* destFolder(NULL);
 	VError dbError = VE_OK;
-	XBOX::VFilePath existingDataFolderNewPath;
+	XBOX::VFilePath existingDataFolderNewPath,existingJournalNewPath;
 	
 	XBOX::StErrorContextInstaller errContext(true,true);
 	
@@ -1546,7 +1560,7 @@ void VJSApplication::_restoreDataStore(XBOX::VJSParms_callStaticFunction& ioParm
 		}
 		
 		dbError = VE_MEMORY_FULL;
-		db4D = VComponentManager::RetainComponentOfType<CDB4DManager>();
+		db4D = CDB4DManager::RetainManager();
 		if (db4D)
 		{
 			toolintf = db4D->CreateJSDataToolsIntf(jsContext, optionsObj);
@@ -1560,30 +1574,7 @@ void VJSApplication::_restoreDataStore(XBOX::VJSParms_callStaticFunction& ioParm
 				bool ok = backupTool->RestoreDataFolder(manifestPath,restoreFolderPath,existingDataFolderNewPath,toolintf);
 				if (ok )
 				{
-					//Restore went well. Restoration will typically bring back some journal information that will not be applicable
-					// now (it was when that particular backup was done) so we need
-					// to update them from the current application's data folder. However depending on the restore folder path
-					// that data folder may have been moved...
-					//e.g.: application.restoreDataFolder(File(manifest),application.getFolder())
-					//will have moved {applicationFolder}/DataFolder to {applicationFolder}/DataFolder_REPLACED_XXXXXX
-					VFilePath sourceDataFolder,destDataFolder;
-					VFolder* df = inApplication->RetainFolder();
-					if(df->GetPath()  == restoreFolderPath)
-					{
-						//The given restore path is actually the data folder's parent folder so the data folder has been renamed.
-						//Current journal infos are found in that renamed folder and need be synchronized from there
-						sourceDataFolder = existingDataFolderNewPath;
-					}
-					else
-					{
-						//The restore path is somewhere else and the current data folder has not been renamed so
-						df->GetPath(sourceDataFolder);
-						sourceDataFolder.ToSubFolder(CVSTR("DataFolder"));
-					}
-					destDataFolder = restoreFolderPath;
-					XBOX::ReleaseRefCountable(&df);
-					destDataFolder.ToSubFolder(CVSTR("DataFolder"));
-					dbError = inApplication->SynchronizeJournalInfos(sourceDataFolder,destDataFolder);
+					ok =  backupTool->RestoreJournal(manifestPath,restoreFolderPath,existingJournalNewPath,toolintf);
 				}
 			}
 		}
@@ -1595,7 +1586,7 @@ void VJSApplication::_restoreDataStore(XBOX::VJSParms_callStaticFunction& ioParm
 	XBOX::ReleaseRefCountable(&destFolder);
 	XBOX::ReleaseRefCountable(&manifestFile);
 	
-	//Response: {ok:true|false[,dataFolder:Folder(xxxxx)]}
+	//Response: {ok:true|false[,dataFolder:Folder(xxxxx)][,journal:File(xxxx)]}
 	{
 		VJSObject statusObj(ioParms.GetContextRef());
 		
@@ -1608,8 +1599,103 @@ void VJSApplication::_restoreDataStore(XBOX::VJSParms_callStaticFunction& ioParm
 			folderObj.MakeFilePathAsFileOrFolder(existingDataFolderNewPath);
 			statusObj.SetProperty(CVSTR("dataFolder"),folderObj);
 		}
+		if (!existingJournalNewPath.IsEmpty() 
+			&& testAssert(existingJournalNewPath.IsValid() && existingJournalNewPath.IsFile()))
+		{
+			VJSObject fileObj(ioParms.GetContextRef());
+			fileObj.MakeFilePathAsFileOrFolder(existingJournalNewPath);
+			statusObj.SetProperty(CVSTR("journal"),fileObj);
+		}
 		ioParms.ReturnValue(statusObj);
 	}
+}
+
+void  VJSApplication::_parseJournal(XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication)
+{
+	VRIAContext *riaContext = NULL;
+	VFile *journalFile(NULL), *destinationFile(NULL);
+	VError err = VE_OK;
+	bool done = false;
+	XBOX::StErrorContextInstaller errContext(true,true);
+	VJSArray arrayOfOps(ioParms.GetContextRef());
+
+	if (!ioParms.IsNullParam(1) && ioParms.IsObjectParam(1))
+	{
+		VJSObject optionsObj(ioParms.GetContextRef());
+		ioParms.GetParamObject(1,optionsObj);
+		if(optionsObj.HasProperty(CVSTR("journal")))
+		{
+			VJSValue paramValue = optionsObj.GetProperty(CVSTR("journal"));
+			journalFile = paramValue.GetFile();
+			if (journalFile != NULL)
+			{
+				journalFile->Retain();
+			}
+		}
+		if(optionsObj.HasProperty(CVSTR("toFile")))
+		{
+			VJSValue paramValue = optionsObj.GetProperty(CVSTR("toFile"));
+			destinationFile = paramValue.GetFile();
+			if (destinationFile != NULL)
+			{
+				destinationFile->Retain();
+			}
+		}
+	}
+	if(journalFile == NULL)
+		vThrowError(VE_DB4D_INVALID_PARAMETER,CVSTR("journal"));
+
+	if (errContext.GetLastError() == VE_OK)
+	{
+		VJSObject optionsObj(ioParms.GetContextRef());
+		VJSContext jsContext(ioParms.GetContextRef());
+
+		if (!ioParms.IsNullParam(2) &&ioParms.IsObjectParam(2))
+		{
+			ioParms.GetParamObject(2, optionsObj);
+		}
+		else
+		{
+			optionsObj.MakeEmpty();
+		}
+
+		if (errContext.GetLastError() == VE_OK)
+		{
+			CDB4DManager* db4D = NULL;
+			IJournalTool* tool = NULL;
+			IDB4D_DataToolsIntf* toolintf = NULL;
+			db4D = CDB4DManager::RetainManager();
+			toolintf = db4D->CreateJSDataToolsIntf(jsContext, optionsObj);
+			tool = db4D->CreateJournalTool();
+			if(tool)
+			{
+				if (destinationFile)
+				{
+					done = tool->ParseJournalToText(*journalFile,*destinationFile,toolintf );
+					if (done)
+					{
+						ioParms.ReturnFile(destinationFile);
+					}
+				}
+				else
+				{
+					done = tool->ParseJournal(*journalFile,arrayOfOps,toolintf );
+					if(done)
+					{
+						ioParms.ReturnValue(arrayOfOps);
+					}
+				}
+			}
+			delete tool; tool = NULL;
+			delete toolintf; toolintf = NULL;
+			XBOX::ReleaseRefCountable(&db4D);
+		}
+	}
+	XBOX::ReleaseRefCountable(&destinationFile);
+	XBOX::ReleaseRefCountable(&journalFile);
+
+	if(!done)
+		ioParms.ReturnNullValue();
 }
 
 void VJSApplication::_integrateDataStoreJournal(XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication)
@@ -1703,7 +1789,7 @@ void VJSApplication::_integrateDataStoreJournal(XBOX::VJSParms_callStaticFunctio
 			CDB4DManager* db4D = NULL;
 			VProgressIndicatorBrigdeToIDB4DToolInterface* progressIndicator = NULL;
 
-			db4D = VComponentManager::RetainComponentOfType<CDB4DManager>();
+			db4D = CDB4DManager::RetainManager();
 			toolintf = db4D->CreateJSDataToolsIntf(jsContext, optionsObj);
 			progressIndicator = new VProgressIndicatorBrigdeToIDB4DToolInterface(toolintf);
 
@@ -1773,7 +1859,7 @@ void VJSApplication::_verifyDataStore( XBOX::VJSParms_callStaticFunction& ioParm
 		else
 			paramObj.MakeEmpty();
 
-		CDB4DManager* db4D = VComponentManager::RetainComponentOfType<CDB4DManager>();
+		CDB4DManager* db4D = CDB4DManager::RetainManager();
 		VError err = VE_OK;
 		CDB4DBase* newdb = db4D->OpenBase(*catalogFile, DB4D_Open_WithSeparateIndexSegment | DB4D_Open_As_XML_Definition | DB4D_Open_No_Respart, &err, FA_READ);
 		if (err == VE_OK)
@@ -2094,22 +2180,6 @@ void VJSApplication::_getPermissions( XBOX::VJSParms_getProperty& ioParms, VRIAS
 	{
 		ioParms.ReturnValue( VJSPermissions::CreateInstance( ioParms.GetContext(), permissions));
 		permissions->Release();
-	}
-	else
-	{
-		ioParms.ReturnUndefinedValue();
-	}
-}
-
-
-void VJSApplication::_getRPCCatalog( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication)
-{
-	VRIAContext *riaContext = VRIAJSRuntimeContext::GetApplicationContextFromJSContext( ioParms.GetContext(), inApplication);
-	VRPCCatalog *rpcCatalog = inApplication->RetainRPCCatalog( riaContext, NULL, NULL, NULL);
-	if (rpcCatalog != NULL)
-	{
-		ioParms.ReturnValue( VJSRPCCatalog::CreateInstance( ioParms.GetContext(), rpcCatalog));
-		rpcCatalog->Release();
 	}
 	else
 	{

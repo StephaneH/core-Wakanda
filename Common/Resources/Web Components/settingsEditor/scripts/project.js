@@ -13,13 +13,14 @@
 * Consequently, no title, copyright or other proprietary rights
 * other than those specified in the applicable license is granted.
 */
+
 function projectDisplay() {
 
     var txt_html = '';
 
     txt_html += displayPublishingInformation();
-	
-	txt_html += displayDatabaseJournaling();
+
+    txt_html += displayDatabaseJournaling();
 
     txt_html += displayTextCompression();
 
@@ -38,7 +39,7 @@ function projectActivate() {
 
     var defaultValue = projectDefault();
     var value;
-	
+
     /* PUBLISHING INFORMATIONS */
     if (jsonData.http) {
 
@@ -92,68 +93,68 @@ function projectActivate() {
         setSelectedValue("listen", defaultValue.project.listen);
         document.getElementById('hostName').value = defaultValue.project.hostName;
     }
-	
-	/* DATABASE JOURNALING INFORMATIONS */
-	var def_enabled = false, 
-		def_journalFolder = false,
-		def_integrate = false,
-		def_restore = false,
-		buffer;
-	
-	if (jsonData.project) {
-		if (jsonData.project[0].database) {
-			if (jsonData.project[0].database[0].journal) {
-				def_enabled = (jsonData.project[0].database[0].journal[0].enabled != undefined);			
-				if (jsonData.project[0].database[0].journal[0].journalFolder) {
-					def_journalFolder = (jsonData.project[0].database[0].journal[0].journalFolder != undefined)
-					&& (jsonData.project[0].database[0].journal[0].journalFolder != null)
-					&& (jsonData.project[0].database[0].journal[0].journalFolder != '');
-				}
-			}
-			if (jsonData.project[0].database[0].autoRecovery) {
-				def_integrate = (jsonData.project[0].database[0].autoRecovery[0].integrateJournal != undefined);
-				def_restore = (jsonData.project[0].database[0].autoRecovery[0].restoreFromLastBackup != undefined);
-			}
-		}
-		/* Compatibility WAK2 -> WAK3*/
-		if (!def_enabled) {
-			def_enabled = (jsonData.project[0].databaseJournalEnabled != undefined);
-			if (def_enabled) {
-				if (!jsonData.project[0].database) {
-					jsonData.project[0].database = new Array();
-					jsonData.project[0].database[0] = new Object();
-				}        
-				if (!jsonData.project[0].database[0].journal) {
-					jsonData.project[0].database[0].journal = new Array();
-					jsonData.project[0].database[0].journal[0] = new Object();
-				}        	
-				jsonData.project[0].database[0].journal[0].enabled = jsonData.project[0].databaseJournalEnabled;				
-				if (!def_journalFolder) {
-					def_journalFolder = true;
-					buffer = (jsonData.project[0].databaseJournalFilePath) ? jsonData.project[0].databaseJournalFilePath
-						: defaultValue.project.database.journal.journalFolder;
-					
-					var x = buffer.lastIndexOf("/");
-					if ((x !=-1) && (x < buffer.length)) {
-						buffer = buffer.substring(0,x+1);
-					}
-					
-					jsonData.project[0].database[0].journal[0].journalFolder = buffer;
-				}
-			}
-		}
-	}	
-	document.getElementById('databaseJournalEnabled').checked = eval((def_enabled) ? jsonData.project[0].database[0].journal[0].enabled
-		: defaultValue.project.database.journal.enabled);		
-	document.getElementById('databaseJournalFilePath').value = (def_journalFolder) ? jsonData.project[0].database[0].journal[0].journalFolder
-		: defaultValue.project.database.journal.journalFolder;
-	document.getElementById('integrateJournal').checked = eval((def_integrate) ? jsonData.project[0].database[0].autoRecovery[0].integrateJournal
-		: defaultValue.project.database.autoRecovery.integrateJournal);
-	document.getElementById('restoreFromLastBackup').checked = eval((def_restore) ? jsonData.project[0].database[0].autoRecovery[0].restoreFromLastBackup
-		: defaultValue.project.database.autoRecovery.restoreFromLastBackup);
-	
-	/* TEXT COMPRESSION */
-	if (jsonData.http) {
+
+    /* DATABASE JOURNALING INFORMATIONS */
+    var def_enabled = false,
+    def_journalFolder = false,
+    def_integrate = false,
+    def_restore = false,
+    buffer;
+
+    if (jsonData.project) {
+        if (jsonData.project[0].database) {
+            if (jsonData.project[0].database[0].journal) {
+                def_enabled = (jsonData.project[0].database[0].journal[0].enabled != undefined);
+                if (jsonData.project[0].database[0].journal[0].journalFolder) {
+                    def_journalFolder = (jsonData.project[0].database[0].journal[0].journalFolder != undefined)
+                    && (jsonData.project[0].database[0].journal[0].journalFolder != null)
+                    && (jsonData.project[0].database[0].journal[0].journalFolder != '');
+                }
+            }
+            if (jsonData.project[0].database[0].autoRecovery) {
+                def_integrate = (jsonData.project[0].database[0].autoRecovery[0].integrateJournal != undefined);
+                def_restore = (jsonData.project[0].database[0].autoRecovery[0].restoreFromLastBackup != undefined);
+            }
+        }
+        /* Compatibility WAK2 -> WAK3*/
+        if (!def_enabled) {
+            def_enabled = (jsonData.project[0].databaseJournalEnabled != undefined);
+            if (def_enabled) {
+                if (!jsonData.project[0].database) {
+                    jsonData.project[0].database = new Array();
+                    jsonData.project[0].database[0] = new Object();
+                }
+                if (!jsonData.project[0].database[0].journal) {
+                    jsonData.project[0].database[0].journal = new Array();
+                    jsonData.project[0].database[0].journal[0] = new Object();
+                }
+                jsonData.project[0].database[0].journal[0].enabled = jsonData.project[0].databaseJournalEnabled;
+                if (!def_journalFolder) {
+                    def_journalFolder = true;
+                    buffer = (jsonData.project[0].databaseJournalFilePath) ? jsonData.project[0].databaseJournalFilePath
+                    : defaultValue.project.database.journal.journalFolder;
+
+                    var x = buffer.lastIndexOf("/");
+                    if ((x !=-1) && (x < buffer.length)) {
+                        buffer = buffer.substring(0,x+1);
+                    }
+
+                    jsonData.project[0].database[0].journal[0].journalFolder = buffer;
+                }
+            }
+        }
+    }
+    document.getElementById('databaseJournalEnabled').checked = eval((def_enabled) ? jsonData.project[0].database[0].journal[0].enabled
+        : defaultValue.project.database.journal.enabled);
+    document.getElementById('databaseJournalFilePath').value = (def_journalFolder) ? jsonData.project[0].database[0].journal[0].journalFolder
+    : defaultValue.project.database.journal.journalFolder;
+    document.getElementById('integrateJournal').checked = eval((def_integrate) ? jsonData.project[0].database[0].autoRecovery[0].integrateJournal
+        : defaultValue.project.database.autoRecovery.integrateJournal);
+    document.getElementById('restoreFromLastBackup').checked = eval((def_restore) ? jsonData.project[0].database[0].autoRecovery[0].restoreFromLastBackup
+        : defaultValue.project.database.autoRecovery.restoreFromLastBackup);
+
+    /* TEXT COMPRESSION */
+    if (jsonData.http) {
 
         /* Enable text compression */
         document.getElementById('allowCompression').checked = eval((jsonData.http[0].allowCompression) ? jsonData.http[0].allowCompression
@@ -161,12 +162,12 @@ function projectActivate() {
 
         /* Compress file over ![stored in bytes and displayed in KB] */
         value = (jsonData.http[0].compressionMinThreshold != undefined) ? jsonData.http[0].compressionMinThreshold
-        	: defaultValue.http.compressionMinThreshold;
+        : defaultValue.http.compressionMinThreshold;
         document.getElementById('compressionMinThreshold').value = (value / 1024).toFixed();
 
         /* Compress file under ![stored in bytes and displayed in MB] */
         value = (jsonData.http[0].compressionMaxThreshold != undefined) ? jsonData.http[0].compressionMaxThreshold
-        	: defaultValue.http.compressionMaxThreshold;
+        : defaultValue.http.compressionMaxThreshold;
         document.getElementById('compressionMaxThreshold').value = (value / 1048576).toFixed();
 
     } else {
@@ -174,7 +175,6 @@ function projectActivate() {
         document.getElementById('allowCompression').checked = eval(defaultValue.http.allowCompression);
         document.getElementById('compressionMinThreshold').value = (defaultValue.http.compressionMinThreshold / 1024).toFixed();
         document.getElementById('compressionMaxThreshold').value = (defaultValue.http.compressionMaxThreshold / 1048576).toFixed();
-
     }
 
     /* SECURE CONNECTIONS */
@@ -186,18 +186,18 @@ function projectActivate() {
 
         /* Port number */
         document.getElementById('SSLPort').value = (jsonData.http[0].SSLPort != undefined) ? jsonData.http[0].SSLPort
-        	: defaultValue.http.SSLPort;
+        : defaultValue.http.SSLPort;
 
         /* Certificate path */
         if (jsonData.http[0].SSLCertificatePath != undefined) // #3677
         {
-			/*document.getElementById('SSLCertificatePath').value = (jsonData.http[0].SSLCertificatePath) ? studio
+            /*document.getElementById('SSLCertificatePath').value = (jsonData.http[0].SSLCertificatePath) ? studio
 			.File(jsonData.http[0].SSLCertificatePath).name
 			: defaultValue.http.SSLCertificatePath;*/
-			document.getElementById('SSLCertificatePath').value = (jsonData.http[0].SSLCertificatePath != undefined) ? jsonData.http[0].SSLCertificatePath
-			: defaultValue.http.SSLCertificatePath;
+            document.getElementById('SSLCertificatePath').value = (jsonData.http[0].SSLCertificatePath != undefined) ? jsonData.http[0].SSLCertificatePath
+            : defaultValue.http.SSLCertificatePath;
         }
-        
+
         /* Mandatory secure connection */
         document.getElementById('SSLMandatory').checked = eval((jsonData.http[0].SSLMandatory) ? jsonData.http[0].SSLMandatory
             : defaultValue.http.SSLMandatory);
@@ -208,7 +208,6 @@ function projectActivate() {
         document.getElementById('SSLPort').value = defaultValue.http.SSLPort;
         document.getElementById('SSLCertificatePath').value = defaultValue.http.SSLCertificatePath;
         document.getElementById('SSLMandatory').checked = eval(defaultValue.http.SSLMandatory);
-
     }
 
     /* KEEP-ALIVE CONNECTIONS */
@@ -220,18 +219,17 @@ function projectActivate() {
 
         /* Number of request by connection */
         document.getElementById('keepAliveMaxRequests').value = (jsonData.http[0].keepAliveMaxRequests != undefined) ? jsonData.http[0].keepAliveMaxRequests
-        	: defaultValue.http.keepAliveMaxRequests;
+        : defaultValue.http.keepAliveMaxRequests;
 
         /* Timeout */
         document.getElementById('keepAliveTimeOut').value = (jsonData.http[0].keepAliveTimeOut != undefined) ? jsonData.http[0].keepAliveTimeOut
-        	: defaultValue.http.keepAliveTimeOut;
+        : defaultValue.http.keepAliveTimeOut;
 
     } else {
 
         document.getElementById('acceptKeepAliveConnections').checked = eval(defaultValue.http.acceptKeepAliveConnections);
         document.getElementById('keepAliveMaxRequests').value = defaultValue.http.keepAliveMaxRequests;
         document.getElementById('keepAliveTimeOut').value = defaultValue.http.keepAliveTimeOut;
-
     }
 
     /* WEB LOG */
@@ -243,17 +241,17 @@ function projectActivate() {
 
         /* Tokens */
         var txtTokens = (jsonData.http[0].logTokens != undefined) ? jsonData.http[0].logTokens
-        	: defaultValue.http.logTokens;
+        : defaultValue.http.logTokens;
 
         /*if (txtTokens == '')
             if (txtLogFormat == "ELF")
                 txtTokens = defaultValue.http.logTokens;*/
 
         document.getElementById('logPath').value = (jsonData.http[0].logPath != undefined) ? jsonData.http[0].logPath
-        	: defaultValue.http.logPath;
+        : defaultValue.http.logPath;
 
         document.getElementById('logMaxSize').value = (jsonData.http[0].logMaxSize != undefined) ? jsonData.http[0].logMaxSize
-        	: defaultValue.http.logMaxSize;
+        : defaultValue.http.logMaxSize;
 
     } else {
 
@@ -263,12 +261,14 @@ function projectActivate() {
         setSelectedValue("logFormat", defaultValue.http.logFormat);
         txtTokens = (defaultValue.http.logFormat = "ELF") ? defaultValue.http.logTokens
         : '';
-        
+
         document.getElementById('logPath').value = defaultValue.http.logPath;
         document.getElementById('logMaxSize').value = defaultValue.http.logMaxSize;
     }
 
-    uncheckAllTokens();
+    $('[name="ELF-TOKEN"]').each(function() {
+        $(this).removeProp("checked");
+    });
 
     if (txtTokens) {
         var token = txtTokens.split(";");
@@ -286,52 +286,47 @@ function projectActivate() {
         // Compatibility WAK1
         // ---------------------------------------------------
         var tempo = new Array();
-
-        for ( var i = 0; i < jsonData.service.length; i++) {
+        var i = 0;
+        for (i = 0; i < jsonData.service.length; i++) {
 
             tempo[i] = jsonData.service[i].name;
-
         }
 
         var tempService;
-        if (tempo.indexOf('webApp') == -1) {
-            tempService = new Object;
-            tempService.name = 'webApp';
+        for (i = 0; i < wakServices.length; i++) {
 
-            if (jsonData.webApp) {
-                if (jsonData.webApp[0].enabled)
-                    tempService.autoStart = jsonData.webApp[0].enabled;
-                if (jsonData.webApp[0].directoryIndex)
-                    tempService.directoryIndex = jsonData.webApp[0].directoryIndex;
+            if (tempo.indexOf(wakServices[i]) == -1) {
+
+                tempService = new Object;
+
+                //common
+                tempService.name = wakServices[i];
+
+                if (jsonData[wakServices[i]]) {
+                    if (jsonData[wakServices[i]][0].enabled)
+                        tempService.autoStart = jsonData[wakServices[i]][0].enabled;
+                }
+
+                //specific
+                switch (tempService.name) {
+
+                    case "webApp":
+                        if (jsonData.webApp[0].directoryIndex)
+                            tempService.directoryIndex = jsonData.webApp[0].directoryIndex;
+                        break;
+
+                    case "rpc":
+                        if (jsonData.rpcService) {
+                            if (jsonData.rpcService[0].enabled)
+                                tempService.autoStart = jsonData.rpcService[0].enabled;
+                            if (jsonData.rpcService[0].pattern)
+                                tempService.proxyPattern = jsonData.rpcService[0].pattern;
+                        }
+                        break;
+                }
+
+                jsonData.service.push(tempService);
             }
-
-            jsonData.service.push(tempService);
-        }
-
-        if (tempo.indexOf('rpc') == -1) {
-            tempService = new Object;
-            tempService.name = 'rpc';
-
-            if (jsonData.rpcService) {
-                if (jsonData.rpcService[0].enabled)
-                    tempService.autoStart = jsonData.rpcService[0].enabled;
-                if (jsonData.rpcService[0].pattern)
-                    tempService.proxyPattern = jsonData.rpcService[0].pattern;
-            }
-
-            jsonData.service.push(tempService);
-        }
-
-        if (tempo.indexOf('dataStore') == -1) {
-            tempService = new Object;
-            tempService.name = 'dataStore';
-
-            if (jsonData.dataService) {
-                if (jsonData.dataService[0].enabled)
-                    tempService.autoStart = jsonData.dataService[0].enabled;
-            }
-
-            jsonData.service.push(tempService);
         }
         // ------------------------------------------------------------------------
 
@@ -343,123 +338,134 @@ function projectActivate() {
             Services[i] = clone(service);
             Services[i].index = i;
 
-            switch (service.name) {
+            var index = wakServices.indexOf(service.name);
+            if(index != -1) {
 
-                case "webApp":
-                    Services[i].id = 1;
-                    document.getElementById('autoStart_' + Services[i].id).checked = eval((service.autoStart) ? service.autoStart
-                        : defaultValue.services.webApp.autoStart);
-                    // directoryIndex is displayed in group Publishing information
-                    /*document.getElementById('directoryIndex').value = (service.directoryIndex) ? service.directoryIndex
-                    	: defaultValue.services.webApp.directoryIndex;*/
-                    break;
+                index++;
 
-                case "rpc":
-                    Services[i].id = 2;
-                    document.getElementById('autoStart_' + Services[i].id).checked = eval((service.autoStart) ? service.autoStart
-                        : defaultValue.services.webApp.autoStart);
-                    document.getElementById('proxyPattern_2').value = (service.proxyPattern) ? service.proxyPattern
-                    	: defaultValue.services.rpc.proxyPattern;
-                    document.getElementById('publishInClientGlobalNamespace_2').checked = eval((service.publishInClientGlobalNamespace) ? service.publishInClientGlobalNamespace
-                        : defaultValue.services.rpc.publishInClientGlobalNamespace);
-                    break;
+                //common
+                document.getElementById('autoStart_' + index).checked = eval((service.autoStart) ? service.autoStart
+                    : defaultValue.services[service.name].autoStart);
 
-                case "dataStore":
-                    Services[i].id = 3;
-                    document.getElementById('autoStart_' + Services[i].id).checked = eval((service.autoStart) ? service.autoStart
-                        : defaultValue.services.dataStore.autoStart);
-                    break;
+                //specific
+                switch (service.name) {
 
-                case "upload":
-                    Services[i].id = 4;
-                    document.getElementById('autoStart_' + Services[i].id).checked = eval((service.autoStart) ? service.autoStart
-                        : defaultValue.services.upload.autoStart);
-                    break;
+                    case "rpc":
+                        document.getElementById('proxyPattern_2').value = (service.proxyPattern) ? service.proxyPattern
+                        : defaultValue.services[service.name].proxyPattern;
+                        document.getElementById('publishInClientGlobalNamespace_2').checked = eval((service.publishInClientGlobalNamespace) ? service.publishInClientGlobalNamespace
+                            : defaultValue.services[service.name].publishInClientGlobalNamespace);
+                        break;
 
-                default:
-                    j = j + 1;
-                    Services[i].id = j;
+                    case "upload":
+                        $('#maxSize_4').val(service.maxSize ? service.maxSize : defaultValue.services[service.name].maxSize);
+                        $('#maxFiles_4').val(service.maxFiles ? service.maxFiles : defaultValue.services[service.name].maxFiles);
+                        $('#sizeUnity_4').val(service.sizeUnity ? service.sizeUnity : defaultValue.services[service.name].sizeUnity);
+
+                        if(parseInt($('#maxSize_4').val()) < 0){
+                            $('#maxSize_4').val('unlimited')
+                        }
+                        if(parseInt($('#maxFiles_4').val()) < 0){
+                            $('#maxFiles_4').val('unlimited')
+                        }
+
+                        break;
+                }
+
+            } else {
+
+                index = ++j;
+
+                //known attributes common
+                if (service.autoStart) {
+
+                    document.getElementById('autoStart_' + index).checked = eval((service.autoStart)) ? service.autoStart
+                    : false;
+                }
             }
 
-            document.getElementById('enabled_' + Services[i].id).checked = (service.enabled) ? eval(service.enabled)
+            //minimum suite
+            Services[i].id = index;
+            document.getElementById('enabled_' + index).checked = (service.enabled) ? eval(service.enabled)
             : true;
-
         }
 
     } else {
 
-        /* DEFAULT VALUES */
-        document.getElementById('enabled_1').checked = true;
-        document.getElementById('autoStart_1').checked = eval(defaultValue.services.webApp.autoStart);
-        //document.getElementById('directoryIndex').value = defaultValue.services.webApp.directoryIndex;
+        //DEFAULT VALUES
 
-        document.getElementById('enabled_2').checked = true;
-        document.getElementById('autoStart_2').checked = eval(defaultValue.services.rpc.autoStart);
+        //common
+        for ( i = 0; i < wakServices.length; i++) {
+
+            j = i+1;
+
+            document.getElementById('enabled_' + j).checked = true;
+            document.getElementById('autoStart_' + j).checked = eval(defaultValue.services[wakServices[i]].autoStart);
+        }
+
+        //specific
+        //rpc
         document.getElementById('proxyPattern_2').value = defaultValue.services.rpc.proxyPattern;
         document.getElementById('publishInClientGlobalNamespace_2').checked = eval(defaultValue.services.rpc.publishInClientGlobalNamespace);
-
-        document.getElementById('enabled_3').checked = true;
-        document.getElementById('autoStart_3').checked = eval(defaultValue.services.dataStore.autoStart);
-
-        document.getElementById('enabled_4').checked = true;
-        document.getElementById('autoStart_4').checked = eval(defaultValue.services.upload.autoStart);
     }
 
     // UPDATE SCREEN
     projectUpdate();
 
     // INSTALL EVENTS
+    if (true) {
+        // ****** PUBLISHING INFORMATIONS ******
+        $("#autoStart").click(projectOnClick);
+        $("#listen").change(projectOnSelect);
+        $("#port").change(projectOnChange);
+        $("#hostName").change(projectOnChange);
+        //$("#directoryIndex").change(projectOnChange);
+        $("#useCache").click(projectOnClick);
+        $("#pageCacheSize").change(projectOnChange);
 
-    // ****** PUBLISHING INFORMATIONS ******
-    $("#autoStart").click(projectOnClick);
-    $("#listen").change(projectOnSelect);
-    $("#port").change(projectOnChange);
-    $("#hostName").change(projectOnChange);
-    //$("#directoryIndex").change(projectOnChange);
-    $("#useCache").click(projectOnClick);
-    $("#pageCacheSize").change(projectOnChange);
-	
-	// ****** JOURNALING INFORMATIONS ******
-	$("#databaseJournalEnabled").click(projectOnClick);
-	$("#databaseJournalFilePath").change(projectOnChange);
-	$("#inDataFolder").click(projectOnClick);
-	$("#integrateJournal").click(projectOnClick);
-	$("#restoreFromLastBackup").click(projectOnClick);
+        // ****** JOURNALING INFORMATIONS ******
+        $("#databaseJournalEnabled").click(projectOnClick);
+        $("#databaseJournalFilePath").change(projectOnChange);
+        $("#inDataFolder").click(projectOnClick);
+        $("#custom").click(projectOnClick);
+        $("#integrateJournal").click(projectOnClick);
+        $("#restoreFromLastBackup").click(projectOnClick);
 
-    // ****** TEXT COMPRESSION ******
-    $("#allowCompression").click(projectOnClick);
-    $("#compressionMinThreshold").change(projectOnChange);
-    $("#compressionMaxThreshold").change(projectOnChange);
+        // ****** TEXT COMPRESSION ******
+        $("#allowCompression").click(projectOnClick);
+        $("#compressionMinThreshold").change(projectOnChange);
+        $("#compressionMaxThreshold").change(projectOnChange);
 
-    // ****** SECURE CONNECTIONS ******
-    $("#allowSSL").click(projectOnClick);
-    $("#SSLPort").change(projectOnChange);
-    $("#SSLCertificatePath").change(projectOnChange);
-    $("#SSLMandatory").click(projectOnClick);
+        // ****** SECURE CONNECTIONS ******
+        $("#allowSSL").click(projectOnClick);
+        $("#SSLPort").change(projectOnChange);
+        $("#SSLCertificatePath").change(projectOnChange);
+        $("#SSLMandatory").click(projectOnClick);
 
-    // ****** KEEP ALIVE CONNECTION ******
-    $("#acceptKeepAliveConnections").click(projectOnClick);
-    $("#maximumRequestsByConnection").change(projectOnChange);
-    $("#maximumTimeout").change(projectOnChange);
+        // ****** KEEP ALIVE CONNECTION ******
+        $("#acceptKeepAliveConnections").click(projectOnClick);
+        $("#maximumRequestsByConnection").change(projectOnChange);
+        $("#maximumTimeout").change(projectOnChange);
 
-    // ****** WEB LOG ******
-    $("#logFormat").change(projectOnSelect);
-    $("#logMaxSize").change(projectOnChange);
-    $("#logPath").change(projectOnChange);
+        // ****** WEB LOG ******
+        $("#logFormat").change(projectOnSelect);
+        $("#logMaxSize").change(projectOnChange);
+        $("#logPath").change(projectOnChange);
 
-    // ****** SERVICES ******
-    $('.service').change(serviceEvent);
+        // ****** SERVICES ******
+        $('.service').change(serviceEvent);
 
-    // ****** COMMON ******
-    $('[name="buttonBrowse"]').click(browse);
-    $('.stepper').click(stepper);
-    $('.stepper').click(projectOnChange);
-    $('.stepper').click(setDirty);
-    $('[name="ELF-TOKEN"]').change(setTokens);
-    $("[name='checkAll']").click(checkAllTokens);
-    $("[name='checkAll']").click(setTokens);
-    $("[name='uncheckAll']").click(uncheckAllTokens);
-    $("[name='uncheckAll']").click(setTokens);
+        // ****** COMMON ******
+        $('[name="buttonBrowse"]').click(browse);
+        $('.stepper').click(stepper);
+        $('.stepper').click(projectOnChange);
+        $('.stepper').click(setDirty);
+        $('[name="ELF-TOKEN"]').change(setTokens);
+        $("[name='checkAll']").click(checkAllTokens);
+        $("[name='checkAll']").click(setTokens);
+        $("[name='uncheckAll']").click(uncheckAllTokens);
+        $("[name='uncheckAll']").click(setTokens);
+    }
 }
 
 function projectUpdate(what) {
@@ -475,36 +481,39 @@ function projectUpdate(what) {
             if (booChecked)
                 document.getElementById('pageCacheSize').focus();
     }
-	
-	if ((!what) || (what == 'databaseJournalEnabled')) {
-	    booChecked = document.getElementById('databaseJournalEnabled').checked;
+
+    if ((!what) || (what == 'databaseJournalEnabled')) {
+        booChecked = document.getElementById('databaseJournalEnabled').checked;
 
         $("#databaseJournalFilePath").prop("disabled", true);//we don't want user to edit
         $("[target='databaseJournalFilePath']").prop("disabled", !booChecked);
         $("#inDataFolder").prop("disabled", !booChecked);
+        $("#custom").prop("disabled", !booChecked);
         $("#integrateJournal").prop("disabled", !booChecked);
         $("#restoreFromLastBackup").prop("disabled", !booChecked);
-        
+
         if(booChecked) {
-			var inDataFolder = (document.getElementById('databaseJournalFilePath').value == "./");
-			document.getElementById('inDataFolder').checked = inDataFolder;        
-			$("[target='databaseJournalFilePath']").prop("disabled", !inDataFolder); 
-			$("[target='databaseJournalFilePath']").prop("disabled", inDataFolder);  
-        }   
+            var inDataFolder = (document.getElementById('databaseJournalFilePath').value == "./");
+            document.getElementById('inDataFolder').checked = inDataFolder;
+            document.getElementById('custom').checked = !inDataFolder;
+            $("[target='databaseJournalFilePath']").prop("disabled", !inDataFolder);
+            $("[target='databaseJournalFilePath']").prop("disabled", inDataFolder);
+        }
     }
-    
-    if (what == 'inDataFolder') {
-	    booChecked = document.getElementById('inDataFolder').checked;
+
+    if ((what == 'inDataFolder') | (what == 'custom')){
+        booChecked = document.getElementById('inDataFolder').checked;
 
         $("[target='databaseJournalFilePath']").prop("disabled", booChecked);
-        
+        document.getElementById('inDataFolder').checked = booChecked;
+        document.getElementById('custom').checked = !booChecked;
+
         if (booChecked) {
-        	
-        	document.getElementById('databaseJournalFilePath').value = "./";
-        	
-        }    
+
+            document.getElementById('databaseJournalFilePath').value = "./";
+        }
     }
-	
+
     if ((!what) || (what == 'allowCompression')) {
 
         booChecked = document.getElementById('allowCompression').checked;
@@ -516,7 +525,7 @@ function projectUpdate(what) {
             if (booChecked)
                 document.getElementById('compressionMinThreshold').focus();
     }
-	
+
     if ((!what) || (what == 'allowSSL')) {
 
         booChecked = document.getElementById('allowSSL').checked;
@@ -525,6 +534,13 @@ function projectUpdate(what) {
         $("[target='SSLCertificatePath']").prop("disabled", !booChecked);
         $("#SSLCertificatePath").prop("disabled", !booChecked);
         $("#SSLMandatory").prop("disabled", !booChecked);
+        if(document.getElementById('warningSSL')) {
+            if (booChecked) {
+                $("#warningSSL").removeClass("cached");
+            } else {
+                $("#warningSSL").addClass("cached");
+            }
+        }
     }
 
     if ((!what) || (what == 'acceptKeepAliveConnections')) {
@@ -546,7 +562,7 @@ function projectUpdate(what) {
             $("[target='logPath']").attr("disabled", true);
             $("#logPath").attr("disabled", 'disabled');
             $("#logMaxSize").attr("disabled", 'disabled');
-            
+
         } else {
 
             $("#withLog").removeClass("cached");
@@ -562,18 +578,44 @@ function projectUpdate(what) {
             $("#logMaxSize").removeAttr("disabled");
         }
     }
-    
+
     //WAK0077166
     if ((!what) || (what == 'services')) {
-    
-		for ( var i = 0; i < jsonData.service.length; i++) {			
-			var j = i+1;
-			booChecked = document.getElementById('enabled_' + j).checked;
-			$("[id$='_" + j + "']").attr("disabled", !booChecked);
-			$("[id='enabled_" + j + "']").attr("disabled", false);  
-		}
+
+        var i = 0;
+        var j = 1000;
+        var index = 0;
+
+        if (jsonData.service) {
+
+            for ( i = 0; i < jsonData.service.length; i++) {
+
+                index =  wakServices.indexOf(jsonData.service[i].name);
+
+                if (index == -1) {
+                    index = ++j;
+                } else {
+                    index++;
+                }
+
+                booChecked = document.getElementById('enabled_' + index).checked;
+                $("[id$='_" + index + "']").attr("disabled", !booChecked);
+                $("[id='enabled_" + index + "']").attr("disabled", false);
+            }
+
+        } else {
+
+            for ( i = 0; i < wakServices.length; i++) {
+
+                index = i+1
+                booChecked = document.getElementById('enabled_' + index).checked;
+                $("[id$='_" + index + "']").attr("disabled", !booChecked);
+                $("[id='enabled_" + index + "']").attr("disabled", false);
+            }
+        }
     }
-    
+
+    return true;
 }
 
 function serviceEvent() {
@@ -599,24 +641,11 @@ function serviceEvent() {
 
         var tempService = new Object;
 
-        switch(serviceID) {
-            case 1 :
-                tempService.name = 'webApp';
-                break;
-            case 2 :
-                tempService.name = 'rpc';
-                break;
-            case 3 :
-                tempService.name = 'dataStore';
-                break;
-            case 4 :
-                tempService.name = 'upload';
-                break;
-        }
+        tempService.name = wakServices[serviceID-1];
 
         switch (type) {
             case 'checkbox':
-                tempService[id] = this.checked; 
+                tempService[id] = this.checked;
                 break;
 
             case 'text':
@@ -634,10 +663,20 @@ function serviceEvent() {
                 break;
 
             case 'text':
+            case 'select-one':
                 jsonData.service[index][id] = this.value;
                 break;
         }
 
+        if(jsonData.service[index].name == 'upload' && id != 'sizeUnity') {
+                if(this.value < 0 || (isNaN(this.value) && this.value != 'unlimited')){
+                    this.value = 'unlimited';
+                }
+
+                if(isNaN(jsonData.service[index][id])){
+                    jsonData.service[index][id] = "-1";
+                }
+        }
     }
 
     setDirty();
@@ -649,40 +688,39 @@ function projectOnClick() {
     var boo_checked = this.checked;
     var id = this.id;
 
-	switch (id) {
-		
+    switch (id) {
+
         case 'databaseJournalEnabled':
         case 'inDataFolder':
-        //case 'otherLocation':                
-        	validate('project');        	
-         	if (!jsonData.project[0].database) {
-        		jsonData.project[0].database = new Array();
-        		jsonData.project[0].database[0] = new Object();
-        	}        
-         	if (!jsonData.project[0].database[0].journal) {
-        		jsonData.project[0].database[0].journal = new Array();
-        		jsonData.project[0].database[0].journal[0] = new Object();
-        	}        	
+        case 'custom':
+            validate('project');
+            if (!jsonData.project[0].database) {
+                jsonData.project[0].database = new Array();
+                jsonData.project[0].database[0] = new Object();
+            }
+            if (!jsonData.project[0].database[0].journal) {
+                jsonData.project[0].database[0].journal = new Array();
+                jsonData.project[0].database[0].journal[0] = new Object();
+            }
             break;
-        
-        
+
+
         case 'integrateJournal':
-        case 'restoreFromLastBackup':                
-        	validate('project');        	
-         	if (!jsonData.project[0].database) {
-        		jsonData.project[0].database = new Array();
-        		jsonData.project[0].database[0] = new Object();
-        	}        
-         	if (!jsonData.project[0].database[0].autoRecovery) {
-        		jsonData.project[0].database[0].autoRecovery = new Array();
-        		jsonData.project[0].database[0].autoRecovery[0] = new Object();
-        	}        	
+        case 'restoreFromLastBackup':
+            validate('project');
+            if (!jsonData.project[0].database) {
+                jsonData.project[0].database = new Array();
+                jsonData.project[0].database[0] = new Object();
+            }
+            if (!jsonData.project[0].database[0].autoRecovery) {
+                jsonData.project[0].database[0].autoRecovery = new Array();
+                jsonData.project[0].database[0].autoRecovery[0] = new Object();
+            }
             break;
-        
     }
-    
+
     switch (id) {
-        
+
         case 'autoStart':
         case 'useCache':
         case 'allowCompression':
@@ -692,20 +730,19 @@ function projectOnClick() {
             validate('http');
             jsonData.http[0][id] = boo_checked;
             break;
-            
-		case 'databaseJournalEnabled':
-			jsonData.project[0].database[0].journal[0].enabled = boo_checked;			
-			break;
-			
-        case 'inDataFolder':
-        	jsonData.project[0].database[0].journal[0].journalFolder = './';               
-        	break;
-			
-		case 'integrateJournal':
-		case 'restoreFromLastBackup':
-			jsonData.project[0].database[0].autoRecovery[0][id] = boo_checked;			
-			break;
 
+        case 'databaseJournalEnabled':
+            jsonData.project[0].database[0].journal[0].enabled = boo_checked;
+            break;
+
+        case 'inDataFolder':
+            jsonData.project[0].database[0].journal[0].journalFolder = './';
+            break;
+
+        case 'integrateJournal':
+        case 'restoreFromLastBackup':
+            jsonData.project[0].database[0].autoRecovery[0][id] = boo_checked;
+            break;
     }
 
     setDirty();
@@ -716,8 +753,9 @@ function projectOnClick() {
         case 'allowCompression':
         case 'allowSSL':
         case 'acceptKeepAliveConnections':
-		case 'databaseJournalEnabled':
-		case 'inDataFolder':
+        case 'databaseJournalEnabled':
+        case 'inDataFolder':
+        case 'custom':
             projectUpdate(id);
     }
 }
@@ -739,7 +777,7 @@ function projectOnSelect () {
             projectUpdate('logFormat');
             break;
     }
-    setDirty();    
+    setDirty();
 }
 
 function projectOnChange() {
@@ -747,8 +785,8 @@ function projectOnChange() {
     var me = $(this).parent().find("input")
     var id = $(me).prop("id");
     if (id == "") {
-    	me = me[1];
-    	id = $(me).prop("id");
+        me = me[1];
+        id = $(me).prop("id");
     }
     var value = $(me).val();
     var min = $(me).prop("min");
@@ -824,61 +862,60 @@ function projectOnChange() {
                 break;
 
             case 'hostName':
-			    validate('project');
+                validate('project');
                 jsonData.project[0][id] = value;
                 break;
-                
-			case 'databaseJournalFilePath':
-			{
-				var defaultValue = projectDefault();
-				validate('project');
-				if (!jsonData.project[0].database) {
-					jsonData.project[0].database = new Array();
-					jsonData.project[0].database[0] = new Object();
-				}        
-				if (!jsonData.project[0].database[0].journal) {
-					jsonData.project[0].database[0].journal = new Array();
-					jsonData.project[0].database[0].journal[0] = new Object();
-				}        	
-				jsonData.project[0].database[0].journal[0].journalFolder = value
-			}
-			break;
-			
+
+            case 'databaseJournalFilePath':
+            {
+                var defaultValue = projectDefault();
+                validate('project');
+                if (!jsonData.project[0].database) {
+                    jsonData.project[0].database = new Array();
+                    jsonData.project[0].database[0] = new Object();
+                }
+                if (!jsonData.project[0].database[0].journal) {
+                    jsonData.project[0].database[0].journal = new Array();
+                    jsonData.project[0].database[0].journal[0] = new Object();
+                }
+                jsonData.project[0].database[0].journal[0].journalFolder = value
+            }
+            break;
+
         }
 
         setDirty();
 
         // update screen & verifications
         switch (id) {
-        
+
             case 'logFormat':
                 projectUpdate(id);
-                break;                
-                
+                break;
+
             case 'SSLCertificatePath':
-            	 /*
-            	 if((value.indexOf("/") = 0) | (!value.length)) {
-            	 	value = studio.editor.getProjectPath() + value.substr(1);
-            	 }
-            	 if (!studio.File('file:///'+value+'cert.pem').exists) {
-        				studio.alert('Warning: The file "cert.pem" is not found in folder "' + value +'"');
-        			} else {
-						if (!studio.File('file:///'+value+'key.pem').exists) {
-							studio.alert('Warning: The file "key.pem" is not found in folder "' + value +'"');
-						}
-        			}
-        		*/
-                break;  
-        	}
+                /*
+                if((value.indexOf("/") = 0) | (!value.length)) {
+                    value = studio.editor.getProjectPath() + value.substr(1);
+                }
+                if (!studio.File('file:///'+value+'cert.pem').exists) {
+                    studio.alert('Warning: The file "cert.pem" is not found in folder "' + value +'"');
+                } else {
+                    if (!studio.File('file:///'+value+'key.pem').exists) {
+                        studio.alert('Warning: The file "key.pem" is not found in folder "' + value +'"');
+                    }
+                }
+                */
+                break;
+        }
 
     } else {
 
-         value = setConstraints(eval(value), eval(min), eval(max))
-         $(me).val([value]);
-         document.getElementById([id]).focus();
-         document.getElementById([id]).select();
+        value = setConstraints(eval(value), eval(min), eval(max))
+        $(me).val([value]);
+        document.getElementById([id]).focus();
+        document.getElementById([id]).select();
     }
-
 }
 
 function serviceIndex (id) {
@@ -896,7 +933,7 @@ function checkAllTokens() {
     $('[name="ELF-TOKEN"]').each(function() {
         $(this).prop("checked", "true");
     });
-    
+
     setTokens();
 }
 
@@ -904,7 +941,7 @@ function uncheckAllTokens() {
     $('[name="ELF-TOKEN"]').each(function() {
         $(this).removeProp("checked");
     });
-    
+
     setTokens();
 }
 
@@ -923,127 +960,158 @@ function setTokens() {
     setDirty();
 }
 
+// Make sure only 1 file browser can be launched
+var fileBrowserLock = false;
+function browseAndGetFile(rootPath, msg) {
+    if (fileBrowserLock)
+        return;
+
+    fileBrowserLock = true;
+    var filePath = studio.editor.selectFile(rootPath, msg);
+    fileBrowserLock = false;
+
+    return filePath;
+}
+
+// Make sure only 1 folder browser can be launched
+var folderBrowserLock = false;
+function browseAndGetFolder(rootPath, msg) {
+    if (folderBrowserLock)
+        return;
+
+    folderBrowserLock = true;
+    var filePath = studio.editor.selectFolder(rootPath, msg);
+    folderBrowserLock = false;
+
+    return filePath;
+}
+
 function browse() {
 
-    // get the project folder path	
- 	var rootPath = studio.editor.getProjectPath();
-    var relativePath = ""; 
-	var filePath = "";
-    var parentPath = "";    
-	var target = this.attributes.target.value;
- 	
-	 switch (target) {
-	 
-		case 'SSLCertificatePath':		
-		
-			filePath = studio.editor.selectFile(rootPath + "cert.pem","Please select the certificat file 'cert.pem' you want to use.");
-			break;
-	 
-		case 'databaseJournalFilePath':
-			filePath = studio.editor.selectFolder(rootPath,"Please select the journal's folder you wish to use.");
-			break;
-			
-		case 'logPath':
-			filePath = studio.editor.selectFolder(rootPath,"Please select the logs' folder you want to use.");
-			break;
-			
-		default:
-			filePath = studio.editor.selectFile(rootPath,"Please select the file you want to use."); 		 
-	 } 
+    // get the project folder path
+    var rootPath = studio.editor.getProjectPath();
+    var relativePath = "";
+    var filePath = "";
+    var parentPath = "";
+    var target = this.attributes.target.value;
+
+    switch (target) {
+
+        case 'SSLCertificatePath':
+
+            filePath = browseAndGetFile(rootPath + "cert.pem", "Please select the certificat file 'cert.pem' you want to use.");
+            //filePath = studio.editor.selectFile(rootPath + "cert.pem","Please select the certificat file 'cert.pem' you want to use.");
+            break;
+
+        case 'databaseJournalFilePath':
+            filePath = browseAndGetFolder(rootPath, "Please select the journal's folder you wish to use.");
+            //filePath = studio.editor.selectFolder(rootPath,"Please select the journal's folder you wish to use.");
+            break;
+
+        case 'logPath':
+            filePath = browseAndGetFolder(rootPath, "Please select the logs' folder you want to use.");
+            //filePath = studio.editor.selectFolder(rootPath,"Please select the logs' folder you want to use.");
+            break;
+
+        default:
+            filePath = browseAndGetFile(rootPath + "cert.pem", "Please select the certificat file 'cert.pem' you want to use.");
+    //filePath = studio.editor.selectFile(rootPath + "cert.pem","Please select the certificat file 'cert.pem' you want to use.");
+    }
 
     if (filePath != undefined && filePath.length) {
-                
+
         //delete the file name
         var x = filePath.lastIndexOf("/");
         if (x != -1) {
-			parentPath = filePath.substr(0,x+1);      
+            parentPath = filePath.substr(0,x+1);
         } else {
-        	parentPath = filePath;
-        }    
-         
-         if (parentPath.indexOf(rootPath) == 0) {
-         	if (parentPath == rootPath) {
-         	
-         		relativePath="";
-         		
-         	} else {
-         	
-         		relativePath = parentPath.substr(rootPath.length);         	
-         	}
-         } else {
-         	relativePath = parentPath;
-         }    
-                            
-         switch (target) {
-
-                case 'SSLCertificatePath': 
-                	
-                	validate('http');                    
-                    jsonData.http[0].SSLCertificatePath = relativePath;
-                    document.getElementById('SSLCertificatePath').value = relativePath;
-        			
-        			if (!studio.File('file:///'+parentPath+'cert.pem').exists) {
-        				studio.alert('Warning: The file "cert.pem" is not found in folder "' + parentPath +'"');
-        			} else {
-						if (!studio.File('file:///'+parentPath+'key.pem').exists) {
-							studio.alert('Warning: The file "key.pem" is not found in folder "' + parentPath +'"');
-						}
-        			}
-                    break;
-					
-				case 'databaseJournalFilePath':
-				{
-					var defaultValue = projectDefault();
-					//validate('project');
-					//here filepath is a folder no need for extra '/'
-					//jsonData.project[0].databaseJournalFilePath = filePath + defaultValue.project.databaseJournalFileName;
-					validate('project');
-					if (!jsonData.project[0].database) {
-						jsonData.project[0].database = new Array();
-						jsonData.project[0].database[0] = new Object();
-					}        
-					if (!jsonData.project[0].database[0].journal) {
-						jsonData.project[0].database[0].journal = new Array();
-						jsonData.project[0].database[0].journal[0] = new Object();
-					}        	
-					jsonData.project[0].database[0].journal[0].journalFolder = filePath
-					document.getElementById('databaseJournalFilePath').value = jsonData.project[0].database[0].journal[0].journalFolder;
-				}
-				break;
-
-                case 'logPath':
-                    validate('http');
-                    jsonData.http[0].logPath = relativePath;
-                    document.getElementById('logPath').value = relativePath;
-                    break;
+            parentPath = filePath;
         }
-        
+
+        if (parentPath.indexOf(rootPath) == 0) {
+            if (parentPath == rootPath) {
+
+                relativePath="";
+
+            } else {
+
+                relativePath = parentPath.substr(rootPath.length);
+            }
+        } else {
+            relativePath = parentPath;
+        }
+
+        switch (target) {
+
+            case 'SSLCertificatePath':
+
+                validate('http');
+                jsonData.http[0].SSLCertificatePath = relativePath;
+                document.getElementById('SSLCertificatePath').value = relativePath;
+
+                if (!studio.File('file:///'+parentPath+'cert.pem').exists) {
+                    studio.alert('Warning: The file "cert.pem" is not found in folder "' + parentPath +'"');
+                } else {
+                    if (!studio.File('file:///'+parentPath+'key.pem').exists) {
+                        studio.alert('Warning: The file "key.pem" is not found in folder "' + parentPath +'"');
+                    }
+                }
+                break;
+
+            case 'databaseJournalFilePath':
+            {
+                var defaultValue = projectDefault();
+                //validate('project');
+                //here filepath is a folder no need for extra '/'
+                //jsonData.project[0].databaseJournalFilePath = filePath + defaultValue.project.databaseJournalFileName;
+                validate('project');
+                if (!jsonData.project[0].database) {
+                    jsonData.project[0].database = new Array();
+                    jsonData.project[0].database[0] = new Object();
+                }
+                if (!jsonData.project[0].database[0].journal) {
+                    jsonData.project[0].database[0].journal = new Array();
+                    jsonData.project[0].database[0].journal[0] = new Object();
+                }
+                jsonData.project[0].database[0].journal[0].journalFolder = filePath
+                document.getElementById('databaseJournalFilePath').value = jsonData.project[0].database[0].journal[0].journalFolder;
+            }
+            break;
+
+            case 'logPath':
+                validate('http');
+                jsonData.http[0].logPath = relativePath;
+                document.getElementById('logPath').value = relativePath;
+                break;
+        }
+
         setDirty();
     }
 }
 
 function projectDefault() {
 
-	var projectRootFolder = studio.editor.getProjectPath();
+    var projectRootFolder = studio.editor.getProjectPath();
     var defaultValue = new Object(
     {
         project : {
             listen: '0',
             hostName: 'localhost',
-			//databaseJournalEnabled: 'false',
-			//databaseJournalFilePath: projectRootFolder,
-			//databaseJournalFileName: 'DBjournal.journal',
-			database : {
-        		journal : {
-        			enabled: 'false',
-        			journalFolder: './'        	
-        		},
-        		autoRecovery : {
-        			integrateJournal: 'false',
-        			restoreFromLastBackup: 'false'
-        		},
-        	},
-        },       
+            //databaseJournalEnabled: 'false',
+            //databaseJournalFilePath: projectRootFolder,
+            //databaseJournalFileName: 'DBjournal.journal',
+            database : {
+                journal : {
+                    enabled: 'false',
+                    journalFolder: './'
+                },
+                autoRecovery : {
+                    integrateJournal: 'false',
+                    restoreFromLastBackup: 'false'
+                }
+            }
+        },
+
         http : {
 
             autoStart : 'true',
@@ -1071,23 +1139,35 @@ function projectDefault() {
             compressionMinThreshold : "1024", // 1 Ko (in bytes)
             compressionMaxThreshold : "10485760" // 10 Mo (in bytes)
         },
+
         services : {
-            webApp : {
+            'webApp' : {
                 enabled : 'true',
                 autoStart : 'true',
                 directoryIndex : 'index.html'
             },
-            rpc : {
+            'rpc' : {
                 enabled : 'true',
                 autoStart : 'true',
                 proxyPattern : '^/rpc-proxy/',
                 publishInClientGlobalNamespace : 'false'
             },
-            dataStore : {
+            'dataStore' : {
                 enabled : 'true',
                 autoStart : 'true'
             },
-            upload : {
+            'upload' : {
+                enabled : 'true',
+                autoStart : 'true',
+                maxSize : '-1',
+                sizeUnity : 'kb',
+                maxFiles : '-1'
+            },
+            'Git HTTP Service' : {
+                enabled : 'true',
+                autoStart : 'true'
+            },
+            'remoteFileExplorer' : {
                 enabled : 'true',
                 autoStart : 'true'
             }
@@ -1128,7 +1208,7 @@ function displayPublishingInformation() {
     txt_html +=             '</select>';
     txt_html +=         '</div>';
 
-     /* TCP Port */
+    /* TCP Port */
     txt_html +=         '<div title="The TCP/IP port to be used when the HTTP server is started.\rThis value will be incremented by one for each project added to the solution.">';
     txt_html +=             '<label for="port">TCP Port:</label>';
     txt_html +=             '<input id="port" type="text" class="numeric" min="1" max="65535" mandatory="true" placeholder="1-65535" size="8"/>';
@@ -1170,38 +1250,43 @@ function displayPublishingInformation() {
 }
 
 function displayDatabaseJournaling(){
-var txt_html = '';
+    var txt_html = '';
 
     txt_html += '<section id="databaseJournaling">';
     txt_html +=     '<h3>Database Journal</h3>';
     txt_html +=     '<div class="group">';
-	txt_html +=         '<div title="Activates the database journal to enable data recovery in case of crash.">';
+    txt_html +=         '<div title="Activates the database journal to enable data recovery in case of crash.">';
     txt_html +=             '<input id="databaseJournalEnabled" type="checkbox" />';
     txt_html +=             '<label for="databaseJournalEnabled">Enable database journal</label>';
     txt_html +=         '</div>';
-	txt_html +=         '<div class="element" title="Folder where the journal will be stored.">';
-	txt_html +=            	'<label for="inDataFolder">Journal folder path:</label>';
-    txt_html +=             '<input type="checkbox" id="inDataFolder">';
-    txt_html +=             '<label for="inDataFolder">In data folder</label>';
-    txt_html +=             '<input type="button" name="buttonBrowse" target="databaseJournalFilePath" value="Browse\u2026">';
-    txt_html +=             '<input id="databaseJournalFilePath" type="text" size="128" />';
-    txt_html +=         '</div>';    
-    txt_html +=         '<div class="element">'; 
-    txt_html +=         	'<label> When Wakanda Server starts your project, allow Wakanda Server to automatically:</label>'; 
-    txt_html +=         '</div>'; 
-    txt_html +=         '<p/>'; 
-	txt_html +=         '<div class="level6">';
+    txt_html +=         '<div class="element" title="Folder where the journal will be stored.">';
+    txt_html +=            	'<label for="inDataFolder">Location:</label>';
+    txt_html +=             '<div class="level2">';
+    txt_html +=	            	'<input type="radio" name="where" id="inDataFolder">';
+    txt_html +=             	'<label for="inDataFolder">In data folder</label>'
+    txt_html +=             '</div>';
+    txt_html +=             '<div class="level2">';
+    txt_html +=	            	'<input type="radio" name="where" id="custom">';
+    txt_html +=             	'<input id="databaseJournalFilePath" type="text" size="68" />';
+    txt_html +=             	'<input type="button" name="buttonBrowse" target="databaseJournalFilePath" value="Browse\u2026">'
+    txt_html +=             '</div>';
+    txt_html +=         '</div>';
+    txt_html +=         '<div class="element">';
+    txt_html +=         	'<label> When Wakanda Server starts your project, allow Wakanda Server to automatically:</label>';
+    txt_html +=         '</div>';
+    txt_html +=         '<p/>';
+    txt_html +=         '<div class="level6">';
     txt_html +=             '<input type="checkbox" id="integrateJournal">';
     txt_html +=             '<label for="integrateJournal">Integrate journal when datastore is not up to date with the journal</label>';
-	txt_html +=         	'<div>';
+    txt_html +=         	'<div>';
     txt_html +=             	'<input type="checkbox" id="restoreFromLastBackup">';
     txt_html +=             	'<label for="restoreFromLastBackup">Restore damaged datastore with last backup</label>';
     txt_html +=         	'</div>';
     txt_html +=         '</div>';
-    
-	txt_html +=     '</div>';
-	txt_html +='</section>';
-	return txt_html;
+
+    txt_html +=     '</div>';
+    txt_html +='</section>';
+    return txt_html;
 }
 
 function displayTextCompression() {
@@ -1219,7 +1304,7 @@ function displayTextCompression() {
     txt_html +=         '</div>';
 
     /* Compress files over */
-    txt_html +=         '<div>'; 
+    txt_html +=         '<div>';
     txt_html +=             '<label for="compressionMinThreshold">Compress files over:</label>';
     txt_html +=             '<input id="compressionMinThreshold" type="text" class="numeric" min="1" step="1" mandatory="true" size="8"/> KB';
     txt_html +=             '<div class="plus stepper inline"/><div class="min stepper inline"/>';
@@ -1260,17 +1345,17 @@ function displaySecureConnections() {
     txt_html +=         '</div>';
 
     /* Certificate Path */
-	if (jsonData.http[0].SSLCertificatePath != undefined) // #3677
+    if (jsonData.http[0].SSLCertificatePath != undefined) // #3677
     {
-		txt_html +=         '<div title="Path to the SSL certificate">';
-		txt_html +=             '<label for="SSLCertificatePath">Certificate Path:</label>';
-		txt_html +=             '<input type="button" name="buttonBrowse" target="SSLCertificatePath" value="Browse\u2026">';
-		txt_html +=             '<input id="SSLCertificatePath" type="text" size="85" placeholder="The certificate is at the root of the project"/>'
-		txt_html +=         '</div>';
-		txt_html +=         '<div title="" class="label warning">';
-		txt_html +=             "   Warning: You must move your certificates to your solution's or project's 'certificates' folder.<br><br>";
-		txt_html +=         '</div>';
-    }    
+        txt_html +=         '<div title="Path to the SSL certificate">';
+        txt_html +=             '<label for="SSLCertificatePath">Certificate Path:</label>';
+        txt_html +=             '<input type="button" name="buttonBrowse" target="SSLCertificatePath" value="Browse\u2026">';
+        txt_html +=             '<input id="SSLCertificatePath" type="text" size="85" placeholder="The certificate is at the root of the project"/>'
+        txt_html +=         '</div>';
+        txt_html +=         '<div id="warningSSL" title="" class="label warning">';
+        txt_html +=             "! Warning: You must move your certificates to your solution's or project's 'certificates' folder.<br><br>";
+        txt_html +=         '</div>';
+    }
     /* Mandatory secure connections */
     txt_html +=         '<div title="Force the use of the SSL protocol for all resources in application">';
     txt_html +=             '<label for="SSLMandatory">Mandatory secure connections</label>';
@@ -1436,9 +1521,10 @@ function displayWebLog() {
     /* Log Path */
     txt_html +=         '<div class="level2" title="Path to the log file">';
     txt_html +=             '<label for="logPath">Log Path:</label>';
-    txt_html +=             '<input type="button" name="buttonBrowse" target="logPath" value="Browse\u2026">';
-    txt_html +=             '<input id="logPath" type="text" size="85"/>';
-    //txt_html +=             '<input id="logPath" type="text" size="63"/>';
+    if((typeof (studio) != "undefined")){
+        txt_html +=             '<input type="button" name="buttonBrowse" target="logPath" value="Browse\u2026">';
+        txt_html +=             '<input id="logPath" type="text" size="85"/>';
+    }
     txt_html +=         '</div>';
 
     /* Maximum Log Size */
@@ -1456,104 +1542,144 @@ function displayWebLog() {
 
 function displayServices() {
 
+    wakServices = new Array();
+    wakServices[0] = "webApp";
+    wakServices[1] = "rpc";
+    wakServices[2] = "dataStore";
+    wakServices[3] = "upload";
+    wakServices[4] = "Git HTTP Service";
+    wakServices[5] = "remoteFileExplorer";
+
+    var wakServicesDescriptions = new Array();
+    wakServicesDescriptions[0] = "static page Web server";
+    wakServicesDescriptions[1] = "RPC service";
+    wakServicesDescriptions[2] = "REST service";
+    wakServicesDescriptions[3] = "file upload service";
+    wakServicesDescriptions[4] = "Git service";
+    wakServicesDescriptions[5] = "remote file explorer";
+
+    var wakServicesTips = new Array();
+    wakServicesTips[0] = "This service allows you to serve static Web pages.";
+    wakServicesTips[1] = "By enabling this service, you can use RPC to access your RPC modules.";
+    wakServicesTips[2] = "This service allows you to access Wakanda's REST server.";
+    wakServicesTips[3] = "This service allows you to take advantage of the file uploading capabilities.";
+    wakServicesTips[4] = "By enabling this service, you can host your GIT repositories over HTTP.";
+    wakServicesTips[5] = "This service allows you to browse files on the server";
+
     var txt_html = '';
+    var i = 0;
+    var id = 0;
 
     txt_html += '<section id="services">';
-    txt_html +=     '<h3>Services</h3>';
-    txt_html +=     '<div class="group">';
+    txt_html +=    '<h3>Services</h3>';
+    txt_html +=    '<div class="group">';
 
-    // wakanda services: id = 1 - 1000
+    // Wakanda services: id = 1 - 1000
+    for ( i = 0; i < wakServices.length; i++) {
 
-    /* webApp : id = 1 */
-    txt_html +=         newService('webApp', 1);
-    txt_html +=         '<div class="level6">';
-    txt_html +=             '<label for="autoStart_1">Auto-Start</label>';
-    txt_html +=             '<input id="autoStart_1" type="checkbox" class="service" serviceID="1" />';
-    txt_html +=         '</div>';
-    txt_html +=     '</div>';
+        id = i+1
 
-    txt_html +=     spacer();
+        if (id > 1)
+            txt_html += spacer();
 
-    /* rpc : id = 2 */
-    txt_html +=     newService('rpc', 2);
-    txt_html +=         '<div class="level6">';
-    txt_html +=             '<label for="autoStart_2">Auto-Start</label>';
-    txt_html +=             '<input id="autoStart_2" type="checkbox" class="service" />';
-    txt_html +=         '</div>';
+        //common
+        txt_html += '<div class="groupTitle" title="'+ wakServicesTips[i] +'">';
+        txt_html += '<input type="checkbox" class="service" id="enabled_'+ id +'"/>';
+        txt_html += '<label class="item" for="enabled_'+ id +'"> Enable <span class="bold">'+ wakServicesDescriptions[i] +'</span></label>';
 
-    txt_html +=         '<div class="level6">';
-    txt_html +=             '<label for="proxyPattern_2">Proxy pattern:</label>';
-    txt_html +=             '<input type="text" class="service" id="proxyPattern_2" size="20"/>';
-    txt_html +=         '</div>';
+        txt_html += '<div class="level6">';
+        txt_html +=    '<label for="autoStart_'+ id +'">Auto-Start</label>';
+        txt_html +=    '<input id="autoStart_'+ id +'" type="checkbox" class="service"/>';
+        txt_html += '</div>';
 
-    txt_html +=         '<div class="item right level6">';
-    txt_html +=             '<label for="publishInClientGlobalNamespace_2">Publish in Client global Namespace</label>';
-    txt_html +=             '<input type="checkbox" class="service" id="publishInClientGlobalNamespace_2"/>';
-    txt_html +=         '</div>';
-    txt_html +=     '</div>';
+        //specific
+        switch (id) {
+            case 2:  // rpc
+                txt_html += '<div class="level6">';
+                txt_html +=    '<label for="proxyPattern_2">Proxy pattern:</label>';
+                txt_html +=    '<input type="text" class="service" id="proxyPattern_2" size="20"/>';
+                txt_html += '</div>';
+                txt_html += '<div class="item right level6">';
+                txt_html +=    '<label for="publishInClientGlobalNamespace_2">Publish in Client global Namespace</label>';
+                txt_html +=    '<input type="checkbox" class="service" id="publishInClientGlobalNamespace_2"/>';
+                txt_html += '</div>';
+                break;
+            case 4:  // upload
+                var
+                sizeUnities = [
+                    {
+                        key : 'byte',
+                        value : 'Byte'
+                    },
+                    {
+                        key : 'kb',
+                        value : 'KB',
+                        selected : true
+                    },
+                    {
+                        key : 'mb',
+                        value : 'MB'
+                    }
+                ]
+                txt_html += '<div class="level6">';
+                txt_html +=     '<label for="maxSize_4">Maximum Size:</label>';
+                txt_html +=     '<input id="maxSize_4" type="text" class="numeric service uilt0" min="0" step="1" mandatory="true" size="8"/>';
+                txt_html +=     '<select id="sizeUnity_4" class="inline service" name="file-upload-unity">';
 
-    txt_html += spacer();
+                for(var _i = 0 , item ; item = sizeUnities[_i] ; _i++){
+                    txt_html +=     '<option value = "' + item.key + '"' + (item.selected ? '" selected = "true"' : '') + '>' + item.value + '</option>';
+                }
 
-    /* dataStore : id = 3 */
-    txt_html +=     newService('dataStore', 3);
-    txt_html +=         '<div class="level6">';
-    txt_html +=             '<label for="autoStart_3">Auto-Start</label>';
-    txt_html +=             '<input id="autoStart_3" type="checkbox" class="service" />';
-    txt_html +=         '</div>';
-    txt_html +=     '</div>';
+                txt_html +=     '</select>';
+                txt_html +=     '<div class="plus stepper inline"/><div class="min stepper inline"/>';
+                txt_html += '</div>';
 
-    txt_html += spacer();
+                txt_html += '<div class="level6">';
+                txt_html +=     '<label for="maxFiles_4">Maximum Files:</label>';
+                txt_html +=     '<input id="maxFiles_4" type="text" class="numeric service uilt0" min="0" step="1" mandatory="true" size="8"/>';
+                txt_html +=     '<div class="plus stepper inline"/><div class="min stepper inline"/>';
+                txt_html += '</div>';
+                break;
+        }
 
-    /* upload : id = 4 */
-    txt_html +=     newService('upload', 4);
-    txt_html +=         '<div class="item rightAlign level6">';
-    txt_html +=             '<label for="autoStart_4">Auto-Start</label>';
-    txt_html +=             '<input type="checkbox" class="service" id="autoStart_4"/>';
-    txt_html +=         '</div>';
-    txt_html +=     '</div>';
+        txt_html += '</div>';
+    }
 
+    // Unknown services: id > 1000
     if (jsonData.service) {
-        // Unknown services: id > 1000
+
         var j = 1000;
 
-        for ( var i = 0; i < jsonData.service.length; i++) {
+        for ( i = 0; i < jsonData.service.length; i++) {
 
             var service = jsonData.service[i];
-            var name = (service.name) ? service.name 
-					: service.modulePath.substr(service.modulePath.lastIndexOf("/")+1);
+            var name = (service.name) ? service.name
+            : service.modulePath.substr(service.modulePath.lastIndexOf("/")+1);
 
-            switch (name) {
+            if (wakServices.indexOf(name) == -1) {
 
-                case "webApp":
-                case "rpc":
-                case "dataStore":
-                case "upload":
-                    break;
+                j++;
+                txt_html += spacer();
+                txt_html += '<div class="groupTitle">';
+                txt_html +=     '<input type="checkbox" class="service" id="enabled_'+ j +'"/>';
+                txt_html +=     '<label class="item" for="enabled_'+ j +'"> Enable <span class="bold">"'+ name +'"</span></label>';
+                txt_html += '</div>';
 
-                default:
+                //Known attribute if any
+                if (service.autoStart) {
 
-                    j = j + 1;
-                    txt_html += spacer();
-                    txt_html += newService(name, j);
+                    txt_html += '<div class="level6">';
+                    txt_html +=    '<label for="autoStart_'+ j +'">Auto-Start</label>';
+                    txt_html +=    '<input id="autoStart_'+ j +'" type="checkbox" class="service"/>';
                     txt_html += '</div>';
-            }
 
+                }
+            }
         }
     }
 
-    txt_html +=     '</div>';
+    txt_html +=    '</div>';
     txt_html += '</section>';
-
-    return txt_html;
-}
-
-function newService(name, i) {
-
-    var txt_html = '';
-
-    txt_html += '<div class="groupTitle">';
-    txt_html += '<input type="checkbox" class="service" id="enabled_' + i + '"/>';
-    txt_html += '<label class="item" for="enabled_' + i + '"> Enable <span class="bold">"' + name + '"</span></label>';
 
     return txt_html;
 }

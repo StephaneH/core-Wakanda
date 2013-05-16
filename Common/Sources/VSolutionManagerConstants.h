@@ -49,7 +49,6 @@ extern const XBOX::VString kXML_ELEMENT_CONFIGURATION;
 extern const XBOX::VString kXML_ELEMENT_SOLUTION_EXPLORER;
 extern const XBOX::VString kXML_ELEMENT_EDITOR;
 extern const XBOX::VString kXML_ELEMENT_LOCATOR;
-extern const XBOX::VString kXML_ELEMENT_SOURCE_CONTROL;
 extern const XBOX::VString kXML_ELEMENT_LAST_WINDOW_POS;
 extern const XBOX::VString kXML_ELEMENT_TABS;
 extern const XBOX::VString kXML_ELEMENT_PERMISSIONS;
@@ -66,8 +65,6 @@ namespace ProjectItemBagKeys
 	EXTERN_BAGKEY_WITH_DEFAULT(form_name, XBOX::VString);						//	TO DO A VOIR avec FM ?
 	EXTERN_BAGKEY_WITH_DEFAULT_SCALAR(eventHandlerIndex, XBOX::VLong, sLONG );
 	EXTERN_BAGKEY_WITH_DEFAULT(methodName, XBOX::VString);
-	EXTERN_BAGKEY_WITH_DEFAULT(sourceControlId, XBOX::VString);
-	EXTERN_BAGKEY_WITH_DEFAULT(sourceControlMode, XBOX::VString);
 	EXTERN_BAGKEY_WITH_DEFAULT_SCALAR(active, XBOX::VBoolean, bool);
 	EXTERN_BAGKEY_WITH_DEFAULT(name, XBOX::VString);
 	EXTERN_BAGKEY_WITH_DEFAULT(solutionLink, XBOX::VString);
@@ -238,9 +235,6 @@ const XBOX::VString kTREE_ITEM_STATE	=	CVSTR("tree_item_state");
 #define BTN_UP_O							CVSTR("PJM_bUp")
 #define BTN_UP_V							CVSTR("PJM_C_bUp")
 
-// Tableaux
-#define ARRAY_SOURCE_CONTROL_IDS			CVSTR("tTxt_sourceControlIDs")
-
 
 // ----------------------------------------------------------------------------
 // Items de menus :
@@ -260,7 +254,6 @@ extern const XBOX::VString kITEM_MNU_CLOSE_SOLUTION;
 extern const XBOX::VString kITEM_MNU_EDIT_PROJECT_SETTINGS;
 extern const XBOX::VString kITEM_MNU_EDIT_BUILD_SETTINGS;
 extern const XBOX::VString kITEM_MNU_EDIT_DEPLOYEMENT_SETTINGS;
-extern const XBOX::VString kITEM_MNU_SELECT_SOURCE_CONTROL;
 extern const XBOX::VString kITEM_MNU_ADD_NEW_STANDARD_FOLDER;
 extern const XBOX::VString kITEM_MNU_SET_AS_STARTUP_PROJECT;
 extern const XBOX::VString kITEM_MNU_ADD_NEW_PROJECT;
@@ -288,14 +281,6 @@ extern const XBOX::VString kITEM_MNU_COPY;
 extern const XBOX::VString kITEM_MNU_PASTE;
 extern const XBOX::VString kITEM_MNU_DELETE;
 extern const XBOX::VString kITEM_MNU_RENAME;
-extern const XBOX::VString kITEM_MNU_GET_LATEST_VERSION;
-extern const XBOX::VString kITEM_MNU_CHECK_OUT;
-extern const XBOX::VString kITEM_MNU_ADD_TO_SOURCE_CONTROL;
-extern const XBOX::VString kITEM_MNU_CHECK_IN;
-extern const XBOX::VString kITEM_MNU_REVERT;
-extern const XBOX::VString kITEM_MNU_EXCLUDE_FROM_SOLUTION;
-extern const XBOX::VString kITEM_MNU_PROPERTIES;
-extern const XBOX::VString kITEM_MNU_SYNCHRONIZE;
 
 // ------------------------
 // Menu contextual List Box
@@ -306,11 +291,6 @@ extern const XBOX::VString kITEM_MNU_LB_REVEAL_IN_FINDER;
 extern const XBOX::VString kITEM_MNU_LB_REVEAL_IN_SOLUTION_EXPLORER;
 extern const XBOX::VString kITEM_MNU_LB_REVEAL_PARENT_IN_SOLUTION_EXPLORER;
 extern const XBOX::VString kITEM_MNU_LB_EXCLUDE_FROM_SOLUTION;
-extern const XBOX::VString kITEM_MNU_LB_GET_LATEST_VERSION;
-extern const XBOX::VString kITEM_MNU_LB_CHECK_OUT;
-extern const XBOX::VString kITEM_MNU_LB_ADD_TO_SOURCE_CONTROL;
-extern const XBOX::VString kITEM_MNU_LB_CHECK_IN;
-extern const XBOX::VString kITEM_MNU_LB_REVERT;
 extern const XBOX::VString kITEM_MNU_LB_CUT;
 extern const XBOX::VString kITEM_MNU_LB_COPY;
 extern const XBOX::VString kITEM_MNU_LB_DELETE;
@@ -325,11 +305,6 @@ extern const XBOX::VString kITEM_MNU_TH_REVEAL_IN_FINDER;
 extern const XBOX::VString kITEM_MNU_TH_REVEAL_IN_SOLUTION_EXPLORER;
 extern const XBOX::VString kITEM_MNU_TH_REVEAL_PARENT_IN_SOLUTION_EXPLORER;
 extern const XBOX::VString kITEM_MNU_TH_EXCLUDE_FROM_SOLUTION;
-extern const XBOX::VString kITEM_MNU_TH_GET_LATEST_VERSION;
-extern const XBOX::VString kITEM_MNU_TH_CHECK_OUT;
-extern const XBOX::VString kITEM_MNU_TH_ADD_TO_SOURCE_CONTROL;
-extern const XBOX::VString kITEM_MNU_TH_CHECK_IN;
-extern const XBOX::VString kITEM_MNU_TH_REVERT;
 extern const XBOX::VString kITEM_MNU_TH_CUT;
 extern const XBOX::VString kITEM_MNU_TH_COPY;
 extern const XBOX::VString kITEM_MNU_TH_DELETE;
@@ -363,7 +338,6 @@ extern const XBOX::VString	kTEMPLATE_SOLUTION_NAME_MACRO;
 // Chaines speciales :
 // ----------------------------------------------------------------------------
 extern const char POSIX_FOLDER_SEPARATOR;
-extern const XBOX::VString kSCC_PREFIX;
 
 #define DEFAULT_FILES_PATH		"DefaultFiles"
 #define INTRO_HTML_BASIC		"Standard.html"
@@ -431,6 +405,7 @@ static const char* arProjectItemsIcons2[] = {
 			"file:Images/SolutionManager/xml.png",
 			"file:Images/SolutionManager/image.png",
 			"file:Images/SolutionManager/web.png",
+			"file:Images/SolutionManager/data.png",
 			"file:Images/SolutionManager/permissions.png",
 			"file:Images/SolutionManager/directory.png",
 			"file:Images/SolutionManager/webComponent.png",

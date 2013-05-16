@@ -36,7 +36,6 @@ class VProject;
 class VSolution;
 class VProjectItemBehaviour;
 class VCatalog;
-class ISourceControlInterface;
 
 
 class VProjectItem : public XBOX::VObject, public XBOX::IRefCountable
@@ -75,19 +74,6 @@ public:
 	// 230409 : ATTENTION !!! toute modification ci-dessus doit etre reportee dans la 
 	// methode PjM_INIT du code 4D associe au Solution Manager
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-	// Temporaire ? dependra des specs sur les icones...
-	// enum globalement similaire a _e_Command de VSolution
-	typedef enum {
-		eNOT_CONTROLED,
-		// _e_Command :
-		eNEWLY_ADDED_FILE,	
-		eDELETED_FILE,
-		eCHECKED_IN,
-		eCHECKED_OUT_TO_ME,										
-		eCHECKED_OUT_BY_SOMENONE,
-		eOUT_OF_DATE
-	} e_ProjectItemSCCStatus;
 
 	// --------------------------
 	// Constructeurs, destructeur
@@ -263,17 +249,6 @@ public:
 	void SetLevel(sLONG level) {fLevel = level;};
 	sLONG GetLevel() {return fLevel;};
 
-
-	// --------------
-	// Source Control
-	// --------------
-	ISourceControlInterface* GetSCCInterfaceForCodeEditor();
-	// Etat :
-	e_ProjectItemSCCStatus GetSCCStatus() {return fSCCStatus;}
-	void SetSCCStatus(e_ProjectItemSCCStatus inSCCStatus) {fSCCStatus = inSCCStatus;}
-	// For code Editor
-	
-
 	// ---------------------------------
 	// Manipulation de l'item physique 
 	// ---------------------------------
@@ -317,8 +292,6 @@ private:
 
 	XBOX::VString fRelativePath;			// The path relative to the parent item
 	sLONG fID;				// cree initialement pour pouvoir reperer un item depuis la ListBox du SolutionExplorer
-	// TO DO :
-	e_ProjectItemSCCStatus fSCCStatus;
 
 	// Structure d'arbre
 	VProjectItem* fParent;
@@ -376,9 +349,10 @@ public:
 	virtual ~VProjectItemManager();
 
 	static				VProjectItemManager* Get();
-	static				bool Init();
+	static				bool Init( bool inWithProjectItemUniqueID);
 	static				void DeInit();
 
+	bool				IsProjectItemUniqueIDRequired() const					{ return fWithProjectItemUniqueID; }
 	sLONG				RegisterProjectItem( VProjectItem *inProjectItem);
 	void				UnregisterProjectItem( VProjectItem *inProjectItem);
 	VProjectItem*		GetProjectItemFromID( sLONG inID) const;
@@ -400,13 +374,14 @@ public:
 	static bool			FolderCopyOrMoveTo(const XBOX::VFilePath& inSrcFilePath, const XBOX::VFilePath& inDestFilePath, bool inCopy);
 
 private:
-	VProjectItemManager();													
+	VProjectItemManager( bool inWithProjectItemUniqueID);													
 	VProjectItemManager (const VProjectItemManager &);
 	VProjectItemManager& operator=(const VProjectItemManager&);
 
 	static	VProjectItemManager						*sProjectItemManager;
 			std::map< sLONG , VProjectItem* >		fMapOfProjectItemIDs;
 			sLONG									fNextProjectItemID;
+			bool									fWithProjectItemUniqueID;
 };
 
 // ----------------------------------------------------------------------------
@@ -549,20 +524,14 @@ public:
 extern const VProjectItemTag kSettingTag;
 extern const VProjectItemTag kCatalogTag;
 extern const VProjectItemTag kBackupsTag;
-// extern const VProjectItemTag kEntityModelScriptTag;	// sc 30/09/2010 unused
 extern const VProjectItemTag kDataTag;
 extern const VProjectItemTag kDataFolderTag;
-extern const VProjectItemTag kDocumentationTag;
-extern const VProjectItemTag kExternalLibraryTag;
-extern const VProjectItemTag kRPCMethodTag;
 extern const VProjectItemTag kRPCCatalogTag;
 extern const VProjectItemTag kBootstrapTag;
 extern const VProjectItemTag kUAGDirectoryTag;
 extern const VProjectItemTag kPermissionsTag;
-extern const VProjectItemTag kIndexPageTag;
 extern const VProjectItemTag kWebFolderTag;
 extern const VProjectItemTag kWebComponentFolderTag;
-extern const VProjectItemTag kPageFolderTag;
 extern const VProjectItemTag kProjectCertificatesFolderTag;
 extern const VProjectItemTag kSolutionCertificatesFolderTag;
 

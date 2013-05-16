@@ -54,17 +54,15 @@ function makeFullPath(project, fileRelativePath, user) {
     
     //find project
     tabresult = tools.GetBespinProjectFolder(project, theUser.login);
-        projectFolder = tabresult[0];
-        isWakandaProject = tabresult[1];
-
-        if (projectFolder) {
-            fullPath = projectFolder.getURL();
-            
-            if (fileRelativePath) {
-                fullPath += fileRelativePath;
-            }
-
-        }
+    projectFolder = tabresult[0];
+    isWakandaProject = tabresult[1];
+    
+    if (projectFolder) {
+    	fullPath = projectFolder.getURL();
+    	
+    	if (fileRelativePath) {
+    		fullPath += fileRelativePath;
+    	}
     }
 
     return [fullPath, isWakandaProject];

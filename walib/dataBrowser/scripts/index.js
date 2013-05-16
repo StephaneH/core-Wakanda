@@ -162,16 +162,26 @@ DataBrowser.prototype = {
 		this.draggingTabIndex = null;
 		this.draggingDialogContainerId = null;
 		
-		this.tabView.onResize = function () {
-			var currentTab;
-			
-			currentTab = this.getSelectedTab();
-			$("#"+currentTab.container.id).width("100%");
-			$$(currentTab.container.id+'_dataGrid').gridController.gridView.refresh();
-			$("#"+currentTab.container.id+"_autoForm").parent().height("100%");
-			$("#"+currentTab.container.id+"_autoForm").height("100%");
-			DataBrowser.resizeAutoForm(currentTab.container.id+"_autoForm");
-		}
+		                
+                this.tabView.onResize = function () {
+                    // hack : the functions was called many times while resizing. which decreases the performance
+                    // now we call at the end of resizing
+                    clearTimeout(this.doIt);
+                    this.doIt = setTimeout(function(args){
+                            var 
+                            that,
+                            currentTab;
+
+                            that = args[0];
+
+                            currentTab = that.getSelectedTab();
+                            $("#"+currentTab.container.id).width("100%");
+                            $$(currentTab.container.id+'_dataGrid').gridController.gridView.refresh();
+                            $("#"+currentTab.container.id+"_autoForm").parent().height("100%");
+                            $("#"+currentTab.container.id+"_autoForm").height("100%");
+                            DataBrowser.resizeAutoForm(currentTab.container.id+"_autoForm");
+                        }, 100,[this]);
+                }
 		
 		rows = $("#dataClassContentTable tr.entityModels");
 		
@@ -243,8 +253,8 @@ DataBrowser.prototype = {
 		});
 		
 		$(".not-selectable").each(function (index) {
-			$(this).bind("selectstart", function() { return false; });
-			$(this).bind("select", function() { return false; });
+			$(this).bind("selectstart", function() {return false;});
+			$(this).bind("select", function() {return false;});
 		});
 		
 		$("#dataBrowserSkinSelector").bind("change", function (event) {
@@ -677,7 +687,7 @@ DataBrowser.prototype = {
 				$("#"+tabViewContainer.id+"_splitter").bind("dblclick", {"containerId" : tabViewContainer.id}, this.dblClickSplitter);
 			}
 			
-			dataGrid.gridController.onRowRightClick = function onRowRightClick_dataBrowser_dataGrid(position, rightClickEvent) {
+			dataGrid.gridController.onRowRightClick = function onRowRightClick_dataBrowser_dataGrid(rightClickEvent) {
 				
 				var parameters;
 				
@@ -695,7 +705,7 @@ DataBrowser.prototype = {
 				return false;
 			};
 			
-			dataGrid.gridController.onRowClick = function onRowClick_dataBrowser_dataGrid(position) {
+			dataGrid.gridController.onRowClick = function onRowClick_dataBrowser_dataGrid(event) {
 				var parameters;
 				
 				parameters = {
@@ -914,7 +924,7 @@ DataBrowser.prototype = {
 					},
 					resizeStop : function (event, ui) {
 						DataBrowser.resizeAutoForm(containerId+"_dialog_autoForm", true);
-					},
+					}
 				};
 				$("#"+containerId+'_dialog_autoForm').dialog(dialogOption);
 				
@@ -1588,7 +1598,7 @@ DataBrowser.prototype = {
 		dataClassName = dataClass.getName();
 		
 		progressName = "export_"+dataClassName+"_"+(new Date()).toISOString()+"_"+Math.random();
-		requestURL = WAF.dsExport.exportData({ generateRESTRequestOnly:true, callWithGet:true}, {'dataClassName': dataClassName, exportType:"csv"/*, progressInfo: progressName*/});
+		requestURL = WAF.dsExport.exportData({generateRESTRequestOnly:true, callWithGet:true}, {'dataClassName': dataClassName, exportType:"csv"/*, progressInfo: progressName*/});
 		
 		iframe = $("#iframeexport");
 		if (iframe.length === 0) {

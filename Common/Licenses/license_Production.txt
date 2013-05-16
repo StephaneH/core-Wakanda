@@ -1,0 +1,26 @@
+WAKANDA PRODUCTION RELEASE - INFORMATION ABOUT LICENSING
+
+The Wakanda platform comes in three primary components: Wakanda Server, Wakanda Studio, and the Wakanda Framework ("WAF"):
+
+1. SCOUT: WAKANDA COMMUNITY EDITION
+
+- Wakanda Framework Community Edition is governed by the terms and conditions of the GNU General Public License v3 ("GPLv3"), available at http://www.gnu.org/licenses/gpl-3.0.html, effective as of October 15, 2011;
+
+- Wakanda Server Community Edition is governed by the terms and conditions of the GNU Affero General Public License v3 ("AGPLv3"), available at http://www.gnu.org/licenses/agpl-3.0.html, effective as of June 28, 2012. However, Wakanda Server Community Edition includes the following external runtime component: CRT, which is not governed by the AGPL v3 license and is subject to its own license terms, available at www.microsoft.com/en-us/download/details.aspx?id=371
+
+- Wakanda Studio Community Edition is governed by the terms and conditions of the Wakanda Studio Community License Agreement, available at http://www.wakanda.org/license/community, effective as of June 28, 2012.
+
+
+Disclaimer of Warranty
+THERE IS NO WARRANTY FOR WAKANDA COMMUNITY EDITION, TO THE EXTENT PERMITTED BY APPLICABLE LAW. EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES PROVIDE WAKANDA COMMUNITY EDITION "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF WAKANDA COMMUNITY EDITION IS WITH YOU. SHOULD WAKANDA COMMUNITY EDITION PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING, REPAIR OR CORRECTION.
+
+
+Limitation of Liability
+IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING WILL ANY COPYRIGHT (OR ANY OTHER INTELLECTUAL PROPERTY RIGHT) HOLDER, OR ANY OTHER PARTY WHO MODIFIES AND/OR CONVEYS WAKANDA COMMUNITY EDITION (IF PERMITTED IN THE RELEVANT LICENSE AGREEMENT) BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY GENERAL, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OR INABILITY TO USE WAKANDA COMMUNITY EDITION (INCLUDING BUT NOT LIMITED TO LOSS OF DATA OR DATA BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD PARTIES OR A FAILURE OF THE PROGRAM TO OPERATE WITH ANY OTHER PROGRAMS), EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+
+
+2. WARRIOR: WAKANDA COMMERCIAL SUBSCRIPTION
+
+Wakanda Server, Wakanda Framework and Wakanda Studio are available as part of a commercial subscription, on a "per Developer" (not a "floating license") basis.
+
+Wakanda commercial subscription is governed by the terms and conditions of the Wakanda Subscription Agreement, available at http://www.wakanda.org/license/commercial, effective as of June 28, 2012.

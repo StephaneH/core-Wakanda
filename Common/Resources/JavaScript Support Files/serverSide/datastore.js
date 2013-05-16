@@ -181,6 +181,13 @@ Datastore = function Datastore() {
     this.close = function close(syncEventName) {        return {};     };
     
     /**
+     * &quot;upgrades&quot; a Wakanda 3 datastore data file so that it can be converted to Wakanda 4
+     *
+     * @method fixForV4
+     */
+    this.fixForV4 = function fixForV4() {             };
+    
+    /**
      * cancels the transaction opened by the startTransaction() method at the corresponding level in the current context
      *
      * @method rollBack
@@ -217,9 +224,19 @@ Datastore = function Datastore() {
      */
     this.verify = function verify(options) {             };
     
+    /**
+     * starts the backup of the current datastore of your application
+     *
+     * @method backup
+     * @param {Object} settings
+     * @param {Object} options
+     * @return {File | Null}
+     */
+    this.backup = function backup(settings, options) {        return new File( ) || new Null( );     };
+    
 
 };
-ds = new Datastore();
+//ds = new Datastore();
 
 Entity = function Entity() {
     
@@ -318,6 +335,14 @@ Entity = function Entity() {
     this.next = function next() {        return new Entity( ) || new Null( );     };
     
     /**
+     * returns an array containing the names of attributes that have been modified in the entity
+     *
+     * @method getModifiedAttributes
+     * @return {Array}
+     */
+    this.getModifiedAttributes = function getModifiedAttributes() {        return [];     };
+    
+    /**
      * passes the entity through the validation process
      *
      * @method validate
@@ -334,12 +359,12 @@ Entity = function Entity() {
     this.getStamp = function getStamp() {        return 0;     };
     
     /**
-     * 
+     * returns the primary key value of the entity to which it is applied
      *
-     * @method 
+     * @method getKey
      * @return {Number | String}
      */
-    this. = function () {        return 0 || '';     };
+    this.getKey = function getKey() {        return 0 || '';     };
     
 
 };
@@ -569,6 +594,15 @@ dataClass = function dataClass() {
     /**
      * 
      *
+     * @property attributes
+     * @attributes 
+     * @type AttributeEnumerator
+     */
+    this.attributes =  new AttributeEnumerator( ); 
+    
+    /**
+     * 
+     *
      * @property length
      * @attributes ReadOnly
      * @type Number
@@ -715,12 +749,13 @@ dataClass = function dataClass() {
     this.setAutoSequenceNumber = function setAutoSequenceNumber(counter) {             };
     
     /**
-     * generates entities in the datastore class where it is applied
+     * generates entities in the datastore class where it is applied and returns the resulting entity collection
      *
      * @method fromArray
      * @param {Array} arrayValues
+     * @return {EntityCollection}
      */
-    this.fromArray = function fromArray(arrayValues) {             };
+    this.fromArray = function fromArray(arrayValues) {        return new EntityCollection( );     };
     
     /**
      * creates a new blank object of type Entity based on the datastore class to which it is applied

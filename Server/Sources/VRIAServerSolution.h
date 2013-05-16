@@ -21,7 +21,8 @@
 #include "VRIASettingsFile.h"
 #include "VSolutionSettings.h"
 #include "VRIAServerJSContextMgr.h"
-
+#include "BreakPointsManager.h"
+#include "VRemoteDebuggerBreakpointsManager.h"
 
 class VSolution;
 class VRIAServerProject;
@@ -84,10 +85,6 @@ private:
 
 
 
-// ----------------------------------------------------------------------------
-
-
-
 class VRIAServerSolution : public XBOX::VObject, public XBOX::IRefCountable, public IJSContextPoolDelegate
 {
 public:
@@ -115,6 +112,7 @@ public:
 			void							GetName( XBOX::VString& outName) const;
 			/**	@brief	Returns the physical folder which contains the design solution file */
 			XBOX::VFolder*					RetainFolder() const;
+			XBOX::VFile*					RetainSolutionFile() const;
 			/** @brief	Returns the folder which contains the log files. */
 			XBOX::VFolder*					RetainLogFolder( bool inCreateIfNotExists) const;
 			/** @brief	Returns the settings file which contains the setting. */
@@ -129,7 +127,6 @@ public:
 			bool							GetUUID( XBOX::VUUID& outUUID) const;
 
 			// Logging
-			XBOX::VLog4jMsgFileReader*		GetMessagesReader() const;
 			void							GetMessagesLoggerID( XBOX::VString& outLoggerID) const;
 
 			VRIAServerProject*				RetainApplicationByName( const XBOX::VString& inName) const;
@@ -138,10 +135,13 @@ public:
 
 			const VSolutionSettings&		GetSettings() const;
 
-			// JavaScript utilities
-			void							DropAllJSContexts();
+			XBOX::VFileSystemNamespace*		GetFileSystemNamespace() const		{ return fFileSystemNamespace;}
 
 			bool							CanGarbageCollect ( ) { return fGarbageCollect; }
+			void							GetBreakpoints( std::set< VRemoteDebuggerBreakpointsManager::VFileBreakpoints > & outBrkpts );
+			void							AddBreakpoint(const XBOX::VString& inUrl, sLONG inLineNb);
+			void							RemoveBreakpoint(const XBOX::VString& inUrl, sLONG inLineNb);
+			void							GetBreakpointsTimeStamp(sLONG& outbreakpointsTimeStamp);
 
 private:
 
@@ -158,6 +158,8 @@ private:
 
 			/** @brief	Init the DB4D Component with the solution database settings */
 			XBOX::VError					_LoadDatabaseSettings();
+
+			XBOX::VError					_LoadFileSystemDefinitions();
 
 			CUAGDirectory*					_OpenUAGDirectory( XBOX::VError& outError);
 
@@ -199,10 +201,12 @@ private:
 			VRIAServerSolutionJSRuntimeDelegate		*fJSRuntimeDelegate;
 
 			XBOX::VLog4jMsgFileLogger		*fLogger;
-			XBOX::VLog4jMsgFileReader		*fLogReader;
 			XBOX::VString					fLoggerID;
 
 			bool							fGarbageCollect;
+			VRemoteDebuggerBreakpointsManager*			fWAKBreakpointsManager;
+
+			XBOX::VFileSystemNamespace*		fFileSystemNamespace;
 };
 
 
@@ -219,13 +223,11 @@ public:
 
 	virtual	XBOX::VFolder*					RetainScriptsFolder();
 	virtual XBOX::VProgressIndicator*		CreateProgressIndicator( const XBOX::VString& inTitle);
+	virtual	XBOX::VFileSystemNamespace*		RetainRuntimeFileSystemNamespace();
 
 private:
 			VRIAServerSolution				*fSolution;
 };
-
-
-
 
 
 #endif

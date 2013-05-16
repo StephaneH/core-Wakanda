@@ -180,7 +180,7 @@ var testCase = {
         var result = new Date(obj.creationDate);
         var expected = this.creationDate.toISOString();
         var actual = result.toISOString()
-        Y.Assert.areSame(expected.substr(0, expected.lastIndexOf('.')), actual.substr(0, actual.lastIndexOf('.')));
+        Y.Assert.areSame(expected.substr(0, expected.lastIndexOf(':')), actual.substr(0, actual.lastIndexOf(':')));
     },
     
     //7 - Attribute modificationDate exists
@@ -196,7 +196,7 @@ var testCase = {
         var result = new Date(obj.modificationDate);
         var expected = this.creationDate.toISOString();
         var actual = result.toISOString()
-        Y.Assert.areSame(expected.substr(0, expected.lastIndexOf('.')), actual.substr(0, actual.lastIndexOf('.')));
+        Y.Assert.areSame(expected.substr(0, expected.lastIndexOf(':')), actual.substr(0, actual.lastIndexOf(':')));
     },
 
     //9 - Attribute exists exists

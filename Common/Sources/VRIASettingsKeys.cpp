@@ -138,24 +138,6 @@ namespace RIASettingsKeys
 		CREATE_BAGKEY_WITH_DEFAULT_SCALAR( flushDataCacheInterval, XBOX::VLong, sLONG, 15 * 60);	// 15 min (in seconds)
 	}
 
-	/*
-	namespace DatabaseJournal
-	{
-		// solution settings
-		CREATE_BAGKEY_WITH_DEFAULT_SCALAR( enabled, XBOX::VBoolean, bool, true);	//whether journaling is enabled
-		CREATE_BAGKEY_WITH_DEFAULT_SCALAR( maxSize, XBOX::VLong, sLONG,1024 * 2);	// max size in Ko for journal
-		CREATE_BAGKEY_WITH_DEFAULT( path, XBOX::VString,L"./DBJournal.journal");	//path name for journal file (empty means applicatio will generate a default name
-	}
-	
-
-	namespace DatabaseRecovery
-	{
-		// solution settings
-		CREATE_BAGKEY_WITH_DEFAULT_SCALAR( recoverFromJournal, XBOX::VBoolean, bool, true);	//integrate existing journal if database is incomplete
-		CREATE_BAGKEY_WITH_DEFAULT_SCALAR( recoverFromLastBackup, XBOX::VBoolean, bool, true);	//integrate from last backup if database is corrupted
-	}
-	*/
-
 	namespace Backup
 	{
 		//Solution and project-wide settings

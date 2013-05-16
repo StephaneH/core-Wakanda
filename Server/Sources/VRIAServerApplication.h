@@ -67,6 +67,8 @@ public:
 			void								SetNetDump(bool inWithServerNetDump);
 			bool								GetNetDump(bool& outWithServerNetDump);
 
+			void								SetDebuggingAuthorized( bool inAuthorized);
+			bool								GetDebuggingAuthorized( bool& outAuthorized) const;
 
 private:
 
@@ -205,6 +207,10 @@ public:
 			void							PublishServiceRecordEvent ();
 			void							GetProgressInfos(const XBOX::VString& inServiceName, XBOX::VLong& outProgressInfos, XBOX::VLong& outProgressSessions);
 
+			bool							GetDebuggingAuthorized() const;
+
+			XBOX::VFileSystemNamespace*		GetFileSystemNamespace() const		{ return fFileSystemNamespace;}
+
 
 protected:
 	virtual	void							DoRun();
@@ -229,7 +235,9 @@ private:
 			void							_FlushDataCache();
 	
 			void							_PublishServiceRecord (const XBOX::VString &inServiceName);
-			void							_WithdrawServiceRecord (const XBOX::VString &inServiceName);
+			void							_WithdrawServiceRecord (const XBOX::VString &inServiceName, const XBOX::VString& inProviderName);
+
+			XBOX::VSignalT_0*				GetPublishEventSignal() { return &fPublishEventSignal; }
 
 	static	VRIAServerApplication*			sCurrentApplication;
 
@@ -263,10 +271,11 @@ private:
 			
 			XBOX::VCriticalSection			fPublishMutex;
 
-			VRIAServerProgressIndicator*	indexProgressIndicator;
-			VRIAServerProgressIndicator*	flushProgressIndicator;
-			XBOX::VSignalT_0*				GetPublishEventSignal() { return &fPublishEventSignal; }
+			VRIAServerProgressIndicator*	fIndexProgressIndicator;
+			VRIAServerProgressIndicator*	fFlushProgressIndicator;
 			XBOX::VSignalT_0				fPublishEventSignal;
+			
+			XBOX::VFileSystemNamespace*		fFileSystemNamespace;
 
 	friend	class VRIAOpenSolutionAsCurrentSolutionMessage;
 	friend	class VRIACloseCurrentSolutionMessage;
@@ -288,11 +297,27 @@ public:
 
 	virtual	XBOX::VFolder*					RetainScriptsFolder();
 	virtual XBOX::VProgressIndicator*		CreateProgressIndicator( const XBOX::VString& inTitle);
+	virtual	XBOX::VFileSystemNamespace*		RetainRuntimeFileSystemNamespace();
 
 private:
 			XBOX::VFolder					*fScriptFolder;
 };
 
+
+
+// ----------------------------------------------------------------------------
+
+
+
+class VDropAllJSContextsMessage : public XBOX::VMessage
+{
+public:
+			VDropAllJSContextsMessage()		{;}
+	virtual ~VDropAllJSContextsMessage()	{;}
+
+protected:
+	virtual	void	DoExecute();
+};
 
 
 #endif

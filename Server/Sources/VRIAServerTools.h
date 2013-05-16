@@ -38,6 +38,9 @@ XBOX::VErrorBase* CreateErrorBase( XBOX::VError inError, const XBOX::VValueBag& 
 
 XBOX::VErrorBase* CreateErrorBase( XBOX::VError inError, const XBOX::VString *inParam, ...);
 
+void fputs_VString( const XBOX::VString& inMessage, FILE *inFile);
+
+
 // ----------------------------------------------------------------------------
 
 

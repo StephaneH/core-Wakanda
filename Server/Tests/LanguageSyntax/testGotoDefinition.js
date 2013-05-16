@@ -1,4 +1,4 @@
-﻿/*
+/*
 * This file is part of Wakanda software, licensed by 4D under
 *  (i) the GNU General Public License version 3 (GNU GPL v3), or
 *  (ii) the Affero General Public License version 3 (AGPL v3) or
@@ -25,7 +25,7 @@ var tests = {
 									results : [
 												{
 													name: "var1",
-													file: "./Definitions/clientSide/gotodef_client_01.js",
+													file: "Definitions/clientSide/gotodef_client_01.js",
 													line: 1
 												}
 											  ]
@@ -37,7 +37,7 @@ var tests = {
 									results : [
 												{
 													name: "p1",
-													file: "./Definitions/clientSide/gotodef_client_01.js",
+													file: "Definitions/clientSide/gotodef_client_01.js",
 													line: 15
 												}
 											  ]
@@ -55,7 +55,7 @@ var tests = {
 									results : [
 												{
 													name: "var1",
-													file: "./Definitions/clientSide/gotodef_client_01.js",
+													file: "Definitions/clientSide/gotodef_client_01.js",
 													line: 1
 												}
 											  ]
@@ -67,7 +67,7 @@ var tests = {
 									results : [
 												{
 													name: "obj1",
-													file: "./Definitions/clientSide/gotodef_client_01.js",
+													file: "Definitions/clientSide/gotodef_client_01.js",
 													line: 2
 												}
 											  ]
@@ -79,7 +79,7 @@ var tests = {
 									results : [
 												{
 													name: "p1",
-													file: "./Definitions/clientSide/gotodef_client_01.js",
+													file: "Definitions/clientSide/gotodef_client_01.js",
 													line: 4
 												}
 											  ]
@@ -91,7 +91,7 @@ var tests = {
 									results : [
 												{
 													name: "p3_1",
-													file: "./Definitions/clientSide/gotodef_client_01.js",
+													file: "Definitions/clientSide/gotodef_client_01.js",
 													line: 8
 												}
 											  ]
@@ -103,7 +103,7 @@ var tests = {
 									results : [
 												{
 													name: "p1",
-													file: "./Definitions/clientSide/gotodef_client_01.js",
+													file: "Definitions/clientSide/gotodef_client_01.js",
 													line: 15
 												}
 											  ]
@@ -115,7 +115,7 @@ var tests = {
 									results : [
 												{
 													name: "p4",
-													file: "./Definitions/clientSide/gotodef_client_01.js",
+													file: "Definitions/clientSide/gotodef_client_01.js",
 													line: 16
 												}
 											  ]
@@ -127,7 +127,7 @@ var tests = {
 									results : [
 												{
 													name: "p4",
-													file: "./Definitions/clientSide/gotodef_client_01.js",
+													file: "Definitions/clientSide/gotodef_client_01.js",
 													line: 16
 												}
 											  ]
@@ -139,7 +139,7 @@ var tests = {
 									results : [
 												{
 													name: "bar1",
-													file: "./Definitions/clientSide/gotodef_client_01.js",
+													file: "Definitions/clientSide/gotodef_client_01.js",
 													line: 19
 												}
 											  ]
@@ -157,7 +157,7 @@ var tests = {
 									results : [
 												{
 													name: "var2",
-													file: "./Definitions/clientSide/gotodef_client_02.js",
+													file: "Definitions/clientSide/gotodef_client_02.js",
 													line: 3
 												}
 											  ]
@@ -169,7 +169,7 @@ var tests = {
 									results : [
 												{
 													name: "obj2",
-													file: "./Definitions/clientSide/gotodef_client_02.js",
+													file: "Definitions/clientSide/gotodef_client_02.js",
 													line: 4
 												}
 											  ]
@@ -181,7 +181,7 @@ var tests = {
 									results : [
 												{
 													name: "p1",
-													file: "./Definitions/clientSide/gotodef_client_02.js",
+													file: "Definitions/clientSide/gotodef_client_02.js",
 													line: 6
 												}
 											  ]
@@ -206,7 +206,7 @@ var tests = {
 									results : [
 												{
 													name: "var2",
-													file: "./Definitions/clientSide/gotodef_client_02.js",
+													file: "Definitions/clientSide/gotodef_client_02.js",
 													line: 24
 												}
 											  ]
@@ -218,7 +218,7 @@ var tests = {
 									results : [
 												{
 													name: "obj2",
-													file: "./Definitions/clientSide/gotodef_client_02.js",
+													file: "Definitions/clientSide/gotodef_client_02.js",
 													line: 25
 												}
 											  ]
@@ -256,7 +256,7 @@ var tests = {
 									results : [
 												{
 													name: "fct_1",
-													file: "./Definitions/clientSide/gotodef_client_02.js",
+													file: "Definitions/clientSide/gotodef_client_02.js",
 													line: 1
 												}
 											  ]
@@ -268,7 +268,7 @@ var tests = {
 									results : [
 												{
 													name: "foo_multiple",
-													file: "./Definitions/clientSide/gotodef_client_03.js",
+													file: "Definitions/clientSide/gotodef_client_03.js",
 													line: 3
 												}
 											  ]
@@ -280,17 +280,17 @@ var tests = {
 									results : [
 												{
 													name: "foo_multiple",
-													file: "./Definitions/clientSide/gotodef_client_01.js",
+													file: "Definitions/clientSide/gotodef_client_01.js",
 													line: 19
 												},
 												{
 													name: "foo_multiple",
-													file: "./Definitions/clientSide/gotodef_client_02.js",
+													file: "Definitions/clientSide/gotodef_client_02.js",
 													line: 35
 												},
 												{
 													name: "foo_multiple",
-													file: "./Definitions/clientSide/gotodef_client_03.js",
+													file: "Definitions/clientSide/gotodef_client_03.js",
 													line: 3
 												},
 											  ]
@@ -308,7 +308,7 @@ var tests = {
 									results : [
 												{
 													name: "var_server1",
-													file: "./Definitions/serverSide/gotodef_server_01.js",
+													file: "Definitions/serverSide/gotodef_server_01.js",
 													line: 1
 												}
 											  ]
@@ -327,7 +327,7 @@ var tests = {
 									results : [
 												{
 													name: "method1",
-													file: "./Definitions/serverSide/p1.waModel.js",
+													file: "Definitions/serverSide/p1.waModel.js",
 													line: 6
 												}
 											  ]
@@ -339,7 +339,7 @@ var tests = {
 									results : [
 												{
 													name: "methods",
-													file: "./Definitions/serverSide/p1.waModel.js",
+													file: "Definitions/serverSide/p1.waModel.js",
 													line: 2
 												}
 											  ]
@@ -351,7 +351,7 @@ var tests = {
 									results : [
 												{
 													name: "Model1",
-													file: "./Definitions/serverSide/p1.waModel.js",
+													file: "Definitions/serverSide/p1.waModel.js",
 													line: 4
 												}
 											  ]
@@ -363,7 +363,7 @@ var tests = {
 									results : [
 												{
 													name: "method1",
-													file: "./Definitions/serverSide/p1.waModel.js",
+													file: "Definitions/serverSide/p1.waModel.js",
 													line: 6
 												}
 											  ]
@@ -387,7 +387,7 @@ var tests = {
 									results : [
 												{
 													name: "bar2",
-													file: "./Definitions/clientSide/gotodef_client_02.js",
+													file: "Definitions/clientSide/gotodef_client_02.js",
 													line: 39
 												}
 											  ]
@@ -399,7 +399,7 @@ var tests = {
 									results : [
 												{
 													name: "server2",
-													file: "./Definitions/serverSide/gotodef_server_01.js",
+													file: "Definitions/serverSide/gotodef_server_01.js",
 													line: 6
 												}
 											  ]
@@ -411,7 +411,7 @@ var tests = {
 									results : [
 												{
 													name: "p1",
-													file: "./Definitions/serverSide/gotodef_server_01.js",
+													file: "Definitions/serverSide/gotodef_server_01.js",
 													line: 7
 												}
 											  ]
@@ -423,7 +423,7 @@ var tests = {
 									results : [
 												{
 													name: "p2",
-													file: "./Definitions/serverSide/gotodef_server_02.js",
+													file: "Definitions/serverSide/gotodef_server_02.js",
 													line: 2
 												}
 											  ]

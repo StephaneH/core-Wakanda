@@ -17,6 +17,7 @@
 #include "VRIAJSDebuggerSettings.h"
 #include "VSolution.h"
 #include "VRIAServerSolution.h"
+#include "VRemoteDebuggerBreakpointsManager.h"
 #include "VRIAServerProject.h"
 #include "VProjectItem.h"
 #include "VRIAServerTools.h"
@@ -27,10 +28,11 @@ USING_TOOLBOX_NAMESPACE
 using namespace std;
 
 
-VJSDebuggerSettings::VJSDebuggerSettings ( VRIAServerSolution* inServerSolution )
+VJSDebuggerSettings::VJSDebuggerSettings( VRIAServerSolution* inServerSolution, VRemoteDebuggerBreakpointsManager* inBreakPointsManager  )
 {
 	fNeedsAuthentication = true;
 	fServerSolution = inServerSolution;
+	fWAKBreakPointsManager = inBreakPointsManager;
 	if ( fServerSolution != 0 )
 		fServerSolution-> Retain ( );
 }
@@ -39,6 +41,46 @@ VJSDebuggerSettings::~VJSDebuggerSettings ( )
 {
 	if ( fServerSolution != 0 )
 		fServerSolution-> Release ( );
+}
+bool VJSDebuggerSettings::AddBreakPoint( OpaqueDebuggerContext inContext, const XBOX::VString& inUrl, intptr_t inSrcId, int inLineNumber )
+{
+	return fWAKBreakPointsManager->AddBreakPoint(inContext,inUrl,inSrcId,inLineNumber);
+}
+bool VJSDebuggerSettings::AddBreakPoint( const XBOX::VString& inUrl, int inLineNumber )
+{
+	return fWAKBreakPointsManager->AddBreakPoint(inUrl,inLineNumber);
+}
+bool VJSDebuggerSettings::RemoveBreakPoint(OpaqueDebuggerContext inContext, const XBOX::VString& inUrl, intptr_t inSrcId, int inLineNumber )
+{
+	return fWAKBreakPointsManager->RemoveBreakPoint(inContext,inUrl,inSrcId,inLineNumber);
+}
+bool VJSDebuggerSettings::RemoveBreakPoint( const XBOX::VString& inUrl, int inLineNumber )
+{
+	return fWAKBreakPointsManager->RemoveBreakPoint(inUrl,inLineNumber);
+}
+void VJSDebuggerSettings::Set(OpaqueDebuggerContext inContext,const XBOX::VString& inUrl, intptr_t inSrcId, const XBOX::VString& inData)
+{
+	fWAKBreakPointsManager->Set(inContext,inUrl,inSrcId,inData);
+}
+void VJSDebuggerSettings::Add(OpaqueDebuggerContext inContext)
+{
+	fWAKBreakPointsManager->Add(inContext);
+}
+void VJSDebuggerSettings::Remove(OpaqueDebuggerContext inContext)
+{
+	fWAKBreakPointsManager->Remove(inContext);
+}
+bool VJSDebuggerSettings::HasBreakpoint(OpaqueDebuggerContext inContext,intptr_t inSrcId, unsigned lineNumber)
+{
+	return fWAKBreakPointsManager->HasBreakpoint(inContext,inSrcId,lineNumber);
+}
+bool VJSDebuggerSettings::GetData(OpaqueDebuggerContext inContext,intptr_t inSrcId, XBOX::VString& outSourceUrl, XBOX::VectorOfVString& outSourceData)
+{
+	return fWAKBreakPointsManager->GetData(inContext,inSrcId,outSourceUrl,outSourceData);
+}
+void VJSDebuggerSettings::GetJSONBreakpoints(XBOX::VString& outJSONBreakPoints)
+{
+	fWAKBreakPointsManager->GetJSONBreakpoints(outJSONBreakPoints);
 }
 
 VError VJSDebuggerSettings::Init ( )
@@ -63,8 +105,8 @@ bool VJSDebuggerSettings::UserCanDebug(IAuthenticationInfos* inAuthenticationInf
 	bool			canDebug = false;
 	CUAGSession*	uagSession;
 
-	uagSession = inAuthenticationInfos->GetUAGSession();
-
+	uagSession = RetainRefCountable(inAuthenticationInfos->GetUAGSession());
+	
 	if (!uagSession)
 	{
 		CUAGDirectory*	uagDirectory = fServerSolution->RetainUAGDirectory();
@@ -89,7 +131,7 @@ bool VJSDebuggerSettings::UserCanDebug(IAuthenticationInfos* inAuthenticationInf
 	{
 		CUAGDirectory*		uagDir = uagSession->GetDirectory();
 		XBOX::VUUID			uuid;
-		if (!uagDir->GetSpecialGroupID(CUAGDirectory::DebuggerGroup, uuid))
+		if (!uagDir->GetSpecialGroupID(CUAGDirectory::AdminGroup, uuid))
 		{
 			xbox_assert(false);
 		}
@@ -101,6 +143,7 @@ bool VJSDebuggerSettings::UserCanDebug(IAuthenticationInfos* inAuthenticationInf
 			}
 		}
 	}
+	ReleaseRefCountable(&uagSession);
 	return canDebug;
 }
 
@@ -158,10 +201,10 @@ bool VJSDebuggerSettings::UserCanDebug ( const UniChar* inUserName, const UniCha
 	
 	if ( cSession != 0 && vError  == VE_OK )
 	{
-		VUUID			vuuidDebuggerGroup;
-		bool			bOK = uagDirectory-> GetSpecialGroupID ( CUAGDirectory::DebuggerGroup, vuuidDebuggerGroup );
+		VUUID			vuuidAdminGroup;
+		bool			bOK = uagDirectory-> GetSpecialGroupID ( CUAGDirectory::AdminGroup, vuuidAdminGroup );
 		xbox_assert ( bOK );
-		if ( cSession-> BelongsTo ( vuuidDebuggerGroup ) )
+		if ( cSession-> BelongsTo ( vuuidAdminGroup ) )
 			bCanDebug = true;
 	}
 
@@ -190,10 +233,10 @@ bool VJSDebuggerSettings::NeedsAuthentication ( ) const
 		VError							vError = VE_OK;
 		CUAGSession*					cSession = uagDirectory-> MakeDefaultSession ( &vError );
 		xbox_assert ( vError == VE_OK );
-		VUUID							vuuidDebuggerGroup;
-		bool							bOK = uagDirectory-> GetSpecialGroupID ( CUAGDirectory::DebuggerGroup, vuuidDebuggerGroup );
+		VUUID							vuuidAdminGroup;
+		bool							bOK = uagDirectory-> GetSpecialGroupID ( CUAGDirectory::AdminGroup, vuuidAdminGroup );
 		xbox_assert ( bOK );
-		if ( cSession-> BelongsTo ( vuuidDebuggerGroup ) )
+		if ( cSession-> BelongsTo ( vuuidAdminGroup ) )
 			bResult = false;
 
 		ReleaseRefCountable ( &cSession );
@@ -214,7 +257,7 @@ bool VJSDebuggerSettings::HasDebuggerUsers ( ) const
 		return false;
 
 	VError								vError = VE_OK;
-	CUAGGroup*							groupDebuggers = uagDirectory-> RetainSpecialGroup ( CUAGDirectory::DebuggerGroup, &vError );
+	CUAGGroup*							groupDebuggers = uagDirectory-> RetainSpecialGroup ( CUAGDirectory::AdminGroup, &vError );
 	xbox_assert ( vError == VE_OK );
 	if ( vError == VE_OK && groupDebuggers != 0 )
 	{

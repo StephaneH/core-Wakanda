@@ -53,4 +53,8 @@ void testMySQLConnectorPreparedStatementWithTypeBlob();
 
 void MySQLConnectorBench();
 
+void MySQLConnectorSample();
+
+void SQLModelSample();
+
 #endif

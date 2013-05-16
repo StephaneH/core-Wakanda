@@ -458,11 +458,11 @@ DEFAULT_RESOURCES=/walib/
 #[INFO]-----------Local Variable---------
 
 echo "Go to Solution A..."
-cd "${SolutionsTest}${Solution[0]}"
+cd "${SolutionsTest}${SolutionName[0]}/${SolutionName[0]}"
 
 echo "[INFO]-------------------Section Default XML Settings : Project | Port :---------------------"
 
-if grep ${DEFAULT_HTTP_PORT} ${SolutionName[0]}.waSettings
+if grep ${DEFAULT_HTTP_PORT} Settings.waSettings
 then
  echo "Default Port configuration is good."
  DEFAULT_HTTP_PORT_S=1
@@ -478,7 +478,7 @@ echo "[INFO]----------------Section Default XML Settings : Project | Hostname :-
 
 echo "Project | Hostname :"
 
-if grep ${DEFAULT_HOSTNAME} ${SolutionName[0]}.waSettings
+if grep ${DEFAULT_HOSTNAME} Settings.waSettings
 then
  echo "Default Hostname configuration is good."
  DEFAULT_HOSTNAME_S=1
@@ -493,7 +493,7 @@ echo "[INFO]----------------Section Default XML Settings : Project | HTTP Start 
 
 echo "HTTP |  HTTP Start :"
 
-if grep ${DEFAULT_HTTP_START} ${SolutionName[0]}.waSettings
+if grep ${DEFAULT_HTTP_START} Settings.waSettings
 then
  echo "Default HTTP Start configuration is good."
  DEFAULT_HTTP_START_S=1
@@ -508,7 +508,7 @@ echo "[INFO]-------------Section Default XML Settings : Project | Responce Forma
 
 echo "HTTP | RESPONSE Format :"
 
-if grep ${DEFAULT_RESPONSEFORMAT} ${SolutionName[0]}.waSettings
+if grep ${DEFAULT_RESPONSEFORMAT} Settings.waSettings
 then
  echo "Default Response Format configuration is good."
  DEFAULT_RESPONSEFORMAT_S=1
@@ -523,18 +523,18 @@ echo "[INFO]-------------Section Default XML Settings : Project | DocumentROOT :
 
 echo "HTTP | DocumentROOT :"
 
-if grep ${DEFAULT_DOCUMENTROOT} ${SolutionName[0]}.waSettings
-then
- echo "Default DocumentRoot  configuration is good."
- DEFAULT_DOCUMENTROOT_S=1
-else
- echo "Default DocumentRoot  configuration is wrong."
- DEFAULT_DOCUMENTROOT_S=0
-fi
+#if grep ${DEFAULT_DOCUMENTROOT} Settings.waSettings
+#then
+# echo "Default DocumentRoot  configuration is good."
+# DEFAULT_DOCUMENTROOT_S=1
+#else
+# echo "Default DocumentRoot  configuration is wrong."
+# DEFAULT_DOCUMENTROOT_S=0
+#fi
 
 echo "[INFO]-------------Section Default XML Settings : Project | DocumentROOT :-------------------"
 
-if [ ${DEFAULT_HTTP_START_S} -eq 1 ] && [ ${DEFAULT_HOSTNAME_S} -eq 1 ] && [ ${DEFAULT_HTTP_START_S} -eq 1 ] && [ ${DEFAULT_RESPONSEFORMAT_S} -eq 1 ] && [ ${DEFAULT_DOCUMENTROOT_S} -eq 1 ]
+if [ ${DEFAULT_HTTP_START_S} -eq 1 ] && [ ${DEFAULT_HOSTNAME_S} -eq 1 ] && [ ${DEFAULT_HTTP_START_S} -eq 1 ] && [ ${DEFAULT_RESPONSEFORMAT_S} -eq 1 ]
 then
 
 #[INFO]-------------Score for Junit----------
@@ -2807,7 +2807,7 @@ then
 #Wrote in the Junit File
 cat >> "${HomeDirectory}${Directory}Junit-report/$(date +%d-%m-%Y)-GoNoGo-Server-Junit-file.xml" <<EOF
   <testcase name="${TESTCASE36}-[Passed]" passed="true" time="DV">
-     <success message="Test Passed, We have a responce from 127.0.0.1:443 in SSL mode : Version Release"><![CDATA[Test passed,  We have a responce from 127.0.0.1:443 in SSL mode : Version Release]]></success>
+     <success message="Test Passed, We have a responce from 127.0.0.1:${port[3]} in SSL mode : Version Release"><![CDATA[Test passed,  We have a responce from 127.0.0.1:${port[3]} in SSL mode : Version Release]]></success>
   </testcase>
 EOF
 
@@ -2848,7 +2848,7 @@ then
 #Wrote in the Junit File
 cat >> "${HomeDirectory}${Directory}Junit-report/$(date +%d-%m-%Y)-GoNoGo-Server-Junit-file.xml" <<EOF
   <testcase name="${TESTCASE36}-[Failed]" passed="false" time="DV">
-     <failure message="Test Failed, We have no responce from 127.0.0.1:443 : Version Release"><![CDATA[Test Failed, Re-execution : We have no responce from 127.0.0.1:443 : Version Release]]></failure>
+     <failure message="Test Failed, We have no responce from 127.0.0.1:${port[3]} : Version Release"><![CDATA[Test Failed, Re-execution : We have no responce from 127.0.0.1:${port[3]} : Version Release]]></failure>
   </testcase>
 EOF
 
@@ -3059,7 +3059,7 @@ then
 #Wrote in the Junit File
 cat >> "${HomeDirectory}${Directory}Junit-report/$(date +%d-%m-%Y)-GoNoGo-Server-Junit-file.xml" <<EOF
   <testcase name="${TESTCASE38}-[Passed]" passed="true" time="DV">
-     <success message="Test Passed, We got a responce from 127.0.0.1:443 : Version Release"><![CDATA[Test passed, We got a responce from 127.0.0.1:443 : Version Release]]></success>
+     <success message="Test Passed, We got a responce from 127.0.0.1:${port[3]} : Version Release"><![CDATA[Test passed, We got a responce from 127.0.0.1:${port[3]} : Version Release]]></success>
   </testcase>
 EOF
 
@@ -3100,7 +3100,7 @@ then
 #Wrote in the Junit File
 cat >> "${HomeDirectory}${Directory}Junit-report/$(date +%d-%m-%Y)-GoNoGo-Server-Junit-file.xml" <<EOF
   <testcase name="${TESTCASE38}-[Failed]" passed="false" time="DV">
-     <failure message="Test Failed, We didn't get a responce from 127.0.0.1:443 : Version Release"><![CDATA[Test Failed, We didn't get a responce from 127.0.0.1:443 : Version Release]]></failure>
+     <failure message="Test Failed, We didn't get a responce from 127.0.0.1:${port[3]} : Version Release"><![CDATA[Test Failed, We didn't get a responce from 127.0.0.1:${port[3]} : Version Release]]></failure>
   </testcase>
 EOF
 
@@ -3156,7 +3156,7 @@ cURL_RPC_OPEN_Wakanda_Solution 0 3
 
 echo "[INFO]-------------------Wakanda Execution : Launch Solution------------------------"
 
-echo "Checking if the adress ${PRIVATE_IP} is running well on port 443"
+echo "Checking if the adress ${PRIVATE_IP} is running well on port ${port[3]}"
 echo "[INFO]------------------------------SimpleGETServer-------------------------------------"
 
 . "${HomeDirectory}${Directory}Functions" 

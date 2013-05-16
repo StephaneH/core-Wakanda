@@ -1,21 +1,6 @@
-/*
-* This file is part of Wakanda software, licensed by 4D under
-*  (i) the GNU General Public License version 3 (GNU GPL v3), or
-*  (ii) the Affero General Public License version 3 (AGPL v3) or
-*  (iii) a commercial license.
-* This file remains the exclusive property of 4D and/or its licensors
-* and is protected by national and international legislations.
-* In any event, Licensee's compliance with the terms and conditions
-* of the applicable license constitutes a prerequisite to any use of this file.
-* Except as otherwise expressly stated in the applicable license,
-* such license does not include any other license or rights on this file,
-* 4D's and/or its licensors' trademarks and/or other proprietary rights.
-* Consequently, no title, copyright or other proprietary rights
-* other than those specified in the applicable license is granted.
-*/
 /**
  *
- * Updated 25 January 2012
+ * Updated on 27 April 2012
  *
  * @class Widgets
  * @extends Object
@@ -190,6 +175,48 @@ Widget = function Widget() {
     this.selectTab = function selectTab(tab) {             };
     
     /**
+     * add an option to the Combo Box widget
+     *
+     * @method addOption
+     * @param {String} value
+     * @param {String} label
+     * @param {Boolean} selected
+     */
+    this.addOption = function addOption(value, label, selected) {             };
+    
+    /**
+     * remove an option from the  Combo Box widget
+     *
+     * @method removeOption
+     * @param {Number} option
+     */
+    this.removeOption = function removeOption(option) {             };
+    
+    /**
+     * returns the title of the Chart
+     *
+     * @method getLabels
+     * @return {Array}
+     */
+    this.getLabels = function getLabels() {        return [];     };
+    
+    /**
+     * returns the values in the Chart widget
+     *
+     * @method getValues
+     * @return {Array}
+     */
+    this.getValues = function getValues() {        return [];     };
+    
+    /**
+     * returns the type of the Chart
+     *
+     * @method getChartType
+     * @return {String}
+     */
+    this.getChartType = function getChartType() {        return '';     };
+    
+    /**
      * find the entities  whose values were entered in the fields of the Query Form  widget
      *
      * @method findEntity
@@ -232,12 +259,100 @@ Widget = function Widget() {
     this.findEntity = function findEntity() {             };
     
     /**
+     * set the Orientation of the Slider  widget
+     *
+     * @method setOrientation
+     * @param {String} orientation
+     */
+    this.setOrientation = function setOrientation(orientation) {             };
+    
+    /**
+     * returns the Orientation of the Slider widget
+     *
+     * @method getOrientation
+     * @return {String}
+     */
+    this.getOrientation = function getOrientation() {        return '';     };
+    
+    /**
+     * set the Step for the Slider widget
+     *
+     * @method setStep
+     * @param {Number} step
+     */
+    this.setStep = function setStep(step) {             };
+    
+    /**
+     * returns the Step for the Slider widget
+     *
+     * @method getStep
+     * @return {Number}
+     */
+    this.getStep = function getStep() {        return 0;     };
+    
+    /**
+     * set the Range of the Slider widget
+     *
+     * @method setRange
+     * @param {String} range
+     */
+    this.setRange = function setRange(range) {             };
+    
+    /**
+     * returns the Range of the Slider widget
+     *
+     * @method getRange
+     * @return {String}
+     */
+    this.getRange = function getRange() {        return '';     };
+    
+    /**
+     * set the two values for a Slider that has two handles
+     *
+     * @method setValues
+     * @param {Array} values
+     */
+    this.setValues = function setValues(values) {             };
+    
+    /**
+     * set the Maximum Value for the Slider
+     *
+     * @method setMax
+     * @param {Number} value
+     */
+    this.setMax = function setMax(value) {             };
+    
+    /**
+     * set the Minimum Value for the Slider
+     *
+     * @method setMin
+     * @param {Number} value
+     */
+    this.setMin = function setMin(value) {             };
+    
+    /**
+     * returns the Maximum Value for  the Slider widget
+     *
+     * @method getMax
+     * @return {Number}
+     */
+    this.getMax = function getMax() {        return 0;     };
+    
+    /**
      * add an additional handle to the [#title id&#61;&quot;1798&quot;/] widget
      *
      * @method addHandle
      * @param {Number} number
      */
     this.addHandle = function addHandle(number) {             };
+    
+    /**
+     * returns the Minimum Value for the Slider widget
+     *
+     * @method getMin
+     * @return {Number}
+     */
+    this.getMin = function getMin() {        return 0;     };
     
     /**
      * load a Web Component already present in your project into the Component widget on your Interface page
@@ -289,9 +404,8 @@ Widget = function Widget() {
      * resets the column&#39;s sort indicators
      *
      * @method resetSortIndicator
-     * @param {Number} column
      */
-    this.resetSortIndicator = function resetSortIndicator(column) {             };
+    this.resetSortIndicator = function resetSortIndicator() {             };
     
     /**
      * reduces the current selection of rows in the Grid to the ones that are selected
@@ -338,10 +452,9 @@ Widget = function Widget() {
      * returns an object of type Column to which you can apply other functions in the [#title id&#61;&quot;2858&quot;/] class
      *
      * @method column
-     * @param {Number | String} columnRef
-     * @return {Column}
+     * @param {Number} columnRef
      */
-    this.column = function column(columnRef) {        return new Column( );     };
+    this.column = function column(columnRef) {             };
     
     /**
      * set the selection mode of the [#title id&#61;&quot;811&quot;/] widget to either &quot;single&quot; or &quot;multiple&quot;
@@ -367,6 +480,38 @@ Widget = function Widget() {
      * @param {String} sortOrder
      */
     this.setSortIndicator = function setSortIndicator(column, sortOrder) {             };
+    
+    /**
+     * select a selection of rows
+     *
+     * @method setSelectedRows
+     * @param {Array} rows
+     */
+    this.setSelectedRows = function setSelectedRows(rows) {             };
+    
+    /**
+     * center the Grid with the rowNumber without changing the current entity
+     *
+     * @method centerRow
+     * @param {Number} rowNumber
+     */
+    this.centerRow = function centerRow(rowNumber) {             };
+    
+    /**
+     * retrieve the height (in pixels) of the rows in the Grid widget
+     *
+     * @method getRowHeight
+     * @return {Number}
+     */
+    this.getRowHeight = function getRowHeight() {        return 0;     };
+    
+    /**
+     * set the height (in pixels) of the rows in the Grid widget
+     *
+     * @method setRowHeight
+     * @param {Number} rowHeight
+     */
+    this.setRowHeight = function setRowHeight(rowHeight) {             };
     
     /**
      * either collapses the left container in a vertically split [#title id&#61;&quot;1801&quot;/] widget and shows the Left Splitter Button
@@ -525,18 +670,20 @@ Widget = function Widget() {
     this.link = function link(widget) {             };
     
     /**
-     * enable data entry in a widget
+     * enable data entry for a widget or all the widgets in a Container or Tab View
      *
      * @method enable
+     * @param {Number} tabNumber
      */
-    this.enable = function enable() {             };
+    this.enable = function enable(tabNumber) {             };
     
     /**
-     * disable the data entry in a widget
+     * disable data entry for a widget or all the widgets in a Container or Tab View
      *
      * @method disable
+     * @param {Number} tabNumber
      */
-    this.disable = function disable() {             };
+    this.disable = function disable(tabNumber) {             };
     
     /**
      * set a [#title id&#61;&quot;1801&quot;/] widget as the parent of a widget
@@ -649,22 +796,6 @@ Widget = function Widget() {
      * @param {String} cssClass
      */
     this.removeClass = function removeClass(cssClass) {             };
-    
-    /**
-     * sets the widget&#39;s label&#39;s text color to textColor
-     *
-     * @method setLabelTextColor
-     * @param {String} textColor
-     */
-    this.setLabelTextColor = function setLabelTextColor(textColor) {             };
-    
-    /**
-     * Set the text for the widget&#39;s label or the Button widget&#39;s text
-     *
-     * @method setLabelText
-     * @param {String} labelText
-     */
-    this.setLabelText = function setLabelText(labelText) {             };
     
     /**
      * set the value for a widget
@@ -881,6 +1012,337 @@ Widget = function Widget() {
      */
     this.setErrorMessage = function setErrorMessage(messageObject) {             };
     
+    /**
+     * 
+     *
+     * @method column
+     * @param {Number} columnRef
+     */
+    this.column = function column(columnRef) {             };
+    
+    /**
+     * 
+     *
+     * @method countSelected
+     * @return {Number}
+     */
+    this.countSelected = function countSelected() {        return 0;     };
+    
+    /**
+     * 
+     *
+     * @method centerRow
+     * @param {Number} rowNumber
+     */
+    this.centerRow = function centerRow(rowNumber) {             };
+    
+    /**
+     * returns True if the widget is visible and False if it is not
+     *
+     * @method isVisible
+     * @return {Boolean}
+     */
+    this.isVisible = function isVisible() {        return true;     };
+    
+    /**
+     * remove the state of the widget
+     *
+     * @method removeState
+     * @param {String} state
+     */
+    this.removeState = function removeState(state) {             };
+    
+    /**
+     * get the state of the widget
+     *
+     * @method getState
+     * @return {String}
+     */
+    this.getState = function getState() {        return '';     };
+    
+    /**
+     * set the widget&#39;s state
+     *
+     * @method setState
+     * @param {String} state
+     */
+    this.setState = function setState(state) {             };
+    
+    /**
+     * returns the Label widget as an object
+     *
+     * @method getLabel
+     * @return {Object}
+     */
+    this.getLabel = function getLabel() {        return {};     };
+    
+    /**
+     * set or create a marker on the map by defining ID and location
+     *
+     * @method setMarker
+     * @param {Number} ID
+     * @param {String} location
+     * @param {Object} options
+     */
+    this.setMarker = function setMarker(ID, location, options) {             };
+    
+    /**
+     * set the center point of the map defined by location
+     *
+     * @method setCenter
+     * @param {String} location
+     */
+    this.setCenter = function setCenter(location) {             };
+    
+    /**
+     * set the icon marker to icon for the marker defined by the entity whose ID is ID
+     *
+     * @method setIconMarker
+     * @param {Number} ID
+     * @param {String} icon
+     */
+    this.setIconMarker = function setIconMarker(ID, icon) {             };
+    
+    /**
+     * set the zoom level of the map defined in zoomValue
+     *
+     * @method setZoom
+     * @param {Number} zoomValue
+     */
+    this.setZoom = function setZoom(zoomValue) {             };
+    
+    /**
+     * returns the value chosen for the Selection mode property
+     *
+     * @method getSelectionMode
+     * @return {String}
+     */
+    this.getSelectionMode = function getSelectionMode() {        return '';     };
+    
+    /**
+     * go to the next view in the Navigation View
+     *
+     * @method goToNextView
+     */
+    this.goToNextView = function goToNextView() {             };
+    
+    /**
+     * go to the previous view in the Navigation View
+     *
+     * @method goToPreviousView
+     */
+    this.goToPreviousView = function goToPreviousView() {             };
+    
+    /**
+     * go to a specific view in the Navigation View
+     *
+     * @method goToView
+     * @param {Number} view
+     */
+    this.goToView = function goToView(view) {             };
+    
+    /**
+     * 
+     *
+     * @method column
+     */
+    this.column = function column() {             };
+    
+    /**
+     * returns the Canvas widget&#39;s DOM object
+     *
+     * @method getCanvas
+     * @return {Object}
+     */
+    this.getCanvas = function getCanvas() {        return {};     };
+    
+    /**
+     * returns the 2D context of the Canvas widget
+     *
+     * @method get2DContext
+     * @return {Object}
+     */
+    this.get2DContext = function get2DContext() {        return {};     };
+    
+    /**
+     * 
+     *
+     * @method column
+     * @param {Number} columnRef
+     */
+    this.column = function column(columnRef) {             };
+    
+    /**
+     * 
+     *
+     * @method getControlManager
+     * @return {Object}
+     */
+    this.getControlManager = function getControlManager() {        return {};     };
+    
+    /**
+     * returns an instance of the WYSIWYG Editor
+     *
+     * @method getWysiwygInstance
+     * @return {Object}
+     */
+    this.getWysiwygInstance = function getWysiwygInstance() {        return {};     };
+    
+    /**
+     * returns the Icon widget
+     *
+     * @method getIcon
+     * @return {Object}
+     */
+    this.getIcon = function getIcon() {        return {};     };
+    
+    /**
+     * minimize the Dialog widget
+     *
+     * @method minimizeDialog
+     */
+    this.minimizeDialog = function minimizeDialog() {             };
+    
+    /**
+     * maximize the Dialog widget
+     *
+     * @method maximizeDialog
+     */
+    this.maximizeDialog = function maximizeDialog() {             };
+    
+    /**
+     * display the Dialog widget
+     *
+     * @method displayDialog
+     */
+    this.displayDialog = function displayDialog() {             };
+    
+    /**
+     * close the Dialog widget
+     *
+     * @method closeDialog
+     */
+    this.closeDialog = function closeDialog() {             };
+    
+    /**
+     * upload the files
+     *
+     * @method uploadFiles
+     */
+    this.uploadFiles = function uploadFiles() {             };
+    
+    /**
+     * set one or more files to be the ones selected for the File Upload widget and displayed in the list of files
+     *
+     * @method setFiles
+     * @param {Object | Array} fileList
+     */
+    this.setFiles = function setFiles(fileList) {             };
+    
+    /**
+     * append one or more files to the list of selected files
+     *
+     * @method appendFiles
+     * @param {Object | Array} fileList
+     */
+    this.appendFiles = function appendFiles(fileList) {             };
+    
+    /**
+     * set the Display notification property of the File Upload widget
+     *
+     * @method setNotificationStatus
+     * @param {Boolean} status
+     */
+    this.setNotificationStatus = function setNotificationStatus(status) {             };
+    
+    /**
+     * set the maximum file size
+     *
+     * @method setMaximumFileSize
+     * @param {Number} maxFileSize
+     * @param {String} unit
+     */
+    this.setMaximumFileSize = function setMaximumFileSize(maxFileSize, unit) {             };
+    
+    /**
+     * returns the value defined for the widget&#39;s Maximum size property along with the type (bytes, kb, or mb)
+     *
+     * @method getMaximumFileSize
+     * @return {String}
+     */
+    this.getMaximumFileSize = function getMaximumFileSize() {        return '';     };
+    
+    /**
+     * set the maximum number of files to upload with the File Upload widget
+     *
+     * @method setMaximumFiles
+     * @param {Number} maxFiles
+     */
+    this.setMaximumFiles = function setMaximumFiles(maxFiles) {             };
+    
+    /**
+     * retrieve the value set for the Maximum files property
+     *
+     * @method getMaximumFiles
+     * @return {Number}
+     */
+    this.getMaximumFiles = function getMaximumFiles() {        return 0;     };
+    
+    /**
+     * define the folder for the Folder/Temporary folder property
+     *
+     * @method setFolderName
+     * @param {String} folderName
+     */
+    this.setFolderName = function setFolderName(folderName) {             };
+    
+    /**
+     * returns the folder defined in the Folder or Temporary folder property or set by setFolderName( )
+     *
+     * @method getFolderName
+     * @return {String}
+     */
+    this.getFolderName = function getFolderName() {        return '';     };
+    
+    /**
+     * set the text in the File Upload widget
+     *
+     * @method setFileUploadText
+     * @param {String} text
+     */
+    this.setFileUploadText = function setFileUploadText(text) {             };
+    
+    /**
+     * returns the text defined in the File Upload widget&#39;s Text property or set by the setFileUploadText( ) function
+     *
+     * @method getFileUploadText
+     * @return {String}
+     */
+    this.getFileUploadText = function getFileUploadText() {        return '';     };
+    
+    /**
+     * remove a specific file in the list of selected files for the File Upload widget
+     *
+     * @method removeFile
+     * @param {Number} fileNumber
+     */
+    this.removeFile = function removeFile(fileNumber) {             };
+    
+    /**
+     * removes all the files the user selected for the File Upload widget
+     *
+     * @method removeAll
+     */
+    this.removeAll = function removeAll() {             };
+    
+    /**
+     * retrieve an array of objects defining each selected file
+     *
+     * @method getFiles
+     * @return {Array}
+     */
+    this.getFiles = function getFiles() {        return [];     };
+    
 
 };
 
@@ -966,6 +1428,64 @@ Tab View = function Tab View() {
 };
 
 
+Combo Box = function Combo Box() {
+    
+    
+    
+    /**
+     * add an option to the Combo Box widget
+     *
+     * @method addOption
+     * @param {String} value
+     * @param {String} label
+     * @param {Boolean} selected
+     */
+    this.addOption = function addOption(value, label, selected) {             };
+    
+    /**
+     * remove an option from the  Combo Box widget
+     *
+     * @method removeOption
+     * @param {Number} option
+     */
+    this.removeOption = function removeOption(option) {             };
+    
+
+};
+
+
+Chart = function Chart() {
+    
+    
+    
+    /**
+     * returns the title of the Chart
+     *
+     * @method getLabels
+     * @return {Array}
+     */
+    this.getLabels = function getLabels() {        return [];     };
+    
+    /**
+     * returns the values in the Chart widget
+     *
+     * @method getValues
+     * @return {Array}
+     */
+    this.getValues = function getValues() {        return [];     };
+    
+    /**
+     * returns the type of the Chart
+     *
+     * @method getChartType
+     * @return {String}
+     */
+    this.getChartType = function getChartType() {        return '';     };
+    
+
+};
+
+
 Query Form = function Query Form() {
     
     
@@ -1029,12 +1549,100 @@ Slider = function Slider() {
     
     
     /**
+     * set the Orientation of the Slider  widget
+     *
+     * @method setOrientation
+     * @param {String} orientation
+     */
+    this.setOrientation = function setOrientation(orientation) {             };
+    
+    /**
+     * returns the Orientation of the Slider widget
+     *
+     * @method getOrientation
+     * @return {String}
+     */
+    this.getOrientation = function getOrientation() {        return '';     };
+    
+    /**
+     * set the Step for the Slider widget
+     *
+     * @method setStep
+     * @param {Number} step
+     */
+    this.setStep = function setStep(step) {             };
+    
+    /**
+     * returns the Step for the Slider widget
+     *
+     * @method getStep
+     * @return {Number}
+     */
+    this.getStep = function getStep() {        return 0;     };
+    
+    /**
+     * set the Range of the Slider widget
+     *
+     * @method setRange
+     * @param {String} range
+     */
+    this.setRange = function setRange(range) {             };
+    
+    /**
+     * returns the Range of the Slider widget
+     *
+     * @method getRange
+     * @return {String}
+     */
+    this.getRange = function getRange() {        return '';     };
+    
+    /**
+     * set the two values for a Slider that has two handles
+     *
+     * @method setValues
+     * @param {Array} values
+     */
+    this.setValues = function setValues(values) {             };
+    
+    /**
+     * set the Maximum Value for the Slider
+     *
+     * @method setMax
+     * @param {Number} value
+     */
+    this.setMax = function setMax(value) {             };
+    
+    /**
+     * set the Minimum Value for the Slider
+     *
+     * @method setMin
+     * @param {Number} value
+     */
+    this.setMin = function setMin(value) {             };
+    
+    /**
+     * returns the Maximum Value for  the Slider widget
+     *
+     * @method getMax
+     * @return {Number}
+     */
+    this.getMax = function getMax() {        return 0;     };
+    
+    /**
      * add an additional handle to the [#title id&#61;&quot;1798&quot;/] widget
      *
      * @method addHandle
      * @param {Number} number
      */
     this.addHandle = function addHandle(number) {             };
+    
+    /**
+     * returns the Minimum Value for the Slider widget
+     *
+     * @method getMin
+     * @return {Number}
+     */
+    this.getMin = function getMin() {        return 0;     };
     
 
 };
@@ -1119,9 +1727,8 @@ Grid = function Grid() {
      * resets the column&#39;s sort indicators
      *
      * @method resetSortIndicator
-     * @param {Number} column
      */
-    this.resetSortIndicator = function resetSortIndicator(column) {             };
+    this.resetSortIndicator = function resetSortIndicator() {             };
     
     /**
      * reduces the current selection of rows in the Grid to the ones that are selected
@@ -1168,10 +1775,9 @@ Grid = function Grid() {
      * returns an object of type Column to which you can apply other functions in the [#title id&#61;&quot;2858&quot;/] class
      *
      * @method column
-     * @param {Number | String} columnRef
-     * @return {Column}
+     * @param {Number} columnRef
      */
-    this.column = function column(columnRef) {        return new Column( );     };
+    this.column = function column(columnRef) {             };
     
     /**
      * set the selection mode of the [#title id&#61;&quot;811&quot;/] widget to either &quot;single&quot; or &quot;multiple&quot;
@@ -1197,6 +1803,93 @@ Grid = function Grid() {
      * @param {String} sortOrder
      */
     this.setSortIndicator = function setSortIndicator(column, sortOrder) {             };
+    
+    /**
+     * select a selection of rows
+     *
+     * @method setSelectedRows
+     * @param {Array} rows
+     */
+    this.setSelectedRows = function setSelectedRows(rows) {             };
+    
+    /**
+     * center the Grid with the rowNumber without changing the current entity
+     *
+     * @method centerRow
+     * @param {Number} rowNumber
+     */
+    this.centerRow = function centerRow(rowNumber) {             };
+    
+    /**
+     * retrieve the height (in pixels) of the rows in the Grid widget
+     *
+     * @method getRowHeight
+     * @return {Number}
+     */
+    this.getRowHeight = function getRowHeight() {        return 0;     };
+    
+    /**
+     * set the height (in pixels) of the rows in the Grid widget
+     *
+     * @method setRowHeight
+     * @param {Number} rowHeight
+     */
+    this.setRowHeight = function setRowHeight(rowHeight) {             };
+    
+    /**
+     * 
+     *
+     * @method column
+     * @param {Number} columnRef
+     */
+    this.column = function column(columnRef) {             };
+    
+    /**
+     * 
+     *
+     * @method countSelected
+     * @return {Number}
+     */
+    this.countSelected = function countSelected() {        return 0;     };
+    
+    /**
+     * 
+     *
+     * @method centerRow
+     * @param {Number} rowNumber
+     */
+    this.centerRow = function centerRow(rowNumber) {             };
+    
+    /**
+     * 
+     *
+     * @method column
+     */
+    this.column = function column() {             };
+    
+    /**
+     * 
+     *
+     * @method column
+     * @param {Number} columnRef
+     */
+    this.column = function column(columnRef) {             };
+    
+
+};
+
+
+Console = function Console() {
+    
+    
+    
+    /**
+     * 
+     *
+     * @method error
+     * @param {Object} message
+     */
+    this.error = function error(message) {             };
     
 
 };
@@ -1373,6 +2066,14 @@ Grid Column = function Grid Column() {
      */
     this.getFormattedValue = function getFormattedValue() {        return '';     };
     
+    /**
+     * set the alignment of the column in a Grid widget
+     *
+     * @method setAlignment
+     * @param {String} alignment
+     */
+    this.setAlignment = function setAlignment(alignment) {             };
+    
 
 };
 
@@ -1440,6 +2141,322 @@ Matrix = function Matrix() {
      * @return {Number}
      */
     this.getCurrentPage = function getCurrentPage() {        return 0;     };
+    
+
+};
+
+
+Google Maps v3 = function Google Maps v3() {
+    
+    
+    
+    /**
+     * set or create a marker on the map by defining ID and location
+     *
+     * @method setMarker
+     * @param {Number} ID
+     * @param {String} location
+     * @param {Object} options
+     */
+    this.setMarker = function setMarker(ID, location, options) {             };
+    
+    /**
+     * set the center point of the map defined by location
+     *
+     * @method setCenter
+     * @param {String} location
+     */
+    this.setCenter = function setCenter(location) {             };
+    
+    /**
+     * set the icon marker to icon for the marker defined by the entity whose ID is ID
+     *
+     * @method setIconMarker
+     * @param {Number} ID
+     * @param {String} icon
+     */
+    this.setIconMarker = function setIconMarker(ID, icon) {             };
+    
+    /**
+     * set the zoom level of the map defined in zoomValue
+     *
+     * @method setZoom
+     * @param {Number} zoomValue
+     */
+    this.setZoom = function setZoom(zoomValue) {             };
+    
+
+};
+
+
+Calendar = function Calendar() {
+    
+    
+    
+    /**
+     * returns the value chosen for the Selection mode property
+     *
+     * @method getSelectionMode
+     * @return {String}
+     */
+    this.getSelectionMode = function getSelectionMode() {        return '';     };
+    
+
+};
+
+
+Navigation View = function Navigation View() {
+    
+    
+    
+    /**
+     * go to the next view in the Navigation View
+     *
+     * @method goToNextView
+     */
+    this.goToNextView = function goToNextView() {             };
+    
+    /**
+     * go to the previous view in the Navigation View
+     *
+     * @method goToPreviousView
+     */
+    this.goToPreviousView = function goToPreviousView() {             };
+    
+    /**
+     * go to a specific view in the Navigation View
+     *
+     * @method goToView
+     * @param {Number} view
+     */
+    this.goToView = function goToView(view) {             };
+    
+
+};
+
+
+Canvas = function Canvas() {
+    
+    
+    
+    /**
+     * returns the Canvas widget&#39;s DOM object
+     *
+     * @method getCanvas
+     * @return {Object}
+     */
+    this.getCanvas = function getCanvas() {        return {};     };
+    
+    /**
+     * returns the 2D context of the Canvas widget
+     *
+     * @method get2DContext
+     * @return {Object}
+     */
+    this.get2DContext = function get2DContext() {        return {};     };
+    
+
+};
+
+
+WYSIWYG Editor = function WYSIWYG Editor() {
+    
+    
+    
+    /**
+     * 
+     *
+     * @method getControlManager
+     * @return {Object}
+     */
+    this.getControlManager = function getControlManager() {        return {};     };
+    
+    /**
+     * returns an instance of the WYSIWYG Editor
+     *
+     * @method getWysiwygInstance
+     * @return {Object}
+     */
+    this.getWysiwygInstance = function getWysiwygInstance() {        return {};     };
+    
+
+};
+
+
+Image Button = function Image Button() {
+    
+    
+    
+    /**
+     * returns the Icon widget
+     *
+     * @method getIcon
+     * @return {Object}
+     */
+    this.getIcon = function getIcon() {        return {};     };
+    
+
+};
+
+
+Dialog = function Dialog() {
+    
+    
+    
+    /**
+     * minimize the Dialog widget
+     *
+     * @method minimizeDialog
+     */
+    this.minimizeDialog = function minimizeDialog() {             };
+    
+    /**
+     * maximize the Dialog widget
+     *
+     * @method maximizeDialog
+     */
+    this.maximizeDialog = function maximizeDialog() {             };
+    
+    /**
+     * display the Dialog widget
+     *
+     * @method displayDialog
+     */
+    this.displayDialog = function displayDialog() {             };
+    
+    /**
+     * close the Dialog widget
+     *
+     * @method closeDialog
+     */
+    this.closeDialog = function closeDialog() {             };
+    
+
+};
+
+
+File Upload = function File Upload() {
+    
+    
+    
+    /**
+     * upload the files
+     *
+     * @method uploadFiles
+     */
+    this.uploadFiles = function uploadFiles() {             };
+    
+    /**
+     * set one or more files to be the ones selected for the File Upload widget and displayed in the list of files
+     *
+     * @method setFiles
+     * @param {Object | Array} fileList
+     */
+    this.setFiles = function setFiles(fileList) {             };
+    
+    /**
+     * append one or more files to the list of selected files
+     *
+     * @method appendFiles
+     * @param {Object | Array} fileList
+     */
+    this.appendFiles = function appendFiles(fileList) {             };
+    
+    /**
+     * set the Display notification property of the File Upload widget
+     *
+     * @method setNotificationStatus
+     * @param {Boolean} status
+     */
+    this.setNotificationStatus = function setNotificationStatus(status) {             };
+    
+    /**
+     * set the maximum file size
+     *
+     * @method setMaximumFileSize
+     * @param {Number} maxFileSize
+     * @param {String} unit
+     */
+    this.setMaximumFileSize = function setMaximumFileSize(maxFileSize, unit) {             };
+    
+    /**
+     * returns the value defined for the widget&#39;s Maximum size property along with the type (bytes, kb, or mb)
+     *
+     * @method getMaximumFileSize
+     * @return {String}
+     */
+    this.getMaximumFileSize = function getMaximumFileSize() {        return '';     };
+    
+    /**
+     * set the maximum number of files to upload with the File Upload widget
+     *
+     * @method setMaximumFiles
+     * @param {Number} maxFiles
+     */
+    this.setMaximumFiles = function setMaximumFiles(maxFiles) {             };
+    
+    /**
+     * retrieve the value set for the Maximum files property
+     *
+     * @method getMaximumFiles
+     * @return {Number}
+     */
+    this.getMaximumFiles = function getMaximumFiles() {        return 0;     };
+    
+    /**
+     * define the folder for the Folder/Temporary folder property
+     *
+     * @method setFolderName
+     * @param {String} folderName
+     */
+    this.setFolderName = function setFolderName(folderName) {             };
+    
+    /**
+     * returns the folder defined in the Folder or Temporary folder property or set by setFolderName( )
+     *
+     * @method getFolderName
+     * @return {String}
+     */
+    this.getFolderName = function getFolderName() {        return '';     };
+    
+    /**
+     * set the text in the File Upload widget
+     *
+     * @method setFileUploadText
+     * @param {String} text
+     */
+    this.setFileUploadText = function setFileUploadText(text) {             };
+    
+    /**
+     * returns the text defined in the File Upload widget&#39;s Text property or set by the setFileUploadText( ) function
+     *
+     * @method getFileUploadText
+     * @return {String}
+     */
+    this.getFileUploadText = function getFileUploadText() {        return '';     };
+    
+    /**
+     * remove a specific file in the list of selected files for the File Upload widget
+     *
+     * @method removeFile
+     * @param {Number} fileNumber
+     */
+    this.removeFile = function removeFile(fileNumber) {             };
+    
+    /**
+     * removes all the files the user selected for the File Upload widget
+     *
+     * @method removeAll
+     */
+    this.removeAll = function removeAll() {             };
+    
+    /**
+     * retrieve an array of objects defining each selected file
+     *
+     * @method getFiles
+     * @return {Array}
+     */
+    this.getFiles = function getFiles() {        return [];     };
     
 
 };

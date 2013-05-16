@@ -6,7 +6,7 @@
 	<service name="rpc" modulePath="services/rpc" enabled="true" autoStart="true" proxyPattern="^/rpc-proxy/" publishInClientGlobalNamespace="false"/>
 	<service name="dataStore" modulePath="services/dataStore" enabled="true" autoStart="true"/>
 	<service name="upload" modulePath="services/upload" enabled="true" autoStart="true"/>
-	<service name="waf-git" modulePath="services/waf-git" enabled="true"/>
+	<service name="Git HTTP Service" modulePath="services/waf-git/waf-GitService" enabled="true"/>
 	<resources location="/walib/" lifeTime="31536000"/>
 	<javaScript reuseContexts="true"/>
 	<debugger enable="true"/>

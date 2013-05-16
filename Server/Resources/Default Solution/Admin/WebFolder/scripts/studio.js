@@ -15,9 +15,7 @@ Studio.prototype = {
 		
 		setFile : function (path) {
 			this.file = path;
-		},
-		
-		
+		}
 	},
 	
 	alert : function alert(txt) {
@@ -28,34 +26,13 @@ Studio.prototype = {
 		
 		var localIp = webAdmin.getLocalIpAdresses();
 		return localIp.join(";");
+
 	},
 	
 	editor : {
 	
 		getProjectPath : function getProjectPath() {
-			
-			var i,
-				projectPath,
-				currentApplications,
-				currentApplicationsLength;
-			
-			
-			projectPath = "";
-			currentApplications = adminObject.currentSolution.applications;
-			currentApplicationsLength = currentApplications.length;
-			i = 0;
-			
-			while(projectPath === "" && i < currentApplicationsLength) {
-				currentApplication = currentApplications[i];
-				
-				if(currentApplication.name === adminObject.applicationSettings) {
-					projectPath = currentApplication.path;
-				}
-				
-				i++;
-			}
-			
-			return projectPath;
+
 		},
 		
 		selectFile : function selectFile() {
@@ -67,28 +44,38 @@ Studio.prototype = {
 		},
 		
 		loaded : function loaded() {
-			
-	    	this.getSettingJsonData();
+                    this.getSettingJsonData(sources.solutions.path);
 		},
 		
-		getSettingJsonData : function() {
+		getSettingJsonData : function(solutionPath, projectPath) {
+			
 			webAdmin.getSettingJsonDataAsync({
 				"onsuccess": function (response) {
-					studio.editor.settingsLoadCaalback(response);
+                                    studio.editor.settingsLoadCaalback(response);                                    
+                                    
 				}
-			}, adminObject.currentSolution.hash, adminObject.applicationSettings);
+			}, solutionPath, projectPath);
 		},
 		
-		setSettingJsonData : function() {
+		setSettingJsonData : function(solutionPath, appName, settings) {
 			
 			var saveJson = studio.editor.settingsSaveCaalback();
-			
-			webAdmin.saveSattingJsonDataAsync({
+			webAdmin.saveSettingJsonDataAsync({
 				"onsuccess": function (response) {
-					
-					adminObject.closeSettings();
+                                    adminObject.showMessage('success', adminObject.resources.SETTINGS_SUCC_MSG);
+                                    window.setTimeout(adminObject.hideMessage, 3000);
+                                    if( settings != null){
+	                                    sources.solutions.settings.database.fixedSize = settings.fixedSize;
+	                                    sources.solutions.settings.database.flushDataCacheInterval = settings.flushDataCacheInterval;
+	                                    sources.solutions.settings.solution.directory.authenticationType = settings.authenticationType;
+	                                    sources.solutions.sync();
+                                    }
+				},
+                                "onerror": function (response) {
+					adminObject.showMessage('error', response);
+                                        window.setTimeout(adminObject.hideMessage, 3000);
 				}
-			}, adminObject.currentSolution.hash, adminObject.applicationSettings, saveJson);
+			}, solutionPath, appName, saveJson);
 		},
 		
 		setDirty : function setDirty() {
@@ -96,7 +83,7 @@ Studio.prototype = {
 		},
 	
 		settingsLoadCaalback : null,
-		settingsSaveCaalback : null,
+		settingsSaveCaalback : null
 	}
 }
 

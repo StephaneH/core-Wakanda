@@ -1,0 +1,49 @@
+# Les fichiers sont classes par rpertoire de destination
+# Le 1er et le 2eme flag indique la langue L suivit de l'initial de la langue 
+# F pour French, E pour English, A pour automatique, et * pour toutes les langues 
+# le 3eme & le 4eme flag indique le produit Wakanda Server : s et son Mode
+# 
+# Pour le mode on peut avoir 
+# A pour tous les modes, D pour debug, B pour beta et R pour release
+# ou les complements
+# d pour tous les modes sauf debug,
+# b pour tous les modes sauf beta,
+# r pour tous les modes sauf release,
+# * pour les fichier pdb qui seront copie pour debug et beta et les releases issues uniquement de la compilation
+#
+# Chaque fichier est contenu dans des sections pour indiquer leur destination 
+# ATTENTION NE PAS METTRE D ESPACE APRES LES [] SINON PLANTAGE
+#
+# Voici les variables que vous avez a dispo
+# %DEPOT% pour l'emplacement du depot sur votre poste
+# %PRODUCT_NAME%
+# %DIR_COMPONENT%
+# %LibModeCompil% libele du mode Debug, Beta, ou Final
+# %Lib2Langue%
+# %LibMode_SR% libl du mode Debug, Beta ou vide pour Release
+#
+# Si le chemin est un nom de repertoire 
+#    sans / correspond  une copy du repertoire (arboresence compris)
+#    avec / correspond  une copy de tout le contenue du repertoire (arboresence compris) 
+#
+
+
+#LES FRAMEWORKS#######################
+LAsA [%TARGET%/Libs]
+LAsA %DEPOT%XToolbox/%BRANCH%/SQL/Projects/CMake/Build/%LibMode%%ARCHS%/SQLUtilities%LibMode_SR%.so
+LAsA %DEPOT%XToolbox/%BRANCH%/SQLModel/Projects/CMake/Build/%LibMode%%ARCHS%/SQLModel%LibMode_SR%.so
+
+# jmo - Je considère que les remote entities seront gérées comme une lib dynamique et non comme un composant
+LAsA %DEPOT%Components/%BRANCH%/RemoteEntity/Projects/CMake/Build/%LibMode%%ARCHS%/RemoteEntity%LibMode_SR%.so
+
+#LES COMPOSANTS INTERNES#######################
+LAsA [%TARGET%%DIR_COMPONENT%Native Components/MySQLConnector%LibMode_SR%.bundle/Contents/Linux]
+LAsA %DEPOT%Components/%BRANCH%/MySQLConnector/Projects/CMake/Build/%LibMode%%ARCHS%/MySQLConnector%LibMode_SR%.so
+
+#LES XLIFF COMPOSANTS#######################
+LAsA [%TARGET%%DIR_COMPONENT%Native Components/MySQLConnector%LibMode_SR%.bundle/Contents/]
+LAsA %DEPOT%Components/%BRANCH%/MySQLConnector/Resources
+
+LAsA [%TARGET%/Modules]
+L*sA %DEPOT%Wakanda/%branch%/Server/Resources/SSJS/ModulesEnterprise/
+

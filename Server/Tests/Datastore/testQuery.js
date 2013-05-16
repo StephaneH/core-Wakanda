@@ -5,46 +5,6 @@ var testCase = {
     
         _should: {
         ignore: {
-			testQuery_TypeDuration_GreatThan_AltKeyword: true,
-			testQuery_TypeDuration_GreatThan_Symbol_Placeholder: true,
-			testQuery_TypeDuration_GreatThan_AltKeyword_Placeholder: true,
-			testQuery_TypeDuration_GreatOrEqual_Symbol: true,
-			testQuery_TypeDuration_GreatOrEqual_AltKeyword1: true,
-			testQuery_TypeDuration_GreatOrEqual_AltKeyWord2: true,
-			testQuery_TypeDuration_GreatOrEqual_Symbol_Placeholder: true,
-			testQuery_TypeDuration_GreatOrEqual_AltKeyword1_Placeholder: true,
-			testQuery_TypeDuration_GreatOrEqual_AltKeyWord2_Placeholder: true,
-			testQuery_TypeDuration_LessThan_Symbol: true,
-			testQuery_TypeDuration_LessThan_AltKeyword: true,
-			testQuery_TypeDuration_LessThan_Symbol_Placholder: true,
-			testQuery_TypeDuration_LessThan_AltKeyword_Placholder: true,
-			testQuery_TypeDuration_LessOrEqual_Symbol: true,
-			testQuery_TypeDuration_LessOrEqual_AltKeyword1: true,
-			testQuery_TypeDuration_LessOrEqual_AltKeyword2: true,
-			testQuery_TypeDuration_LessOrEqual_Symbol_Placeholder: true,
-			testQuery_TypeDuration_LessOrEqual_AltKeyword1_Placeholder: true,
-			testQuery_TypeDuration_LessOrEqual_AltKeyword2_Placeholder: true,
-			testQuery_TypeDuration_EqualTo_Symbol: true,
-			testQuery_TypeDuration_EqualTo_AltKeyword1: true,
-			testQuery_TypeDuration_EqualTo_AltKeyword2: true,
-			testQuery_TypeDuration_EqualTo_Symbol_Placeholder: true,
-			testQuery_TypeDuration_EqualTo_AltKeyword1_Placeholder: true,
-			testQuery_TypeDuration_EqualTo_AltKeyword2_Placeholder: true,
-			testQuery_TypeDuration_StrictlyEqualTo_Symbol: true,
-			testQuery_TypeDuration_StrictlyEqualTo_AltKeyword1: true,
-			testQuery_TypeDuration_StrictlyEqualTo_AltKeyword2: true,
-			testQuery_TypeDuration_NotEqualTo_Symbol: true,
-			testQuery_TypeDuration_NotEqualTo_AltKeyword: true,
-			testQuery_TypeDuration_NotEqualTo_Symbol_Placeholder: true,
-			testQuery_TypeDuration_NotEqualTo_AltKeyword_Placeholder: true,
-			testQuery_TypeDuration_StrictlyNotEqualTo_Symbol: true,
-			testQuery_TypeDuration_StrictlyNotEqualTo_AltKeyword1: true,
-			testQuery_TypeDuration_StrictlyNotEqualTo_AltKeyword2: true,
-			testQuery_TypeDuration_StrictlyNotEqualTo_AltKeyword3: true,
-			testQuery_TypeDuration_StrictlyNotEqualTo_Symbol_Placeholder: true,
-			testQuery_TypeDuration_StrictlyNotEqualTo_AltKeyword1_Placeholder: true,
-			testQuery_TypeDuration_StrictlyNotEqualTo_AltKeyword2_Placeholder: true,
-			testQuery_TypeDuration_StrictlyNotEqualTo_AltKeyword3_Placeholder: true,
 			testQuery_WrongArrayOfString1: true, // To be discussed
 			testQuery_WrongArrayOfString2: true, // To be discussed
 			testQuery_ArrayOfBytes: true, // fixed bug
@@ -6922,6 +6882,28 @@ var testCase = {
 		if(message!="")
 			Y.Assert.fail("query method applied with 'order by' fail");
 	},
+	//test query: order by, passing from unsorted collection to sorted collection (NO)
+	testQuery_OrderBy_ReturningUnsortedCollection: function() {
+		var col1 = ds.MyClass_QueryTests.query("ID < 5");
+		var len_col1 = col1.length;
+		var col2 = ds.MyClass_QueryTests.query("ID = 3");
+		col1.add(col2);
+		
+		if(col1.length != len_col1)
+			Y.Assert.fail("query method wihtout using order by option should not return a sorted collection");
+		
+	},
+	//test query: order by, passing from unsorted collection to sorted collection (YES)
+	testQuery_OrderBy_ReturningSortedCollection: function() {
+		var col1 = ds.MyClass_QueryTests.query("ID < 5 order by ID");
+		var len_col1 = col1.length;
+		var col2 = ds.MyClass_QueryTests.query("ID = 3");
+		col1.add(col2);
+		
+		if(col1.length != len_col1+1)
+			Y.Assert.fail("query method with using order by option should return a sorted collection");
+		
+	},
 	//test query: filter alias
 	testQuery_AliasFilter: function() {
 		var message = ""; 
@@ -7086,10 +7068,10 @@ var testCase = {
 	//test query: N to One relation
 	testQuery_NToOneRelationAttributes: function() {
 		var message = "";
-		var coll = ds.OneToN.query("oneToN.name = 'oneToN 1*'");
+		var coll = ds.OneToN.query("oneToN.name = 'oneToN2 1*'");
 		if(coll.length == 2)
 		{
-			if(coll[0].ID!=1 || coll[1].ID != 2)
+			if(coll[0].name!="oneToN 11" || coll[1].name != "oneToN 12")
 				message += " (probleme in the entities of retured collection) ";
 		}
 		else
@@ -7102,10 +7084,10 @@ var testCase = {
 	//test query: N to One relation
 	testQuery_NToOneRelationAttributes_Placeholder: function() {
 		var message = "";
-		var coll = ds.OneToN.query("oneToN.name = :1","oneToN 1*");
+		var coll = ds.OneToN.query("oneToN.name = :1","oneToN2 1*");
 		if(coll.length == 2)
 		{
-			if(coll[0].ID!=1 || coll[1].ID != 2)
+			if(coll[0].name!="oneToN 11" || coll[1].name != "oneToN 12")
 				message += " (probleme in the entities of retured collection) ";
 		}
 		else
@@ -7209,7 +7191,7 @@ var testCase = {
 		isGood = true;
 		try
 		{
-			var coll = ds.Employee.query("$(this.name.length == this.firstname.length)", { allowJavascript: true });
+			var coll = ds.JavascriptFunctions.query("$(this.name.length == this.firstname.length)", { allowJavascript: true });
 		}
 		catch(e)
 		{

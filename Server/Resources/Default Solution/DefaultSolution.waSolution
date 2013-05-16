@@ -1,5 +1,7 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <solution>
 	<project path="./Admin/ServerAdmin.waProject"/>
-	<file path="./DefaultSolution.waSettings"><tag name="settings"/></file>
+	<file path="./DefaultSolution.waSettings">
+		<tag name="settings"/>
+	</file>
 </solution>

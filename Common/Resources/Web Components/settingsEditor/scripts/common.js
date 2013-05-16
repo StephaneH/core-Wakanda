@@ -216,22 +216,35 @@ function stepper() {
         var step = me.parent().find("input").prop("step");
         step = (!step) ? 1 : parseFloat(step);
 
-        var curValue = parseFloat(me.parent().find("input").val());
+        var curValue = me.parent().find("input").val();
+        curValue = parseFloat(isNaN(curValue) ? -1 : curValue);
 
         var newVal;
         if (me.hasClass("plus"))
-            if ((!curValue) & (curValue != min))
+            if ((!curValue) & (curValue != min) & curValue != 0)
                 newVal = min;
             else
                 newVal = ((curValue + step) <= max) ? (curValue + step)
                 : curValue;
-        else if ((!curValue) & (curValue != min))
+        else if ((!curValue) & (curValue != min)){
             newVal = max;
-        else
-            newVal = ((curValue - step) >= min) ? (curValue - step)
-            : curValue;
-
+        }
+        else{
+            if(me.parent().find("input").hasClass('uilt0') && curValue - step < 0){  // Unlimited if less than 0
+                newVal = 'unlimited';
+            }
+            else{
+                newVal = ((curValue - step) >= min) ? (curValue - step)
+                    : curValue;
+            }
+        }
+        
+        
         me.parent().find("input").val(newVal);
+        
+        if(me.parent().find("input").hasClass('service')){
+            me.parent().find("input").change();
+        }
     }
 }
 

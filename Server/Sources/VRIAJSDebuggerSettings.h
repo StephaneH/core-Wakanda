@@ -20,19 +20,15 @@
 
 
 class VRIAServerSolution;
-
+class VRemoteDebuggerBreakpointsManager;
 
 class VJSDebuggerSettings :
 	public XBOX::VObject,
-#if 0//!defined(WKA_USE_UNIFIED_DBG)
-	public IJSWDebuggerSettings
-#else
 	public IWAKDebuggerSettings
-#endif
 {
 	public :
 
-		VJSDebuggerSettings ( VRIAServerSolution* inServerSolution );
+		VJSDebuggerSettings ( VRIAServerSolution* inServerSolution, VRemoteDebuggerBreakpointsManager* inBreakPointsManager  );
 		virtual ~VJSDebuggerSettings ( );
 
 		XBOX::VError Init ( );
@@ -42,13 +38,23 @@ class VJSDebuggerSettings :
 		virtual bool UserCanDebug(IAuthenticationInfos* inAuthenticationInfos) const;
 		virtual bool HasDebuggerUsers ( ) const;
 
+		virtual bool AddBreakPoint( OpaqueDebuggerContext inContext, const XBOX::VString& inUrl, intptr_t inSrcId, int inLineNumber );
+		virtual bool AddBreakPoint( const XBOX::VString& inUrl, int inLineNumber );
+		virtual bool RemoveBreakPoint( OpaqueDebuggerContext inContext, const XBOX::VString& inUrl, intptr_t inSrcId, int inLineNumber );
+		virtual bool RemoveBreakPoint( const XBOX::VString& inUrl, int inLineNumber );
+		virtual void Set(OpaqueDebuggerContext inContext,const XBOX::VString& inUrl, intptr_t inSrcId, const XBOX::VString& inData);
+		virtual void Add(OpaqueDebuggerContext inContext);
+		virtual void Remove(OpaqueDebuggerContext inContext);
+		virtual bool HasBreakpoint(OpaqueDebuggerContext	inContext, intptr_t inSrcId, unsigned lineNumber);
+		virtual bool GetData(OpaqueDebuggerContext inContext,intptr_t inSrcId, XBOX::VString& outSourceUrl, XBOX::VectorOfVString& outSourceData);
+		virtual void GetJSONBreakpoints(XBOX::VString& outJSONBreakPoints);
 	private :
 
 		VRIAServerSolution*					fServerSolution;
 		// UUIDs of groups that can access JS debugger functionlaity
 		std::vector<XBOX::VUUID>			fDebuggerGroups;
 		bool								fNeedsAuthentication; // true by default
-
+		VRemoteDebuggerBreakpointsManager*	fWAKBreakPointsManager;
 		VJSDebuggerSettings ( );
 };
 

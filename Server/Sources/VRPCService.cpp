@@ -257,28 +257,6 @@ VJSRequestHandler* VRPCService::_CreateRequestHandlerForMethods()
 		VFile *file = new VFile( rpcImpl);
 		handler->RegisterIncludedFile( file);
 		QuickReleaseRefCountable( file);
-
-		// The files which contain the RPC methods have to being included
-		if (fDesignProject != NULL)
-		{
-			VectorOfProjectItems itemsVector;
-			
-			fDesignProject->GetProjectItemsFromTag( kRPCMethodTag, itemsVector);
-			for (VectorOfProjectItemsIterator iter = itemsVector.begin() ; iter != itemsVector.end() ; ++iter)
-			{
-				if (*iter != NULL)
-				{
-					VFilePath path;
-					(*iter)->GetFilePath( path);
-					if (!path.IsEmpty() && path.IsFile())
-					{
-						file = new VFile( path);
-						handler->RegisterIncludedFile( file);
-						QuickReleaseRefCountable( file);
-					}
-				}
-			}
-		}
 	}
 	return handler;
 }

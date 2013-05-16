@@ -226,62 +226,15 @@
           <source>Not available in this context. A running application is required</source>
           <target>Not available in this context. A running application is required</target>
         </trans-unit>
-      </group>
-
-      <group id="1900" resname="XMLHttpRequest Errors Text">
-        <trans-unit resname="ERR_XHRQ_1000" id="1">
-          <source>Invalid URL method</source>
-          <target>Invalid URL method</target>
+        <trans-unit resname="ERR_iasv_1067" id="67">
+          <source>Model file '{param1}' not found</source>
+          <target>Model file '{param1}' not found</target>
         </trans-unit>
-        <trans-unit resname="ERR_XHRQ_1001" id="2">
-          <source>Dangerous URL method</source>
-          <target>Dangerous URL method</target>
-        </trans-unit>
-        <trans-unit resname="ERR_XHRQ_1002" id="3">
-          <source>Unsupported URL protocol</source>
-          <target>Unsupported URL protocol</target>
-        </trans-unit>
-        <trans-unit resname="ERR_XHRQ_1003" id="4">
-          <source>Invalid state for requested operation</source>
-          <target>Invalid state for requested operation</target>
-        </trans-unit>
-        <trans-unit resname="ERR_XHRQ_1004" id="5">
-          <source>Internal javascript binding error</source>
-          <target>Internal javascript binding error</target>
-        </trans-unit>
-        <trans-unit resname="ERR_XHRQ_1005" id="6">
-          <source>Send could not complete</source>
-          <target>Send could not complete</target>
-        </trans-unit>
-        <trans-unit resname="ERR_XHRQ_1008" id="7">
-          <source>Internal implementation error</source>
-          <target>Internal implementation error</target>
+        <trans-unit resname="ERR_iasv_1068" id="68">
+          <source>Cannot find JavaScript language context</source>
+          <target>Cannot find JavaScript language context</target>
         </trans-unit>
       </group>
-      
-      <group id="2000" resname="cURL Wrappers Errors Text">
-        <trans-unit resname="ERR_CWRP_1101" id="1">
-          <source>Unsupported protocol</source>
-          <target>Unsupported protocol</target>
-        </trans-unit>
-        <trans-unit resname="ERR_CWRP_1105" id="2">
-          <source>Could not resolve proxy</source>
-          <target>Could not resolve proxy</target>
-        </trans-unit>
-        <trans-unit resname="ERR_CWRP_1106" id="3">
-          <source>Could not resolve hostname</source>
-          <target>Could not resolve hostname</target>
-        </trans-unit>
-        <trans-unit resname="ERR_CWRP_1107" id="4">
-          <source>Could not connect</source>
-          <target>Could not connect</target>
-        </trans-unit>
-        <trans-unit resname="ERR_CWRP_1199" id="5">
-          <source>Undefined implementation error</source>
-          <target>Undefined implementation error</target>
-        </trans-unit>
-      </group>
-      
     </body>
   </file>
 </xliff>

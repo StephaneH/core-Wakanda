@@ -22,13 +22,8 @@
 #include "VProjectSettings.h"
 #include "VRIAServerConstants.h"
 #include "VRIAUTIs.h"
-#include "VSourceControl.h"
 #include "DB4D/Headers/DB4D.h"
 #include "VProject.h"
-
-#if !RIA_SERVER
-#include "VSourceControlConnector.h"
-#endif
 
 USING_TOOLBOX_NAMESPACE
 
@@ -67,23 +62,15 @@ VProject::VProject( VSolution *inParentSolution)
 : fSolution(inParentSolution)
 ,fProjectItem( NULL)
 ,fProjectItemProjectFile( NULL)
-,fSourceControlConnector(NULL)
 ,fProjectFileDirtyStamp(0)
 ,fIsLoadingFromXML(false)
 ,fSymbolTable(NULL)
 ,fBackgroundDeleteFileTask(NULL)
-,fItemParsingCompleteSignal(NULL)
-,fProjectUser(NULL)
 ,fIsWatchingFileSystem(false)
 ,fIsUpdatingSymbolTable(false)
+,fCoreSymbolsNotLoaded(true)
 {
 	fUUID.Regenerate();
-
-#if !RIA_SERVER
-	fSourceControlConnector = new VSourceControlConnector(this);
-#endif
-
-	fProjectUser = new VProjectUser(this);
 }
 
 VProject::~VProject()
@@ -92,20 +79,6 @@ VProject::~VProject()
 	xbox_assert(!fIsUpdatingSymbolTable);
 	xbox_assert(fBackgroundDeleteFileTask == NULL);
 	xbox_assert(fSymbolTable == NULL);
-
-#if !RIA_SERVER
-#if 0	// to be fixed: crashing bug
-	delete fSourceControlConnector;
-	fSourceControlConnector = NULL;
-#endif
-#endif
-
-	ReleaseRefCountable( &fItemParsingCompleteSignal);
-
-	delete fProjectUser;
-	fProjectUser = NULL;
-
-	ReleaseRefCountable( &fItemParsingCompleteSignal);
 }
 
 
@@ -347,7 +320,7 @@ sLONG VProject::BackgroundDeleteFile( VTask *inTask )
 }
 
 
-void VProject::LoadCoreFiles( const VFolder &inFolder, const VString &inName, ESymbolFileExecContext inExecContext, IDocumentParserManager::IJob *inJob )
+void VProject::LoadCoreFiles( const VFolder &inFolder, const VString &inName, ESymbolFileExecContext inExecContext, IDocumentParserManager::IJob *inJob, const ESymbolFileBaseFolder& inBaseFolder )
 {
 	IDocumentParserManager *parsingManager = GetSolution()->GetDocumentParserManager();
 	if (!parsingManager)
@@ -365,7 +338,7 @@ void VProject::LoadCoreFiles( const VFolder &inFolder, const VString &inName, ES
 			VString fileName;
 			while (VE_STREAM_EOF != stream.GetTextLine( fileName, false ))
 			{
-				VSymbolFileInfos fileInfos(VFile( coreFolder, fileName ).GetPath(), eSymbolFileBaseFolderStudio, inExecContext);
+                VSymbolFileInfos fileInfos(VFile( coreFolder, fileName ).GetPath(), inBaseFolder, inExecContext);
 
 				inJob->ScheduleTask(fileInfos);
 			}
@@ -376,44 +349,50 @@ void VProject::LoadCoreFiles( const VFolder &inFolder, const VString &inName, ES
 
 void VProject::LoadDefaultSymbols( ISymbolTable *table )
 {
-	VFolder *folder = VProcess::Get()->RetainFolder( VProcess::eFS_Resources);
-	if (folder == NULL)
-		return;
+	if( fCoreSymbolsNotLoaded )
+	{
+		fCoreSymbolsNotLoaded = false;
 
-	IDocumentParserManager *parsingManager = GetSolution()->GetDocumentParserManager();
-	if (!parsingManager)
-		return;
-
-	VFilePath path;
-	folder->GetPath( path );
-
-	path.ToSubFolder( "JavaScript Support Files" );
-	VFolder supportFolder( path );
-
-	IDocumentParserManager::IJob *job = parsingManager->CreateJob();
-
-	LoadCoreFiles( supportFolder, CVSTR( "bothSides" ), eSymbolFileExecContextClientServer, job );
-	LoadCoreFiles( supportFolder, CVSTR( "serverSide" ), eSymbolFileExecContextServer, job );
-	LoadCoreFiles( supportFolder, CVSTR( "clientSide" ), eSymbolFileExecContextClient, job );
-	
-	// Parsing "waf.js" in Studio resources "walib" folder
-	VFilePath	wafPath;
-	VString		wafPathStr;
-
-	folder->GetPath( wafPath);
-	wafPath = wafPath.ToSubFolder( L"Web Components");
-	wafPath = wafPath.ToSubFolder( L"walib");
-	wafPath = wafPath.ToSubFolder( L"WAF");
-	wafPath = wafPath.ToSubFile( L"waf.js");
-
-	// Tmp : desactivate "waf.js" parsing while memory leaks still remain
-	// job->ScheduleTask( VSymbolFileInfos (wafPath, eSymbolFileBaseFolderStudio, eSymbolFileExecContextClient) );
-
-	folder->Release();
-
-	// Now that we've collected all of the default symbols into one batch, we can submit it as an entire job.
-	parsingManager->ScheduleTask( this, job, IDocumentParserManager::CreateCookie( 'Core', this), table );
-	job->Release();
+		VFolder *folder = VProcess::Get()->RetainFolder( VProcess::eFS_Resources);
+		if (folder == NULL)
+			return;
+		
+		IDocumentParserManager *parsingManager = GetSolution()->GetDocumentParserManager();
+		if (!parsingManager)
+			return;
+		
+		VFilePath path;
+		folder->GetPath( path );
+		folder->Release();
+		
+		path.ToSubFolder( "JavaScript Support Files" );
+		VFolder supportFolder( path );
+		
+		IDocumentParserManager::IJob *job = parsingManager->CreateJob();
+		
+		LoadCoreFiles(supportFolder, CVSTR("bothSides"), eSymbolFileExecContextClientServer, job, eSymbolFileBaseFolderStudioJSResources);
+		LoadCoreFiles(supportFolder, CVSTR("serverSide"), eSymbolFileExecContextServer, job, eSymbolFileBaseFolderStudioJSResources);
+		LoadCoreFiles(supportFolder, CVSTR("clientSide"), eSymbolFileExecContextClient, job, eSymbolFileBaseFolderStudioJSResources);
+		
+		VString pathStr;
+		fSolution->GetBaseFolderPathStr(eSymbolFileBaseFolderServerModules, pathStr);
+		
+		VFilePath serverPath;
+		serverPath.FromFullPath(pathStr);
+		
+		// First : parse the server modules folder
+		VFolder serverFolder(serverPath.ToParent().GetPath());
+		LoadCoreFiles(serverFolder, CVSTR("Modules"), eSymbolFileExecContextServer, job, eSymbolFileBaseFolderServerModules);
+		
+		// Then : parse all server modules folder children
+		serverPath.ToSubFolder("Modules");
+		VFolder serverModulesFolder(serverPath.GetPath());
+		_LoadFromFolderChildren(serverModulesFolder, job, eSymbolFileBaseFolderServerModules);
+		
+		// Now that we've collected all of the default symbols into one batch, we can submit it as an entire job.
+		parsingManager->ScheduleTask( this, job, table );
+		job->Release();
+	}
 }
 
 void VProject::LoadKludgeSymbols( ISymbolTable *table )
@@ -434,14 +413,14 @@ void VProject::LoadKludgeSymbols( ISymbolTable *table )
 
 	IDocumentParserManager::IJob *job = parsingManager->CreateJob();
 
-	LoadKludgeFile( supportFolder, CVSTR( "bothSides" ), eSymbolFileExecContextClientServer, job );
-	LoadKludgeFile( supportFolder, CVSTR( "serverSide" ), eSymbolFileExecContextServer, job );
-	LoadKludgeFile( supportFolder, CVSTR( "clientSide" ), eSymbolFileExecContextClient, job );
+	LoadKludgeFile(supportFolder, CVSTR("bothSides"), eSymbolFileExecContextClientServer, job, eSymbolFileBaseFolderStudioJSResources);
+	LoadKludgeFile(supportFolder, CVSTR("serverSide"), eSymbolFileExecContextServer, job, eSymbolFileBaseFolderStudioJSResources);
+	LoadKludgeFile(supportFolder, CVSTR("clientSide"), eSymbolFileExecContextClient, job, eSymbolFileBaseFolderStudioJSResources);
 	
 	folder->Release();
 }
 
-void VProject::LoadKludgeFile( const VFolder &inFolder, const VString &inName, ESymbolFileExecContext inExecContext, IDocumentParserManager::IJob *inJob )
+void VProject::LoadKludgeFile( const VFolder &inFolder, const VString &inName, ESymbolFileExecContext inExecContext, IDocumentParserManager::IJob *inJob, const ESymbolFileBaseFolder& inBaseFolder )
 {
 	IDocumentParserManager *parsingManager = GetSolution()->GetDocumentParserManager();
 	if ( NULL != parsingManager )
@@ -451,8 +430,8 @@ void VProject::LoadKludgeFile( const VFolder &inFolder, const VString &inName, E
 		
 			if ( kludgeFile.Exists() )
 			{
-				VSymbolFileInfos fileInfos(kludgeFile.GetPath(), eSymbolFileBaseFolderStudio, inExecContext);
-				parsingManager->ScheduleTask( this, fileInfos, IDocumentParserManager::CreateCookie( 'Klu', this), fSymbolTable, IDocumentParserManager::kPriorityAboveNormal );
+				VSymbolFileInfos fileInfos(kludgeFile.GetPath(), inBaseFolder, inExecContext);
+				parsingManager->ScheduleTask( this, fileInfos, fSymbolTable, IDocumentParserManager::kPriorityAboveNormal );
 			}
 	}
 }
@@ -468,24 +447,26 @@ void VProject::ParseProjectItemForEditor( VProjectItem *inItem, VString& inConte
 	if (!parsingManager)
 		return;	
 
-	parsingManager->GetParsingCompleteSignal().Connect( this, VTask::GetCurrent(), &VProject::ParsingComplete );
-
-	if (inItem && fSymbolTable) {
-		VFilePath path;
-		if (inItem->GetFilePath( path ))
+	if (inItem && fSymbolTable)
+	{
+		IEntityModelCatalog *catalog = inItem->GetBehaviour()->GetCatalog();
+		if (NULL != catalog)
 		{
-			VProjectItem*			webFolderProjectItem = GetProjectItemFromTag(kWebFolderTag);
-			ESymbolFileExecContext	execContext = ((inItem == webFolderProjectItem) || inItem->IsChildOf(webFolderProjectItem)) ? eSymbolFileExecContextClient : eSymbolFileExecContextServer;
-			VSymbolFileInfos		fileInfos(path, eSymbolFileBaseFolderProject, execContext);			
-			
-			parsingManager->ScheduleTask( this, fileInfos, inContents, IDocumentParserManager::CreateCookie( 'Proj', this), fSymbolTable, IDocumentParserManager::kPriorityAboveNormal );
+			parsingManager->ScheduleTask( this, catalog, fSymbolTable, IDocumentParserManager::kPriorityAboveNormal );
+		}
+		else
+		{
+			VFilePath path;
+			if (inItem->GetFilePath( path ))
+			{
+				VProjectItem*			webFolderProjectItem = GetProjectItemFromTag(kWebFolderTag);
+				ESymbolFileExecContext	execContext = ((inItem == webFolderProjectItem) || inItem->IsChildOf(webFolderProjectItem)) ? eSymbolFileExecContextClient : eSymbolFileExecContextServer;
+				VSymbolFileInfos		fileInfos(path, eSymbolFileBaseFolderProject, execContext);
+				
+				parsingManager->ScheduleTask( this, fileInfos, fSymbolTable, IDocumentParserManager::kPriorityAboveNormal );
+			}
 		}
 	}
-}
-
-VProject::ItemParsingCompleteSignal* VProject::RetainItemParsingCompleteSignal() const
-{
-	return RetainRefCountable( fItemParsingCompleteSignal);
 }
 
 void VProject::FileSystemEventHandler( const std::vector< VFilePath > &inFilePaths, VFileSystemNotifier::EventKind inKind )
@@ -557,14 +538,16 @@ void VProject::FileSystemEventHandler( const std::vector< VFilePath > &inFilePat
 						{
 							IEntityModelCatalog *catalog = projectItem->GetBehaviour()->GetCatalog();
 							if (NULL != catalog)
-								parsingManager->ScheduleTask( this, catalog, IDocumentParserManager::CreateCookie( 'Proj', this), fSymbolTable, priority );
+							{
+								parsingManager->ScheduleTask( this, catalog, fSymbolTable, priority );
+							}
 						}
 						else
 						{
 							ESymbolFileExecContext	execContext = ((projectItem == webFolderProjectItem) || projectItem->IsChildOf(webFolderProjectItem)) ? eSymbolFileExecContextClient : eSymbolFileExecContextServer;
 							VSymbolFileInfos		fileInfos(*iter, eSymbolFileBaseFolderProject, execContext);
 
-							parsingManager->ScheduleTask( this, fileInfos, IDocumentParserManager::CreateCookie( 'Proj', this), fSymbolTable, priority );
+							parsingManager->ScheduleTask( this, fileInfos, fSymbolTable, priority );
 						}
 					}
 				}
@@ -595,34 +578,6 @@ void VProject::FileSystemEventHandler( const std::vector< VFilePath > &inFilePat
 #endif
 }
 
-void VProject::ParsingComplete( VFilePath inPath, sLONG inStatus, IDocumentParserManager::TaskCookie inCookie )
-{
-	if (inCookie.fCookie != this)
-		return;
-	
-	if (inCookie.fIdentifier == 'Proj')
-	{
-		if (inStatus == 0)
-		{
-			VProjectItem *projItem = GetProjectItemFromFullPath( inPath.GetPath() );
-			if (projItem)
-			{
-				if (fSolution->GetDelegate() != NULL)
-					fSolution->GetDelegate()->ParsingComplete( projItem);
-
-				if (fItemParsingCompleteSignal != NULL)
-				{
-					fItemParsingCompleteSignal->Trigger( this, projItem);
-				}
-			}
-		}
-	}
-	else if (inCookie.fIdentifier == 'Core')
-	{
-		GetSolution()->DoParsedOneFile();
-	}
-}
-
 void VProject::BackgroundParseFiles()
 {
 	// If we don't have a symbol table, then we want to try to generate a new
@@ -630,9 +585,9 @@ void VProject::BackgroundParseFiles()
 	// sc 16/06/2010, do nothing if the symbol table is not opened
 	if (fSymbolTable == NULL)
 		return;
-
+	
 	IDocumentParserManager *parsingManager = GetSolution()->GetDocumentParserManager();
-	if (!parsingManager) 
+	if (!parsingManager)
 		return;
 
 #if VERSIONDEBUG
@@ -641,84 +596,90 @@ void VProject::BackgroundParseFiles()
 	lName = "\"" + lName + "\"";
 	DebugMsg( L"Start updating symbol table of project " + lName + L"\n");
 #endif
-
+		
 #if RIA_STUDIO
-
+		
 	// Always load the default symbols
 	LoadDefaultSymbols( fSymbolTable );
-
+		
 	VectorOfProjectItems items;
 	_GetProjectItemsByExtension( RIAFileKind::kJSFileExtension, items );
-
+		
 	// Some people have projects with multiple versions of the same file -- they have
 	// different information in the files, and the files have different names, but they're
-	// actually the "same" file.  For instance: foo.js, foo-debug.js and foo-min.js.  The 
+	// actually the "same" file.  For instance: foo.js, foo-debug.js and foo-min.js.  The
 	// -debug file is one with debugging information in it, and -min is one that's been run
 	// through a minimizer.  If the user has files like this, we only want to parse *one* of
-	// the files, or else we'll end up with a bunch of extra symbols that we don't actually 
-	// want.  However, this leaves us with another issue, which is one of ordering.  We don't 
+	// the files, or else we'll end up with a bunch of extra symbols that we don't actually
+	// want.  However, this leaves us with another issue, which is one of ordering.  We don't
 	// know the order that the files will be given to us from the call to GetProjectItemsByExtension!
 	// So we have to take that list, see if we can find any "duplicate" files within it, and then
 	// decide which file to keep.  It's a lot more convoluted than it should be, but that seems
 	// to be the norm for JavaScript anyways.  Oh, and there's another lovely problem -- we can't
-	// just skip any files with a -debug or -min in them because it's also possible that the user 
-	// doesn't have multiple versions of that file.  For instance, they only dragged the -debug 
+	// just skip any files with a -debug or -min in them because it's also possible that the user
+	// doesn't have multiple versions of that file.  For instance, they only dragged the -debug
 	// version into their project!  So we are going to map hashes to project items.  We will hash
 	// the first "part" of the file name (where a part is defined by the dash).  Then, if we find
 	// multiple files, we can determine whether the file we've mapped or the conflicting item is a
 	// better choice as to what to parse.  So, for instance, say we find foo-min.js first, and then
 	// we get a conflict with foo-debug.js.  The debug file is a better choice to parse since it
 	// will contain more symbol information.  So we will replace the foo-min.js file with the foo-debug.js
-	// file, and continue searching.  According to Alexandre, the preference for files is: debug (1), 
+	// file, and continue searching.  According to Alexandre, the preference for files is: debug (1),
 	// regular (2), min (3), but that may change in the future.  So when we process an item, we will also
 	// map it's name hash to a weight.  This will help us to determine whether to replace the file or not.
 	// The higher the weight, the harder it is to replace the file.
 	std::map< sLONG, VProjectItem * > itemList;
 	std::map< sLONG, int > weightList;
-
-	for (VectorOfProjectItems::iterator iter = items.begin(); iter != items.end(); ++iter) {
+		
+	for (VectorOfProjectItems::iterator iter = items.begin(); iter != items.end(); ++iter)
+	{
 		// Ghosted items are ones that have been removed from the project already
 		if ((*iter)->IsGhost())	continue;
-
+			
 		// Get the project item's file name
 		VString pathStr;
 		(*iter)->BuildFullPath( pathStr );
-
+			
 		// Get just the file name
 		VFilePath path( pathStr );
 		VString fileName;
 		path.GetFileName( fileName, false );
-
+			
 		// Now that we have the file name, we want to split it up into parts based on the dash (if there
 		// is one in the file name at all).
 		VectorOfVString parts;
 		fileName.GetSubStrings( (UniChar)'-', parts, true, true );	// we want empty strings and to trim spaces
-
+			
 		// We want to strip off the last part of the name if it's -debug or -min.  We can't just rely on the
 		// front part as being correct because the user might have a file named foo-bar-debug.js and foo-baz-min.js,
 		// in which cases we'd only hash foo and never add symbols for foo-baz-min.js even though it's a distinct
 		// file.
 		VString lastPart;
-		if (parts.size() > 1) {
-			if (parts.back() == "debug" || parts.back() == "min") {
+		if (parts.size() > 1)
+		{
+			if (parts.back() == "debug" || parts.back() == "min")
+			{
 				// We want to trim this part off
 				lastPart = parts.back();
 				parts.pop_back();
 			}
-
+				
 			// Now create the new file name
 			fileName = "";
-			for (int i = 0; i < parts.size(); i++) {
+			for (int i = 0; i < parts.size(); i++)
+			{
 				fileName += parts[ i ];
 				if (i != parts.size() - 1) fileName += CVSTR( "-" );
 			}
-		} else {
+		}
+		else
+		{
 			fileName = parts.front();
 		}
-
+			
 		// The first part is the file name that we actually care about, so hash that
 		uLONG hash = fileName.GetHashValue();
-
+		
 		// The last part of the file is the weight.  If the last part is -min, the weight is 1, if the last
 		// part doesn't exist (because there aren't parts!), the weight is 2, if the last part is -debug, the
 		// weight is 3.
@@ -727,62 +688,60 @@ void VProject::BackgroundParseFiles()
 		if (lastPart == "min")			weight = kLowPriority;
 		else if (lastPart == "debug" )	weight = kHighPriority;
 		else							weight = kMediumPriority;
-		
+			
 		// Now we want to see if there's already an item in the map with the same hash.  If not, then we
 		// can just add this project item.  But if there is, we need to see whether we want to replace or not.
 		std::map< sLONG, VProjectItem * >::iterator listVal = itemList.find( hash );
-		if (listVal == itemList.end()) {
+		if (listVal == itemList.end())
+		{
 			// This is the easy case, we can just add the item to the list
 			itemList[ hash ] = *iter;
-
+				
 			// Also, map the weight of the file
 			weightList[ hash ] = weight;
-		} else {
+		}
+		else
+		{
 			// An item already exists in the list, so let's see whether we want to replace it or not.  We will determine
 			// that based on the weight of the hash.
 			int existingFileWeight = weightList[ listVal->first ];
-			if (weight > existingFileWeight) {
+			if (weight > existingFileWeight)
+			{
 				// The weight of the current file beats the weight of the file we had, so replace
 				itemList[ hash ] = *iter;
 				weightList[ hash ] = weight;
 			}
 		}
 	}
-
+		
 	VProjectItem* webFolderProjectItem = GetProjectItemFromTag(kWebFolderTag);
-
+		
 	// Now that we finally have the item list figured out, we can actually generate the symbols for it.
 	IDocumentParserManager::IJob *job = parsingManager->CreateJob();
-	for (std::map< sLONG, VProjectItem * >::iterator iter = itemList.begin(); iter != itemList.end(); ++iter) {
-
+	for (std::map< sLONG, VProjectItem * >::iterator iter = itemList.begin(); iter != itemList.end(); ++iter)
+	{
 		bool	belongToWebFolder;
-		VString pathStr;		
-
+		VString pathStr;
+			
 		belongToWebFolder = ((iter->second == webFolderProjectItem) || iter->second->IsChildOf(webFolderProjectItem));
 		iter->second->BuildFullPath( pathStr );
-
-		VFilePath			path( pathStr );		
+			
+		VFilePath			path( pathStr );
 		VSymbolFileInfos	fileInfos(path, eSymbolFileBaseFolderProject, belongToWebFolder ? eSymbolFileExecContextClient : eSymbolFileExecContextServer);
-
+			
 		job->ScheduleTask(fileInfos);
 	}
-
-	// Now we can schedule the batch job
-	GetSolution()->DoStartParsingFiles( job->GetTaskCount());
-
-	parsingManager->GetJobCompleteSignal().Connect( this, VTask::GetCurrent(), &VProject::CoreFileLoadComplete );
-	parsingManager->ScheduleTask( this, job, IDocumentParserManager::CreateCookie( 'Proj', this), fSymbolTable );
+		
+	parsingManager->ScheduleTask( this, job, fSymbolTable );
 	job->Release();
+	
+	LoadCatalog();
+	LoadKludgeSymbols( fSymbolTable );
 #endif
-
-	fIsUpdatingSymbolTable = true;
 }
 
-void VProject::CoreFileLoadComplete( IDocumentParserManager::TaskCookie inCookie )
+void VProject::LoadCatalog()
 {
-	if (inCookie.fCookie != this)
-		return;
-
 	IDocumentParserManager *parsingManager = GetSolution()->GetDocumentParserManager();
 	if (!parsingManager) 
 		return;
@@ -793,18 +752,11 @@ void VProject::CoreFileLoadComplete( IDocumentParserManager::TaskCookie inCookie
 	// job has completed.  The only tricky part is determining whether we need to actually process the catalog
 	// file -- it may not have changed, in which case we don't need to regenerate the symbols for it.  Given 
 	// the speed at which the symbols are generated, we'll just do it every time.
-	if (inCookie.fIdentifier == 'Core') {
-		VProjectItem *catalogItem = _GetEntityModelProjectItem(); 
-		if (catalogItem) {
-			IEntityModelCatalog *catalog = catalogItem->GetBehaviour()->GetCatalog();
-			if (catalog) {
-				parsingManager->ScheduleTask( this, catalog, IDocumentParserManager::CreateCookie( 'Proj', this), fSymbolTable );
-			}
-		}
-
-		LoadKludgeSymbols( fSymbolTable );
-
-		GetSolution()->DoStopParsingFiles();
+	VProjectItem *catalogItem = _GetEntityModelProjectItem();
+	if (catalogItem) {
+		IEntityModelCatalog *catalog = catalogItem->GetBehaviour()->GetCatalog();
+		if (catalog)
+			parsingManager->ScheduleTask( this, catalog, fSymbolTable );
 	}
 }
 
@@ -835,8 +787,6 @@ void VProject::StopBackgroundParseFiles()
 	if (!parsingManager) 
 		return;
 
-	parsingManager->GetJobCompleteSignal().Disconnect( this);	// sc 15/04/2010, the project was never disconnected from this signal
-	parsingManager->GetParsingCompleteSignal().Disconnect( this );
 	parsingManager->UnscheduleTasksForHandler( this );
 
 	fIsUpdatingSymbolTable = false;
@@ -929,6 +879,17 @@ VError VProject::OpenSymbolTable()
 				if (!fSymbolTable->OpenSymbolDatabase( databaseFile ))
 				{
 					ReleaseRefCountable( &fSymbolTable);
+				}
+				else
+				{
+					// Init default folder posix path strings
+					VString posixPathStr;
+					
+					fSolution->GetBaseFolderPathStr(eSymbolFileBaseFolderStudioJSResources, posixPathStr);
+					fSymbolTable->SetBaseFolderPathStr(eSymbolFileBaseFolderStudioJSResources, posixPathStr, true);
+					
+					fSolution->GetBaseFolderPathStr(eSymbolFileBaseFolderServerModules, posixPathStr);
+					fSymbolTable->SetBaseFolderPathStr(eSymbolFileBaseFolderServerModules, posixPathStr, true);
 				}
 			}
 			languageEngine->Release();
@@ -1042,12 +1003,6 @@ VError VProject::Load( bool inOpenSymbolsTable)
 		if (err == VE_OK)
 		{
 			err = _LoadProjectFile();
-		}
-
-		if (err == VE_OK)
-		{
-			if (fSourceControlConnector && (fSourceControlConnector->GetSourceControl()) && (fSourceControlConnector->IsConnectedToSourceControl()))
-				_LoadSCCStatusOfProjectItems();
 		}
 
 		if ((err == VE_OK) && inOpenSymbolsTable)
@@ -1170,407 +1125,6 @@ VError VProject::ReloadCatalogs()
 	}
 			
 	return err;
-}
-
-
-void VProject::LoadOrSaveProjectUserFile(bool inLoad)
-{
-	if (fSourceControlConnector)
-	{
-		VString strProjectPath;
-		VFilePath strProjectVFilePath;
-		fProjectItem->GetURL().GetFilePath(strProjectVFilePath);
-		strProjectVFilePath.GetPath(strProjectPath);
-		VString strProjectName;
-		fProjectItem->GetDisplayName(strProjectName);
-		strProjectPath += strProjectName;
-		strProjectPath += ".";
-		VString strProjectUserFilePath = strProjectPath;
-		VString userName;
-		VSystem::GetLoginUserName(userName);
-		strProjectUserFilePath += userName;
-		VFile userFile(strProjectUserFilePath);
-		(inLoad) ? fProjectUser->LoadFromUserFile(userFile) : fProjectUser->SaveToUserFile(userFile);
-	}
-}
-
-
-bool VProject::ConnectToSourceControl(XBOX::VString& inSourceControlId)
-{
-	bool isConnectedToSourceControl = false;
-
-	if (fSourceControlConnector)
-	{
-		isConnectedToSourceControl = fSourceControlConnector->ConnectToSourceControl(inSourceControlId);
-	}
-
-	return isConnectedToSourceControl;
-}
-
-
-ISourceControl* VProject::GetSourceControl() const
-{
-	return fSourceControlConnector ? fSourceControlConnector->GetSourceControl() : NULL;
-} 
-
-
-XBOX::VString VProject::GetSourceControlID() const
-{
-	return fSourceControlConnector ? fSourceControlConnector->GetSourceControlID() : "";
-}
-
-
-bool VProject::IsConnectedToSourceControl() const
-{
-	return fSourceControlConnector ? fSourceControlConnector->IsConnectedToSourceControl() : false;
-}
-
-
-void VProject::_LoadSCCStatusOfProjectItems()
-{
-	VectorOfProjectItems projectItems;
-	VProjectItemTools::GetChildFile( fProjectItem, projectItems, true);
-	_LoadSCCStatusOfProjectItems(projectItems);
-}
-
-VError VProject::_LoadSCCStatusOfProjectItems(const VectorOfProjectItems& inProjectItems)
-{
-	VError err = VE_OK;
-
-	assert(inProjectItems.size() > 0);
-
-	if (inProjectItems.size() > 0)
-	{
-		if (fSourceControlConnector && fSourceControlConnector->GetSourceControl())
-		{
-			VFilePath vfilepath;
-			std::vector<VFilePath> vFilesFullPath;
-
-			for (VectorOfProjectItemsConstIterator it = inProjectItems.begin(); 
-				it != inProjectItems.end(); ++it)
-			{
-				if ((*it)->GetFilePath(vfilepath))
-					vFilesFullPath.push_back(vfilepath);
-			}
-
-			std::vector<ESCCStatus> infos;
-			infos.resize(inProjectItems.size());
-
-			if (!fSourceControlConnector->GetSourceControl()->QueryInfo(vFilesFullPath, infos))
-				err = VE_UNKNOWN_ERROR;		
-			else
-			{
-				std::vector<ESCCStatus>::iterator it_infos = infos.begin();
-				for (VectorOfProjectItemsConstIterator it = inProjectItems.begin(); 
-					it != inProjectItems.end(); ++it, ++it_infos)
-				{
-					// TO DO 280309 ce code sera a adapter lorsque l'on aura (enfin) les specs...
-					// attention a l'ordre
-					if ((*it_infos) & kSccStateDeleted)
-						(*it)->SetSCCStatus(VProjectItem::eDELETED_FILE);
-					else if ((*it_infos) & kSccStateCheckedOut)
-						(*it)->SetSCCStatus(VProjectItem::eCHECKED_OUT_TO_ME);
-					else if ((*it_infos) & kSccStateOutOther)
-						(*it)->SetSCCStatus(VProjectItem::eCHECKED_OUT_BY_SOMENONE);
-					else if ((*it_infos) & kSccStateControlled)  // ???????????
-						(*it)->SetSCCStatus(VProjectItem::eCHECKED_IN);
-					else if ((*it_infos) & kSccStateOutOfdate)  
-						(*it)->SetSCCStatus(VProjectItem::eOUT_OF_DATE);
-
-					/*if (infos & kSccStateCheckedOut)
-						(*it)->SetState(VProjectItem::eNEWLY_ADDED_FILE);*/
-				}
-			}
-		}
-		else	// pas de vscc
-			err = VE_UNKNOWN_ERROR;		
-	}
-
-	return err;
-}
-
-VError VProject::_LoadSCCStatusOfProjectItems(const VectorOfProjectItems& inProjectItems, std::vector<VFilePath>& inFileFullPathes)
-{
-	VError err = VE_OK;
-
-	assert(inFileFullPathes.size() > 0);
-	assert(inProjectItems.size() == inFileFullPathes.size());
-
-	if (inFileFullPathes.size() > 0)
-	{
-		if (fSourceControlConnector && fSourceControlConnector->GetSourceControl())
-		{
-			std::vector<ESCCStatus> infos;
-			infos.resize(inFileFullPathes.size());
-
-			if (!fSourceControlConnector->GetSourceControl()->QueryInfo(inFileFullPathes, infos))
-				err = VE_UNKNOWN_ERROR;		
-			else
-			{
-				std::vector<ESCCStatus>::iterator it_infos = infos.begin();
-				for (VectorOfProjectItemsConstIterator it = inProjectItems.begin(); 
-					it != inProjectItems.end(); ++it, ++it_infos)
-				{
-					// TO DO 280309 ce code sera a adapter lorsque l'on aura (enfin) les specs...
-					// attention a l'ordre
-					if ((*it_infos) & kSccStateDeleted)
-						(*it)->SetSCCStatus(VProjectItem::eDELETED_FILE);
-					else if ((*it_infos) & kSccStateCheckedOut)
-						(*it)->SetSCCStatus(VProjectItem::eCHECKED_OUT_TO_ME);
-					else if ((*it_infos) & kSccStateOutOther)
-						(*it)->SetSCCStatus(VProjectItem::eCHECKED_OUT_BY_SOMENONE);
-					else if ((*it_infos) & kSccStateControlled)  // ???????????
-						(*it)->SetSCCStatus(VProjectItem::eCHECKED_IN);
-					else if ((*it_infos) & kSccStateOutOfdate)  
-						(*it)->SetSCCStatus(VProjectItem::eOUT_OF_DATE);
-
-					/*if (infos & kSccStateCheckedOut)
-						(*it)->SetState(VProjectItem::eNEWLY_ADDED_FILE);*/
-				}
-			}
-		}
-		else	// pas de vscc
-			err = VE_UNKNOWN_ERROR;		
-	}
-
-	return err;
-}
-
-VError VProject::AddToSourceControl(const VectorOfProjectItems& inProjectItems)
-{
-	VError err = VE_OK;
-
-	assert(!inProjectItems.empty());
-
-	if (!inProjectItems.empty())
-	{
-		if (fSourceControlConnector && fSourceControlConnector->GetSourceControl())
-		{
-			if (fSolution->GetDelegate() != NULL)
-				fSolution->GetDelegate()->DoStartPossibleLongTimeOperation();
-
-			VFilePath vfilepath;
-			std::vector<VFilePath> vFilesFullPath;
-			std::vector<sLONG> vFilesType;
-
-			for (VectorOfProjectItemsConstIterator it = inProjectItems.begin(); 
-				it != inProjectItems.end(); ++it)
-			{
-				if ((*it)->IsPhysicalFile())
-				{
-					if ((*it)->GetFilePath(vfilepath))
-					{
-						vFilesFullPath.push_back(vfilepath);
-						vFilesType.push_back(SCC_FILETYPE_TEXT);
-					}
-				}
-			}
-
-			if (!fSourceControlConnector->GetSourceControl()->Add(vFilesFullPath, vFilesType))
-				err = VE_UNKNOWN_ERROR;		
-			else
-			{
-				_LoadSCCStatusOfProjectItems(inProjectItems, vFilesFullPath);
-				if (fSolution->GetDelegate() != NULL)
-					fSolution->GetDelegate()->DoSourceControlStatusChanged( inProjectItems);
-			}
-
-			if (fSolution->GetDelegate() != NULL)
-				fSolution->GetDelegate()->DoEndPossibleLongTimeOperation();
-		}
-		else	// pas de vscc
-			err = VE_UNKNOWN_ERROR;		
-	}
-
-	return err;
-}
-
-VError VProject::GetLatestVersion(const VectorOfProjectItems& inProjectItems)
-{
-	VError err = VE_OK;
-
-	assert(!inProjectItems.empty());
-
-	if (!inProjectItems.empty())
-	{
-		if (fSourceControlConnector && fSourceControlConnector->GetSourceControl())
-		{
-			if (fSolution->GetDelegate() != NULL)
-				fSolution->GetDelegate()->DoStartPossibleLongTimeOperation();
-
-			VFilePath vfilepath;
-			std::vector<VFilePath> vFilesFullPath;
-
-			for (VectorOfProjectItemsConstIterator it = inProjectItems.begin(); 
-				it != inProjectItems.end(); ++it)
-			{
-				if ((*it)->GetFilePath(vfilepath))
-					vFilesFullPath.push_back(vfilepath);
-			}
-
-			if (!fSourceControlConnector->GetSourceControl()->Get(vFilesFullPath))
-				err = VE_UNKNOWN_ERROR;		
-			else
-			{
-				_LoadSCCStatusOfProjectItems(inProjectItems, vFilesFullPath);
-				if (fSolution->GetDelegate() != NULL)
-					fSolution->GetDelegate()->DoSourceControlStatusChanged( inProjectItems);
-			}
-
-			if (fSolution->GetDelegate() != NULL)
-				fSolution->GetDelegate()->DoEndPossibleLongTimeOperation();
-		}
-		else	// pas de vscc
-			err = VE_UNKNOWN_ERROR;		
-	}
-
-	return err;
-}
-
-VError VProject::CheckOut(const VectorOfProjectItems& inProjectItems, bool inCheckOutProjectFiles)
-{
-	VError err = VE_OK;
-
-	assert(!inProjectItems.empty());
-
-	if (!inProjectItems.empty())
-	{
-		if (fSourceControlConnector && fSourceControlConnector->GetSourceControl())
-		{
-			if (fSolution->GetDelegate() != NULL)
-				fSolution->GetDelegate()->DoStartPossibleLongTimeOperation();
-
-			VectorOfProjectItems filteredProjectItems;
-			VFilePath vfilepath;
-			std::vector<VFilePath> vFilesFullPath;
-
-			for (VectorOfProjectItemsConstIterator it = inProjectItems.begin(); 
-				it != inProjectItems.end(); ++it)
-			{
-				// filtre :
-				if ((!inCheckOutProjectFiles) && (*it)->ConformsTo( RIAFileKind::kProjectFileKind))
-					continue;
-				filteredProjectItems.push_back(*it);
-				if ((*it)->GetFilePath(vfilepath))
-					vFilesFullPath.push_back(vfilepath);
-			}
-
-			if (vFilesFullPath.size() > 0)
-			{
-				if (!fSourceControlConnector->GetSourceControl()->CheckOut(vFilesFullPath))
-					err = VE_UNKNOWN_ERROR;		
-				else
-				{
-					_LoadSCCStatusOfProjectItems(filteredProjectItems, vFilesFullPath);
-					if (fSolution->GetDelegate() != NULL)
-						fSolution->GetDelegate()->DoSourceControlStatusChanged( inProjectItems);
-				}
-			}
-
-			if (fSolution->GetDelegate() != NULL)
-				fSolution->GetDelegate()->DoEndPossibleLongTimeOperation();
-		}
-		else	// pas de vscc
-			err = VE_UNKNOWN_ERROR;		
-	}
-
-	return err;
-}
-
-VError VProject::CheckIn(const VectorOfProjectItems& inProjectItems)
-{
-	VError err = VE_OK;
-
-	assert(inProjectItems.size() > 0);
-
-	if (inProjectItems.size() > 0)
-	{
-		if (fSourceControlConnector && fSourceControlConnector->GetSourceControl())
-		{
-			if (fSolution->GetDelegate() != NULL)
-				fSolution->GetDelegate()->DoStartPossibleLongTimeOperation();
-
-			VFilePath vfilepath;
-			std::vector<VFilePath> vFilesFullPath;
-
-			for (VectorOfProjectItemsConstIterator it = inProjectItems.begin(); 
-				it != inProjectItems.end(); ++it)
-			{
-				if ((*it)->GetFilePath(vfilepath))
-					vFilesFullPath.push_back(vfilepath);
-			}
-
-			if (!fSourceControlConnector->GetSourceControl()->CheckIn(vFilesFullPath))
-				err = VE_UNKNOWN_ERROR;		
-			else
-			{
-				_LoadSCCStatusOfProjectItems(inProjectItems, vFilesFullPath);
-				if (fSolution->GetDelegate() != NULL)
-					fSolution->GetDelegate()->DoSourceControlStatusChanged( inProjectItems);
-			}
-
-			if (fSolution->GetDelegate() != NULL)
-				fSolution->GetDelegate()->DoEndPossibleLongTimeOperation();
-		}
-		else	// pas de vscc
-			err = VE_UNKNOWN_ERROR;		
-	}
-
-	return err;
-}
-
-VError VProject::Revert(const VectorOfProjectItems& inProjectItems)
-{
-	VError err = VE_OK;
-
-	assert(inProjectItems.size() > 0);
-
-	if (inProjectItems.size() > 0)
-	{
-		if (fSourceControlConnector && fSourceControlConnector->GetSourceControl())
-		{
-			if (fSolution->GetDelegate() != NULL)
-				fSolution->GetDelegate()->DoStartPossibleLongTimeOperation();
-
-			VFilePath vfilepath;
-			std::vector<VFilePath> vFilesFullPath;
-
-			for (VectorOfProjectItemsConstIterator it = inProjectItems.begin(); 
-				it != inProjectItems.end(); ++it)
-			{
-				if ((*it)->GetFilePath(vfilepath))
-					vFilesFullPath.push_back(vfilepath);
-			}
-
-			if (!fSourceControlConnector->GetSourceControl()->Revert(vFilesFullPath))
-				err = VE_UNKNOWN_ERROR;		
-			else
-			{
-				_LoadSCCStatusOfProjectItems(inProjectItems, vFilesFullPath);
-				if (fSolution->GetDelegate() != NULL)
-					fSolution->GetDelegate()->DoSourceControlStatusChanged( inProjectItems);
-			}
-
-			if (fSolution->GetDelegate() != NULL)
-				fSolution->GetDelegate()->DoEndPossibleLongTimeOperation();
-		}
-		else	// pas de vscc
-			err = VE_UNKNOWN_ERROR;		
-	}
-
-	return err;
-}
-
-ISourceControlInterface* VProject::GetSCCInterfaceForCodeEditor()
-{
-	ISourceControlInterface* result = NULL;
-
-	if(fSourceControlConnector != NULL)
-	{
-		result = fSourceControlConnector->GetSCCInterfaceForCodeEditor();
-	}
-
-	return result;
 }
 
 
@@ -1762,8 +1316,6 @@ void VProject::TagItemAs( VProjectItem *inProjectItem, const VProjectItemTag& in
 {
 	if (testAssert(VProjectItemTagManager::Get()->IsRegisteredProjectItemTag( inTag)))
 	{
-		xbox_assert(inTag != kIndexPageTag);
-
 		if (inProjectItem != NULL && !inProjectItem->HasTag( inTag))
 		{
 			e_Save_Action saveAction = e_SAVE;
@@ -1892,7 +1444,9 @@ void VProject::GetCompatibleTags( const VProjectItem* inProjectItem, std::vector
 			
 			if (applyToFolders && inProjectItem->GetKind() == VProjectItem::eFOLDER && !inProjectItem->IsExternalReference())
 			{
-				outTags.push_back( *iter);
+				// sc 19/02/2013 WAK0079681, exclude page folder
+				if (!inProjectItem->ConformsTo( RIAFileKind::kPageFolderFileKind))
+					outTags.push_back( *iter);
 			}
 			else if (applyToFiles && inProjectItem->IsPhysicalFile() && !inProjectItem->IsExternalReference())
 			{
@@ -1928,8 +1482,6 @@ void VProject::GetProjectItemsFromTag( const VProjectItemTag& inTag, VectorOfPro
 
 	if (!VProjectItemTagManager::Get()->IsRegisteredProjectItemTag( inTag))
 		return;
-
-	xbox_assert( inTag != kIndexPageTag);
 
 	bool done = false;
 
@@ -2162,102 +1714,6 @@ VProjectItem* VProject::GetMainPage()
 }
 
 
-VError VProject::BuildFileURLString(VString &outFileURL, VProjectItem* inProjectItem, bool inWantSSL)
-{
-	VString hostName, ip, pattern;
-	sLONG port = -1;
-	sLONG sslPort = -1;
-	bool canSSL = false;
-	bool mandatorySSL = false;
-
-	outFileURL.Clear();
-	
-	VError err = GetPublicationSettings( hostName, ip, port, canSSL, mandatorySSL, sslPort);	// sc 06/01/2010 factorisation
-	if (err == VE_OK)
-	{
-		if ( mandatorySSL || ( inWantSSL && canSSL ) )
-		{
-		#if WITH_DEPRECATED_IPV4_API
-			outFileURL = "https://127.0.0.1";
-		#else
-			outFileURL = VString("https://") + ServerNetTools::GetLoopbackIP(true /*with brackets*/);
-		#endif
-			VString strPort;
-			strPort.FromLong(sslPort);
-			outFileURL += ":";
-			outFileURL += strPort;
-		}
-		else
-		{
-		#if WITH_DEPRECATED_IPV4_API
-			outFileURL = "http://127.0.0.1";
-		#else
-			outFileURL = VString("http://") + ServerNetTools::GetLoopbackIP(true /*with brackets*/);
-		#endif
-			
-			if (port != 80)
-			{
-				VString strPort;
-				strPort.FromLong(port);
-				outFileURL += ":";
-				outFileURL += strPort;
-			}
-		}
-
-		if (!pattern.IsEmpty())
-		{
-			outFileURL += "/";
-			outFileURL += pattern;
-		}
-
-		if (inProjectItem != NULL)
-		{
-			VProjectItem *webFolder = GetProjectItemFromTag( kWebFolderTag);
-			if (webFolder != NULL)
-			{
-				VFilePath webFolderPath, itemPath;
-				if (webFolder->GetFilePath( webFolderPath) && inProjectItem->GetFilePath( itemPath))
-				{
-					VString relativePath;
-					if (itemPath.GetRelativePosixPath( webFolderPath, relativePath))
-					{
-						if ( outFileURL [ outFileURL. GetLength ( ) - 1 ] != '/')
-							outFileURL += '/';
-						outFileURL += relativePath;
-					}
-					else
-					{
-						err = VE_RIA_FILE_DOES_NOT_EXIST;
-					}
-
-				}
-			}
-		}
-	}
-
-	return err;
-}
-
-VError VProject::BuildAppliURLString(VString &outAppliURL, bool inWithIndexPage, bool inWantSSL)
-{
-	VError err = VE_OK;
-
-	if (inWithIndexPage)
-	{
-		VProjectItem *indexPage = GetMainPage();
-		if (indexPage != NULL)
-			err = BuildFileURLString( outAppliURL, indexPage, inWantSSL);
-		else
-			err = VE_RIA_FILE_DOES_NOT_EXIST;
-	}
-	else
-	{
-		err = BuildFileURLString( outAppliURL, NULL, inWantSSL);
-	}
-
-	return err;
-}
-
 XBOX::VError VProject::GetPublicationSettings( XBOX::VString& outHostName, XBOX::VString& outIP, sLONG& outPort, bool& outAllowSSL, bool& outMandatorySSL, sLONG& outSSLPort) const
 {
 	VError vError = VE_OK;
@@ -2448,6 +1904,8 @@ XBOX::VError VProject::RemoveItems( const VectorOfProjectItems& inProjectItems, 
 
 	if ((saveAction == e_SAVE) || (saveAction == e_NO_SAVE))
 	{
+		VProjectFileStampSaver stampSaver(this);
+
 		VProjectItem *firstCommonParent = NULL;
 		VectorOfProjectItems items( inProjectItems.begin(), inProjectItems.end());
 		
@@ -2463,17 +1921,23 @@ XBOX::VError VProject::RemoveItems( const VectorOfProjectItems& inProjectItems, 
 					// TBD
 					xbox_assert(false);
 				}
-				else if (inDeletePhysicalItems)
+				else
 				{
-					(*itemIter)->DeleteContent();
+					// sc 08/11/2012 WAK0078737, to properly remove the item reference, it must be removed here
+					_DoItemRemoved( *itemIter, true);
+
+					if (inDeletePhysicalItems)
+						(*itemIter)->DeleteContent();
+
+					(*itemIter)->SetGhost(true);
+					(*itemIter)->DeleteChildren();
+					(*itemIter)->Release();
 				}
 			}
 		}
 
 		if (inDeletePhysicalItems)
 		{
-			VProjectFileStampSaver stampSaver(this);
-
 			if (fSolution->GetDelegate() != NULL)
 				fSolution->GetDelegate()->DoStartPossibleLongTimeOperation();
 
@@ -2482,10 +1946,10 @@ XBOX::VError VProject::RemoveItems( const VectorOfProjectItems& inProjectItems, 
 						
 			if (fSolution->GetDelegate() != NULL)
 				fSolution->GetDelegate()->DoEndPossibleLongTimeOperation();
-
-			if ((saveAction == e_SAVE) && stampSaver.StampHasBeenChanged())
-				_SaveProjectFile();
 		}
+
+		if ((saveAction == e_SAVE) && stampSaver.StampHasBeenChanged())
+			_SaveProjectFile();
 	}
 
 	return err;
@@ -2511,7 +1975,7 @@ XBOX::VError VProject::RenameItem( VProjectItem *inProjectItem, const XBOX::VStr
 		{
 			VString name;
 			inProjectItem->GetName( name);
-			if (name != inNewName)
+			if ( ! name.EqualToString( inNewName, true ) )
 			{
 				e_Save_Action saveAction = e_SAVE;
 	
@@ -2591,11 +2055,15 @@ VError VProject::_SynchronizeWithFileSystem( VProjectItem *inItem)
 		if (iter->IsPhysicalLinkValid() && _IsItemReferenced( iter)  && !iter->ContentExists()) // if file is referenced (role is set), just ignore it
 		{
 			iter->SetPhysicalLinkValid( false);
+			iter->Touch();	// sc 08/11/2012 WAK0078737
 			continue;
 		}
 
 		if (!iter->IsPhysicalLinkValid() && iter->ContentExists())
+		{
 			iter->SetPhysicalLinkValid( true);	// sc 30/03/2012
+			iter->Touch();	// sc 08/11/2012 WAK0078737
+		}
 
 		if (!iter->IsPhysicalLinkValid())	// sc 02/04/2012 WAK0076271, WAK0076272, WAK0076273
 			continue;
@@ -2801,20 +2269,6 @@ VError VProject::_LoadProjectFile()
 		err = LoadBagFromXML( projectFile, fProjectItem->GetXMLElementName(), bagProject, XML_ValidateNever);
 		if (err == VE_OK)
 		{
-			if (fSourceControlConnector)
-			{
-				VString sourceControlID;
-				bagProject.GetString(ProjectItemBagKeys::sourceControlMode, sourceControlID);
-				if (sourceControlID.IsEmpty() && fSolution)
-					sourceControlID = fSolution->GetSourceControlID();
-				fSourceControlConnector->SetSourceControlID(sourceControlID);
-				if (!fSourceControlConnector->GetSourceControlID().IsEmpty())
-				{
-					VString sourceControlID = fSourceControlConnector->GetSourceControlID();
-					fSourceControlConnector->ConnectToSourceControl(sourceControlID);
-				}	
-			}
-
 			// avant tout, il faut construire l'arbre complet avant de pouvoir ajouter des proprietes aux items
 			// ----------------------------------------
 			// 1ere boucle : traiter l'ensemble des folders rencontres
@@ -3010,14 +2464,6 @@ VError VProject::_SaveProjectFile(bool inForceSave)
 
 		if (projectFileProjectItem != NULL)
 		{
-			// checkout du fichier 4DProject
-			if (fSourceControlConnector && fSourceControlConnector->GetSourceControl())
-			{
-				VectorOfProjectItems projectFileProjectItems;
-				projectFileProjectItems.push_back(projectFileProjectItem);
-				err = CheckOut(projectFileProjectItems, true);
-			}
-
 			// TO DO 030409 if (err == VE_OK)
 			{
 				VFileDesc *fd = NULL;
@@ -3371,6 +2817,25 @@ void VProject::_GetProjectItemsByExtension( VProjectItem *inProjectItem, const X
 	}
 }
 
+void VProject::_LoadFromFolderChildren(const XBOX::VFolder& inCurrent, IDocumentParserManager::IJob *inJob, const ESymbolFileBaseFolder& inBaseFolder)
+{
+	VArrayString* files = inCurrent.GetContents(FF_NO_FILES);
+	if( files )
+	{
+		VString filename;
+		sLONG count = files->GetCount();
+		for (int i = 0; i < count; i++)
+		{
+			files->GetString( filename, i+1);
+			
+			VFolder child(inCurrent, filename);
+			_LoadFromFolderChildren(child, inJob, inBaseFolder);
+			LoadCoreFiles(inCurrent, filename, eSymbolFileExecContextServer, inJob, inBaseFolder);
+		}
+	}
+	delete files;
+	files = NULL;
+}
 
 // ----------------------------------------------------------------------------
 // Classe VCatalog :
@@ -3538,9 +3003,9 @@ VError VCatalog::ParseCatalogAndCreateProjectItems(CDB4DBase* inDB4DBase)
 			VFilePath catalogFilePath;
 			fCatalogItem->GetFilePath(catalogFilePath);
 			VFile catalogFile(catalogFilePath);
-			CDB4DManager *dB4DBaseManager = VComponentManager::RetainComponentOfType<CDB4DManager>();
+			CDB4DManager *dB4DBaseManager = CDB4DManager::RetainManager();
 			sLONG flags = DB4D_Open_As_XML_Definition | DB4D_Open_No_Respart | DB4D_Open_StructOnly | DB4D_Open_Allow_Temporary_Convert_For_ReadOnly;
-			CDB4DBase *dB4DBase = dB4DBaseManager->OpenBase(catalogFile, flags, NULL /* outErr */, XBOX::FA_READ, 0, NULL, permissionsFile);
+			CDB4DBase *dB4DBase = dB4DBaseManager->OpenBase(catalogFile, flags, &err, XBOX::FA_READ, 0, NULL, permissionsFile);
 
 			ReleaseRefCountable( &permissionsFile );
 
@@ -3601,7 +3066,7 @@ void VCatalog::GetEntityModelAttributes(const VString& inEntityName, std::vector
 			{
 				VString entityName;
 				bagEntityModel->GetString(d4::name, entityName);
-				if (entityName == inEntityName)
+				if( entityName.EqualToString(inEntityName, true) )
 				{
 					const VBagArray* bagEntityModelAttributes = bagEntityModel->GetElements(d4::attributes);
 					if (bagEntityModelAttributes)
@@ -3639,7 +3104,7 @@ void VCatalog::GetEntityModelMethods(const VString& inEntityName, std::vector< I
 			{
 				VString entityName;
 				bagEntityModel->GetString(d4::name, entityName);
-				if (entityName == inEntityName)
+				if( entityName.EqualToString(inEntityName, true) )
 				{
 					const VBagArray* bag = bagEntityModel->GetElements(d4::methods);
 					if (bag)
@@ -3660,99 +3125,4 @@ void VCatalog::GetEntityModelMethods(const VString& inEntityName, std::vector< I
 		}
 	}
 	ReleaseRefCountable( &catalogBag);
-}
-
-
-
-// ----------------------------------------------------------------------------
-// Classe VProjectUser :
-// ----------------------------------------------------------------------------
-VProjectUser::VProjectUser(VProject* inProject)
-{
-	fProject = inProject;
-}
-
-VProjectUser::~VProjectUser()
-{
-}
-
-VError VProjectUser::LoadFromUserFile(VFile& inUserFile)
-{
-	VError err = VE_OK;
-
-	if (fProject && inUserFile.Exists() )
-	{
-		VFileDesc *fd = NULL;
-		err = inUserFile.Open(FA_READ, &fd, FO_Default);
-		if (err != VE_OK)
-			VTask::FlushErrors();	// ce n'est pas grave s'il y a eu une erreur (fichier absent pex)
-		if (err == VE_OK && fd != NULL)
-		{
-			VPtr ptr = VMemory::NewPtr(fd->GetSize(), kSOLUTION_MANAGER_SIGNATURE);
-			if (ptr != NULL)
-			{
-				err = fd->GetDataAtPos(ptr, fd->GetSize());
-				if (err == VE_OK)
-				{
-					VString xmlString(ptr, fd->GetSize(), VTC_UTF_8);
-					/*VValueBag* bagSourceControl = ::CreateBagFromXMLFile(&inUserFile, kXML_ELEMENT_SOURCE_CONTROL, XML_ValidateNever, false);
-					
-					if (bagSourceControl != NULL)
-					{
-
-						bagSourceControl->Release();
-					}
-					*/
-				}
-				VMemory::DisposePtr(ptr);
-			}
-		}
-		else
-		{
-			//err = VE_SOMA_SOLUTION_LINK_FILE_COULD_NOT_OPENED;
-		}
-		delete fd;
-	}
-
-	return err;
-}
-
-VError VProjectUser::SaveToUserFile(VFile& inUserFile) const
-{
-	VError err = VE_OK;
-
-	if (fProject)
-	{
-		VFileDesc *fd = NULL;
-		err = inUserFile.Open(FA_READ_WRITE, &fd, FO_CreateIfNotFound | FO_Overwrite);
-		if (err == VE_OK && fd != NULL)
-		{
-			VString strXML;
-			strXML.FromCString(INTRO_XML_UTF8);
-
-			VValueBag* bagSourceControl = new VValueBag();
-			ProjectItemBagKeys::sourceControlId.Set(bagSourceControl, fProject->GetSourceControlConnector()->GetSourceControlID());
-			VString sourceControlID = fProject->GetSourceControlConnector()->GetSourceControlID();
-			if (sourceControlID.IsEmpty())
-				ProjectItemBagKeys::sourceControlMode.Set(bagSourceControl, fProject->GetSolution()->GetSourceControlID());
-			bagSourceControl->DumpXML(strXML, kXML_ELEMENT_SOURCE_CONTROL, false);
-			bagSourceControl->Release();
-
-			VStringConvertBuffer buffer(strXML, VTC_UTF_8);
-			err = fd->SetSize(buffer.GetSize());
-			if (err == VE_OK)
-			{
-				err = fd->PutDataAtPos(buffer.GetCPointer(), buffer.GetSize());
-				if (err == VE_OK)
-					err = fd->Flush();
-			}
-			delete fd;
-		}
-		else
-		{
-			err = VE_FILE_CANNOT_OPEN;
-		}
-	}
-
-	return err;
 }

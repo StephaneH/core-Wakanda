@@ -16,24 +16,21 @@ add_executable(Wakanda ${Sources})
 add_definitions(-DVERSION_LINUX=1 -DRIA_SERVER)
 
 
-#jmo - need include path cleaning !
 include_directories(
-  ${ServerNetIncludeDir}
   ${ComponentsRoot}
   ${DB4DIncludeDir}
   ${IcuIncludeDir}
-  ${InspectorDir}
   ${JsCoreIncludeDir}
-  ${ServerNetIncludeDir}
-  ${XBoxRoot}
   ${WakandaRoot}/Common/Sources
-  ${WakandaServerRoot}/Sources)
+  ${WakandaServerRoot}/Sources
+  ${XBoxRoot}
+  )
 
 
-target_link_libraries(Wakanda Icu JavaScript JsDebugger Kernel KernelIPC ServerNet Xerces Xml)
+target_link_libraries(Wakanda DB4D Graphics JavaScript JsDebugger Kernel KernelIPC ServerNet Xml)
 
 
-add_dependencies(Wakanda DB4D HTTPServer LanguageSyntax SQLServer UsersAndGroups Zip)
+add_dependencies(Wakanda DB4D HTTPServer LanguageSyntax SecurityManager UsersAndGroups Zip)
 
 
 add_custom_command(TARGET Wakanda PRE_BUILD
@@ -43,10 +40,12 @@ add_custom_command(TARGET Wakanda PRE_BUILD
 add_custom_command(TARGET Wakanda POST_BUILD
   COMMAND perl ${Depot}/Tools/Versionning/versionning_waf.pl ${WakandaRoot}/walib/WAF/Loader.js
   COMMAND mkdir -p ${AppRoot}/Wakanda\ Server
-  COMMAND ${CopyFilesRoot}/CopyFiles_Linux.sh ${AppRoot}/Wakanda\ Server E)
+  COMMAND ${CopyFilesRoot}/CopyFiles_Linux.sh ${AppRoot}/Wakanda\ Server E
+  COMMAND ${CopyFilesRoot}/CopyFiles_Linux.sh ${AppRoot}/Wakanda\ Server E+)
 
 #But sometimes we need this more specific target that performs ressources copy only
 add_custom_target(Resources
   COMMAND perl ${Depot}/Tools/Versionning/versionning_waf.pl ${WakandaRoot}/walib/WAF/Loader.js
   COMMAND mkdir -p ${AppRoot}/Wakanda\ Server
-  COMMAND ${CopyFilesRoot}/CopyFiles_Linux.sh ${AppRoot}/Wakanda\ Server E)
+  COMMAND ${CopyFilesRoot}/CopyFiles_Linux.sh ${AppRoot}/Wakanda\ Server E
+  COMMAND ${CopyFilesRoot}/CopyFiles_Linux.sh ${AppRoot}/Wakanda\ Server E+)

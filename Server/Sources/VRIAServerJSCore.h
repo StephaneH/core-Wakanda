@@ -37,7 +37,14 @@ public:
 	static	void			_getRecentSolution( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication);
 	static	void			_setDebuggerServer( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication);
 	static	void			_getDebuggerServer( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication);
-
+	static	void			_isDebugging( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication);
+	static	void			_stopDebugger( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication);
+	static	void			_startDebugger( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication);
+	static	void			_canSetDebuggerServer( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication);
+	static	void			_setBreakpoints( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication);
+	static	void			_removeBreakpoints( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication);
+	static	void			_getDebuggerStatus( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication);
+	static	void			_getBreakpoints( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication);
 };
 
 #endif

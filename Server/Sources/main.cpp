@@ -17,6 +17,7 @@
 #include "VRIAServerApplication.h"
 #include "VSolutionStartupParameters.h"
 #include "VRIAServerSolution.h"
+#include "VRIAServerSupervisor.h"
 
 #include "../Projet/Visual/WakandaVersNum.h"
 
@@ -28,6 +29,8 @@ const VString kARG_ADMINISTRATOR_PORT( "--admin-port");
 const VString kARG_ADMINISTRATOR_SSL_PORT( "--admin-ssl-port");
 const VString kVERSION_NUMBER("--version");
 const VString kLOG_DUMP("--netdump");
+const VString kARG_DEBUG_OFF("--debug-off");
+const VString kARG_SYSLOG("--syslog");
 
 
 int main (int inArgc, char * const inArgv[])
@@ -52,6 +55,9 @@ int main (int inArgc, char * const inArgv[])
 	{
 		// Parse the command line argument
 		VError err = VE_OK;
+
+		// remote admin: feature development in progress
+		//VRIAServerSupervisor*	srvSup = VRIAServerSupervisor::Get();
 
 		VRIAServerStartupParameters *startupParameters = new VRIAServerStartupParameters();
 		if (startupParameters != NULL)
@@ -138,6 +144,21 @@ int main (int inArgc, char * const inArgv[])
 						argument.Remove(1, kLOG_DUMP.GetLength());
 						
 						startupParameters->SetNetDump(true);
+					}
+					else if (argument.EqualToString( kARG_DEBUG_OFF))
+					{
+						++curArg;
+						startupParameters->SetDebuggingAuthorized( false);
+					}
+					else if (argument.EqualToString( kARG_SYSLOG))
+					{
+						++curArg;
+
+					#if VERSIONMAC || VERSION_LINUX
+						VSysLogOutput *syslogOutput = new VSysLogOutput( L"Wakanda Server");
+						application.GetLogger()->AddLogListener( syslogOutput);
+						syslogOutput->Release();
+					#endif
 					}
 					else
 					{

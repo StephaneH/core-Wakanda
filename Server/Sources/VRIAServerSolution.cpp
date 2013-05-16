@@ -166,8 +166,9 @@ fPermissions(NULL),
 fJSContextPool(NULL),
 fJSRuntimeDelegate(NULL),
 fLogger(NULL),
-fLogReader(NULL),
-fGarbageCollect(false)
+fGarbageCollect(false),
+fWAKBreakpointsManager(NULL),
+fFileSystemNamespace(NULL)
 {
 	fState.opened = false;
 	fState.started = false;
@@ -177,6 +178,7 @@ fGarbageCollect(false)
 
 VRIAServerSolution::~VRIAServerSolution()
 {
+	ReleaseRefCountable( &fFileSystemNamespace);
 }
 
 
@@ -184,6 +186,7 @@ VRIAServerSolution* VRIAServerSolution::OpenSolution( VError& outError, VSolutio
 {
 	outError = VE_OK;
 	VRIAServerSolution *solution = NULL;
+
 
 	VSolution *designSolution = VSolutionManager::Get()->OpenSolution( inStartupParameters);
 	if (designSolution != NULL)
@@ -247,29 +250,32 @@ VError VRIAServerSolution::Close()
 
 	if (fDesignSolution != NULL)
 	{
+		if ( fWAKBreakpointsManager && !fState.inMaintenance)
+		{
+			fWAKBreakpointsManager->Save();
+		}
 		VSolutionManager::Get()->CloseSolution( fDesignSolution);
 		delete fDesignSolution;
 		fDesignSolution = NULL;
 	}
 
-	JSWDebuggerFactory		fctry;
-#if 0//!defined(WKA_USE_UNIFIED_DBG)
-	IJSWDebugger*			jswDebugger = fctry. Get ( );
-#else
-	IWAKDebuggerServer*		jswDebugger = fctry. Get ( );
-	IWAKDebuggerServer*		chrDbgr = fctry.GetChromeDebugHandler();
-#endif
-	
-	if ( jswDebugger != 0 )
-		jswDebugger-> SetSettings ( NULL );
-
-	VChromeDebugHandler::StaticSetSettings(NULL);
-	/*if (chrDbgr)
+	if (!fState.inMaintenance)
 	{
-		chrDbgr->SetSettings(NULL);
-	}*/
-	delete fDebuggerSettings;
-	fDebuggerSettings = NULL;
+		JSWDebuggerFactory		fctry;
+		IRemoteDebuggerServer*	jswDebugger = fctry. Get ( );
+		const VString			K_EMPTY_SOLUTION_STR("Empty-Solution");
+		IRemoteDebuggerServer*	chrDbgr = fctry.GetChromeDebugHandler(K_EMPTY_SOLUTION_STR);
+		
+		if ( jswDebugger != 0 )
+			jswDebugger-> SetSettings ( NULL );
+
+		VChromeDebugHandler::StaticSetSettings(NULL);
+
+		delete fDebuggerSettings;
+		fDebuggerSettings = NULL;
+	}
+	delete fWAKBreakpointsManager;
+	fWAKBreakpointsManager = NULL;
 
 	VString logMsg;
 	logMsg.Printf( "Solution closed (duration: %i ms)", usCounter.Stop()/1000);
@@ -277,22 +283,13 @@ VError VRIAServerSolution::Close()
 
 	if (fLogger != NULL)
 	{
-		if (fLogReader != NULL)
-		{
-			fLogger->DetachReader( fLogReader);
-		}
 
 		fLogger->Flush();
 		fLogger->Stop();
 
-		ILogger *appLogger = VRIAServerApplication::Get()->RetainLogger();
-		if (appLogger == fLogger)
-			VRIAServerApplication::Get()->SetLogger( NULL);
-		ReleaseRefCountable( &appLogger);
+		delete fLogger;
+		fLogger = NULL;
 	}
-
-	ReleaseRefCountable( &fLogger);
-	ReleaseRefCountable( &fLogReader);
 
 	fName.Clear();
 	fLoggerID.Clear();
@@ -324,15 +321,95 @@ VError VRIAServerSolution::Start()
 			
 	usCounter.Start();
 	logger.Log( fLoggerID, eL4JML_Information, L"Starting the solution");
+	
+	xbox_assert ( (fDebuggerSettings == NULL) && (fWAKBreakpointsManager) );
 
-	if (fApplicationsMutex.Lock())
+	if (!fState.inMaintenance)
 	{
+		fDebuggerSettings = new VJSDebuggerSettings ( this, fWAKBreakpointsManager );
+		err = fDebuggerSettings-> Init ( );
+		VChromeDebugHandler::StaticSetSettings(fDebuggerSettings);
+	}
+	else
+	{
+		fDebuggerSettings = NULL;
+	}
+
+	if (!err && fApplicationsMutex.Lock())
+	{
+		VString lHostName, lIp, lPattern, lPublishName;
+		sLONG lPort = 0, lSSLPort = 0;
+		bool lAllowSSL = false, lSSLMandatory = false;
+
 		bool ignoreProjectStartingErrors = !fSettings.GetStopIfProjectFails();
 		fGarbageCollect = fSettings.GetGarbageCollect();
 
 		for (VectorOfApplication_iter iter = fApplicationsCollection.begin() ; iter != fApplicationsCollection.end() && err == VE_OK ; ++iter)
 		{
+			StErrorContextInstaller lErrorContext;
+			
 			err = (*iter)->Start();
+
+			if ((*iter)->GetPublicationSettings( lHostName, lIp, lPort, lSSLPort, lPattern, lPublishName, lAllowSSL, lSSLMandatory) == VE_OK)
+			{
+				VString lMsg, lProjectDesc, lPublicationPorts, lPublicationAddress;
+
+				(*iter)->GetName( lPublishName);
+				if ((*iter)->IsAdministrator())
+					lProjectDesc.AppendString( L"The Administration Web Server");
+				else
+					lProjectDesc.Printf( "\"%S\" project", &lPublishName);
+
+				if (lAllowSSL)
+				{
+					if (lSSLMandatory)
+					{
+						lPublicationPorts.Printf( "secure port %i", lSSLPort);
+					}
+					else
+					{
+						VString lStrAnd( L"and"), lStrOr( L"or");
+						lPublicationPorts.Printf( "port %i %S secure port %i", lPort, (err == VE_OK) ? &lStrAnd : &lStrOr, lSSLPort);
+					}
+				}
+				else
+				{
+					lPublicationPorts.Printf( "port %i", lPort);
+				}
+
+				VNetAddress netAddress( lIp);
+				if (netAddress.IsAny())
+					lPublicationAddress.AppendString( L"all IP addresses");
+				else if (netAddress.IsLoopBack())
+					lPublicationAddress.AppendString( L"localhost");
+				else
+					lPublicationAddress.Printf( "%S IP address", &lIp);
+
+
+				if (err == VE_OK)
+				{
+					lMsg.Printf( "- %S listens for connections on %S on %S\n\n", &lProjectDesc, &lPublicationPorts, &lPublicationAddress);
+				}
+				else
+				{
+					if (lErrorContext.GetContext()->FindAny( VE_SRVR_FAILED_TO_CREATE_LISTENING_SOCKET, VE_SRVR_FAILED_TO_START_LISTENER, VE_OK))
+					{
+						lMsg.Printf( "- %S cannot listen for connections on %S on %S\n", &lProjectDesc, &lPublicationPorts, &lPublicationAddress);
+						
+						if ((*iter)->IsAdministrator())
+							lMsg.AppendString( L"  You can customize the Administration Web Server's ports with the \"--admin-port\" and \"--admin-ssl-port\" options\n\n");
+						else
+							lMsg.AppendString( L"  Please check the project's publishing settings\n\n");
+					}
+					else
+					{
+						lMsg.Printf( "- %S cannot be published\n\n", &lProjectDesc);
+					}
+				}
+				
+				fputs_VString( lMsg, stdout);
+			}
+
 			if (err != VE_OK)
 			{
 				VString name;
@@ -389,25 +466,17 @@ VError VRIAServerSolution::Start()
 	{
 		//TEST_RegisterDebuggerUAGCallback ( );
 
-		xbox_assert ( fDebuggerSettings == NULL );
-		fDebuggerSettings = new VJSDebuggerSettings ( this );
-		err = fDebuggerSettings-> Init ( );
-		if ( err == VE_OK )
+		if ( !fState.inMaintenance )
 		{
 			JSWDebuggerFactory		fctry;
-#if 0//!defined(WKA_USE_UNIFIED_DBG)
-			IJSWDebugger*			jswDebugger = fctry. Get ( );
-#else
-			IWAKDebuggerServer*		jswDebugger = fctry. Get ( );
-			IWAKDebuggerServer*		chrDbgr = fctry.GetChromeDebugHandler();
-#endif
+			IRemoteDebuggerServer*	jswDebugger = fctry. Get ( );
+			VString	solName;
+			fDesignSolution->GetName(solName);
+			IRemoteDebuggerServer*	chrDbgr = fctry.GetChromeDebugHandler(solName);
+
 			if ( jswDebugger != 0 )
 				jswDebugger-> SetSettings ( fDebuggerSettings );
 			VChromeDebugHandler::StaticSetSettings(fDebuggerSettings);
-			/*if ( chrDbgr != 0 )
-			{
-				chrDbgr->SetSettings(fDebuggerSettings);
-			}*/
 		}
 	}
 
@@ -416,6 +485,15 @@ VError VRIAServerSolution::Start()
 		VString logMsg;
 		logMsg.Printf( "Solution started (duration: %i ms)", usCounter.Stop()/1000);
 		logger.Log( fLoggerID, eL4JML_Information, logMsg);
+	}
+	else
+	{
+		if (fDebuggerSettings)
+		{
+			delete fDebuggerSettings;
+			fDebuggerSettings = NULL;
+			VChromeDebugHandler::StaticSetSettings(NULL);
+		}
 	}
 
 	fState.started = true;
@@ -499,6 +577,20 @@ VFolder* VRIAServerSolution::RetainFolder() const
 }
 
 
+VFile* VRIAServerSolution::RetainSolutionFile() const
+{
+	VFile *solutionFile = NULL;
+
+	if (fDesignSolution != NULL)
+	{
+		VFilePath path;
+		if (fDesignSolution->GetSolutionFilePath( path))
+			solutionFile = new VFile( path);
+	}
+	return solutionFile;
+}
+
+
 VFolder* VRIAServerSolution::RetainLogFolder( bool inCreateIfNotExists) const
 {
 	VFolder *folder = NULL;
@@ -562,12 +654,6 @@ bool VRIAServerSolution::GetUUID( VUUID& outUUID) const
 }
 
 
-VLog4jMsgFileReader* VRIAServerSolution::GetMessagesReader() const
-{
-	return fLogReader;
-}
-
-
 void VRIAServerSolution::GetMessagesLoggerID( XBOX::VString& outLoggerID) const
 {
 	outLoggerID = fLoggerID;
@@ -627,22 +713,22 @@ const VSolutionSettings& VRIAServerSolution::GetSettings() const
 }
 
 
-void VRIAServerSolution::DropAllJSContexts()
+void VRIAServerSolution::GetBreakpoints( std::set< VRemoteDebuggerBreakpointsManager::VFileBreakpoints > & outBrkpts )
 {
-	if (fJSContextPool != NULL)
-		fJSContextPool->Clear();
-	
-	if (fApplicationsMutex.Lock())
-	{
-		for (VectorOfApplication_citer iter = fApplicationsCollection.begin() ; iter != fApplicationsCollection.end() ; ++iter)
-		{
-			(*iter)->DropAllJSContexts();
-		}
-
-		fApplicationsMutex.Unlock();
-	}
+	fWAKBreakpointsManager->GetBreakpoints(outBrkpts);
 }
-
+void VRIAServerSolution::AddBreakpoint(const XBOX::VString& inUrl, sLONG inLineNb)
+{
+	fWAKBreakpointsManager->AddBreakPoint(inUrl,inLineNb);
+}
+void VRIAServerSolution::RemoveBreakpoint(const XBOX::VString& inUrl, sLONG inLineNb)
+{
+	fWAKBreakpointsManager->RemoveBreakPoint(inUrl,inLineNb);
+}
+void VRIAServerSolution::GetBreakpointsTimeStamp(sLONG& outbreakpointsTimeStamp)
+{
+	fWAKBreakpointsManager->GetTimeStamp(outbreakpointsTimeStamp);
+}
 
 IJSRuntimeDelegate* VRIAServerSolution::GetRuntimeDelegate()
 {
@@ -705,11 +791,9 @@ VError VRIAServerSolution::_Open( VSolution* inDesignSolution, VRIAServerSolutio
 
 		if (err == VE_OK && !fState.inMaintenance)
 		{
-			VSize		nNameLength = fName. GetLength ( ) * 2 + 1;
-			char*		szchName = new char [ nNameLength ];
-			fName. ToCString ( szchName, nNameLength );
-			fprintf ( stdout, "Publishing solution \"%s\"\n", szchName );
-			delete [ ] szchName;
+			VString lMsg;
+			lMsg.Printf( "Publishing \"%S\" solution\n\n", &fName);
+			fputs_VString( lMsg, stdout);
 		}
 
 		if (err == VE_OK && !fState.inMaintenance)
@@ -746,8 +830,6 @@ VError VRIAServerSolution::_Open( VSolution* inDesignSolution, VRIAServerSolutio
 				}
 				else
 				{
-					VRIAServerApplication::Get()->SetLogger( fLogger);
-
 					VRIAServerStartupParameters* startupParameters=VRIAServerApplication::Get()->RetainStartupParameters();
 
 					if(startupParameters!=NULL)
@@ -756,14 +838,18 @@ VError VRIAServerSolution::_Open( VSolution* inDesignSolution, VRIAServerSolutio
 						
 						if(startupParameters->GetNetDump(netdump))
 						{
-							fLogger->WithTrace(true);
-							fLogger->WithDump(true);
+							VProcess::Get()->GetLogger()->WithTrace(true);
+							VProcess::Get()->GetLogger()->WithDump(true);
 						}	
 							
 						ReleaseRefCountable(&startupParameters);
 					}
 						
 					fLogger->Start();
+
+					VString lMsg;
+					lMsg.Printf( "The solution's log file will be stored in the \"%S\" folder\n\n", &logFolder->GetPath().GetPath());
+					fputs_VString( lMsg, stdout);
 				}
 
 				logFolder->Release();
@@ -776,16 +862,6 @@ VError VRIAServerSolution::_Open( VSolution* inDesignSolution, VRIAServerSolutio
 
 		StUseLogger logger;
 
-		if (err == VE_OK && !fState.inMaintenance)
-		{
-			// Create a log file reader
-			fLogReader = new VLog4jMsgFileReader();
-			if (fLogReader == NULL)
-				err = ThrowError( VE_MEMORY_FULL);
-			else
-				fLogger->AttachReader( fLogReader);
-		}
-
 		if (err == VE_OK || fState.inMaintenance)
 		{
 			StErrorContextInstaller errContext;
@@ -795,6 +871,12 @@ VError VRIAServerSolution::_Open( VSolution* inDesignSolution, VRIAServerSolutio
 
 			logger.Log( fLoggerID, eL4JML_Information, L"Opening the solution");
 
+			if (err == VE_OK || fState.inMaintenance)
+			{
+				// load file system definition files
+				err = _LoadFileSystemDefinitions();
+			}
+			
 			if (err == VE_OK && !fState.inMaintenance)
 			{
 				fJSRuntimeDelegate = new VRIAServerSolutionJSRuntimeDelegate( this);
@@ -918,36 +1000,7 @@ VError VRIAServerSolution::_Open( VSolution* inDesignSolution, VRIAServerSolutio
 									fApplicationsCollection.push_back( VRefPtr<VRIAServerProject>(application));
 									fApplicationsMap[uuid] = VRefPtr<VRIAServerProject>(application);
 									hasAdmin |= application->IsAdministrator();
-
-									if (!fState.inMaintenance)
-									{
-										VString			vstrHostName;
-										VString			vstrIP;
-										sLONG			nPort = 0;
-										VString			vstrPattern;
-										VString			vstrPublishName;
-										VError			vErrorS = application-> GetPublicationSettings ( vstrHostName, vstrIP, nPort, vstrPattern, vstrPublishName );
-										xbox_assert ( vErrorS == VE_OK );
-										vstrPublishName. Clear ( );
-										application-> GetName ( vstrPublishName );
-
-										VString			vstrMessage;
-										vstrMessage. AppendCString ( "\tProject \"" );
-										vstrMessage. AppendString ( vstrPublishName );
-										vstrMessage. AppendCString ( "\" published at " );
-										vstrMessage. AppendString ( vstrIP );
-										vstrMessage. AppendCString ( " on port " );
-										vstrMessage. AppendLong ( nPort );
-										vstrMessage. AppendCString ( "\n" );
-
-										VSize		nNameLength = vstrMessage. GetLength ( ) * 2 + 1;
-										char*		szchName = new char [ nNameLength ];
-										vstrMessage. ToCString ( szchName, nNameLength );
-										fprintf ( stdout, szchName );
-										delete [ ] szchName;
-									}
 								}
-
 								ReleaseRefCountable( &projectOpeningParams);
 							}
 							else
@@ -1052,6 +1105,22 @@ VError VRIAServerSolution::_Open( VSolution* inDesignSolution, VRIAServerSolutio
 				}
 			}
 
+			if (!err || fState.inMaintenance)
+			{
+				VString			vstrRoot;
+				VFolder* vfRoot = RetainFolder();
+				if ( vfRoot != 0 )
+				{
+					VFilePath		vfPathRoot;
+					vfRoot->GetPath ( vfPathRoot );
+					vfPathRoot.GetPosixPath ( vstrRoot );
+					vfRoot->Release ( );
+				}
+				fWAKBreakpointsManager = new VRemoteDebuggerBreakpointsManager(vstrRoot);
+				fWAKBreakpointsManager->SetSolution(fDesignSolution);
+				fWAKBreakpointsManager->Load();
+			}
+
 			logger.LogMessagesFromErrorContext( fLoggerID, errContext.GetContext());
 
 			if (err == VE_OK)
@@ -1091,6 +1160,29 @@ VError VRIAServerSolution::_LoadFileSettings()
 
 	return err;	
 }
+
+
+VError VRIAServerSolution::_LoadFileSystemDefinitions()
+{
+	VError err = VE_OK;
+	
+	// link solution namespace to process one
+	if (testAssert( fFileSystemNamespace == NULL))
+		fFileSystemNamespace = new VFileSystemNamespace( VRIAServerApplication::Get()->GetFileSystemNamespace());
+
+	if (fFileSystemNamespace != NULL)
+	{
+		VFilePath solutionPath;
+		fDesignSolution->GetSolutionFolderPath( solutionPath);
+
+		VFile file( solutionPath, CVSTR( "fileSystems.json"), FPS_POSIX);
+		if (file.Exists())
+			err = fFileSystemNamespace->LoadFromDefinitionFile( &file);
+	}
+	
+	return err;
+}
+
 
 VError VRIAServerSolution::_LoadDatabaseSettings()
 {
@@ -1151,19 +1243,7 @@ VError VRIAServerSolution::_LoadDatabaseSettings()
 				wantedSizeBlockMem = minsizeblockmem;
 			}
 		
-#if !VERSION_LINUX
-//jmo - Bug sous Linux... Et probablement ailleurs ! Soit la pile d'appels suivante :
-
-// #0  xbox::VCppMemMgr::AddVirtualAllocation (this=0x7fffec0bfb70, inMaxBytes=104857600, inHintAddress=0x0, inPhysicalMemory=true) at depot/XToolbox/Main/Kernel/Sources/VMemoryCpp.cpp:1480
-// #1  0x00007ffff11924fb in VDBCacheMgr::SetMaxSize (this=0x7fffec0bfb60, inSize=209715200, inPhysicalMemOnly=true, outMaxSize=0x7fffffffcc08) at depot/Components/Main/DB4D/Sources/Cache.cpp:1066
-// #2  0x00007ffff12a6841 in VDBMgr::SetCacheSize (this=0x7fffec0d5670, inSize=209715200, inPhysicalMemOnly=true, outActualCacheSize=0x7fffffffcc08) at depot/Components/Main/DB4D/Sources/DB4DMgr.cpp:675
-// #3  0x00007ffff1302681 in VDB4DMgr::SetCacheSize (this=0x7fffec1d2480, inSize=209715200, inPhysicalMemOnly=true, outActualSize=0x7fffffffcc08) at depot/Components/Main/DB4D/Sources/DB4DComponent.cpp:582
-// #4  0x0000000000494f7f in VRIAServerSolution::_LoadDatabaseSettings (this=0x7fffec34c250) at depot/4eDimension/main/4D/PC4D/Solution_RIAServer.cpp:685
-
-//On voit dans xbox::VCppMemMgr::AddVirtualAllocation() qu'on retourne SYSTEMATIQUEMENT une erreur si on utilise le mem. manager standard. Cette erreur se propage jusqu'au "err=" de la ligne ci-dessous et empeche le chargement de la solution...
-
 			err = db4dMgr->SetCacheSize( wantedSizeBlockMem, fSettings.GetKeepCacheInMemory(), &allocatedSize);
-#endif
 
 			// Calculate the minimum size to flush
 			if ( allocatedSize <= 2*1024L*1024L)
@@ -1414,4 +1494,10 @@ VFolder* VRIAServerSolutionJSRuntimeDelegate::RetainScriptsFolder()
 VProgressIndicator* VRIAServerSolutionJSRuntimeDelegate::CreateProgressIndicator( const VString& inTitle)
 {
 	return NULL;
+}
+
+
+XBOX::VFileSystemNamespace* VRIAServerSolutionJSRuntimeDelegate::RetainRuntimeFileSystemNamespace()
+{
+	return RetainRefCountable( fSolution->GetFileSystemNamespace());
 }

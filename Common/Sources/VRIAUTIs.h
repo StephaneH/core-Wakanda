@@ -38,6 +38,7 @@ namespace RIAFileKind
 	extern const XBOX::VString kMatchFileExtension;
 	extern const XBOX::VString kWebComponentFileExtension;
 	extern const XBOX::VString kCacheUAGFileExtension;
+	extern const XBOX::VString kLogFileExtension;
 
 	// Standard extensions
 	extern const XBOX::VString kCSSFileExtension;

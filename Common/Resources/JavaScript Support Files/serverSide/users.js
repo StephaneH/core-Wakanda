@@ -164,6 +164,14 @@ Directory = function Directory() {
     this.addGroup = function addGroup(name, fullName) {        return new Group( );     };
     
     /**
+     * returns true if the solution is currently running under the controlled admin access mode, and false if it is under the free access mode
+     *
+     * @method hasAdministrator
+     * @return {Boolean}
+     */
+    this.hasAdministrator = function hasAdministrator() {        return true;     };
+    
+    /**
      * returns the HA1 key resulting from the combination of userName, password and (optionally) realm parameters using a hash function
      *
      * @method computeHA1
@@ -326,11 +334,11 @@ User = function User() {
     /**
      * 
      *
-     * @property 
+     * @property storage
      * @attributes 
-     * @type String
+     * @type Storage
      */
-    this. =  ''; 
+    this.storage =  new Storage( ); 
     
     
     /**

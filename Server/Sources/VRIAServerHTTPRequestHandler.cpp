@@ -123,6 +123,10 @@ VError VJSRequestHandler::HandleRequest( IHTTPResponse* inResponse)
 			}
 		}
 	}
+	else if (NULL == globalContext)
+	{
+		err = ThrowError (VE_RIA_JS_CANNOT_FIND_CONTEXT);
+	}
 
 	fApplication->ReleaseJSContext( globalContext, inResponse);
 
@@ -208,7 +212,7 @@ VError VDebugHTTPRequestHandler::HandleRequest( IHTTPResponse* inResponse)
 
 				if (uagSession != NULL)
 				{
-					CUAGGroup *uagDebuggerGroup = uagDirectory->RetainSpecialGroup( CUAGDirectory::DebuggerGroup);
+					CUAGGroup *uagDebuggerGroup = uagDirectory->RetainSpecialGroup( CUAGDirectory::AdminGroup);
 					if (uagDebuggerGroup != NULL)
 					{
 						accessGranted = uagSession->BelongsTo( uagDebuggerGroup);
@@ -247,128 +251,130 @@ VError VDebugHTTPRequestHandler::HandleRequest( IHTTPResponse* inResponse)
 
 		if ((err == VE_OK) && accessGranted && !handled)
 		{
-		#if 1
-
+			bool haveFile = false, haveScript = false;
+			VFile *fileToEvaluate = NULL;
+			VString textToEvaluate;
+			VURL sourceURL;
+			
 			if (inResponse->GetRequest().GetURL().EqualToUSASCIICString( "/debug/eval/file"))
 			{
-				// the parameter is a posix path relative to the application folder
-				VString param;
-				param.FromBlock( inResponse->GetRequest().GetRequestBody().GetDataPtr(), inResponse->GetRequest().GetRequestBody().GetDataSize(), VTC_UTF_8);
-
-		#else
-			// to make easy test from the browser
-			if (inResponse->GetRequest().GetURL().BeginsWith( L"/debug/eval/file/"))
-			{
-				// the parameter is a posix path relative to the application folder
-				VString param;
-				VIndex len = VString( L"/debug/eval/file/").GetLength();
-				inResponse->GetRequest().GetURL().GetSubString( len + 1, inResponse->GetRequest().GetURL().GetLength() - len, param);
-
-		#endif
-
-				if (!param.IsEmpty())
+				VString contentType;
+				inResponse->GetRequest().GetContentTypeHeader( contentType);
+				if (contentType.BeginsWith( L"multipart/form-data"))
 				{
-					VFilePath path;
-					fApplication->BuildPathFromRelativePath( path, param, FPS_POSIX);
-					if (!path.IsEmpty() && path.IsFile())
+					const VMIMEMessage *htmlForm = inResponse->GetRequest().GetHTMLForm();
+					if (htmlForm != NULL)
 					{
-						VFile script( path);
-						if (script.Exists())
+						const VectorOfMIMEPart& parts = htmlForm->GetMIMEParts();
+						for (VectorOfMIMEPart::const_iterator iter = parts.begin() ; iter != parts.end() ; ++iter)
 						{
-							VJSGlobalContext *globalContext = fApplication->RetainJSContext( err, false, &inResponse->GetRequest());
-							if (globalContext != NULL && err == VE_OK)
+							if ((*iter)->GetName() == L"url")
 							{
-								StErrorContextInstaller errorContext;
+								// the "url" part is a posix path relative to the application folder
+								CharSet charSet = (*iter)->GetMediaTypeCharSet();
+								VString url;
+								url.FromBlock( (*iter)->GetData().GetDataPtr(), (*iter)->GetData().GetDataSize(), (charSet != VTC_UNKNOWN) ? charSet : VTC_UTF_8);
 
-								VString loggerID, result, format( L"text/plain");
-								VValueSingle *xvalue = NULL;
+								sourceURL.FromString( url, false);
 
-								fApplication->GetMessagesLoggerID( loggerID);
-								StUseLogger logger;
-
-								globalContext->EvaluateScript( &script, &xvalue, true );
-
-								if (errorContext.GetLastError() != VE_OK)
+								VFilePath path;
+								fApplication->BuildPathFromRelativePath( path, url, FPS_POSIX);
+								if (!path.IsEmpty() && path.IsFile())
 								{
-									// sc 02/06/2010 returns the error
-									VErrorContext *context = errorContext.GetContext();
-									if (context != NULL)
-									{
-										VString errorMessage;
-										for (std::vector<VRefPtr<VErrorBase> >::const_iterator iter = context->GetErrorStack().begin() ; iter != context->GetErrorStack().end() ; ++iter)
-										{
-											if (iter != context->GetErrorStack().begin())
-												result.AppendCString( "\r\n");
-
-											(*iter)->GetErrorDescription( errorMessage);
-											result.AppendString( errorMessage);
-										}
-									}
-
-									err = inResponse->ReplyWithStatusCode( HTTP_INTERNAL_SERVER_ERROR);
-								}
-								else if (xvalue != NULL)
-								{
-									xvalue->GetString( result);
-								}
+									sourceURL.FromFilePath( path);
 									
-								if (err == VE_OK)
-									err = SetHTTPResponseString( inResponse, result, &format);
-
-								logger.LogMessagesFromErrorContext( loggerID, errorContext.GetContext());
-
-								delete xvalue;
-
-								handled = true;
+									fileToEvaluate = new VFile( path);
+									haveFile = fileToEvaluate->Exists();
+								}
 							}
-
-							fApplication->ReleaseJSContext( globalContext, inResponse);
-						}
-					}
-				}
-			}
-			else if (inResponse->GetRequest().GetURL().EqualToUSASCIICString( "/debug/isOpenedSolution"))
-			{
-				// the parameter is the full posix path of the solution file
-				VString param;
-				param.FromBlock( inResponse->GetRequest().GetRequestBody().GetDataPtr(), inResponse->GetRequest().GetRequestBody().GetDataSize(), VTC_UTF_8);
-
-				if (!param.IsEmpty())
-				{
-					VFilePath path( param, FPS_POSIX);
-					if (!path.IsEmpty() && path.IsFile())
-					{
-						VFile fileParam( path);
-						bool sameFile = false;
-
-						VSolution *solution = fApplication->GetSolution()->GetDesignSolution();
-						if (solution != NULL)
-						{
-							VProjectItem *item = solution->GetSolutionFileProjectItem();
-							if (item != NULL)
+							else if ((*iter)->GetName() == L"script")
 							{
-								item->GetFilePath( path);
-								VFile openedFile( path);
-								sameFile = openedFile.IsSameFile( &fileParam);
+								// the "script" part contains a JavaScript content to evaluate
+								CharSet charSet = (*iter)->GetMediaTypeCharSet();
+								textToEvaluate.FromBlock( (*iter)->GetData().GetDataPtr(), (*iter)->GetData().GetDataSize(), (charSet != VTC_UNKNOWN) ? charSet : VTC_UTF_8);
+								textToEvaluate.ConvertCarriageReturns( eCRM_NATIVE);
+								haveScript = true;
 							}
 						}
-
-						handled = true;
-						VString format( L"text/plain"), result( (sameFile) ? L"yes" : L"no");
-						err = SetHTTPResponseString( inResponse, result, &format);
+					}
+				}
+				else
+				{
+					// the parameter is a posix path relative to the application folder
+					VString param;
+					param.FromBlock( inResponse->GetRequest().GetRequestBody().GetDataPtr(), inResponse->GetRequest().GetRequestBody().GetDataSize(), VTC_UTF_8);
+					if (!param.IsEmpty())
+					{
+						VFilePath path;
+						fApplication->BuildPathFromRelativePath( path, param, FPS_POSIX);
+						if (!path.IsEmpty() && path.IsFile())
+						{
+							fileToEvaluate = new VFile( path);
+							haveFile = fileToEvaluate->Exists();
+						}
 					}
 				}
 			}
-			else if (inResponse->GetRequest().GetURL().EqualToUSASCIICString( "/debug/reloadCatalog"))
+
+			if (haveFile || haveScript)
 			{
-				handled = true;
-				
-				err = fApplication->ReloadCatalog( NULL);
-				if (err == VE_OK)
-					err = inResponse->ReplyWithStatusCode( HTTP_OK);
-				else
-					err = inResponse->ReplyWithStatusCode( HTTP_INTERNAL_SERVER_ERROR);
+				VJSGlobalContext *globalContext = fApplication->RetainJSContext( err, false, &inResponse->GetRequest());
+				if (globalContext != NULL && err == VE_OK)
+				{
+					StErrorContextInstaller errorContext;
+
+					VString loggerID, result;
+					VValueSingle *xvalue = NULL;
+
+					fApplication->GetMessagesLoggerID( loggerID);
+					StUseLogger logger;
+
+					if (haveScript)
+						globalContext->EvaluateScript( textToEvaluate, &sourceURL, &xvalue, true );
+					else
+						globalContext->EvaluateScript( fileToEvaluate, &xvalue, true );
+
+					if (errorContext.GetLastError() != VE_OK)
+					{
+						// sc 02/06/2010 returns the error
+						VValueBag errorBag;
+						VErrorTaskContext::BuildErrorStack(errorBag);
+						errorBag.GetJSONString(result);
+
+						err = inResponse->ReplyWithStatusCode( HTTP_INTERNAL_SERVER_ERROR);
+					}
+					else if (xvalue != NULL)
+					{
+						xvalue->GetString( result);
+					}
+
+					// build the result object
+					VString format = L"application/json";
+
+					VJSONValue jsonResult;
+					VJSONImporter::ParseString( result, jsonResult);
+
+					VJSONObject *jsonObject = new VJSONObject();
+					jsonObject->SetProperty( L"result", jsonResult);
+
+					VJSONWriter jsonWriter;
+					jsonWriter.StringifyObject( jsonObject, result);
+
+					ReleaseRefCountable( &jsonObject);
+						
+					err = SetHTTPResponseString( inResponse, result, &format);
+
+					logger.LogMessagesFromErrorContext( loggerID, errorContext.GetContext());
+
+					delete xvalue;
+
+					handled = true;
+				}
+
+				fApplication->ReleaseJSContext( globalContext, inResponse);
 			}
+
+			ReleaseRefCountable( &fileToEvaluate);
 		}
 	}
 

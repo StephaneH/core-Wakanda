@@ -1,0 +1,5 @@
+{
+    "desc": "Tests of the DataProvider API (core)",
+    "kind": "csjs",
+    "oldJenkinsName": ["TestClientDataProvider1DPSourceObject", "TestClientDataProvider2DPDataStore", "TestClientDataProvider3DPDataStoreClass", "TestClientDataProvider4DPEntity", "TestClientDataProvider5DPEntityAttribute", "TestClientDataProvider6DPEntityCollection"]
+}

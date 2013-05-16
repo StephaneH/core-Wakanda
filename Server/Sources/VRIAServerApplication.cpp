@@ -42,8 +42,9 @@
 #endif
 
 
-//#define TEST_MYSQL_CONNECTOR
-#ifdef TEST_MYSQL_CONNECTOR
+//#define CONNECTIVITY_TESTS
+
+#ifdef CONNECTIVITY_TESTS
 #include "testMySQLConnector.h"
 #endif
 
@@ -73,6 +74,7 @@ namespace ServerStartupParametersKeys
 	CREATE_BAGKEY_NO_DEFAULT( defaultAdministratorSSLPort, XBOX::VLong);
 	CREATE_BAGKEY_NO_DEFAULT( quitServerWhenSolutionIsClosed, XBOX::VBoolean);
 	CREATE_BAGKEY_NO_DEFAULT( netDump, XBOX::VBoolean);
+	CREATE_BAGKEY_NO_DEFAULT( debuggingAuthorized, XBOX::VBoolean);
 }
 
 
@@ -159,6 +161,19 @@ bool VRIAServerStartupParameters::GetNetDump(bool& outWithServerNetDump)
 {
 	return fBag.GetBool( ServerStartupParametersKeys::netDump, outWithServerNetDump);
 }
+
+
+void VRIAServerStartupParameters::SetDebuggingAuthorized( bool inAutorized)
+{
+	fBag.SetBool( ServerStartupParametersKeys::debuggingAuthorized, inAutorized);
+}
+
+
+bool VRIAServerStartupParameters::GetDebuggingAuthorized( bool& outAuthorized) const
+{
+	return fBag.GetBool( ServerStartupParametersKeys::debuggingAuthorized, outAuthorized);
+}
+
 
 
 // ----------------------------------------------------------------------------
@@ -292,8 +307,9 @@ VRIAServerApplication::VRIAServerApplication()
 , fJSContextPool(NULL)
 , fJSRuntimeDelegate(NULL)
 , fJSContextMgr(NULL)
-, indexProgressIndicator(NULL)
-, flushProgressIndicator(NULL)
+, fIndexProgressIndicator(NULL)
+, fFlushProgressIndicator(NULL)
+, fFileSystemNamespace(new VFileSystemNamespace)
 {
 	xbox_assert(sCurrentApplication == NULL);
 	sCurrentApplication = this;
@@ -306,6 +322,8 @@ VRIAServerApplication::~VRIAServerApplication()
 	{
 		_DeInit();
 	}
+
+	ReleaseRefCountable( &fFileSystemNamespace);
 	
 	xbox_assert(sCurrentApplication == this);
 	sCurrentApplication = NULL;
@@ -693,7 +711,42 @@ XBOX::VError VRIAServerApplication::ReleaseJSContext( XBOX::VJSGlobalContext* in
 
 void VRIAServerApplication::DoRun()
 {
-	fprintf ( stdout, "Welcome to Wakanda Server!\n\n" );
+	VString version, welcome;
+	GetProductVersion( version);
+	welcome.Printf( "Welcome to Wakanda Server version %S\n\n", &version);
+	fputs_VString( welcome, stdout);
+
+	// sc 19/02/2013 WAK0080519, keep only the last fifteen valid link files
+	TimeToStringsPairMultimap linkFiles;
+	GetMapOfRecentSolutionFiles( linkFiles);
+
+	sLONG linkFileCount = 0;
+	TimeToStringsPairMultimap::reverse_iterator linkIter = linkFiles.rbegin();
+	while (linkIter != linkFiles.rend())
+	{
+		VFile linkFile( linkIter->second.second);
+			
+		bool validLinkFile = linkFileCount < 15;
+		if (validLinkFile)
+		{
+			VSolutionStartupParameters startupParams;
+			validLinkFile = (LoadSolutionStartupParametersFromLinkFile( linkFile, startupParams) == VE_OK);
+			if (validLinkFile)
+			{
+				VFile *solutionFile = startupParams.GetSolutionFileToOpen();
+				if (solutionFile != NULL)
+					validLinkFile = solutionFile->Exists();
+			}
+		}
+
+		if (validLinkFile)
+			++linkFileCount;
+		else
+			linkFile.Delete();
+
+		++linkIter;
+	}
+
 	inherited::DoRun();
 }
 
@@ -745,7 +798,7 @@ bool VRIAServerApplication::_Init()
 	// pp init gdiplus
 	VGraphicContext::Init();
 
-	VPicture::Init(NULL, NULL);
+	VPicture::Init(NULL);
 	//Force le lien avec la Dll Graphics
 	XBOX::VPicture* tmp=new XBOX::VPicture();
 	delete tmp;
@@ -840,7 +893,8 @@ bool VRIAServerApplication::_Init()
 					||	libName == CVSTR("SecurityManagerDebug.bundle")
 					||	libName == CVSTR("ZipDebug.bundle")
 					||	libName == CVSTR("MySQLConnectorDebug.bundle")					
-					||	libName == CVSTR("LanguageSyntaxDebug.bundle") )
+					||	libName == CVSTR("LanguageSyntaxDebug.bundle")
+					||	libName == CVSTR("SQLModelDebug.bundle"))
 			#endif
 				{
 					VError error = VComponentManager::RegisterComponentLibrary( i->GetPath());
@@ -855,16 +909,16 @@ bool VRIAServerApplication::_Init()
 	// Init DB4D component
 	if (ok)
 	{
-		ok = (fComponent_DB4D = VComponentManager::RetainComponentOfType<CDB4DManager>()) != NULL;
+		ok = (fComponent_DB4D = CDB4DManager::RetainManager(fLocalizer)) != NULL;
 		if (fComponent_DB4D != NULL)
 		{
-			indexProgressIndicator = new VRIAServerProgressIndicator(RIASERVER_PROGRESS_INDEX_USERINFO, GetPublishEventSignal() );
-			flushProgressIndicator = new VRIAServerProgressIndicator(RIASERVER_PROGRESS_FLUSH_USERINFO, GetPublishEventSignal() );
+			fIndexProgressIndicator = new VRIAServerProgressIndicator(RIASERVER_PROGRESS_INDEX_USERINFO, GetPublishEventSignal() );
+			fFlushProgressIndicator = new VRIAServerProgressIndicator(RIASERVER_PROGRESS_FLUSH_USERINFO, GetPublishEventSignal() );
 			GetPublishEventSignal()->Connect(this, XBOX::VTask::GetCurrent(), &VRIAServerApplication::PublishServiceRecordEvent);
 			
 			fComponent_DB4D->SetRunningMode( DB4D_RunningWakanda);	// important so that db4D uses proper file extension
-			fComponent_DB4D->SetDefaultProgressIndicator_For_Indexes(indexProgressIndicator);
-			fComponent_DB4D->SetDefaultProgressIndicator_For_DataCacheFlushing(flushProgressIndicator);
+			fComponent_DB4D->SetDefaultProgressIndicator_For_Indexes(fIndexProgressIndicator);
+			fComponent_DB4D->SetDefaultProgressIndicator_For_DataCacheFlushing(fFlushProgressIndicator);
 		}
 	}
 	
@@ -885,7 +939,7 @@ bool VRIAServerApplication::_Init()
 	
 	// Init design solution manager
 	if (ok)
-		VSolutionManager::Init();
+		VSolutionManager::Init( false);	// sc 08/02/2013 WAK0080397, the unique ID of project items is not used on Wakanda Server
 
 	// Init messages logger
 	if (ok)
@@ -941,8 +995,9 @@ bool VRIAServerApplication::_Init()
 	}
 #endif
 
-#ifdef TEST_MYSQL_CONNECTOR
+#ifdef CONNECTIVITY_TESTS
 
+	/*
 	MySQLConnectorBench();
 
 	testMySQLConnectorCreateSessionWithValidParams();
@@ -978,6 +1033,11 @@ bool VRIAServerApplication::_Init()
 	testMySQLConnectorPreparedStatementWithTypeDateTime();
 
 	testMySQLConnectorPreparedStatementWithTypeBlob();
+	*/
+
+	MySQLConnectorSample();
+
+	SQLModelSample();
 
 #endif
 
@@ -1082,8 +1142,8 @@ void VRIAServerApplication::_DeInit()
 
 	GetPublishEventSignal()->Disconnect(this);
 	
-	indexProgressIndicator->Release();
-	flushProgressIndicator->Release();
+	ReleaseRefCountable( &fIndexProgressIndicator);
+	ReleaseRefCountable( &fFlushProgressIndicator);
 
 #if VERSIONMAC && USE_HELPER_TOOLS
 	AuthorizationHelpers::DeInit();
@@ -1130,30 +1190,8 @@ void VRIAServerApplication::_OnStartup( VRIAServerStartupParameters *inStartupPa
 					if (fJSRuntimeDelegate != NULL)
 					{
 						fJSContextPool = fJSContextMgr->CreateJSContextPool( err, this);
-						if ((err == VE_OK) && (fJSContextPool != NULL))
-						{
-							// Module support: require.js must be included into each JavaScript context
-							VFilePath requirePath;
-							GetWAFrameworkFolderPath( requirePath);
-							requirePath.ToSubFolder( L"Core");
-							requirePath.ToSubFolder( L"Native");
-							requirePath.SetFileName( L"require");
-							requirePath.SetExtension( L"js");
-							
-							VFile file( requirePath);
-							if (file.Exists())
-							{
-								fJSContextPool->AppendRequiredScript( requirePath);
-							}
-							else
-							{
-								ThrowError( VE_RIA_JS_FILE_NOT_FOUND, &CVSTR("require.js"), NULL);
-							}
-						}
-						else
-						{
+						if (fJSContextPool == NULL)
 							err = ThrowError( VE_MEMORY_FULL);
-						}
 
 						if (err == VE_OK)
 						{
@@ -1255,6 +1293,11 @@ VError VRIAServerApplication::_OpenSolutionAsCurrentSolution( VSolutionStartupPa
 				designSolution->StopUpdatingSymbolTable();
 			}
 
+			if (GetDebuggingAuthorized())
+			{
+				VJSGlobalContext::AbortAllDebug();
+			}
+
 			err = fSolution->Stop();
 			xbox_assert(err == VE_OK);
 		}
@@ -1263,8 +1306,10 @@ VError VRIAServerApplication::_OpenSolutionAsCurrentSolution( VSolutionStartupPa
 		{
 			if (fSolution != NULL)
 			{
+				VString solutionName;
+				fSolution->GetName( solutionName );
 				err = fSolution->Close();
-				_WithdrawServiceRecord(DEFAULT_SERVICE_NAME);
+				_WithdrawServiceRecord(DEFAULT_SERVICE_NAME, solutionName);
 				xbox_assert(err == VE_OK);
 				ReleaseRefCountable( &fSolution);
 			}
@@ -1371,8 +1416,10 @@ VError VRIAServerApplication::_CloseCurrentSolution()
 				designSolution->StopUpdatingSymbolTable();
 			}
 
-			VJSGlobalContext::AbortAllDebug ( );
-
+			if (GetDebuggingAuthorized())
+			{
+				VJSGlobalContext::AbortAllDebug();
+			}
 			err = fSolution->Stop();
 
 			xbox_assert(err == VE_OK);
@@ -1382,8 +1429,10 @@ VError VRIAServerApplication::_CloseCurrentSolution()
 		{
 			if (fSolution != NULL)
 			{
+				VString solutionName;
+				fSolution->GetName( solutionName );
 				err = fSolution->Close();
-				_WithdrawServiceRecord(DEFAULT_SERVICE_NAME);
+				_WithdrawServiceRecord(DEFAULT_SERVICE_NAME, solutionName);
 				xbox_assert(err == VE_OK);
 				ReleaseRefCountable( &fSolution);
 			}
@@ -1453,12 +1502,14 @@ void VRIAServerApplication::_PublishServiceRecord (const XBOX::VString &inServic
 			VectorOfApplication appCollection;
 			VString				adminIP, adminPattern, adminHostName, publishName;
 			sLONG				adminPort = 0;
+			sLONG				adminSSLPort = 0;
+			bool				allowSSL = false, SSLMandatory = false;
 
 			fSolution->GetApplications(appCollection);
 			for (VectorOfApplication_iter iter = appCollection.begin() ; iter != appCollection.end() ; ++iter)
 			{
 				if ((*iter)->IsAdministrator())
-					(*iter)->GetPublicationSettings( adminHostName, adminIP, adminPort, adminPattern, publishName);
+					(*iter)->GetPublicationSettings( adminHostName, adminIP, adminPort, adminSSLPort, adminPattern, publishName, allowSSL, SSLMandatory);
 			}
 
 			// Construct a service record
@@ -1514,7 +1565,6 @@ void VRIAServerApplication::_PublishServiceRecord (const XBOX::VString &inServic
 				xbox_assert(serviceRecord.fIPv4Address.GetLength() || serviceRecord.fIPv6Address.GetLength());
 
 				serviceRecord.fPort = adminPort;
-
 				serviceRecord.fServiceName = inServiceName;
 				serviceRecord.fProviderName = publishName.GetLength() ? publishName : providerName;
 
@@ -1531,6 +1581,9 @@ void VRIAServerApplication::_PublishServiceRecord (const XBOX::VString &inServic
 				VValueBag::StKey	httpPath(CVSTR("path"));
 
 				serviceRecord.fValueBag.SetString("path", "index.html");
+				VString adminSSLPortStr;
+				adminSSLPortStr.FromLong( adminSSLPort );
+				serviceRecord.fValueBag.SetString("_SSLPORT", adminSSLPortStr );	
 
 				fServiceDiscoveryServer->AddServiceRecord(serviceRecord);	
 				
@@ -1542,8 +1595,11 @@ void VRIAServerApplication::_PublishServiceRecord (const XBOX::VString &inServic
 				address.FillIpV4((IP4 *) &binaryAddress);
 
 				serviceRecord.fValueBag.SetLong("_ADDRESS", binaryAddress);	
-				serviceRecord.fValueBag.SetString("_ADDRESS_IPV6", serviceRecord.fIPv6Address );	
-				serviceRecord.fValueBag.SetLong("_PORT", serviceRecord.fPort);	
+				serviceRecord.fValueBag.SetString("_ADDRESS_IPV6", serviceRecord.fIPv6Address );
+
+				VString adminPortStr;
+				adminPortStr.FromLong( serviceRecord.fPort );
+				serviceRecord.fValueBag.SetString("_PORT", adminPortStr );	
 				serviceRecord.fValueBag.SetString("_NAME", serviceRecord.fProviderName);
 
 				// DB index and flush infos
@@ -1589,16 +1645,26 @@ void VRIAServerApplication::_PublishServiceRecord (const XBOX::VString &inServic
 	}
 }
 
-void VRIAServerApplication::_WithdrawServiceRecord (const XBOX::VString &inServiceName)
+void VRIAServerApplication::_WithdrawServiceRecord (const XBOX::VString &inServiceName, const XBOX::VString &inProviderName)
 {
-	VString	providerName;
+	VString	providerName( inProviderName );
 	VFile	*file;
 
 	if (NULL != fSolution)
 	{
-		fSolution->GetName(providerName);
 		if (providerName.IsEmpty())
 			providerName = DEFAULT_NAME;
+
+		if (providerName.EqualToString("DefaultSolution", true))
+		{
+			VServiceRecord serviceRecord;
+			serviceRecord.SetHostName();
+			XBOX::VString	suffix;
+
+			serviceRecord.fHostName.GetSubString(1, serviceRecord.fHostName.GetLength() - 6, suffix);
+			providerName.AppendString("-");							
+			providerName.AppendString(suffix);
+		}				
 
 		fServiceDiscoveryServer->RemoveServiceRecord(inServiceName, providerName);	//** Check successful completion.
 		
@@ -1641,6 +1707,19 @@ void VRIAServerApplication::GetProgressInfos(const VString& inServiceName, VLong
 }
 
 
+bool VRIAServerApplication::GetDebuggingAuthorized() const
+{
+	if (fStartupParameters != NULL)
+	{
+		bool debuggingAuthorized = false;
+		if (fStartupParameters->GetDebuggingAuthorized( debuggingAuthorized))
+			return debuggingAuthorized;
+	}
+
+	return true;
+}
+
+
 
 // ----------------------------------------------------------------------------
 
@@ -1670,6 +1749,22 @@ VProgressIndicator* VRIAServerJSRuntimeDelegate::CreateProgressIndicator( const 
 }
 
 
+XBOX::VFileSystemNamespace* VRIAServerJSRuntimeDelegate::RetainRuntimeFileSystemNamespace()
+{
+	return RetainRefCountable( VRIAServerApplication::Get()->GetFileSystemNamespace());
+}
+
+
+
+// ----------------------------------------------------------------------------
+
+
+
+void VDropAllJSContextsMessage::DoExecute()
+{
+	VJSContextPoolCleaner cleaner;
+	cleaner.CleanAll();
+}
 
 //**
 

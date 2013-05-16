@@ -1,0 +1,5 @@
+{
+    "desc": "Tests of the WebWorker API",
+    "kind": "ssjs",
+    "oldJenkinsName": "TestServerWebWorker"
+}

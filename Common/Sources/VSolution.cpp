@@ -19,7 +19,6 @@
 #include "VProjectItem.h"
 #include "VProjectItemBehaviour.h"
 #include "VSolutionStartupParameters.h"
-#include "VSourceControl.h"
 #include "BreakPointsManager.h"
 #include "VRIAUTIs.h"
 #include "VRIASettingsKeys.h"
@@ -64,7 +63,6 @@ const VString kXML_ELEMENT_CONFIGURATION			= CVSTR("configuration");
 const VString kXML_ELEMENT_SOLUTION_EXPLORER		= CVSTR("solutionExplorer");
 const VString kXML_ELEMENT_LOCATOR					= CVSTR("locator");
 const VString kXML_ELEMENT_EDITOR					= CVSTR("editor");
-const VString kXML_ELEMENT_SOURCE_CONTROL			= CVSTR("sourceControl");
 const VString kXML_ELEMENT_LAST_WINDOW_POS			= CVSTR("lastWindowPos");
 const VString kXML_ELEMENT_TABS						= CVSTR("tabs");
 const VString kXML_ELEMENT_PERMISSIONS				= CVSTR("permissions");
@@ -85,7 +83,6 @@ const VString kITEM_MNU_CLOSE_SOLUTION			= CVSTR("close_solution");
 const VString kITEM_MNU_EDIT_PROJECT_SETTINGS	= CVSTR("edit_project_settings");
 const VString kITEM_MNU_EDIT_BUILD_SETTINGS		= CVSTR("edit_build_settings");
 const VString kITEM_MNU_EDIT_DEPLOYEMENT_SETTINGS	= CVSTR("edit_deployement_settings");
-const VString kITEM_MNU_SELECT_SOURCE_CONTROL	= CVSTR("select_source_control");
 
 // ---------------------------------
 // Menu contextual List Hierarchique
@@ -118,14 +115,6 @@ const VString kITEM_MNU_COPY						= CVSTR("copy");
 const VString kITEM_MNU_PASTE						= CVSTR("paste");
 const VString kITEM_MNU_DELETE						= CVSTR("delete");
 const VString kITEM_MNU_RENAME						= CVSTR("rename");
-const VString kITEM_MNU_GET_LATEST_VERSION			= CVSTR("get_latest_version");
-const VString kITEM_MNU_CHECK_OUT					= CVSTR("check_out");
-const VString kITEM_MNU_ADD_TO_SOURCE_CONTROL		= CVSTR("add_to_source_control");
-const VString kITEM_MNU_CHECK_IN					= CVSTR("check_in");
-const VString kITEM_MNU_REVERT						= CVSTR("revert");
-const VString kITEM_MNU_EXCLUDE_FROM_SOLUTION		= CVSTR("exclude_from_solution");
-const VString kITEM_MNU_PROPERTIES					= CVSTR("properties");
-const VString kITEM_MNU_SYNCHRONIZE					= CVSTR("refresh");
 
 // ------------------------
 // Menu contextual List Box
@@ -140,11 +129,6 @@ const VString kITEM_MNU_LB_CUT						= CVSTR("LB_cut");
 const VString kITEM_MNU_LB_COPY						= CVSTR("LB_copy");
 const VString kITEM_MNU_LB_DELETE					= CVSTR("LB_delete");
 const VString kITEM_MNU_LB_RENAME					= CVSTR("LB_rename");
-const VString kITEM_MNU_LB_GET_LATEST_VERSION		= CVSTR("LB_get_latest_version");
-const VString kITEM_MNU_LB_CHECK_OUT				= CVSTR("LB_check_out");
-const VString kITEM_MNU_LB_ADD_TO_SOURCE_CONTROL	= CVSTR("LB_add_to_source_control");
-const VString kITEM_MNU_LB_CHECK_IN					= CVSTR("LB_check_in");
-const VString kITEM_MNU_LB_REVERT					= CVSTR("LB_revert");
 
 // --------------------------
 // Menu contextual Thumbnails
@@ -159,11 +143,6 @@ const VString kITEM_MNU_TH_CUT						= CVSTR("TH_cut");
 const VString kITEM_MNU_TH_COPY						= CVSTR("TH_copy");
 const VString kITEM_MNU_TH_DELETE					= CVSTR("TH_delete");
 const VString kITEM_MNU_TH_RENAME					= CVSTR("TH_rename");
-const VString kITEM_MNU_TH_GET_LATEST_VERSION		= CVSTR("TH_get_latest_version");
-const VString kITEM_MNU_TH_CHECK_OUT				= CVSTR("TH_check_out");
-const VString kITEM_MNU_TH_ADD_TO_SOURCE_CONTROL	= CVSTR("TH_add_to_source_control");
-const VString kITEM_MNU_TH_CHECK_IN					= CVSTR("TH_check_in");
-const VString kITEM_MNU_TH_REVERT					= CVSTR("TH_revert");
 
 // -----------------------------------
 // Menu contextual Tool Bar principale
@@ -193,7 +172,6 @@ const XBOX::VString	kTEMPLATE_SOLUTION_NAME_MACRO( "$(solutionName)");
 // Chaines speciales :
 // ----------------------------------------------------------------------------
 const char POSIX_FOLDER_SEPARATOR = '/';
-const VString kSCC_PREFIX = CVSTR("scc_");
 
 // ----------------------------------------------------------------------------
 // Properties :
@@ -201,9 +179,6 @@ const VString kSCC_PREFIX = CVSTR("scc_");
 const VString kPROJECT_ITEM_FILE_SIZE					= CVSTR("file_size");
 const VString kPROJECT_ITEM_FILE_TYPE			 		= CVSTR("file_type");
 const VString kPROJECT_ITEM_LAST_MODIFICATION			= CVSTR("file_last_modification");
-// not used const VString kPROJECT_ITEM_CREATION_TIME				= CVSTR("file_creation_time");
-// not used const VString kPROJECT_ITEM_LAST_ACCESS					= CVSTR("file_last_access");
-
 
 
 const XBOX::ScrapKind kSOLUTION_UUID_SCRAP_KIND( "com.4d.wakanda.studio.solution-uuid");
@@ -621,6 +596,8 @@ XBOX::VError VSolution::Rename( const XBOX::VString& inNewName)
 	VString name;
 	if (GetName( name) && (name != inNewName))
 	{
+		_UnregisterProjectItem( fSolutionFileProjectItem);
+		
 		name = inNewName + L"." + RIAFileKind::kSolutionFileExtension;
 
 		err = fSolutionFileProjectItem->RenameContent( name);
@@ -628,7 +605,7 @@ XBOX::VError VSolution::Rename( const XBOX::VString& inNewName)
 		{
 			fSolutionItem->SetDisplayName( inNewName);
 			fSolutionItem->Touch();
-			
+
 			// sc 29/09/2011 update the startup parameters
 			if (fSolutionStartupParameters != NULL)
 			{
@@ -644,6 +621,8 @@ XBOX::VError VSolution::Rename( const XBOX::VString& inNewName)
 
 			UpdateSolutionLinkFile();
 		}
+
+		_RegisterProjectItem( fSolutionFileProjectItem);
 	}
 
 	if (err != VE_OK)
@@ -686,28 +665,6 @@ void VSolution::SetSolutionUser( ISolutionUser* inSolutionUser)
 	if (fSolutionUser)
 		fSolutionUser->SetSolution( this);
 }
-
-
-void VSolution::DoStartParsingFiles( sLONG inExpectedCount)
-{
-	if (fDelegate != NULL)
-		fDelegate->StartParsingFiles( inExpectedCount);
-}
-
-
-void VSolution::DoStopParsingFiles()
-{
-	if (fDelegate != NULL)
-		fDelegate->StopParsingFiles();
-}
-
-
-void VSolution::DoParsedOneFile()
-{
-	if (fDelegate != NULL)
-		fDelegate->ParsedOneFile();
-}
-
 
 void VSolution::SetBreakPointsManager( ISolutionBreakPointsManager* inBreakPointsManager)
 {
@@ -1443,17 +1400,12 @@ XBOX::VError VSolution::_ResolveMacro( const XBOX::VFolder& inFolder, const XBOX
 bool VSolution::Open()
 {
 	// cree les items projets depuis le fichier XML de la solution
-	bool fSuccessfulLoading = true;
+	fSuccessfulLoading = true;
 
 	VError err = _LoadSolutionFile();
 
-	if ((err != VE_OK) 
-	 && (err != VE_SOMA_PROJECT_FILE_NOT_FOUND)
-	 && (err != VE_SOMA_SETTINGS_FILE_NOT_FOUND))
+	if (err != VE_OK)
 		fSuccessfulLoading = false;
-
-	if (fSolutionMessageManager)
-		fSolutionMessageManager->CheckErrorStack();
 
 	if (fSuccessfulLoading)
 	{
@@ -1468,7 +1420,7 @@ bool VSolution::Open()
 
 		if (fBreakPointsManager != NULL)
 		{
-			fBreakPointsManager->Load();
+			fBreakPointsManager->Reset();
 		}
 	}
 	return fSuccessfulLoading;
@@ -1811,8 +1763,9 @@ void VSolution::FileSystemEventHandler( const std::vector< VFilePath > &inFilePa
 			VProjectItem *item = GetProjectItemFromFullPath( (*it).GetPath() );
 			if ( fSolutionItem->IsParentOf(item) && item->GetKind() != VProjectItem::ePROJECT )
 			{
-				if ( item->ConformsTo( RIAFileKind::kUAGDirectoryFileKind ) ||
-					 item->ConformsTo( RIAFileKind::kSettingsFileKind ) )
+				if (	item->ConformsTo( RIAFileKind::kSolutionFileKind )
+					 ||	item->ConformsTo( RIAFileKind::kUAGDirectoryFileKind )
+					 ||	item->ConformsTo( RIAFileKind::kSettingsFileKind ) )
 				{
 					std::vector<VFilePath> pathes;
 
@@ -1916,7 +1869,12 @@ VError VSolution::_LoadSolutionFile()
 	{
 		VFile solutionFile(solutionFileProjectItem->GetURL());
 		VValueBag *bagSolution = new VValueBag();
-		err = LoadBagFromXML( solutionFile, fSolutionItem->GetXMLElementName(), *bagSolution, XML_ValidateNever);
+
+		{
+			StErrorContextInstaller errs(false);
+			err = LoadBagFromXML( solutionFile, fSolutionItem->GetXMLElementName(), *bagSolution, XML_ValidateNever);
+		}
+		
 		if (err == VE_OK)
 		{
 			// -----------------------------------------------------------
@@ -2058,8 +2016,6 @@ VError VSolution::_LoadSolutionFile()
 		else
 		{
 			err = VE_SOMA_SOLUTION_FILE_COULD_NOT_OPENED;
-			VErrorBase* errorBase = new VErrorBase(err, 0);
-			VTask::GetCurrent()->PushRetainedError(errorBase);
 		}
 		ReleaseRefCountable( &bagSolution);
 	}
@@ -2166,9 +2122,13 @@ VError VSolution::InitializeDefaultFileContent( const VFilePath& inPath, const V
 		sourcePath.ToSubFile( inSubType );
 
 		VFile sourceFile( sourcePath );
-		VMemoryBuffer<> buffer;
-		sourceFile.GetContent( buffer );
-		strInitialization.FromBlock( buffer.GetDataPtr(), buffer.GetDataSize(), XBOX::VTC_UTF_8);
+		VFileStream stream( &sourceFile );
+		VError err = stream.OpenReading();
+		if ( VE_OK == err )
+		{
+			stream.GuessCharSetFromLeadingBytes( VTC_DefaultTextExport );
+			stream.GetText( strInitialization );
+		}
 
 		if ((inSubType == INTRO_MODULE_JS) || (inSubType == INTRO_MODULE_RPC) || (inSubType == INTRO_MODULE_SERVICE))
 		{
@@ -2215,6 +2175,8 @@ void VSolution::_SetSolutionItem( VProjectItem *inProjectItem)
 		VProjectItemSolution *solutionBehaviour = dynamic_cast<VProjectItemSolution*>(fSolutionItem->GetBehaviour());
 		if (testAssert(solutionBehaviour != NULL))
 			solutionBehaviour->SetSolution( this);
+
+		_RegisterProjectItem( fSolutionItem);
 	}
 }
 
@@ -2224,6 +2186,7 @@ void VSolution::_SetSolutionFileItem( VProjectItem *inProjectItem)
 	if (testAssert(fSolutionFileProjectItem == NULL && inProjectItem != NULL))
 	{
 		fSolutionFileProjectItem = RetainRefCountable( inProjectItem);
+		_RegisterProjectItem( fSolutionFileProjectItem);
 
 		if (fSolutionItem != NULL)
 			fSolutionItem->AttachChild( fSolutionFileProjectItem);
@@ -2432,15 +2395,21 @@ VError VSolution::_SynchronizeWithFileSystem( VProjectItem *inItem)
 		if (iter->IsPhysicalLinkValid() && _IsItemReferenced( iter)  && !iter->ContentExists()) // if file is referenced (role is set), just ignore it
 		{
 			iter->SetPhysicalLinkValid( false);
+			iter->Touch();	// sc 08/11/2012 WAK0078737
 			continue;
 		}
 
 		if (!iter->IsPhysicalLinkValid())
 		{
 			if (iter->ContentExists())
+			{
 				iter->SetPhysicalLinkValid( true);
+				iter->Touch();	// sc 08/11/2012 WAK0078737
+			}
 			else
+			{
 				continue;
+			}
 		}
 
 		if (iter->IsPhysicalFileOrFolder())
@@ -2598,38 +2567,24 @@ VError VSolution::_InitializeProjectItem(VProjectItem* inProjectItem, const VStr
 }
 
 
-VProjectItem* VSolution::ImportExistingFile( XBOX::VError& outError, VProjectItem *inParentItem, const XBOX::VFilePath& inSourceFilePath)
+VProjectItem* VSolution::ImportExistingFile( XBOX::VError& outError, const XBOX::VFilePath& inDestinationPath, const XBOX::VFilePath& inSourceFilePath)
 {
 	VProjectItem *result = NULL;
 	outError = VE_OK;
 	
-	if (inParentItem != NULL)
+	VFile sourceFile( inSourceFilePath);
+	if (sourceFile.Exists())
 	{
-		VFile sourceFile( inSourceFilePath);
-		if (sourceFile.Exists())
+		outError = sourceFile.CopyTo( inDestinationPath, NULL);
+
+		if (outError == VE_OK)
 		{
-			VFilePath destinationPath;
-			if (inParentItem->GetFilePath( destinationPath) && destinationPath.IsFolder())
-			{
-				VString fileName;
-				inSourceFilePath.GetFileName( fileName);
-				destinationPath.ToSubFile( fileName);
-				
-				outError = sourceFile.CopyTo( destinationPath, NULL);
-				if (outError == VE_OK)
-				{
-					result = CreateFileItemFromPath( outError, destinationPath, false);
-				}
-			}
-			else
-			{
-				outError = VE_FOLDER_NOT_FOUND;
-			}
+			result = CreateFileItemFromPath( outError, inDestinationPath, false);
 		}
-		else
-		{
-			outError = VE_FILE_NOT_FOUND;
-		}
+	}
+	else
+	{
+		outError = VE_FILE_NOT_FOUND;
 	}
 
 	return result;
@@ -2659,7 +2614,7 @@ VProjectItem* VSolution::ImportExistingFolder( XBOX::VError& outError, VProjectI
 					inSourceFolderPath.GetFolderName( folderName);
 					destinationPath.ToSubFolder( folderName);
 
-					outError = sourceFolder.CopyContentsTo( VFolder( destinationPath));
+					outError = sourceFolder.CopyContentsTo( VFolder( destinationPath), FCP_SkipInvisibles );
 					if (outError == VE_OK)
 					{
 						result = CreateFolderItemFromPath( outError, destinationPath, false, true);
@@ -2743,7 +2698,7 @@ VProject* VSolution::AddExistingProject(const VURL& inProjectFileURL, bool inRef
 	VError lErr = VE_OK;
 	VFilePath projectFilePath;
 	inProjectFileURL.GetFilePath( projectFilePath);
-	VProject *project = VProject::Instantiate( lErr, this, projectFilePath);
+	VProject *project = VProject::Instantiate(lErr, this, projectFilePath);
 	if (lErr == VE_OK && project != NULL)
 	{
 		e_Save_Action saveAction = e_SAVE;
@@ -2968,8 +2923,9 @@ XBOX::VError VSolution::RenameItem( VProjectItem *inProjectItem, const XBOX::VSt
 			VString name( inNewName);
 			VString extension( L"." + RIAFileKind::kSolutionFileExtension);
 			if (name.EndsWith( extension))
-				name.Truncate( name.GetLength() -  extension.GetLength());
+				name.Truncate( name.GetLength() - extension.GetLength());
 
+			inProjectItem->SetName( name );
 			err = Rename( name);
 		}
 		else
@@ -2998,6 +2954,9 @@ XBOX::VError VSolution::RenameItem( VProjectItem *inProjectItem, const XBOX::VSt
 								name.Truncate( name.GetLength() -  extension.GetLength());
 							
 							err = project->Rename( name);
+
+							inProjectItem->SetName( name );
+							
 							if (err == VE_OK)
 								_TouchSolutionFile();
 						}
@@ -3005,6 +2964,7 @@ XBOX::VError VSolution::RenameItem( VProjectItem *inProjectItem, const XBOX::VSt
 
 					if ((saveAction == e_SAVE) && stampSaver.StampHasBeenChanged())
 						_SaveSolutionFile();
+
 				}
 				else if (projectOwner == NULL)
 				{
@@ -3172,98 +3132,6 @@ VSolutionStartupParameters* VSolution::RetainStartupParameters()
 
 	return RetainRefCountable( fSolutionStartupParameters);
 }
-
-
-void VSolution::ConnectProjectsToSourceControl(XBOX::VString& inSourceControlId)
-{
-	for (VectorOfProjectsIterator it = fProjects.begin(); it != fProjects.end(); ++it)
-		(*it)->ConnectToSourceControl(inSourceControlId);
-}
-
-VError VSolution::_DispatchCommandByProject(_e_Command inCommand, const VectorOfProjectItems& inSelectedProjectItems)
-{
-	VError err = VE_OK;
-
-	assert(!inSelectedProjectItems.empty());
-
-	if (!inSelectedProjectItems.empty())
-	{
-		VectorOfProjects candidateProjects;
-		
-		for (VectorOfProjectItemsConstIterator it = inSelectedProjectItems.begin();
-			it != inSelectedProjectItems.end(); ++it)
-		{
-			VProject* project = (*it)->GetProjectOwner();
-			if (project != NULL && project->IsConnectedToSourceControl())
-			{
-				if (std::find( candidateProjects.begin(), candidateProjects.end(), project) == candidateProjects.end())
-					candidateProjects.push_back( project);
-			}
-		}
-
-		for (VectorOfProjectsIterator it_project = candidateProjects.begin(); it_project != candidateProjects.end(); ++it_project)
-		{
-			VectorOfProjectItems projectItems;
-			for (VectorOfProjectItemsConstIterator it = inSelectedProjectItems.begin();
-				it != inSelectedProjectItems.end(); ++it)
-			{
-				if ((*it)->GetProjectOwner() == (*it_project))
-				{
-					projectItems.push_back((*it));
-				}
-			}
-
-			switch(inCommand)
-			{
-			case eADD_TO_SOURCE_CONTROL:
-				err = (*it_project)->AddToSourceControl(projectItems);
-				break;
-			case eGET_LATEST_VERSION:
-				err = (*it_project)->GetLatestVersion(projectItems);
-				break;
-			case eCHECKOUT:
-				err = (*it_project)->CheckOut(projectItems);
-				break;
-			case eCHECKIN:
-				err = (*it_project)->CheckIn(projectItems);
-				break;
-			case eREVERT:
-				err = (*it_project)->Revert(projectItems);
-				break;
-			default:
-				assert(false);
-			}
-		}
-	}
-
-	return err;
-}
-
-VError VSolution::AddToSourceControl(const VectorOfProjectItems& inProjectItems)
-{
-	return _DispatchCommandByProject(eADD_TO_SOURCE_CONTROL, inProjectItems);
-}
-
-VError VSolution::GetLatestVersion(const VectorOfProjectItems& inProjectItems)
-{
-	return _DispatchCommandByProject(eGET_LATEST_VERSION, inProjectItems);
-}
-
-VError VSolution::CheckOut(const VectorOfProjectItems& inProjectItems)
-{
-	return _DispatchCommandByProject(eCHECKOUT, inProjectItems);
-}
-
-VError VSolution::CheckIn(const VectorOfProjectItems& inProjectItems)
-{
-	return _DispatchCommandByProject(eCHECKIN, inProjectItems);
-}
-
-VError VSolution::Revert(const VectorOfProjectItems& inProjectItems)
-{
-	return _DispatchCommandByProject(eREVERT, inProjectItems);
-}
-
 
 VError VSolution::DoSolutionWillClose()
 {
@@ -3780,7 +3648,6 @@ void VSolution::GetPathRelativeToFolderPath(const VString& inFolderPath, const V
 VSolutionManager* VSolutionManager::sSolutionManager = NULL;
 
 VSolutionManager::VSolutionManager()
-: fSourceControlManager(NULL)
 {
 }
 
@@ -3790,7 +3657,7 @@ VSolutionManager::~VSolutionManager()
 }
 
 
-bool VSolutionManager::Init()
+bool VSolutionManager::Init( bool inWithProjectItemUniqueID)
 {
 	bool ok = true;
 	
@@ -3800,7 +3667,7 @@ bool VSolutionManager::Init()
 		ok = (sSolutionManager != NULL);
 		
 		if (ok) 
-			ok = VProjectItemManager::Init();
+			ok = VProjectItemManager::Init( inWithProjectItemUniqueID);
 
 	#if SOLUTION_PROFILING_ENABLED
 		if (ok)
@@ -3943,15 +3810,9 @@ bool VSolutionManager::CloseSolution( VSolution *inSolution)
 		inSolution->UnloadProjects();
 		inSolution->Close();
 
-		fprintf ( stdout, "\nSolution closed\n\n" );
+		fprintf ( stdout, "\nSolution is closed\n\n" );
 	}
 	return ok;
-}
-
-
-void VSolutionManager::SetSourceControlManager( ISourceControlManager* inSourceControlManager)
-{
-	fSourceControlManager = inSourceControlManager;
 }
 
 
@@ -4045,8 +3906,30 @@ bool VSolution::GetPidFromRunningServerFile (const XBOX::VString &inFileName, uL
 	}
 }
 
+void VSolution::SetBaseFolderPathStr(const ESymbolFileBaseFolder& inType, const XBOX::VString& inPathStr, const bool& inRefreshProjectsDatabase)
+{
+	fBaseFolderPosixPathStrings[inType] = inPathStr;
+	if( inRefreshProjectsDatabase )
+	{
+		for (VectorOfProjectsIterator iter = fProjects.begin() ; iter != fProjects.end(); ++iter)
+		{
+			ISymbolTable* symb = (*iter)->GetSymbolTable();
+			if (symb != nil)
+				symb->SetBaseFolderPathStr(inType, inPathStr, true);
+		}
+	}
+}
 
-
+void VSolution::GetBaseFolderPathStr(const ESymbolFileBaseFolder& inType, XBOX::VString& outPathStr)
+{
+	outPathStr = "";
+	
+	std::map<ESymbolFileBaseFolder, XBOX::VString>::const_iterator it = fBaseFolderPosixPathStrings.find(inType);
+	if( it != fBaseFolderPosixPathStrings.end() )
+	{
+		outPathStr = it->second;
+	}
+}
 
 void VSolutionTools::RemoveUselessPaths( std::vector<VFilePath>& ioPaths)
 {

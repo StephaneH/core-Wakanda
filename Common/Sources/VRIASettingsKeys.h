@@ -132,17 +132,6 @@ namespace RIASettingsKeys
 		EXTERN_BAGKEY_WITH_DEFAULT_SCALAR( keepCacheInMemory, XBOX::VBoolean, bool);
 		EXTERN_BAGKEY_WITH_DEFAULT_SCALAR( flushDataCacheInterval, XBOX::VLong, sLONG);
 	}
-	namespace DatabaseJournal
-	{
-		EXTERN_BAGKEY_WITH_DEFAULT_SCALAR( databaseJournalEnabled, XBOX::VBoolean, bool); 
-		EXTERN_BAGKEY_WITH_DEFAULT( databaseJournalFilePath, XBOX::VString);			  //journal folder path  
-	}
-
-	namespace DatabaseRecovery
-	{
-		EXTERN_BAGKEY_WITH_DEFAULT_SCALAR( recoverFromJournal, XBOX::VBoolean, bool);		//integrate journal if database is incomplete
-		EXTERN_BAGKEY_WITH_DEFAULT_SCALAR( recoverFromLastBackup, XBOX::VBoolean, bool);//integrate from last backup if database is corrupted
-	}
 
 	// Backup settings 
 	namespace Backup

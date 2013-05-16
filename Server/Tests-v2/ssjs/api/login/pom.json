@@ -1,0 +1,5 @@
+{
+    "desc": "Tests of the Login API",
+    "kind": "ssjs",
+    "oldJenkinsName": ["TestServerDirectory", "TestServerDirectoryLoginListener"]
+}

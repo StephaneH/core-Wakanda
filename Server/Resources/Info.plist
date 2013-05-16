@@ -17,9 +17,9 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleVersion</key>
-	<string>2.0</string>
+	<string>0.0</string>
 	<key>CFBundleShortVersionString</key>
-	<string>2.0</string>
+	<string>0.0</string>
 	<key>CFBundleSignature</key>
 	<string>waSE</string>
 	<key>LSMinimumSystemVersion</key>
@@ -527,6 +527,21 @@
 				<key>public.filename-extension</key>
 				<array>
 					<string>waLog</string>
+				</array>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.folder</string>
+			</array>
+			<key>UTTypeIdentifier</key>
+			<string>com.4d.wakanda.page-folder</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>waPage</string>
 				</array>
 			</dict>
 		</dict>

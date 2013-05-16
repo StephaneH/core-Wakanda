@@ -91,13 +91,13 @@ Solution = function Solution() {
     this.getFolder = function getFolder(kind, encodeURL) {        return '' || new Folder( );     };
     
     /**
-     * returns a reference to the application object whose name you passed in the name parameter
+     * returns a reference to the application object whose name you passed in the projectName parameter - an application is a running Wakanda project
      *
      * @method getApplicationByName
-     * @param {String} name
+     * @param {String} projectName
      * @return {Object}
      */
-    this.getApplicationByName = function getApplicationByName(name) {        return {};     };
+    this.getApplicationByName = function getApplicationByName(projectName) {        return {};     };
     
     /**
      * closes the current solution and reopens the default solution
@@ -113,6 +113,15 @@ Solution = function Solution() {
      * @return {Number}
      */
     this.getDebuggerPort = function getDebuggerPort() {        return 0;     };
+    
+    /**
+     * returns the solution-level file associated with the role you passed as a parameter
+     *
+     * @method getItemsWithRole
+     * @param {String} role
+     * @return {File}
+     */
+    this.getItemsWithRole = function getItemsWithRole(role) {        return new File( );     };
     
 
 };
@@ -267,6 +276,15 @@ Application = function Application() {
     this.Blob = function Blob(size, filler, mimeType) {             };
     
     /**
+     * creates a new mutex object that will allow you to control multithreaded concurrent accesses to JavaScript code
+     *
+     * @method Mutex
+     * @param {String} key
+     * @return {Storage}
+     */
+    this.Mutex = function Mutex(key) {        return new Storage( );     };
+    
+    /**
      * returns an object of the ConnectionSession type identifying the current session under which the current user is actually running on the server
      *
      * @method currentSession
@@ -287,7 +305,7 @@ Application = function Application() {
      *
      * @method SystemWorker
      * @param {String} commandLine
-     * @param {String} executionPath
+     * @param {String | Folder} executionPath
      */
     this.SystemWorker = function SystemWorker(commandLine, executionPath) {             };
     
@@ -390,10 +408,10 @@ Application = function Application() {
      * returns a reference to the current datastore of the project whose name you passed in projectName
      *
      * @method getDataStore
-     * @param {} 
+     * @param {String} projectName
      * @return {Datastore}
      */
-    this.getDataStore = function getDataStore() {        return new Datastore( );     };
+    this.getDataStore = function getDataStore(projectName) {        return new Datastore( );     };
     
     /**
      * launches the garbage collector on all sleeping contexts
@@ -406,11 +424,11 @@ Application = function Application() {
      * allows you to display a system notification window on the server machine
      *
      * @method displayNotification
-     * @param {} 
-     * @param {} 
+     * @param {} projectName
+     * @param {} projectName
      * @param {Boolean} critical
      */
-    this.displayNotification = function displayNotification(critical) {             };
+    this.displayNotification = function displayNotification(projectName, projectName, critical) {             };
     
     /**
      * converts the ISO date string passed in the isoDate parameter into a standard JavaScript format
@@ -444,19 +462,19 @@ Application = function Application() {
      * returns in an object the contents of the url&#39;s&quot;query string&quot;, which was passed as a parameter
      *
      * @method getURLQuery
-     * @param {} 
+     * @param {} projectName
      * @return {Object}
      */
-    this.getURLQuery = function getURLQuery() {        return {};     };
+    this.getURLQuery = function getURLQuery(projectName) {        return {};     };
     
     /**
      * returns the url passed in the parameter as an array of strings
      *
      * @method getURLPath
-     * @param {} 
+     * @param {} projectName
      * @return {Array}
      */
-    this.getURLPath = function getURLPath() {        return [];     };
+    this.getURLPath = function getURLPath(projectName) {        return [];     };
     
     /**
      * returns a JSON string converted into an XML string
@@ -680,14 +698,15 @@ Application = function Application() {
     this.Folder = function Folder(path) {        return new Folder( );     };
     
     /**
-     * 
+     * Constructor method: creates a new BinaryStream object
      *
      * @method BinaryStream
-     * @param {String | File} file
-     * @param {} 
+     * @param {String | File | SocketSync | Socket} binary
+     * @param {String} readMode
+     * @param {Number} timeOut
      * @return {BinaryStream}
      */
-    this.BinaryStream = function BinaryStream(file, ) {        return new BinaryStream( );     };
+    this.BinaryStream = function BinaryStream(binary, readMode, timeOut) {        return new BinaryStream( );     };
     
     /**
      * creates a new TextStream object
@@ -699,6 +718,65 @@ Application = function Application() {
      * @return {TextStream}
      */
     this.TextStream = function TextStream(file, readMode, charset) {        return new TextStream( );     };
+    
+    /**
+     * allows you to restore a data folder using a specific backup manifest file
+     *
+     * @method restoreDataStore
+     * @param {File} manifest
+     * @param {Folder} restoreFolder
+     * @param {Object} options
+     * @return {Object}
+     */
+    this.restoreDataStore = function restoreDataStore(manifest, restoreFolder, options) {        return {};     };
+    
+    /**
+     * allows you to partially or fully integrate a journal file into a datastore
+     *
+     * @method integrateDataStoreJournal
+     * @param {File} model
+     * @param {File} data
+     * @param {File} journal
+     * @param {Object} options
+     */
+    this.integrateDataStoreJournal = function integrateDataStoreJournal(model, data, journal, options) {             };
+    
+    /**
+     * returns an array that lists the 20 most recent backup manifests recorded in the backup registry default folder of the application
+     *
+     * @method getLastBackup
+     * @return {Array}
+     */
+    this.getLastBackup = function getLastBackup() {        return [];     };
+    
+    /**
+     * returns an Object containing the default backup settings for the solution
+     *
+     * @method getBackupSettings
+     * @return {Object}
+     */
+    this.getBackupSettings = function getBackupSettings() {        return {};     };
+    
+    /**
+     * returns an array that lists the 20 most recent backup manifests recorded in the specified backup registry
+     *
+     * @method getBackupRegistry
+     * @param {Folder} registryFolder
+     * @return {Array}
+     */
+    this.getBackupRegistry = function getBackupRegistry(registryFolder) {        return [];     };
+    
+    /**
+     * starts the backup of the closed datastore defined by model and data
+     *
+     * @method backupDataStore
+     * @param {File} model
+     * @param {File} data
+     * @param {Object} settings
+     * @param {Object} options
+     * @return {Null}
+     */
+    this.backupDataStore = function backupDataStore(model, data, settings, options) {        return new Null( );     };
     
     /**
      * allows the user to look up the filesystem for a file or directory referred to by a local url

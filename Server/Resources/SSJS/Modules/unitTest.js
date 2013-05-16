@@ -65,7 +65,8 @@ run = exports.run = function (aTestCase, aCallBack) {
             function handleTestComplete(data) {
                 console.log("Test completed.");
                 currentResults = data.results;
-				if (currentCallBack !== null) currentCallBack.call(_this, currentResults);
+				testRunnerCompleted = true;
+                if (currentCallBack !== null) currentCallBack.call(_this, currentResults);
 				if (typeof exitWait !== "undefined") exitWait();
             }
             Y.Test.Runner.subscribe(Y.Test.Runner.TEST_FAIL_EVENT, handleTestFail);
@@ -128,11 +129,16 @@ run = exports.run = function (aTestCase, aCallBack) {
         Y.Test.Runner.run();
         
         if (currentTestCase !== null && typeof wait === "function") {
-        	wait(Math.max(100, 1000 * getTestCount(currentTestCase)));        	
-        	if (typeof currentTestCase._wait === "object" && typeof currentTestCase._wait.after !== "undefined") {
-        		console.log("Test asks to wait " + currentTestCase._wait.after + " after run.");
-        		wait(currentTestCase._wait.after);
-        	}	
+            while (testRunnerCompleted === false) {
+                wait(50);
+            }
+            /* Should be useless now:
+            wait(Math.max(100, 1000 * getTestCount(currentTestCase)));          
+            if (typeof currentTestCase._wait === "object" && typeof currentTestCase._wait.after !== "undefined") {
+                console.log("Test asks to wait " + currentTestCase._wait.after + " after run.");
+                wait(currentTestCase._wait.after);
+            } 
+            */
         }
     });
     
@@ -251,14 +257,22 @@ getenv = exports.getenv = function () {
 		else {
 			var myEnvWorker = new SystemWorker('cmd /C set');
 		}
-		myEnvWorker.onmessage = function() {
-			var resultLines = arguments[0].data.split('\n');
-		    for (var i = 0, j = resultLines.length; i < j; i++) {
-		    	var envVar = resultLines[i].split('=');
-		    	envVars[envVar[0]] = envVar[1];
-			}	
-		};
-		wait(250);
+        var resultLines = '';
+        myEnvWorker.onmessage = function() {
+            resultLines += arguments[0].data.toString();
+        };
+        wait(500);
+        resultLines = resultLines.split('\n');
+        for (var i = 0, j = resultLines.length; i < j; i++) {
+            var envVar = resultLines[i].split('=');             
+            if (envVar.length === 2) {
+                envVar[0] = new String(envVar[0]).replace(/^\s+/g,'').replace(/\s+$/g,'');
+                envVar[1] = new String(envVar[1]).replace(/^\s+/g,'').replace(/\s+$/g,'');
+                if (envVar[0] != '') {
+                    envVars[envVar[0]] = envVar[1];
+                }
+            }
+        }
     }
     return envVars;
 };
@@ -274,6 +288,7 @@ getModulePath = exports.getModulePath = function () {
 /* private stuff */
 var initTestRunnerDone = false;
 var initTestRunnerRequestHandlersDone = false;
+var testRunnerCompleted = false;
 var currentTestCase = null;
 var currentCallBack = null;
 var currentResults =  null;

@@ -99,7 +99,7 @@ SystemWorker = function SystemWorker() {
      * @method exec
      * @param {String} commandLine
      * @param {Buffer | String} stdinContent
-     * @param {String} executionPath
+     * @param {String | Folder} executionPath
      * @return {Object | Null}
      */
     this.exec = function exec(commandLine, stdinContent, executionPath) {        return {} || new Null( );     };

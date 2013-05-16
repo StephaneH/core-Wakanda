@@ -153,6 +153,15 @@ VErrorBase* CreateErrorBase( VError inError, const VString *inParam, ...)
 }
 
 
+void fputs_VString( const VString& inMessage, FILE *inFile)
+{
+	VSize bufferSize = inMessage.GetLength()*2 + 1;
+	VPtr buffer = VMemory::NewPtrClear( bufferSize, kRIA_OSTYPE_SIGNATURE);
+	inMessage.ToCString( buffer, bufferSize);
+	fputs( buffer, inFile);
+	VMemory::DisposePtr( buffer);
+}
+
 
 // ----------------------------------------------------------------------------
 

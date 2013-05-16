@@ -48,6 +48,8 @@ public:
 	static void			    _getBackupRegistry(XBOX::VJSParms_callStaticFunction& ioParms, XBOX::VJSGlobalObject* inGlobalObject);//array or null: getBackupRegistry(File: registry)
 	static void			    _integrateDataStoreJournal(XBOX::VJSParms_callStaticFunction& ioParms, XBOX::VJSGlobalObject* inGlobalObject);//bool: integrateDataStoreJournal(FILE: model, FILE: data,File:journal[,Object: options])
 	static void			    _restoreDataStore(XBOX::VJSParms_callStaticFunction& ioParms, XBOX::VJSGlobalObject* inGlobalObject);
+	static void			    _parseJournal(XBOX::VJSParms_callStaticFunction& ioParms, XBOX::VJSGlobalObject* inGlobalObject);
+	
 	
 
 	static void				_login(XBOX::VJSParms_callStaticFunction& ioParms, XBOX::VJSGlobalObject* inGlobalObject); // bool : loginByKey(userName, ha1)
@@ -68,7 +70,6 @@ public:
 	static	void			_getDirectory( XBOX::VJSParms_getProperty& ioParms, XBOX::VJSGlobalObject* inGlobalObject);
 	static	void			_getInternal( XBOX::VJSParms_getProperty& ioParms, XBOX::VJSGlobalObject* inGlobalObject);
 	static	void			_getPermissions( XBOX::VJSParms_getProperty& ioParms, XBOX::VJSGlobalObject* inGlobalObject);
-	static	void			_getRPCCatalog( XBOX::VJSParms_getProperty& ioParms, XBOX::VJSGlobalObject* inGlobalObject);
 	static	void			_getWildChar( XBOX::VJSParms_getProperty& ioParms, XBOX::VJSGlobalObject* inGlobalObject);
 	
 	
@@ -107,6 +108,7 @@ public:
 	static void				_backupDataStore(XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication); //string: backupClosedDataStore(File: catalog, File: data, Object: backup config [,object options])
 	static void				_integrateDataStoreJournal(XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication); //Folder restoreDataStore(File: manifest [,Object: options])
 	static void				_restoreDataStore(XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication);
+	static void				_parseJournal(XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication);//Array parseJournal(File: journal[,Object: options]
 
 	static void				_verifyDataStore(XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication); // bool : verifyDataStore(File: catalog, File: data, Object: paramObj)
 	static void				_repairInto(XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication); // bool : repairInto(File: catalog, File: data, Object: paramObj, File: outData)
@@ -130,7 +132,6 @@ public:
 	static	void			_getDirectory( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication);
 	static	void			_getInternal( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication);
 	static	void			_getPermissions( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication);
-	static	void			_getRPCCatalog( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication);
 	static	void			_getWildChar( XBOX::VJSParms_getProperty& ioParms, VRIAServerProject* inApplication);
 	
 };

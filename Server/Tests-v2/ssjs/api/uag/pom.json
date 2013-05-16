@@ -1,0 +1,5 @@
+{
+    "desc": "Tests of the UAG API",
+    "kind": "ssjs",
+    "oldJenkinsName": ["TestServerUAGDirectory", "TestServerUAGGroup", "TestServerUAGSession", "TestServerUAGUser"]
+}

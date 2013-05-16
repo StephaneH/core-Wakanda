@@ -1,0 +1,5 @@
+{
+    "desc": "Main GoNoGo Server tests",
+    "kind": "shell",
+    "oldJenkinsName": "GoNoGoServer"    
+}

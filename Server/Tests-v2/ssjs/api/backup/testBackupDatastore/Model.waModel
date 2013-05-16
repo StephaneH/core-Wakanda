@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="UTF-8"?><EntityModelCatalog>
+
+<dbInfo name="Model" uuid="DEB2380315EE8E47AF7052ECFC4FADBC"/>
+
+<dataClasses name="MyClass1" className="BookClass" collectionName="BookClassCollection" scope="public" uuid="2AB8FD1B82AFA44994E7AA0037E479B4" tablePos="1">
+
+	<extraProperties ____objectunic="true" panelColor="#70CCC2">
+
+		<panel ____objectunic="true" isOpen="true" pathVisible="true">
+
+			<position ____objectunic="true" X="25" Y="20"/>
+</panel>
+</extraProperties>
+
+	<attributes name="ID" kind="storage" scope="public" uuid="D06073C5137F5841B2E682DD6F26BEDB" fieldPos="1" unique="true" autosequence="true" type="long" primKey="true"/>
+
+	<attributes name="title" kind="storage" scope="public" uuid="7780E980860BB04E9FB266599B863600" fieldPos="2" type="string"/>
+
+</dataClasses>
+</EntityModelCatalog>

@@ -50,8 +50,11 @@ public:
 			void						GarbageCollect();
 
 			// Inherited from IJSWorkerDelegate
+	virtual WorkerDelegateType			GetType ()	{	return TYPE_WAKANDA_SERVER;	}
 	virtual	XBOX::VJSGlobalContext*		RetainJSContext( XBOX::VError& outError, const XBOX::VJSContext& inParentContext, bool inReusable);
 	virtual	XBOX::VError				ReleaseJSContext( XBOX::VJSGlobalContext* inContext);
+
+			void						GetAllPools( std::vector<VJSContextPool*>& outPools) const;
 
 			// Private utilities
 			void						_RegisterPool( VJSContextPool *inPool);
@@ -65,6 +68,34 @@ private:
 
 
 // ----------------------------------------------------------------------------
+
+
+
+class VJSContextPoolCleaner : public XBOX::VObject
+{
+public:
+			VJSContextPoolCleaner();
+	virtual	~VJSContextPoolCleaner();
+
+			XBOX::VError	CleanAll();
+
+private:
+			VJSContextPoolCleaner( const VJSContextPoolCleaner& inSource)	{ assert(false); }
+
+			typedef struct sPoolInfo
+			{
+				VJSContextPool	*fPool;
+				bool			fEnabledState;
+			} sPoolInfo;
+			
+			std::vector<sPoolInfo>	fPoolToClean;
+};
+
+
+
+// ----------------------------------------------------------------------------
+
+
 
 class CUAGSession;
 

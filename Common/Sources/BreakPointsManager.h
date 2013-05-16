@@ -23,22 +23,24 @@ typedef XBOX::VSignalT_0	VSignal_UpdateBreakPoints;
 // ----------------------------------------------------------------------------
 class VSolution;
 class VDataSource_array;
-class VJSDebugger;
+class IJSDebugger;
+class VRIAServer;
 
 class ISolutionBreakPointsManager : public XBOX::IRefCountable
 {
 public:
 	virtual void							SetSolution(VSolution* inSolution) = 0;
 	virtual void							InitSolutionFolderPosixPath() = 0;
-	virtual XBOX::VError					Load() = 0;
-	virtual XBOX::VError					Save() = 0;
+	virtual void							Reset() = 0;
+	virtual void							UpdateBreakPoints( VRIAServer* inRiaServer, sLONG inTimeStamp ) = 0;
 	virtual VSignal_UpdateBreakPoints&		GetSignalUpdateBreakPoints() = 0;
 	virtual void GetBreakPoints( XBOX::VString& outJSON ) = 0;
 	virtual void SetEnable( const XBOX::VString& inPath, sLONG inLineNumber, bool inEnable ) = 0;
 	virtual void SetCondition( const XBOX::VString& inRelativePath, sLONG inLineNumber, const XBOX::VString& inCondition ) = 0;
 	virtual void RemoveBreakPoint( const XBOX::VString& inRelativePath, sLONG inLineNumber ) = 0;
-	virtual void SetBreakPoints( VJSDebugger* inDebugger ) const = 0;
+	virtual void SetBreakPoints( IJSDebugger* inDebugger ) const = 0;
 	virtual void EnableAllBreakPoints( bool inEnable ) = 0;
 };
+
 
 #endif

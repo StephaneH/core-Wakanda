@@ -24,10 +24,9 @@ class VRIARequestLogger : public XBOX::VObject, public IRequestLogger
 {
 public:
 			VRIARequestLogger();
-			VRIARequestLogger( XBOX::VLog4jMsgFileLogger* inLogger);
 	virtual ~VRIARequestLogger();
 
-			XBOX::VLog4jMsgFileLogger*	GetLogger() const { return fLogger; }
+			XBOX::ILogger*	GetLogger() const { return fLogger; }
 
 			// Inherited from IRequestLogger interface
 	virtual void						Log( OsType inComponentID, void* inCDB4DBaseContext, sLONG inRequestNo, sLONG inRequestNbBytes, sLONG inReplyNbBytes, sLONG inElapsedTime);
@@ -38,7 +37,7 @@ public:
 			void						SetEnable( bool inEnable) { fEnable = inEnable; }
 
 private:
-			XBOX::VLog4jMsgFileLogger	*fLogger;
+			XBOX::ILogger*				fLogger;
 			bool						fEnable;
 };
 

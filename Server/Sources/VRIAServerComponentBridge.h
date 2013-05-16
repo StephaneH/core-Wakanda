@@ -43,6 +43,11 @@ public:
 	virtual	CUAGSession*				RetainUAGSession(const XBOX::VJSGlobalContext* inContext);
 	virtual	XBOX::VError				SetUAGSession(const XBOX::VJSGlobalContext* inContext, CUAGSession *inUAGSession);
 
+	virtual bool						AcceptRestConnection(const XBOX::VString& inUserName, const XBOX::VString& inPassWord)
+	{
+		return true;
+	}
+
 	virtual XBOX::VWorkerPool*			GetSharedWorkerPool ( );
 	virtual void						StopSharedWorkerPool ( );
 

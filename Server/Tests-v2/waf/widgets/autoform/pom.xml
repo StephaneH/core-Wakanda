@@ -1,0 +1,54 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.wakanda.qa</groupId>
+	<artifactId>autoform-events</artifactId>
+	<name>autoform-events</name>
+	<version>1.0</version>
+	<developers>
+		<developer>
+			<name>Anas Bihi</name>
+			<organization>4D</organization>
+			<email>anas.bihi@4d.com</email>
+		</developer>
+	</developers>
+	<dependencies>
+		<dependency>
+			<groupId>org.wakanda.qa</groupId>
+			<artifactId>studio-runtime-utils</artifactId>
+			<version>1.2.1</version>
+		</dependency>
+	</dependencies>
+	<repositories>
+		<repository>
+			<id>releases</id>
+			<url>http://194.98.194.72:9000/nexus/content/repositories/releases</url>
+		</repository>
+	</repositories>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.2</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>test-jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.9</version>
+				<configuration>
+					<test>TestsEntry</test>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>

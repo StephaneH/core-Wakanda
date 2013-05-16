@@ -126,9 +126,39 @@ VError SaveSolutionStartupParametersToLinkFile( const VString& inLinkFileName, c
 			{
 				VFilePath path;
 				folder->GetPath( path);
-				path.SetFileName( inLinkFileName, false);
+				VString fileName( inLinkFileName );
+				path.SetFileName( fileName, false);
 				path.SetExtension( RIAFileKind::kSolutionLinkFileExtension);
 			
+				sLONG num = 0;
+				bool tryAgain;
+
+				do
+				{
+					tryAgain = false;
+					VFile toTest( path );
+					if ( toTest.Exists() )
+					{
+						VSolutionStartupParameters parameters;
+						if ( VE_OK == LoadSolutionStartupParametersFromLinkFile( fileName, parameters ) )
+						{
+							if ( parameters.GetSolutionFileToOpen() && inStartupParameters.GetSolutionFileToOpen() )
+							{
+								if ( parameters.GetSolutionFileToOpen()->GetPath() != inStartupParameters.GetSolutionFileToOpen()->GetPath() )
+								{
+									num++;
+									VString strNum;
+									strNum.FromLong( num );
+									fileName = inLinkFileName + "-" + strNum;
+									path.SetFileName( fileName, false );
+									tryAgain = true;
+								}
+							}
+						}
+					}
+				} while ( tryAgain );
+
+
 				VFile file( path);
 				err = WriteBagToFileInXML( bag, SolutionStartupParametersBagKeys::kXmlElement, &file);
 			}

@@ -38,8 +38,6 @@ namespace ProjectItemBagKeys
 	CREATE_BAGKEY_WITH_DEFAULT_SCALAR(event_handler_index, XBOX::VLong, sLONG, 0);
 #endif
 	CREATE_BAGKEY_WITH_DEFAULT(methodName, XBOX::VString, "");
-	CREATE_BAGKEY_WITH_DEFAULT(sourceControlId, XBOX::VString, "");
-	CREATE_BAGKEY_WITH_DEFAULT(sourceControlMode, XBOX::VString, "none");
 	CREATE_BAGKEY_WITH_DEFAULT_SCALAR(active, XBOX::VBoolean, bool, true);
 	CREATE_BAGKEY_WITH_DEFAULT(name, XBOX::VString, "");
 	CREATE_BAGKEY_WITH_DEFAULT(solutionLink, XBOX::VString, "");
@@ -72,13 +70,14 @@ VProjectItem::VProjectItem(e_ProjectItemKind inKind)
 ,fProjectItemSolutionOwner(NULL)
 ,fLevel(0)
 ,fExternalReference(false)
-,fSCCStatus(eNOT_CONTROLED)
 ,fPhysicalLinkValid(true)
 ,fGhost(false)
 ,fUserData(NULL)
 ,fStamp(1)
+,fID(0)
 {
-	fID = VProjectItemManager::Get()->RegisterProjectItem(this);
+	if (VProjectItemManager::Get()->IsProjectItemUniqueIDRequired())
+		fID = VProjectItemManager::Get()->RegisterProjectItem(this);
 
 	fBag = new VValueBag();
 	_CreateItemBehaviour( inKind);
@@ -91,13 +90,14 @@ VProjectItem::VProjectItem(const VURL& inURL, e_ProjectItemKind inKind)
 ,fProjectItemSolutionOwner(NULL)
 ,fLevel(0)
 ,fExternalReference(false)
-,fSCCStatus(eNOT_CONTROLED)
 ,fPhysicalLinkValid(true)
 ,fGhost(false)
 ,fUserData(NULL)
 ,fStamp(1)
+,fID(0)
 {
-	fID = VProjectItemManager::Get()->RegisterProjectItem(this);
+	if (VProjectItemManager::Get()->IsProjectItemUniqueIDRequired())
+		fID = VProjectItemManager::Get()->RegisterProjectItem(this);
 
 	fURL = inURL;
 	fBag = new VValueBag();
@@ -112,13 +112,14 @@ VProjectItem::VProjectItem( VProjectItemBehaviour *inBehaviour)
 ,fProjectItemSolutionOwner(NULL)
 ,fLevel(0)
 ,fExternalReference(false)
-,fSCCStatus(eNOT_CONTROLED)
 ,fPhysicalLinkValid(true)
 ,fGhost(false)
 ,fUserData(NULL)
 ,fStamp(1)
+,fID(0)
 {
-	fID = VProjectItemManager::Get()->RegisterProjectItem(this);
+	if (VProjectItemManager::Get()->IsProjectItemUniqueIDRequired())
+		fID = VProjectItemManager::Get()->RegisterProjectItem(this);
 
 	fBag = new VValueBag();
 	SetBehaviour( inBehaviour);
@@ -144,7 +145,8 @@ VProjectItem::~VProjectItem()
 
 	ReleaseRefCountable( &fBag);
 
-	VProjectItemManager::Get()->UnregisterProjectItem( this);
+	if (VProjectItemManager::Get()->IsProjectItemUniqueIDRequired())
+		VProjectItemManager::Get()->UnregisterProjectItem( this);
 }
 
 
@@ -935,18 +937,6 @@ void VProjectItem::SetGhost(bool inGhost)
 }
 
 
-ISourceControlInterface* VProjectItem::GetSCCInterfaceForCodeEditor()
-{
-	VProject* project = GetProjectOwner();
-	ISourceControlInterface* result = NULL;
-	if(project != NULL)
-	{
-		result = project->GetSCCInterfaceForCodeEditor();
-	}
-	return result;
-}
-
-
 bool VProjectItem::IsChildOf(VProjectItem* inProjectItem) const
 {
 	bool ok = false;
@@ -1194,8 +1184,8 @@ bool VProjectItem::CheckAnyProjectItemParentIsExternalReference(bool inIncludeMe
 VProjectItemManager* VProjectItemManager::sProjectItemManager = NULL;
 
 
-VProjectItemManager::VProjectItemManager()
-: fNextProjectItemID(PROJECT_ITEM_INDEX_START)
+VProjectItemManager::VProjectItemManager( bool inWithProjectItemUniqueID)
+: fNextProjectItemID(PROJECT_ITEM_INDEX_START), fWithProjectItemUniqueID( inWithProjectItemUniqueID)
 {
 }
 
@@ -1211,13 +1201,13 @@ VProjectItemManager* VProjectItemManager::Get()
 }
 
 
-bool VProjectItemManager::Init()
+bool VProjectItemManager::Init( bool inWithProjectItemUniqueID)
 {
 	bool ok = true;
 
 	if (sProjectItemManager == NULL)
 	{
-		sProjectItemManager = new VProjectItemManager();
+		sProjectItemManager = new VProjectItemManager( inWithProjectItemUniqueID);
 		ok = (sProjectItemManager != NULL);
 
 		if (ok)
@@ -1240,8 +1230,10 @@ sLONG VProjectItemManager::RegisterProjectItem( VProjectItem *inProjectItem)
 {
 	sLONG id = 0;
 
-	if (testAssert(inProjectItem != NULL))
+	if (testAssert(fWithProjectItemUniqueID && (inProjectItem != NULL)))
 	{
+		assert(VTask::IsCurrentMain());
+
 		if (fNextProjectItemID == 0)
 			++fNextProjectItemID;
 		
@@ -1257,8 +1249,10 @@ sLONG VProjectItemManager::RegisterProjectItem( VProjectItem *inProjectItem)
 
 void VProjectItemManager::UnregisterProjectItem( VProjectItem *inProjectItem)
 {
-	if (testAssert(inProjectItem != NULL))
+	if (testAssert(fWithProjectItemUniqueID && (inProjectItem != NULL)))
 	{
+		assert(VTask::IsCurrentMain());
+
 		std::map< sLONG , VProjectItem* >::iterator found = fMapOfProjectItemIDs.find( inProjectItem->GetID());
 		if (testAssert(found != fMapOfProjectItemIDs.end()))
 			fMapOfProjectItemIDs.erase( found);
@@ -1705,20 +1699,14 @@ const VProjectItemTag kSettingTag( "settings");
 const VProjectItemTag kCatalogTag( "catalog");
 const VProjectItemTag kBackupsTag( "Backups");
 
-// const VProjectItemTag kEntityModelScriptTag( "EMScripts");	// sc 30/09/2010 unused
 const VProjectItemTag kDataTag( "data");
 const VProjectItemTag kDataFolderTag( "dataFolder");
-const VProjectItemTag kDocumentationTag( "documentation");
-const VProjectItemTag kExternalLibraryTag( "libraries");
-const VProjectItemTag kRPCMethodTag( "rpc");
 const VProjectItemTag kRPCCatalogTag( "catalogRpc");
 const VProjectItemTag kBootstrapTag( "bootStrap");
 const VProjectItemTag kUAGDirectoryTag( "directory");
 const VProjectItemTag kPermissionsTag( "permissions");
-const VProjectItemTag kIndexPageTag( "indexPage");
 const VProjectItemTag kWebFolderTag( "webFolder");
 const VProjectItemTag kWebComponentFolderTag( "webComponent" );
-const VProjectItemTag kPageFolderTag( "pageFolder" );
 const VProjectItemTag kProjectCertificatesFolderTag( "projectCertificatesFolder");
 const VProjectItemTag kSolutionCertificatesFolderTag( "solutionCertificatesFolder");
 
@@ -1779,17 +1767,6 @@ bool VProjectItemTagManager::Init()
 												&defaultFolders,
 												NULL );
 
-		#if 0 // sc 30/09/2010 unused
-			// kEntityModelScriptTag
-			defaultFolders.clear();
-			defaultFolders.push_back( L"Catalogs/");
-			sManager->RegisterProjectItemTag(	kEntityModelScriptTag,
-												L"com.netscape.javascript-source",
-												ePITP_ApplyToMultipleFiles | ePITP_ApplyToFolderContent,
-												&defaultFolders,
-												NULL );
-		#endif
-
 			// kDataTag
 			defaultFolders.clear();
 			defaultFolders.push_back( L"data/");
@@ -1802,40 +1779,13 @@ bool VProjectItemTagManager::Init()
 
 			// kDataFolderTag
 			defaultFolders.clear();
-			// No default Data folder name - to check with SC
-			//defaultFolders.push_back( L"DataFolder/");
+			defaultFolders.push_back( L"DataFolder/");	// sc 01/03/2013 WAK0080758, a default folder is required
 			sManager->RegisterProjectItemTag(	kDataFolderTag,
 												L"",
 												ePITP_ApplyToSingleFolder,
 												&defaultFolders,
 												NULL );
 
-			// kDocumentationTag
-			defaultFolders.clear();
-			defaultFolders.push_back( L"libraries/");
-			sManager->RegisterProjectItemTag(	kDocumentationTag,
-												L"com.netscape.javascript-source",
-												ePITP_ApplyToMultipleFiles | ePITP_ApplyToMultipleFolders | ePITP_ApplyToFolderContent,
-												&defaultFolders,
-												NULL );
-
-			// kExternalLibraryTag
-			sManager->RegisterProjectItemTag(	kExternalLibraryTag,
-												L"",
-												ePITP_ApplyToMultipleFolders,
-												NULL,
-												NULL );
-
-			// kRPCMethodTag
-			defaultFolders.clear();
-			defaultFolders.push_back( L"rpc/");
-			defaultFiles.clear();
-			defaultFiles.push_back( L"waRpc.js");
-			sManager->RegisterProjectItemTag(	kRPCMethodTag,
-												L"com.netscape.javascript-source",
-												ePITP_ApplyToMultipleFiles | ePITP_ApplyToFolderContent,
-												&defaultFolders,
-												&defaultFiles );
 			// kRPCCatalogTag
 			defaultFolders.clear();
 			defaultFolders.push_back( L"rpc/");
@@ -1876,14 +1826,6 @@ bool VProjectItemTagManager::Init()
 												ePITP_ApplyToSingleFile | ePITP_ApplyToFolderContent,
 												&defaultFolders,
 												NULL );
-			// kIndexPageTag
-			defaultFiles.clear();
-			defaultFiles.push_back( L"index.html");
-			sManager->RegisterProjectItemTag(	kIndexPageTag,
-												L"public.html",
-												ePITP_ApplyToMultipleFiles,
-												NULL,
-												&defaultFiles );
 
 			// kWebFolderTag
 			defaultFolders.clear();
@@ -1903,14 +1845,6 @@ bool VProjectItemTagManager::Init()
 												&defaultFolders,
 												NULL );
 
-			// kPageFolderTag
-			defaultFolders.clear();
-			defaultFolders.push_back( L"pages/");
-			sManager->RegisterProjectItemTag(	kWebComponentFolderTag,
-												RIAFileKind::kPageFolderExtension,
-												ePITP_ApplyToSingleFolder,
-												&defaultFolders,
-												NULL );
 			// kProjectCertificatesFolderTag
 			defaultFolders.clear();
 			defaultFolders.push_back( L"Certificates/");

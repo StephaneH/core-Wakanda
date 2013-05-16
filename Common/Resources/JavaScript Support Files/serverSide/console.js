@@ -20,7 +20,7 @@ Console = function Console() {
     
     
     /**
-     * 
+     *  writes message to the log and Wakanda Studio Debugger&#39;s Console with the visual &quot;INFO&quot; label
      *
      * @method info
      * @param {Object} message
@@ -28,7 +28,7 @@ Console = function Console() {
     this.info = function info(message) {             };
     
     /**
-     * 
+     * writes message to the log file and Wakanda Studio&#39;s Debugger console with the visual &quot;WARNING&quot; label
      *
      * @method warn
      * @param {Object} message
@@ -36,7 +36,7 @@ Console = function Console() {
     this.warn = function warn(message) {             };
     
     /**
-     * 
+     * writes message to the log file and Wakanda Studio Debugger&#39;s console with the visual &quot;TRACE&quot; label
      *
      * @method log
      * @param {Object} message
@@ -44,7 +44,7 @@ Console = function Console() {
     this.log = function log(message) {             };
     
     /**
-     * 
+     * writes message to the log file and Wakanda Studio Debugger&#39;s Console with the visual &quot;ERROR&quot; label
      *
      * @method error
      * @param {Object} message

@@ -18,24 +18,19 @@
 
 #include "testMySQLConnector.h"
 
-#include "../../../../Components/Main/SQLConnectorCommon/Headers/ISQLSession.h"
-#include "../../../../Components/Main/SQLConnectorCommon/Headers/ISQLResultSet.h"
-#include "../../../../Components/Main/SQLConnectorCommon/Headers/ISQLRow.h"
-#include "../../../../Components/Main/SQLConnectorCommon/Headers/ISQLStatement.h"
-#include "../../../../Components/Main/SQLConnectorCommon/Headers/ISQLPreparedStatement.h"
 
-#include "../../../../Components/Main/MySQLConnector/Headers/CMySQLConnector.h"
-
+#include "MySQLConnector/CMySQLConnector.h"
+#include "SQLModel/CSQLModel.h"
 
 
 USING_TOOLBOX_NAMESPACE
 
 
-#define MYSQL_HOST					( VJSONValue( "192.168.222.12" ) )
+#define MYSQL_HOST					( VJSONValue( "194.98.194.72" ) )
 
-#define MYSQL_USER					( VJSONValue( "abdessamad" ) )
+#define MYSQL_USER					( VJSONValue( "wakandaqa" ) )
 
-#define MYSQL_CORRECT_PASSWORD		( VJSONValue( "secret" ) )
+#define MYSQL_CORRECT_PASSWORD		( VJSONValue( "wakandaqa" ) )
 
 #define MYSQL_INCORRECT_PASSWORD	( VJSONValue( "!secret" ) )
 
@@ -50,1204 +45,1205 @@ USING_TOOLBOX_NAMESPACE
 
 void testMySQLConnectorCreateSessionWithValidParams()
 {
-	CMySQLConnector *mysqlConnector = VComponentManager::RetainComponent<CMySQLConnector>();
+	CSQLConnector* connector = VComponentManager::RetainComponent<CMySQLConnector>();
 
-	VJSONObject * params = new VJSONObject();
+	VJSONObject* params = new VJSONObject();
 
-	params->SetProperty( "hostname",	MYSQL_HOST );
+	params->SetProperty ( "hostname",	MYSQL_HOST );
 
-	params->SetProperty( "user",		MYSQL_USER );
+	params->SetProperty ( "user",		MYSQL_USER );
 
-	params->SetProperty( "password",	MYSQL_CORRECT_PASSWORD );
+	params->SetProperty ( "password",	MYSQL_CORRECT_PASSWORD );
 
-	params->SetProperty( "database",	MYSQL_DATABASE );
+	params->SetProperty ( "database",	MYSQL_DATABASE );
 
-	params->SetProperty( "port",		MYSQL_PORT );
+	params->SetProperty ( "port",		MYSQL_PORT );
 
-	params->SetProperty( "ssl",			MYSQL_SSL_FALSE );
+	params->SetProperty ( "ssl",		MYSQL_SSL_FALSE );
 
-	ISQLSession *session = mysqlConnector->CreateSession( params );
+	ISQLSession* session = connector->CreateSession ( params );
 
-	if( session != NULL )
+	if ( session != NULL )
 	{
-		printf( "connection to mysql server was successful ..\n" );
+		printf ( "connection to mysql server was successful ..\n" );
 
-		ReleaseRefCountable( &session );
+		ReleaseRefCountable ( &session );
 	}
 	else
 	{
-		printf( "connection to mysql server failed ..\n" );
+		printf ( "connection to mysql server failed ..\n" );
 	}
 
-	ReleaseRefCountable( &params );
+	ReleaseRefCountable ( &params );
 
-	ReleaseRefCountable( &mysqlConnector );
+	ReleaseRefCountable ( &connector );
 }
 
 void testMySQLConnectorCreateSessionWithInCorrectPassword()
 {
-	CMySQLConnector *mysqlConnector = VComponentManager::RetainComponent<CMySQLConnector>();
+	CSQLConnector* connector = VComponentManager::RetainComponent<CMySQLConnector>();
 
-	VJSONObject * params = new VJSONObject();
+	VJSONObject* params = new VJSONObject();
 
-	params->SetProperty( "hostname",	MYSQL_HOST );
+	params->SetProperty ( "hostname",	MYSQL_HOST );
 
-	params->SetProperty( "user",		MYSQL_USER );
+	params->SetProperty ( "user",		MYSQL_USER );
 
-	params->SetProperty( "password",	MYSQL_INCORRECT_PASSWORD );
+	params->SetProperty ( "password",	MYSQL_CORRECT_PASSWORD );
 
-	params->SetProperty( "database",	MYSQL_DATABASE );
+	params->SetProperty ( "database",	MYSQL_DATABASE );
 
-	params->SetProperty( "port",		MYSQL_PORT );
+	params->SetProperty ( "port",		MYSQL_PORT );
 
-	params->SetProperty( "ssl",			MYSQL_SSL_FALSE );
+	params->SetProperty ( "ssl",		MYSQL_SSL_FALSE );
 
-	ISQLSession *session = mysqlConnector->CreateSession( params );
+	ISQLSession* session = connector->CreateSession ( params );
 
-	if( session != NULL )
+	if ( session != NULL )
 	{
-		printf( "connection to mysql server was successful ..\n" );
+		printf ( "connection to mysql server was successful ..\n" );
 
-		ReleaseRefCountable( &session );
+		ReleaseRefCountable ( &session );
 	}
 	else
 	{
-		printf( "connection to mysql server failed ..\n" );
+		printf ( "connection to mysql server failed ..\n" );
 	}
 
-	ReleaseRefCountable( &params );
+	ReleaseRefCountable ( &params );
 
-	ReleaseRefCountable( &mysqlConnector );
+	ReleaseRefCountable ( &connector );
 }
 
 
 void testMySQLConnectorExecuteQuerySelect()
 {
-	CMySQLConnector *mysqlConnector = VComponentManager::RetainComponent<CMySQLConnector>();
+	CSQLConnector* connector = VComponentManager::RetainComponent<CMySQLConnector>();
 
-	VJSONObject * params = new VJSONObject();
+	VJSONObject* params = new VJSONObject();
 
-	params->SetProperty( "hostname",	MYSQL_HOST );
+	params->SetProperty ( "hostname",	MYSQL_HOST );
 
-	params->SetProperty( "user",		MYSQL_USER );
+	params->SetProperty ( "user",		MYSQL_USER );
 
-	params->SetProperty( "password",	MYSQL_CORRECT_PASSWORD );
+	params->SetProperty ( "password",	MYSQL_CORRECT_PASSWORD );
 
-	params->SetProperty( "database",	MYSQL_DATABASE );
+	params->SetProperty ( "database",	MYSQL_DATABASE );
 
-	params->SetProperty( "port",		MYSQL_PORT );
+	params->SetProperty ( "port",		MYSQL_PORT );
 
-	params->SetProperty( "ssl",			MYSQL_SSL_FALSE );
+	params->SetProperty ( "ssl",			MYSQL_SSL_FALSE );
 
-	ISQLSession *session = mysqlConnector->CreateSession( params );
+	ISQLSession* session = connector->CreateSession ( params );
 
-	if(session != NULL)
+	if ( session != NULL )
 	{
-		VString query("SELECT * FROM people WHERE id < 10");
+		VString query ( "SELECT * FROM City WHERE id < 10" );
 
-		VError error = session->ExecuteQuery( query );
+		VError error = session->ExecuteQuery ( query );
 
-		if( error == VE_OK )
+		if ( error == VE_OK )
 		{
 			sLONG count = session->GetResultSetsCount();
 
-			for(sLONG i = 0; i < count; ++i)
+			for ( sLONG i = 0; i < count; ++i )
 			{
-				ISQLResultSet* res = session->RetainNthResultSet( i );
+				ISQLResultSet* res = session->RetainNthResultSet ( i );
 
 				//the result set contains error
-				if(res->IsError())
+				if ( res->IsError() )
 				{
 					VString errMsg = res->GetErrorMessage();
 					//do the processing in case of error
 				}
 				else
 				{
-					while( !res->IsEOF() )
+					while ( !res->IsEOF() )
 					{
-						ISQLRow *row = res->RetainNextRow();
+						ISQLRow* row = res->RetainNextRow();
 
 
-						VValue *idValue = row->CreateNthValue( 0 );
-						DebugMsg( "id = %V\n", idValue );
+						VValue* idValue = row->GetNthValue ( 1 );
+						DebugMsg ( "id = %V\n", idValue );
 
 
-						VValue *firstNameValue = row->CreateNthValue( 2 );
-						DebugMsg( "first name = %V\n", firstNameValue );
+						VValue* firstNameValue = row->GetNthValue ( 3 );
+						DebugMsg ( "first name = %V\n", firstNameValue );
 
 
-						VValue *dateValue = row->CreateNthValue( 4 );
-						DebugMsg( "date = %V\n", dateValue );
+						VValue* dateValue = row->GetNthValue ( 5 );
+						DebugMsg ( "date = %V\n", dateValue );
 
 
-						ReleaseRefCountable( &row );
+						ReleaseRefCountable ( &row );
 					}
 				}
 
 
-				ReleaseRefCountable( &res );
+				ReleaseRefCountable ( &res );
 			}
 
 		}
 		else
 		{
-			printf( "an error occured in the query ..\n" );
+			printf ( "an error occured in the query ..\n" );
 		}
-		
-		ReleaseRefCountable( &session );
+
+		ReleaseRefCountable ( &session );
 	}
 	else
 	{
-		printf( "connection to mysql server failed ..\n" );
+		printf ( "connection to mysql server failed ..\n" );
 	}
 
-	ReleaseRefCountable( &params );
+	ReleaseRefCountable ( &params );
 
-	ReleaseRefCountable( &mysqlConnector );
+	ReleaseRefCountable ( &connector );
 }
 
 void testMySQLConnectorStatement()
 {
-	CMySQLConnector *mysqlConnector = VComponentManager::RetainComponent<CMySQLConnector>();
+	CSQLConnector* connector = VComponentManager::RetainComponent<CMySQLConnector>();
 
-	VJSONObject * params = new VJSONObject();
+	VJSONObject* params = new VJSONObject();
 
-	params->SetProperty( "hostname",	MYSQL_HOST );
+	params->SetProperty ( "hostname",	MYSQL_HOST );
 
-	params->SetProperty( "user",		MYSQL_USER );
+	params->SetProperty ( "user",		MYSQL_USER );
 
-	params->SetProperty( "password",	MYSQL_CORRECT_PASSWORD );
+	params->SetProperty ( "password",	MYSQL_CORRECT_PASSWORD );
 
-	params->SetProperty( "database",	MYSQL_DATABASE );
+	params->SetProperty ( "database",	MYSQL_DATABASE );
 
-	params->SetProperty( "port",		MYSQL_PORT );
+	params->SetProperty ( "port",		MYSQL_PORT );
 
-	params->SetProperty( "ssl",			MYSQL_SSL_FALSE );
+	params->SetProperty ( "ssl",			MYSQL_SSL_FALSE );
 
-	ISQLSession *session = mysqlConnector->CreateSession( params );
+	ISQLSession* session = connector->CreateSession ( params );
 
-	ReleaseRefCountable( &params );
+	ReleaseRefCountable ( &params );
 
-	if(session != NULL)
+	if ( session != NULL )
 	{
-		ISQLStatement *stmt = session->CreateStatement( "SELECT * FROM people WHERE id < 5");
+		ISQLStatement* stmt = session->CreateStatement ( "SELECT * FROM people WHERE id < 5" );
 
 		VError error = VE_OK;
 
-		ISQLResultSet *res = stmt->Execute( error );
+		ISQLResultSet* res = stmt->Execute ( error );
 
-		if( error == VE_OK )
+		if ( error == VE_OK )
 		{
-			if( res->IsError() )
+			if ( res->IsError() )
 			{
-				printf( "an error occured in the execution of the prepared statement!\n" );
+				printf ( "an error occured in the execution of the prepared statement!\n" );
 			}
 			else
 			{
-				while( !res->IsEOF() )
+				while ( !res->IsEOF() )
 				{
-					ISQLRow *row = res->RetainNextRow();
+					ISQLRow* row = res->RetainNextRow();
 
 
-					VValue *idValue = row->CreateNthValue( 0 );
+					VValue* idValue = row->GetNthValue ( 1 );
 					VString id;
-					id.AppendPrintf("%V", idValue);
-					DebugMsg( "id = %V\n", &id);
+					id.AppendPrintf ( "%V", idValue );
+					DebugMsg ( "id = %V\n", &id );
 
 
-					VValue *firstNameValue = row->CreateNthValue( 2 );
+					VValue* firstNameValue = row->GetNthValue ( 3 );
 					VString firstName;
-					firstName.AppendPrintf("%V", firstNameValue);
-					DebugMsg( "first name = %V\n", &firstName );
+					firstName.AppendPrintf ( "%V", firstNameValue );
+					DebugMsg ( "first name = %V\n", &firstName );
 
 
-					VValue *dateValue = row->CreateNthValue( 4 );
+					VValue* dateValue = row->GetNthValue ( 5 );
 					VString date;
-					date.AppendPrintf("%V", dateValue);
-					DebugMsg( "date = %V\n", &date );
+					date.AppendPrintf ( "%V", dateValue );
+					DebugMsg ( "date = %V\n", &date );
 
 
-					ReleaseRefCountable( &row );
+					ReleaseRefCountable ( &row );
 				}
 			}
 
-			ReleaseRefCountable( &res );
+			ReleaseRefCountable ( &res );
 		}
 		else
 		{
-			printf( "an error occured in the execution of the prepared statement!\n" );
+			printf ( "an error occured in the execution of the prepared statement!\n" );
 		}
 
-		ReleaseRefCountable( &session );
+		ReleaseRefCountable ( &session );
 	}
 	else
 	{
-		printf( "connection to mysql server failed ..\n" );
+		printf ( "connection to mysql server failed ..\n" );
 	}
 
-	ReleaseRefCountable( &mysqlConnector );
+	ReleaseRefCountable ( &connector );
 }
 
 
 
 void testMySQLConnectorPreparedStatementWithIntegerParam()
 {
-	CMySQLConnector *mysqlConnector = VComponentManager::RetainComponent<CMySQLConnector>();
+	CSQLConnector* connector = VComponentManager::RetainComponent<CMySQLConnector>();
 
-	VJSONObject * params = new VJSONObject();
+	VJSONObject* params = new VJSONObject();
 
-	params->SetProperty( "hostname",	MYSQL_HOST );
+	params->SetProperty ( "hostname",	MYSQL_HOST );
 
-	params->SetProperty( "user",		MYSQL_USER );
+	params->SetProperty ( "user",		MYSQL_USER );
 
-	params->SetProperty( "password",	MYSQL_CORRECT_PASSWORD );
+	params->SetProperty ( "password",	MYSQL_CORRECT_PASSWORD );
 
-	params->SetProperty( "database",	MYSQL_DATABASE );
+	params->SetProperty ( "database",	MYSQL_DATABASE );
 
-	params->SetProperty( "port",		MYSQL_PORT );
+	params->SetProperty ( "port",		MYSQL_PORT );
 
-	params->SetProperty( "ssl",			MYSQL_SSL_FALSE );
+	params->SetProperty ( "ssl",			MYSQL_SSL_FALSE );
 
-	ISQLSession *session = mysqlConnector->CreateSession( params );
+	ISQLSession* session = connector->CreateSession ( params );
 
-	ReleaseRefCountable( &params );
+	ReleaseRefCountable ( &params );
 
-	if(session != NULL)
+	if ( session != NULL )
 	{
-		ISQLStatement *statement = session->CreateStatement( "SELECT * FROM people WHERE id = ?");
+		ISQLStatement* statement = session->CreateStatement ( "SELECT * FROM people WHERE id = ?" );
 
 		VError error = VE_OK;
 
-		ISQLPreparedStatement* pStmt = statement->CreatePreparedStatement(error);
+		ISQLPreparedStatement* pStmt = statement->CreatePreparedStatement ( error );
 
-		VLong keyLong(3);
+		VLong keyLong ( 3 );
 
-		pStmt->SetNthParameter( 1, keyLong );
+		pStmt->SetNthParameter ( 1, keyLong );
 
-		ISQLResultSet *res = pStmt->Execute( error );
+		ISQLResultSet* res = pStmt->Execute ( error );
 
-		if( error == VE_OK )
+		if ( error == VE_OK )
 		{
-			if( res->IsError() )
+			if ( res->IsError() )
 			{
-				printf( "an error occured in the execution of the prepared statement!\n" );
+				printf ( "an error occured in the execution of the prepared statement!\n" );
 			}
 			else
 			{
-				while( !res->IsEOF() )
+				while ( !res->IsEOF() )
 				{
-					ISQLRow *row = res->RetainNextRow();
+					ISQLRow* row = res->RetainNextRow();
 
-					VValue *idValue = row->CreateNthValue( 0 );
+					VValue* idValue = row->GetNthValue ( 1 );
 
-					VValue *firstNameValue = row->CreateNthValue( 2 );
+					VValue* firstNameValue = row->GetNthValue ( 3 );
 
-					VValue *dateValue = row->CreateNthValue( 4 );
+					VValue* dateValue = row->GetNthValue ( 5 );
 
 					VString DbgMsg;
 
-					DbgMsg.AppendPrintf( "idValue = %V, firstNameValue = %V, dateValue = %V", idValue, firstNameValue, dateValue );
+					DbgMsg.AppendPrintf ( "idValue = %V, firstNameValue = %V, dateValue = %V", idValue, firstNameValue, dateValue );
 
-					DebugMsg( "%V", &DbgMsg );
+					DebugMsg ( "%V", &DbgMsg );
 
-					ReleaseRefCountable( &row );
+					ReleaseRefCountable ( &row );
 				}
 			}
 
-			ReleaseRefCountable( &res );
+			ReleaseRefCountable ( &res );
 		}
 		else
 		{
-			printf( "an error occured in the execution of the prepared statement!\n" );
+			printf ( "an error occured in the execution of the prepared statement!\n" );
 		}
 
-		ReleaseRefCountable( &session );
+		ReleaseRefCountable ( &session );
 	}
 	else
 	{
-		printf( "connection to mysql server failed ..\n" );
+		printf ( "connection to mysql server failed ..\n" );
 	}
 
-	ReleaseRefCountable( &mysqlConnector );
+	ReleaseRefCountable ( &connector );
 
 }
 
 
 void testMySQLConnectorPreparedStatementWithStringParam()
 {
-	CMySQLConnector *mysqlConnector = VComponentManager::RetainComponent<CMySQLConnector>();
+	CSQLConnector* connector = VComponentManager::RetainComponent<CMySQLConnector>();
 
-	VJSONObject * params = new VJSONObject();
+	VJSONObject* params = new VJSONObject();
 
-	params->SetProperty( "hostname",	MYSQL_HOST );
+	params->SetProperty ( "hostname",	MYSQL_HOST );
 
-	params->SetProperty( "user",		MYSQL_USER );
+	params->SetProperty ( "user",		MYSQL_USER );
 
-	params->SetProperty( "password",	MYSQL_CORRECT_PASSWORD );
+	params->SetProperty ( "password",	MYSQL_CORRECT_PASSWORD );
 
-	params->SetProperty( "database",	MYSQL_DATABASE );
+	params->SetProperty ( "database",	MYSQL_DATABASE );
 
-	params->SetProperty( "port",		MYSQL_PORT );
+	params->SetProperty ( "port",		MYSQL_PORT );
 
-	params->SetProperty( "ssl",			MYSQL_SSL_FALSE );
+	params->SetProperty ( "ssl",			MYSQL_SSL_FALSE );
 
-	ISQLSession *session = mysqlConnector->CreateSession( params );
+	ISQLSession* session = connector->CreateSession ( params );
 
-	ReleaseRefCountable( &params );
+	ReleaseRefCountable ( &params );
 
-	if(session != NULL)
+	if ( session != NULL )
 	{
-		ISQLStatement *statement = session->CreateStatement( "SELECT * FROM people WHERE first_name = ?");
+		ISQLStatement* statement = session->CreateStatement ( "SELECT * FROM people WHERE first_name = ?" );
 
 		VError error = VE_OK;
 
-		ISQLPreparedStatement* pStmt = statement->CreatePreparedStatement(error);
+		ISQLPreparedStatement* pStmt = statement->CreatePreparedStatement ( error );
 
-		VString keyString("sotyi");
+		VString keyString ( "sotyi" );
 
-		pStmt->SetNthParameter( 1, keyString );
+		pStmt->SetNthParameter ( 1, keyString );
 
-		ISQLResultSet *res = pStmt->Execute( error );
+		ISQLResultSet* res = pStmt->Execute ( error );
 
-		if( error == VE_OK )
+		if ( error == VE_OK )
 		{
-			if( res->IsError() )
+			if ( res->IsError() )
 			{
-				printf( "an error occured in the execution of the prepared statement!\n" );
+				printf ( "an error occured in the execution of the prepared statement!\n" );
 			}
 			else
 			{
-				while( !res->IsEOF() )
+				while ( !res->IsEOF() )
 				{
-					ISQLRow *row = res->RetainNextRow();
+					ISQLRow* row = res->RetainNextRow();
 
-					VValue *idValue = row->CreateNthValue( 0 );
+					VValue* idValue = row->GetNthValue ( 1 );
 
-					VValue *firstNameValue = row->CreateNthValue( 2 );
+					VValue* firstNameValue = row->GetNthValue ( 3 );
 
-					VValue *dateValue = row->CreateNthValue( 4 );
+					VValue* dateValue = row->GetNthValue ( 5 );
 
 					VString DbgMsg;
 
-					DbgMsg.AppendPrintf( "idValue = %V, firstNameValue = %V, dateValue = %V", idValue, firstNameValue, dateValue );
+					DbgMsg.AppendPrintf ( "idValue = %V, firstNameValue = %V, dateValue = %V", idValue, firstNameValue, dateValue );
 
-					DebugMsg( "%V", &DbgMsg );
+					DebugMsg ( "%V", &DbgMsg );
 
-					ReleaseRefCountable( &row );
+					ReleaseRefCountable ( &row );
 				}
 			}
 
-			ReleaseRefCountable( &res );
+			ReleaseRefCountable ( &res );
 		}
 		else
 		{
-			printf( "an error occured in the execution of the prepared statement!\n" );
+			printf ( "an error occured in the execution of the prepared statement!\n" );
 		}
 
-		ReleaseRefCountable( &session );
+		ReleaseRefCountable ( &session );
 	}
 	else
 	{
-		printf( "connection to mysql server failed ..\n" );
+		printf ( "connection to mysql server failed ..\n" );
 	}
 
-	ReleaseRefCountable( &mysqlConnector );
+	ReleaseRefCountable ( &connector );
 
 }
 
 void testMySQLConnectorPreparedStatementWithDateParam()
 {
-	CMySQLConnector *mysqlConnector = VComponentManager::RetainComponent<CMySQLConnector>();
+	CSQLConnector* connector = VComponentManager::RetainComponent<CMySQLConnector>();
 
-	VJSONObject * params = new VJSONObject();
+	VJSONObject* params = new VJSONObject();
 
-	params->SetProperty( "hostname",	MYSQL_HOST );
+	params->SetProperty ( "hostname",	MYSQL_HOST );
 
-	params->SetProperty( "user",		MYSQL_USER );
+	params->SetProperty ( "user",		MYSQL_USER );
 
-	params->SetProperty( "password",	MYSQL_CORRECT_PASSWORD );
+	params->SetProperty ( "password",	MYSQL_CORRECT_PASSWORD );
 
-	params->SetProperty( "database",	MYSQL_DATABASE );
+	params->SetProperty ( "database",	MYSQL_DATABASE );
 
-	params->SetProperty( "port",		MYSQL_PORT );
+	params->SetProperty ( "port",		MYSQL_PORT );
 
-	params->SetProperty( "ssl",			MYSQL_SSL_FALSE );
+	params->SetProperty ( "ssl",			MYSQL_SSL_FALSE );
 
-	ISQLSession *session = mysqlConnector->CreateSession( params );
+	ISQLSession* session = connector->CreateSession ( params );
 
-	ReleaseRefCountable( &params );
+	ReleaseRefCountable ( &params );
 
-	if(session != NULL)
+	if ( session != NULL )
 	{
-		ISQLStatement *statement = session->CreateStatement( "SELECT * FROM people WHERE date_of_birth = ?");
+		ISQLStatement* statement = session->CreateStatement ( "SELECT * FROM people WHERE date_of_birth = ?" );
 
 		VError error = VE_OK;
 
-		ISQLPreparedStatement* pStmt = statement->CreatePreparedStatement(error);
+		ISQLPreparedStatement* pStmt = statement->CreatePreparedStatement ( error );
 
 		VTime keyDate;
 
-		keyDate.FromUTCTime( 1984, 8, 11, 0, 0, 0, 0 );
+		keyDate.FromUTCTime ( 1984, 8, 11, 0, 0, 0, 0 );
 
-		pStmt->SetNthParameter( 1, keyDate );
+		pStmt->SetNthParameter ( 1, keyDate );
 
-		ISQLResultSet *res = pStmt->Execute( error );
+		ISQLResultSet* res = pStmt->Execute ( error );
 
-		if( error == VE_OK )
+		if ( error == VE_OK )
 		{
-			if( res->IsError() )
+			if ( res->IsError() )
 			{
-				printf( "an error occured in the execution of the prepared statement!\n" );
+				printf ( "an error occured in the execution of the prepared statement!\n" );
 
 				VString msg = res->GetErrorMessage();
 
-				printf( "error msg = %V\n", &msg );
+				printf ( "error msg = %V\n", &msg );
 			}
 			else
 			{
-				while( !res->IsEOF() )
+				while ( !res->IsEOF() )
 				{
-					ISQLRow *row = res->RetainNextRow();
+					ISQLRow* row = res->RetainNextRow();
 
-					VValue *idValue = row->CreateNthValue( 0 );
+					VValue* idValue = row->GetNthValue ( 1 );
 
-					VValue *firstNameValue = row->CreateNthValue( 2 );
+					VValue* firstNameValue = row->GetNthValue ( 3 );
 
-					VValue *dateValue = row->CreateNthValue( 4 );
+					VValue* dateValue = row->GetNthValue ( 5 );
 
 					VString DbgMsg;
 
-					DbgMsg.AppendPrintf( "idValue = %V, firstNameValue = %V, dateValue = %V", idValue, firstNameValue, dateValue );
+					DbgMsg.AppendPrintf ( "idValue = %V, firstNameValue = %V, dateValue = %V", idValue, firstNameValue, dateValue );
 
-					DebugMsg( "%V", &DbgMsg );
+					DebugMsg ( "%V", &DbgMsg );
 
-					ReleaseRefCountable( &row );
+					ReleaseRefCountable ( &row );
 				}
 			}
 
-			ReleaseRefCountable( &res );
+			ReleaseRefCountable ( &res );
 		}
 		else
 		{
-			printf( "an error occured in the execution of the prepared statement!\n" );
+			printf ( "an error occured in the execution of the prepared statement!\n" );
 		}
 
-		ReleaseRefCountable( &session );
+		ReleaseRefCountable ( &session );
 	}
 	else
 	{
-		printf( "connection to mysql server failed ..\n" );
+		printf ( "connection to mysql server failed ..\n" );
 	}
 
-	ReleaseRefCountable( &mysqlConnector );
+	ReleaseRefCountable ( &connector );
 
 }
 
 
 void testMySQLConnectorPreparedStatementWithTypeTinyInt()
 {
-	CMySQLConnector *mysqlConnector = VComponentManager::RetainComponent<CMySQLConnector>();
+	CSQLConnector* connector = VComponentManager::RetainComponent<CMySQLConnector>();
 
-	VJSONObject * params = new VJSONObject();
+	VJSONObject* params = new VJSONObject();
 
-	params->SetProperty( "hostname",	MYSQL_HOST );
+	params->SetProperty ( "hostname",	MYSQL_HOST );
 
-	params->SetProperty( "user",		MYSQL_USER );
+	params->SetProperty ( "user",		MYSQL_USER );
 
-	params->SetProperty( "password",	MYSQL_CORRECT_PASSWORD );
+	params->SetProperty ( "password",	MYSQL_CORRECT_PASSWORD );
 
-	params->SetProperty( "database",	MYSQL_DATABASE );
+	params->SetProperty ( "database",	MYSQL_DATABASE );
 
-	params->SetProperty( "port",		MYSQL_PORT );
+	params->SetProperty ( "port",		MYSQL_PORT );
 
-	params->SetProperty( "ssl",			MYSQL_SSL_FALSE );
+	params->SetProperty ( "ssl",			MYSQL_SSL_FALSE );
 
-	ISQLSession *session = mysqlConnector->CreateSession( params );
+	ISQLSession* session = connector->CreateSession ( params );
 
-	ReleaseRefCountable( &params );
+	ReleaseRefCountable ( &params );
 
-	if(session != NULL)
+	if ( session != NULL )
 	{
-		ISQLStatement *statement = session->CreateStatement( "SELECT * FROM test_tiny_int");
+		ISQLStatement* statement = session->CreateStatement ( "SELECT * FROM test_tiny_int" );
 
 		VError error = VE_OK;
 
-		ISQLPreparedStatement* pStmt = statement->CreatePreparedStatement(error);
+		ISQLPreparedStatement* pStmt = statement->CreatePreparedStatement ( error );
 
-		ISQLResultSet *res = pStmt->Execute( error );
+		ISQLResultSet* res = pStmt->Execute ( error );
 
-		if( error == VE_OK )
+		if ( error == VE_OK )
 		{
-			if( res->IsError() )
+			if ( res->IsError() )
 			{
-				printf( "an error occured in the execution of the prepared statement!\n" );
+				printf ( "an error occured in the execution of the prepared statement!\n" );
 			}
 			else
 			{
-				while( !res->IsEOF() )
+				while ( !res->IsEOF() )
 				{
-					ISQLRow *row = res->RetainNextRow();
+					ISQLRow* row = res->RetainNextRow();
 
-					VValue* value = row->CreateNthValue( 1 );
+					VValue* value = row->GetNthValue ( 2 );
 
 					VString dbgMsg;
 
-					dbgMsg.AppendPrintf( "value = %V", value );
+					dbgMsg.AppendPrintf ( "value = %V", value );
 
-					DebugMsg( "%V\n", &dbgMsg );
+					DebugMsg ( "%V\n", &dbgMsg );
 
-					ReleaseRefCountable( &row );
+					ReleaseRefCountable ( &row );
 				}
 			}
 
-			ReleaseRefCountable( &res );
+			ReleaseRefCountable ( &res );
 		}
 		else
 		{
-			printf( "an error occured in the execution of the prepared statement!\n" );
+			printf ( "an error occured in the execution of the prepared statement!\n" );
 		}
 
-		ReleaseRefCountable( &session );
+		ReleaseRefCountable ( &session );
 	}
 	else
 	{
-		printf( "connection to mysql server failed ..\n" );
+		printf ( "connection to mysql server failed ..\n" );
 	}
 
-	ReleaseRefCountable( &mysqlConnector );
+	ReleaseRefCountable ( &connector );
 }
 
 
 void testMySQLConnectorPreparedStatementWithTypeSmallInt()
 {
-	CMySQLConnector *mysqlConnector = VComponentManager::RetainComponent<CMySQLConnector>();
+	CSQLConnector* connector = VComponentManager::RetainComponent<CMySQLConnector>();
 
-	VJSONObject * params = new VJSONObject();
+	VJSONObject* params = new VJSONObject();
 
-	params->SetProperty( "hostname",	MYSQL_HOST );
+	params->SetProperty ( "hostname",	MYSQL_HOST );
 
-	params->SetProperty( "user",		MYSQL_USER );
+	params->SetProperty ( "user",		MYSQL_USER );
 
-	params->SetProperty( "password",	MYSQL_CORRECT_PASSWORD );
+	params->SetProperty ( "password",	MYSQL_CORRECT_PASSWORD );
 
-	params->SetProperty( "database",	MYSQL_DATABASE );
+	params->SetProperty ( "database",	MYSQL_DATABASE );
 
-	params->SetProperty( "port",		MYSQL_PORT );
+	params->SetProperty ( "port",		MYSQL_PORT );
 
-	params->SetProperty( "ssl",			MYSQL_SSL_FALSE );
+	params->SetProperty ( "ssl",			MYSQL_SSL_FALSE );
 
-	ISQLSession *session = mysqlConnector->CreateSession( params );
+	ISQLSession* session = connector->CreateSession ( params );
 
-	ReleaseRefCountable( &params );
+	ReleaseRefCountable ( &params );
 
-	if(session != NULL)
+	if ( session != NULL )
 	{
-		ISQLStatement *statement = session->CreateStatement( "SELECT * FROM test_small_int");
+		ISQLStatement* statement = session->CreateStatement ( "SELECT * FROM test_small_int" );
 
 		VError error = VE_OK;
 
-		ISQLPreparedStatement* pStmt = statement->CreatePreparedStatement(error);
+		ISQLPreparedStatement* pStmt = statement->CreatePreparedStatement ( error );
 
-		ISQLResultSet *res = pStmt->Execute( error );
+		ISQLResultSet* res = pStmt->Execute ( error );
 
-		if( error == VE_OK )
+		if ( error == VE_OK )
 		{
-			if( res->IsError() )
+			if ( res->IsError() )
 			{
-				printf( "an error occured in the execution of the prepared statement!\n" );
+				printf ( "an error occured in the execution of the prepared statement!\n" );
 			}
 			else
 			{
-				while( !res->IsEOF() )
+				while ( !res->IsEOF() )
 				{
-					ISQLRow *row = res->RetainNextRow();
+					ISQLRow* row = res->RetainNextRow();
 
-					VValue* value = row->CreateNthValue( 1 );
+					VValue* value = row->GetNthValue ( 2 );
 
 					VString dbgMsg;
 
-					dbgMsg.AppendPrintf( "value = %V", value );
+					dbgMsg.AppendPrintf ( "value = %V", value );
 
-					DebugMsg( "%V\n", &dbgMsg );
+					DebugMsg ( "%V\n", &dbgMsg );
 
-					ReleaseRefCountable( &row );
+					ReleaseRefCountable ( &row );
 				}
 			}
 
-			ReleaseRefCountable( &res );
+			ReleaseRefCountable ( &res );
 		}
 		else
 		{
-			printf( "an error occured in the execution of the prepared statement!\n" );
+			printf ( "an error occured in the execution of the prepared statement!\n" );
 		}
 
-		ReleaseRefCountable( &session );
+		ReleaseRefCountable ( &session );
 	}
 	else
 	{
-		printf( "connection to mysql server failed ..\n" );
+		printf ( "connection to mysql server failed ..\n" );
 	}
 
-	ReleaseRefCountable( &mysqlConnector );
+	ReleaseRefCountable ( &connector );
 }
 
 
 void testMySQLConnectorPreparedStatementWithTypeMediumInt()
 {
-	CMySQLConnector *mysqlConnector = VComponentManager::RetainComponent<CMySQLConnector>();
+	CSQLConnector* connector = VComponentManager::RetainComponent<CMySQLConnector>();
 
-	VJSONObject * params = new VJSONObject();
+	VJSONObject* params = new VJSONObject();
 
-	params->SetProperty( "hostname",	MYSQL_HOST );
+	params->SetProperty ( "hostname",	MYSQL_HOST );
 
-	params->SetProperty( "user",		MYSQL_USER );
+	params->SetProperty ( "user",		MYSQL_USER );
 
-	params->SetProperty( "password",	MYSQL_CORRECT_PASSWORD );
+	params->SetProperty ( "password",	MYSQL_CORRECT_PASSWORD );
 
-	params->SetProperty( "database",	MYSQL_DATABASE );
+	params->SetProperty ( "database",	MYSQL_DATABASE );
 
-	params->SetProperty( "port",		MYSQL_PORT );
+	params->SetProperty ( "port",		MYSQL_PORT );
 
-	params->SetProperty( "ssl",			MYSQL_SSL_FALSE );
+	params->SetProperty ( "ssl",			MYSQL_SSL_FALSE );
 
-	ISQLSession *session = mysqlConnector->CreateSession( params );
+	ISQLSession* session = connector->CreateSession ( params );
 
-	ReleaseRefCountable( &params );
+	ReleaseRefCountable ( &params );
 
-	if(session != NULL)
+	if ( session != NULL )
 	{
-		ISQLStatement *statement = session->CreateStatement( "SELECT * FROM test_medium_int");
+		ISQLStatement* statement = session->CreateStatement ( "SELECT * FROM test_medium_int" );
 
 		VError error = VE_OK;
 
-		ISQLPreparedStatement* pStmt = statement->CreatePreparedStatement(error);
+		ISQLPreparedStatement* pStmt = statement->CreatePreparedStatement ( error );
 
-		ISQLResultSet *res = pStmt->Execute( error );
+		ISQLResultSet* res = pStmt->Execute ( error );
 
-		if( error == VE_OK )
+		if ( error == VE_OK )
 		{
-			if( res->IsError() )
+			if ( res->IsError() )
 			{
-				printf( "an error occured in the execution of the prepared statement!\n" );
+				printf ( "an error occured in the execution of the prepared statement!\n" );
 			}
 			else
 			{
-				while( !res->IsEOF() )
+				while ( !res->IsEOF() )
 				{
-					ISQLRow *row = res->RetainNextRow();
+					ISQLRow* row = res->RetainNextRow();
 
-					VValue* value = row->CreateNthValue( 1 );
+					VValue* value = row->GetNthValue ( 2 );
 
 					VString dbgMsg;
 
-					dbgMsg.AppendPrintf( "value = %V", value );
+					dbgMsg.AppendPrintf ( "value = %V", value );
 
-					DebugMsg( "%V\n", &dbgMsg );
+					DebugMsg ( "%V\n", &dbgMsg );
 
-					ReleaseRefCountable( &row );
+					ReleaseRefCountable ( &row );
 				}
 			}
 
-			ReleaseRefCountable( &res );
+			ReleaseRefCountable ( &res );
 		}
 		else
 		{
-			printf( "an error occured in the execution of the prepared statement!\n" );
+			printf ( "an error occured in the execution of the prepared statement!\n" );
 		}
 
-		ReleaseRefCountable( &session );
+		ReleaseRefCountable ( &session );
 	}
 	else
 	{
-		printf( "connection to mysql server failed ..\n" );
+		printf ( "connection to mysql server failed ..\n" );
 	}
 
-	ReleaseRefCountable( &mysqlConnector );
+	ReleaseRefCountable ( &connector );
 }
 
 
 void testMySQLConnectorPreparedStatementWithTypeInt()
 {
-	CMySQLConnector *mysqlConnector = VComponentManager::RetainComponent<CMySQLConnector>();
+	CSQLConnector* connector = VComponentManager::RetainComponent<CMySQLConnector>();
 
-	VJSONObject * params = new VJSONObject();
+	VJSONObject* params = new VJSONObject();
 
-	params->SetProperty( "hostname",	MYSQL_HOST );
+	params->SetProperty ( "hostname",	MYSQL_HOST );
 
-	params->SetProperty( "user",		MYSQL_USER );
+	params->SetProperty ( "user",		MYSQL_USER );
 
-	params->SetProperty( "password",	MYSQL_CORRECT_PASSWORD );
+	params->SetProperty ( "password",	MYSQL_CORRECT_PASSWORD );
 
-	params->SetProperty( "database",	MYSQL_DATABASE );
+	params->SetProperty ( "database",	MYSQL_DATABASE );
 
-	params->SetProperty( "port",		MYSQL_PORT );
+	params->SetProperty ( "port",		MYSQL_PORT );
 
-	params->SetProperty( "ssl",			MYSQL_SSL_FALSE );
+	params->SetProperty ( "ssl",			MYSQL_SSL_FALSE );
 
-	ISQLSession *session = mysqlConnector->CreateSession( params );
+	ISQLSession* session = connector->CreateSession ( params );
 
-	ReleaseRefCountable( &params );
+	ReleaseRefCountable ( &params );
 
-	if(session != NULL)
+	if ( session != NULL )
 	{
-		ISQLStatement *statement = session->CreateStatement( "SELECT * FROM test_int");
+		ISQLStatement* statement = session->CreateStatement ( "SELECT * FROM test_int" );
 
 		VError error = VE_OK;
 
-		ISQLPreparedStatement* pStmt = statement->CreatePreparedStatement(error);
+		ISQLPreparedStatement* pStmt = statement->CreatePreparedStatement ( error );
 
-		ISQLResultSet *res = pStmt->Execute( error );
+		ISQLResultSet* res = pStmt->Execute ( error );
 
-		if( error == VE_OK )
+		if ( error == VE_OK )
 		{
-			if( res->IsError() )
+			if ( res->IsError() )
 			{
-				printf( "an error occured in the execution of the prepared statement!\n" );
+				printf ( "an error occured in the execution of the prepared statement!\n" );
 			}
 			else
 			{
-				while( !res->IsEOF() )
+				while ( !res->IsEOF() )
 				{
-					ISQLRow *row = res->RetainNextRow();
+					ISQLRow* row = res->RetainNextRow();
 
-					VValue* value = row->CreateNthValue( 1 );
+					VValue* value = row->GetNthValue ( 2 );
 
 					VString dbgMsg;
 
-					dbgMsg.AppendPrintf( "value = %V", value );
+					dbgMsg.AppendPrintf ( "value = %V", value );
 
-					DebugMsg( "%V\n", &dbgMsg );
+					DebugMsg ( "%V\n", &dbgMsg );
 
-					ReleaseRefCountable( &row );
+					ReleaseRefCountable ( &row );
 				}
 			}
 
-			ReleaseRefCountable( &res );
+			ReleaseRefCountable ( &res );
 		}
 		else
 		{
-			printf( "an error occured in the execution of the prepared statement!\n" );
+			printf ( "an error occured in the execution of the prepared statement!\n" );
 		}
-		
-		ReleaseRefCountable( &session );
+
+		ReleaseRefCountable ( &session );
 	}
 	else
 	{
-		printf( "connection to mysql server failed ..\n" );
+		printf ( "connection to mysql server failed ..\n" );
 	}
 
-	ReleaseRefCountable( &mysqlConnector );
+	ReleaseRefCountable ( &connector );
 }
 
 void testMySQLConnectorPreparedStatementWithTypeBigInt()
 {
-	CMySQLConnector *mysqlConnector = VComponentManager::RetainComponent<CMySQLConnector>();
+	CSQLConnector* connector = VComponentManager::RetainComponent<CMySQLConnector>();
 
-	VJSONObject * params = new VJSONObject();
+	VJSONObject* params = new VJSONObject();
 
-	params->SetProperty( "hostname",	MYSQL_HOST );
+	params->SetProperty ( "hostname",	MYSQL_HOST );
 
-	params->SetProperty( "user",		MYSQL_USER );
+	params->SetProperty ( "user",		MYSQL_USER );
 
-	params->SetProperty( "password",	MYSQL_CORRECT_PASSWORD );
+	params->SetProperty ( "password",	MYSQL_CORRECT_PASSWORD );
 
-	params->SetProperty( "database",	MYSQL_DATABASE );
+	params->SetProperty ( "database",	MYSQL_DATABASE );
 
-	params->SetProperty( "port",		MYSQL_PORT );
+	params->SetProperty ( "port",		MYSQL_PORT );
 
-	params->SetProperty( "ssl",			MYSQL_SSL_FALSE );
+	params->SetProperty ( "ssl",			MYSQL_SSL_FALSE );
 
-	ISQLSession *session = mysqlConnector->CreateSession( params );
+	ISQLSession* session = connector->CreateSession ( params );
 
-	ReleaseRefCountable( &params );
+	ReleaseRefCountable ( &params );
 
-	if(session != NULL)
+	if ( session != NULL )
 	{
-		ISQLStatement *statement = session->CreateStatement( "SELECT * FROM test_big_int");
+		ISQLStatement* statement = session->CreateStatement ( "SELECT * FROM test_big_int" );
 
 		VError error = VE_OK;
 
-		ISQLPreparedStatement* pStmt = statement->CreatePreparedStatement(error);
+		ISQLPreparedStatement* pStmt = statement->CreatePreparedStatement ( error );
 
-		ISQLResultSet *res = pStmt->Execute( error );
+		ISQLResultSet* res = pStmt->Execute ( error );
 
-		if( error == VE_OK )
+		if ( error == VE_OK )
 		{
-			if( res->IsError() )
+			if ( res->IsError() )
 			{
-				printf( "an error occured in the execution of the prepared statement!\n" );
+				printf ( "an error occured in the execution of the prepared statement!\n" );
 			}
 			else
 			{
-				while( !res->IsEOF() )
+				while ( !res->IsEOF() )
 				{
-					ISQLRow *row = res->RetainNextRow();
+					ISQLRow* row = res->RetainNextRow();
 
-					VValue* value = row->CreateNthValue( 1 );
+					VValue* value = row->GetNthValue ( 2 );
 
 					VString dbgMsg;
 
-					dbgMsg.AppendPrintf( "value = %V", value );
+					dbgMsg.AppendPrintf ( "value = %V", value );
 
-					DebugMsg( "%V\n", &dbgMsg );
+					DebugMsg ( "%V\n", &dbgMsg );
 
-					ReleaseRefCountable( &row );
+					ReleaseRefCountable ( &row );
 				}
 			}
 
-			ReleaseRefCountable( &res );
+			ReleaseRefCountable ( &res );
 		}
 		else
 		{
-			printf( "an error occured in the execution of the prepared statement!\n" );
+			printf ( "an error occured in the execution of the prepared statement!\n" );
 		}
-		
-		ReleaseRefCountable( &session );
+
+		ReleaseRefCountable ( &session );
 	}
 	else
 	{
-		printf( "connection to mysql server failed ..\n" );
+		printf ( "connection to mysql server failed ..\n" );
 	}
 
-	ReleaseRefCountable( &mysqlConnector );
+	ReleaseRefCountable ( &connector );
 }
 
 void testMySQLConnectorPreparedStatementWithTypeFloat()
 {
-	CMySQLConnector *mysqlConnector = VComponentManager::RetainComponent<CMySQLConnector>();
+	CSQLConnector* connector = VComponentManager::RetainComponent<CMySQLConnector>();
 
-	VJSONObject * params = new VJSONObject();
+	VJSONObject* params = new VJSONObject();
 
-	params->SetProperty( "hostname",	MYSQL_HOST );
+	params->SetProperty ( "hostname",	MYSQL_HOST );
 
-	params->SetProperty( "user",		MYSQL_USER );
+	params->SetProperty ( "user",		MYSQL_USER );
 
-	params->SetProperty( "password",	MYSQL_CORRECT_PASSWORD );
+	params->SetProperty ( "password",	MYSQL_CORRECT_PASSWORD );
 
-	params->SetProperty( "database",	MYSQL_DATABASE );
+	params->SetProperty ( "database",	MYSQL_DATABASE );
 
-	params->SetProperty( "port",		MYSQL_PORT );
+	params->SetProperty ( "port",		MYSQL_PORT );
 
-	params->SetProperty( "ssl",			MYSQL_SSL_FALSE );
+	params->SetProperty ( "ssl",			MYSQL_SSL_FALSE );
 
-	ISQLSession *session = mysqlConnector->CreateSession( params );
+	ISQLSession* session = connector->CreateSession ( params );
 
-	ReleaseRefCountable( &params );
+	ReleaseRefCountable ( &params );
 
-	if(session != NULL)
+	if ( session != NULL )
 	{
-		ISQLStatement *statement = session->CreateStatement( "SELECT * FROM test_float");
+		ISQLStatement* statement = session->CreateStatement ( "SELECT * FROM test_float" );
 
 		VError error = VE_OK;
 
-		ISQLPreparedStatement* pStmt = statement->CreatePreparedStatement(error);
+		ISQLPreparedStatement* pStmt = statement->CreatePreparedStatement ( error );
 
-		ISQLResultSet *res = pStmt->Execute( error );
+		ISQLResultSet* res = pStmt->Execute ( error );
 
-		if( error == VE_OK )
+		if ( error == VE_OK )
 		{
-			if( res->IsError() )
+			if ( res->IsError() )
 			{
-				printf( "an error occured in the execution of the prepared statement!\n" );
+				printf ( "an error occured in the execution of the prepared statement!\n" );
 			}
 			else
 			{
-				while( !res->IsEOF() )
+				while ( !res->IsEOF() )
 				{
-					ISQLRow *row = res->RetainNextRow();
+					ISQLRow* row = res->RetainNextRow();
 
-					VValue* value = row->CreateNthValue( 1 );
+					VValue* value = row->GetNthValue ( 2 );
 
 					VString dbgMsg;
 
-					dbgMsg.AppendPrintf( "value = %V", value );
+					dbgMsg.AppendPrintf ( "value = %V", value );
 
-					DebugMsg( "%V\n", &dbgMsg );
+					DebugMsg ( "%V\n", &dbgMsg );
 
-					ReleaseRefCountable( &row );
+					ReleaseRefCountable ( &row );
 				}
 			}
 
-			ReleaseRefCountable( &res );
+			ReleaseRefCountable ( &res );
 		}
 		else
 		{
-			printf( "an error occured in the execution of the prepared statement!\n" );
+			printf ( "an error occured in the execution of the prepared statement!\n" );
 		}
-		
-		ReleaseRefCountable( &session );
+
+		ReleaseRefCountable ( &session );
 	}
 	else
 	{
-		printf( "connection to mysql server failed ..\n" );
+		printf ( "connection to mysql server failed ..\n" );
 	}
 
-	ReleaseRefCountable( &mysqlConnector );
+	ReleaseRefCountable ( &connector );
 }
 
 void testMySQLConnectorPreparedStatementWithTypeDouble()
 {
-	CMySQLConnector *mysqlConnector = VComponentManager::RetainComponent<CMySQLConnector>();
+	CSQLConnector* connector = VComponentManager::RetainComponent<CMySQLConnector>();
 
-	VJSONObject * params = new VJSONObject();
+	VJSONObject* params = new VJSONObject();
 
-	params->SetProperty( "hostname",	MYSQL_HOST );
+	params->SetProperty ( "hostname",	MYSQL_HOST );
 
-	params->SetProperty( "user",		MYSQL_USER );
+	params->SetProperty ( "user",		MYSQL_USER );
 
-	params->SetProperty( "password",	MYSQL_CORRECT_PASSWORD );
+	params->SetProperty ( "password",	MYSQL_CORRECT_PASSWORD );
 
-	params->SetProperty( "database",	MYSQL_DATABASE );
+	params->SetProperty ( "database",	MYSQL_DATABASE );
 
-	params->SetProperty( "port",		MYSQL_PORT );
+	params->SetProperty ( "port",		MYSQL_PORT );
 
-	params->SetProperty( "ssl",			MYSQL_SSL_FALSE );
+	params->SetProperty ( "ssl",			MYSQL_SSL_FALSE );
 
-	ISQLSession *session = mysqlConnector->CreateSession( params );
+	ISQLSession* session = connector->CreateSession ( params );
 
-	ReleaseRefCountable( &params );
+	ReleaseRefCountable ( &params );
 
-	if(session != NULL)
+	if ( session != NULL )
 	{
-		ISQLStatement *statement = session->CreateStatement( "SELECT * FROM test_double");
+		ISQLStatement* statement = session->CreateStatement ( "SELECT * FROM test_double" );
 
 		VError error = VE_OK;
 
-		ISQLPreparedStatement* pStmt = statement->CreatePreparedStatement(error);
+		ISQLPreparedStatement* pStmt = statement->CreatePreparedStatement ( error );
 
-		ISQLResultSet *res = pStmt->Execute( error );
+		ISQLResultSet* res = pStmt->Execute ( error );
 
-		if( error == VE_OK )
+		if ( error == VE_OK )
 		{
-			if( res->IsError() )
+			if ( res->IsError() )
 			{
-				printf( "an error occured in the execution of the prepared statement!\n" );
+				printf ( "an error occured in the execution of the prepared statement!\n" );
 			}
 			else
 			{
-				while( !res->IsEOF() )
+				while ( !res->IsEOF() )
 				{
-					ISQLRow *row = res->RetainNextRow();
+					ISQLRow* row = res->RetainNextRow();
 
-					VValue* value = row->CreateNthValue( 1 );
+					VValue* value = row->GetNthValue ( 2 );
 
 					VString dbgMsg;
 
-					dbgMsg.AppendPrintf( "value = %V", value );
+					dbgMsg.AppendPrintf ( "value = %V", value );
 
-					DebugMsg( "%V\n", &dbgMsg );
+					DebugMsg ( "%V\n", &dbgMsg );
 
-					ReleaseRefCountable( &row );
+					ReleaseRefCountable ( &row );
 				}
 			}
 
-			ReleaseRefCountable( &res );
+			ReleaseRefCountable ( &res );
 		}
 		else
 		{
-			printf( "an error occured in the execution of the prepared statement!\n" );
+			printf ( "an error occured in the execution of the prepared statement!\n" );
 		}
-		
-		ReleaseRefCountable( &session );
+
+		ReleaseRefCountable ( &session );
 	}
 	else
 	{
-		printf( "connection to mysql server failed ..\n" );
+		printf ( "connection to mysql server failed ..\n" );
 	}
 
-	ReleaseRefCountable( &mysqlConnector );
+	ReleaseRefCountable ( &connector );
 }
 
 
 void testMySQLConnectorPreparedStatementWithTypeString()
 {
-	CMySQLConnector *mysqlConnector = VComponentManager::RetainComponent<CMySQLConnector>();
+	CSQLConnector* connector = VComponentManager::RetainComponent<CMySQLConnector>();
 
-	VJSONObject * params = new VJSONObject();
+	VJSONObject* params = new VJSONObject();
 
-	params->SetProperty( "hostname",	MYSQL_HOST );
+	params->SetProperty ( "hostname",	MYSQL_HOST );
 
-	params->SetProperty( "user",		MYSQL_USER );
+	params->SetProperty ( "user",		MYSQL_USER );
 
-	params->SetProperty( "password",	MYSQL_CORRECT_PASSWORD );
+	params->SetProperty ( "password",	MYSQL_CORRECT_PASSWORD );
 
-	params->SetProperty( "database",	MYSQL_DATABASE );
+	params->SetProperty ( "database",	MYSQL_DATABASE );
 
-	params->SetProperty( "port",		MYSQL_PORT );
+	params->SetProperty ( "port",		MYSQL_PORT );
 
-	params->SetProperty( "ssl",			MYSQL_SSL_FALSE );
+	params->SetProperty ( "ssl",			MYSQL_SSL_FALSE );
 
-	ISQLSession *session = mysqlConnector->CreateSession( params );
+	ISQLSession* session = connector->CreateSession ( params );
 
-	ReleaseRefCountable( &params );
+	ReleaseRefCountable ( &params );
 
-	if(session != NULL)
+	if ( session != NULL )
 	{
-		ISQLStatement *statement = session->CreateStatement( "SELECT * FROM test_string");
+		ISQLStatement* statement = session->CreateStatement ( "SELECT * FROM test_string" );
 
 		VError error = VE_OK;
 
-		ISQLPreparedStatement* pStmt = statement->CreatePreparedStatement(error);
+		ISQLPreparedStatement* pStmt = statement->CreatePreparedStatement ( error );
 
-		ISQLResultSet *res = pStmt->Execute( error );
+		ISQLResultSet* res = pStmt->Execute ( error );
 
-		if( error == VE_OK )
+		if ( error == VE_OK )
 		{
-			if( res->IsError() )
+			if ( res->IsError() )
 			{
-				printf( "an error occured in the execution of the prepared statement!\n" );
+				printf ( "an error occured in the execution of the prepared statement!\n" );
 			}
 			else
 			{
-				while( !res->IsEOF() )
+				while ( !res->IsEOF() )
 				{
-					ISQLRow *row = res->RetainNextRow();
+					ISQLRow* row = res->RetainNextRow();
 
-					VValue* value = row->CreateNthValue( 1 );
+					VValue* value = row->GetNthValue ( 2 );
 
 					VString dbgMsg;
 
-					dbgMsg.AppendPrintf( "value = %V", value );
+					dbgMsg.AppendPrintf ( "value = %V", value );
 
-					DebugMsg( "%V\n", &dbgMsg );
+					DebugMsg ( "%V\n", &dbgMsg );
 
-					ReleaseRefCountable( &row );
+					ReleaseRefCountable ( &row );
 				}
 			}
 
-			ReleaseRefCountable( &res );
+			ReleaseRefCountable ( &res );
 		}
 		else
 		{
-			printf( "an error occured in the execution of the prepared statement!\n" );
+			printf ( "an error occured in the execution of the prepared statement!\n" );
 		}
-		
-		ReleaseRefCountable( &session );
+
+		ReleaseRefCountable ( &session );
 	}
 	else
 	{
-		printf( "connection to mysql server failed ..\n" );
+		printf ( "connection to mysql server failed ..\n" );
 	}
 
-	ReleaseRefCountable( &mysqlConnector );
+	ReleaseRefCountable ( &connector );
 }
 
 
 void testMySQLConnectorPreparedStatementWithTypeDateTime()
 {
-	CMySQLConnector *mysqlConnector = VComponentManager::RetainComponent<CMySQLConnector>();
+	CSQLConnector* connector = VComponentManager::RetainComponent<CMySQLConnector>();
 
-	VJSONObject * params = new VJSONObject();
+	VJSONObject* params = new VJSONObject();
 
-	params->SetProperty( "hostname",	MYSQL_HOST );
+	params->SetProperty ( "hostname",	MYSQL_HOST );
 
-	params->SetProperty( "user",		MYSQL_USER );
+	params->SetProperty ( "user",		MYSQL_USER );
 
-	params->SetProperty( "password",	MYSQL_CORRECT_PASSWORD );
+	params->SetProperty ( "password",	MYSQL_CORRECT_PASSWORD );
 
-	params->SetProperty( "database",	MYSQL_DATABASE );
+	params->SetProperty ( "database",	MYSQL_DATABASE );
 
-	params->SetProperty( "port",		MYSQL_PORT );
+	params->SetProperty ( "port",		MYSQL_PORT );
 
-	params->SetProperty( "ssl",			MYSQL_SSL_FALSE );
+	params->SetProperty ( "ssl",			MYSQL_SSL_FALSE );
 
-	ISQLSession *session = mysqlConnector->CreateSession( params );
+	ISQLSession* session = connector->CreateSession ( params );
 
-	ReleaseRefCountable( &params );
+	ReleaseRefCountable ( &params );
 
-	if(session != NULL)
+	if ( session != NULL )
 	{
-		ISQLStatement *statement = session->CreateStatement( "SELECT * FROM test_datetime");
+		ISQLStatement* statement = session->CreateStatement ( "SELECT * FROM test_datetime" );
 
 		VError error = VE_OK;
 
-		ISQLPreparedStatement* pStmt = statement->CreatePreparedStatement(error);
+		ISQLPreparedStatement* pStmt = statement->CreatePreparedStatement ( error );
 
-		ISQLResultSet *res = pStmt->Execute( error );
+		ISQLResultSet* res = pStmt->Execute ( error );
 
-		if( error == VE_OK )
+		if ( error == VE_OK )
 		{
-			if( res->IsError() )
+			if ( res->IsError() )
 			{
-				printf( "an error occured in the execution of the prepared statement!\n" );
+				printf ( "an error occured in the execution of the prepared statement!\n" );
 			}
 			else
 			{
-				while( !res->IsEOF() )
+				while ( !res->IsEOF() )
 				{
-					ISQLRow *row = res->RetainNextRow();
+					ISQLRow* row = res->RetainNextRow();
 
-					VValue* value = row->CreateNthValue( 1 );
+					VValue* value = row->GetNthValue ( 2 );
 
 					VString dbgMsg;
 
-					dbgMsg.AppendPrintf( "value = %V", value );
+					dbgMsg.AppendPrintf ( "value = %V", value );
 
-					DebugMsg( "%V\n", &dbgMsg );
+					DebugMsg ( "%V\n", &dbgMsg );
 
-					ReleaseRefCountable( &row );
+					ReleaseRefCountable ( &row );
 				}
 			}
 
-			ReleaseRefCountable( &res );
+			ReleaseRefCountable ( &res );
 		}
 		else
 		{
-			printf( "an error occured in the execution of the prepared statement!\n" );
+			printf ( "an error occured in the execution of the prepared statement!\n" );
 		}
-		
-		ReleaseRefCountable( &session );
+
+		ReleaseRefCountable ( &session );
 	}
 	else
 	{
-		printf( "connection to mysql server failed ..\n" );
+		printf ( "connection to mysql server failed ..\n" );
 	}
 
-	ReleaseRefCountable( &mysqlConnector );
+	ReleaseRefCountable ( &connector );
 }
 
 
 void testMySQLConnectorPreparedStatementWithTypeBlob()
 {
-	CMySQLConnector *mysqlConnector = VComponentManager::RetainComponent<CMySQLConnector>();
+	CSQLConnector* connector = VComponentManager::RetainComponent<CMySQLConnector>();
 
-	VJSONObject * params = new VJSONObject();
+	VJSONObject* params = new VJSONObject();
 
-	params->SetProperty( "hostname",	MYSQL_HOST );
+	params->SetProperty ( "hostname",	MYSQL_HOST );
 
-	params->SetProperty( "user",		MYSQL_USER );
+	params->SetProperty ( "user",		MYSQL_USER );
 
-	params->SetProperty( "password",	MYSQL_CORRECT_PASSWORD );
+	params->SetProperty ( "password",	MYSQL_CORRECT_PASSWORD );
 
-	params->SetProperty( "database",	MYSQL_DATABASE );
+	params->SetProperty ( "database",	MYSQL_DATABASE );
 
-	params->SetProperty( "port",		MYSQL_PORT );
+	params->SetProperty ( "port",		MYSQL_PORT );
 
-	params->SetProperty( "ssl",			MYSQL_SSL_FALSE );
+	params->SetProperty ( "ssl",			MYSQL_SSL_FALSE );
 
-	ISQLSession *session = mysqlConnector->CreateSession( params );
+	ISQLSession* session = connector->CreateSession ( params );
 
-	ReleaseRefCountable( &params );
+	ReleaseRefCountable ( &params );
 
-	if(session != NULL)
+	if ( session != NULL )
 	{
-		ISQLStatement *statement = session->CreateStatement( "SELECT * FROM test_blob");
+		ISQLStatement* statement = session->CreateStatement ( "SELECT * FROM test_blob" );
 
 		VError error = VE_OK;
 
-		ISQLPreparedStatement* pStmt = statement->CreatePreparedStatement(error);
+		ISQLPreparedStatement* pStmt = statement->CreatePreparedStatement ( error );
 
-		ISQLResultSet *res = pStmt->Execute( error );
+		ISQLResultSet* res = pStmt->Execute ( error );
 
-		if( error == VE_OK )
+		if ( error == VE_OK )
 		{
-			if( res->IsError() )
+			if ( res->IsError() )
 			{
-				printf( "an error occured in the execution of the prepared statement!\n" );
+				printf ( "an error occured in the execution of the prepared statement!\n" );
 			}
 			else
 			{
-				uBYTE expected[3][16] = {
+				uBYTE expected[3][16] =
+				{
 					{0x0f, 0xC9, 0xCB, 0xBB, 0xCC, 0xCE, 0xB9, 0xC8, 0xCA, 0xBC, 0xCC, 0xCE, 0xB9, 0xC9, 0xCB, 0xBB},
 					{0x03, 0xAB, 0xCD, 0xEF},
 					{0x00}
@@ -1257,128 +1253,369 @@ void testMySQLConnectorPreparedStatementWithTypeBlob()
 
 				bool ok = true;
 
-				while( !res->IsEOF() )
+				while ( !res->IsEOF() )
 				{
-					ISQLRow *row = res->RetainNextRow();
+					ISQLRow* row = res->RetainNextRow();
 
-					VValue *value = row->CreateNthValue( 1 );
+					VValue* value = row->GetNthValue ( 2 );
 
-					VBlobWithPtr *blobValue = static_cast<VBlobWithPtr*>(value);
+					VBlobWithPtr* blobValue = static_cast<VBlobWithPtr*> ( value );
 
 					sLONG8 len = blobValue->GetSize();
 
-				
 
-					if( len != expected[i][0] )
+
+					if ( len != expected[i][0] )
 					{
 						ok = false;
 					}
-					else if( len == 0 )
+					else if ( len == 0 )
 					{
 
 					}
 					else
 					{
-						uBYTE *buffer = (uBYTE*) ::malloc( len );
+						uBYTE* buffer = ( uBYTE* ) ::malloc ( len );
 
 						xbox::VSize copied;
 
-						blobValue->GetData( buffer, len, 0, &copied );
+						blobValue->GetData ( buffer, len, 0, &copied );
 
-						for( sLONG n = 0; n < len; ++n )
+						for ( sLONG n = 0; n < len; ++n )
 						{
-							if( expected[i][n+1] != buffer[n] )
+							if ( expected[i][n + 1] != buffer[n] )
 							{
 								ok = false;
-								
+
 								break;
 							}
 						}
 					}
 
 
-					ReleaseRefCountable( &row );
+					ReleaseRefCountable ( &row );
 
 					++i;
 				}
 
-				if(ok)
+				if ( ok )
 				{
-					printf("testMySQLConnectorPreparedStatementWithTypeBlob is OK\n");
+					printf ( "testMySQLConnectorPreparedStatementWithTypeBlob is OK\n" );
 				}
 				else
 				{
-					printf("testMySQLConnectorPreparedStatementWithTypeBlob is KO\n");
+					printf ( "testMySQLConnectorPreparedStatementWithTypeBlob is KO\n" );
 				}
 			}
 
-			ReleaseRefCountable( &res );
+			ReleaseRefCountable ( &res );
 		}
 		else
 		{
-			printf( "an error occured in the execution of the prepared statement!\n" );
+			printf ( "an error occured in the execution of the prepared statement!\n" );
 		}
-		
-		ReleaseRefCountable( &session );
+
+		ReleaseRefCountable ( &session );
 	}
 	else
 	{
-		printf( "connection to mysql server failed ..\n" );
+		printf ( "connection to mysql server failed ..\n" );
 	}
 
-	ReleaseRefCountable( &mysqlConnector );
+	ReleaseRefCountable ( &connector );
 }
+
+
 
 void MySQLConnectorBench()
 {
-	CMySQLConnector *mysqlConnector = VComponentManager::RetainComponent<CMySQLConnector>();
+	CSQLConnector* connector = VComponentManager::RetainComponent<CMySQLConnector>();
 
-	VJSONObject * params = new VJSONObject();
+	VJSONObject* params = new VJSONObject();
 
-	params->SetProperty( "hostname",	MYSQL_HOST );
+	params->SetProperty ( "hostname",	MYSQL_HOST );
 
-	params->SetProperty( "user",		MYSQL_USER );
+	params->SetProperty ( "user",		MYSQL_USER );
 
-	params->SetProperty( "password",	MYSQL_CORRECT_PASSWORD );
+	params->SetProperty ( "password",	MYSQL_CORRECT_PASSWORD );
 
-	params->SetProperty( "database",	MYSQL_DATABASE );
+	params->SetProperty ( "database",	MYSQL_DATABASE );
 
-	params->SetProperty( "port",		MYSQL_PORT );
+	params->SetProperty ( "port",		MYSQL_PORT );
 
-	params->SetProperty( "ssl",			MYSQL_SSL_FALSE );
+	params->SetProperty ( "ssl",			MYSQL_SSL_FALSE );
 
-	ISQLSession *session = mysqlConnector->CreateSession( params );
+	ISQLSession* session = connector->CreateSession ( params );
 
-	if(session != NULL)
+	if ( session != NULL )
 	{
-		VString query("SELECT * FROM people");
+		VString query ( "SELECT * FROM people" );
 
 		clock_t startClock = clock();
 
-		VError error = session->ExecuteQuery( query );
+		VError error = session->ExecuteQuery ( query );
 
 		clock_t endClock = clock();
 
-		sLONG Dt = 1000 * (endClock-startClock) / CLOCKS_PER_SEC;
+		sLONG Dt = 1000 * ( endClock - startClock ) / CLOCKS_PER_SEC;
 
-		printf( "fetching all rows takes %d milliseconds\n", Dt );
-		fflush(stderr);
+		printf ( "fetching all rows takes %d milliseconds\n", Dt );
+		fflush ( stderr );
 
 		startClock = clock();
 
-		ReleaseRefCountable( &session );
+		ReleaseRefCountable ( &session );
 
 		endClock = clock();
 
-		Dt = 1000 * (endClock-startClock) / CLOCKS_PER_SEC;
+		Dt = 1000 * ( endClock - startClock ) / CLOCKS_PER_SEC;
 
-		printf( "releasing all rows takes %d milliseconds\n", Dt );
-		fflush(stderr);
+		printf ( "releasing all rows takes %d milliseconds\n", Dt );
+		fflush ( stderr );
 	}
 
-	ReleaseRefCountable( &params );
+	ReleaseRefCountable ( &params );
 
-	ReleaseRefCountable( &mysqlConnector );
+	ReleaseRefCountable ( &connector );
+}
 
 
+void MySQLConnectorSample()
+{
+	DebugMsg ( "\n------------- START DEMO MYSQL CONNECTOR -------------\n" );
+
+	CSQLConnector* connector = VComponentManager::RetainComponent<CMySQLConnector>();
+
+	VJSONObject* params = new VJSONObject();
+
+	params->SetProperty ( "hostname",	MYSQL_HOST );
+
+	params->SetProperty ( "user",		MYSQL_USER );
+
+	params->SetProperty ( "password",	MYSQL_CORRECT_PASSWORD );
+
+	params->SetProperty ( "database",	MYSQL_DATABASE );
+
+	params->SetProperty ( "port",		MYSQL_PORT );
+
+	params->SetProperty ( "ssl",		MYSQL_SSL_FALSE );
+
+	ISQLSession* session = connector->CreateSession ( params );
+
+	if ( session != NULL )
+	{
+		VString query ( "SELECT * FROM people WHERE id = ?" );
+
+		ISQLStatement* stmt = session->CreateStatement ( query );
+
+		VError error;
+
+		ISQLPreparedStatement* pstmt = stmt->CreatePreparedStatement ( error );
+
+		if ( error == VE_OK )
+		{
+			pstmt->SetNthParameter ( 1, VLong ( 1 ) );
+
+			ISQLResultSet* res = pstmt->Execute ( error );
+
+			ISQLRow* row = res->RetainNextRow();
+
+			VValue*	id			= row->GetNthValue ( 1 );
+			VValue*	matricule	= row->GetNthValue ( 2 );
+			VValue* firstName	= row->GetNthValue ( 3 );
+			VValue* lastName	= row->GetNthValue ( 4 );
+			VValue*	birthDate	= row->GetNthValue ( 5 );
+
+			DebugMsg ( "id = %V\n", id );
+
+			DebugMsg ( "matricule = %V\n", matricule );
+
+			DebugMsg ( "first name = %V\n", firstName );
+
+			DebugMsg ( "last name = %V\n", lastName );
+
+			DebugMsg ( "birth date = %V\n", birthDate );
+
+		}
+		else
+		{
+			DebugMsg ( "Error: Can't create the prepared statement!\n" );
+		}
+
+
+		ReleaseRefCountable ( &session );
+
+	}
+
+	ReleaseRefCountable ( &params );
+
+	ReleaseRefCountable ( &connector );
+
+	DebugMsg ( "\n-------------- END DEMO MYSQL CONNECTOR -------------\n" );
+}
+
+void SQLModelSample()
+{
+	DebugMsg ( "\n------------- START DEMO SQL Model -------------\n" );
+
+	CSQLConnector* connector = VComponentManager::RetainComponent<CMySQLConnector>();
+
+	VJSONObject* params = new VJSONObject();
+
+	params->SetProperty ( "hostname",	MYSQL_HOST );
+
+	params->SetProperty ( "user",		MYSQL_USER );
+
+	params->SetProperty ( "password",	MYSQL_CORRECT_PASSWORD );
+
+	params->SetProperty ( "database",	MYSQL_DATABASE );
+
+	params->SetProperty ( "port",		MYSQL_PORT );
+
+	params->SetProperty ( "ssl",		MYSQL_SSL_FALSE );
+
+	ISQLSession* session = connector->CreateSession ( params );
+
+	if ( session != NULL )
+	{
+		CSQLModel* modelComponent = VComponentManager::RetainComponent<CSQLModel>();
+
+		ISQLModel* model = modelComponent->CreateModel ( session );
+
+		sLONG count = model->GetDataClassesCount();
+
+		for ( sLONG i = 0; i < count; ++i )
+		{
+			VString name;
+
+			ISQLDataClass* dataClass = model->GetDataClass ( i );
+
+			dataClass->GetName ( name );
+
+
+			//verifying attributes of dataclass people
+
+			if ( name == "people" )
+			{
+				sLONG attributeCount = dataClass->GetAttributesCount();
+
+				for ( sLONG j = 0; j < attributeCount; ++j )
+				{
+					ISQLAttribute* attr = dataClass->GetAttribute ( j );
+
+					VString attrName;
+
+					attr->GetName ( attrName );
+
+					ValueKind kind = attr->GetValueKind();
+
+					DebugMsg ( "attribute name = %V\n", &attrName );
+
+					DebugMsg ( "attribute kind = %d\n", kind );
+				}
+			}
+
+
+
+			//verifying collection creation
+			if ( name == "people" )
+			{
+				ISQLCollection* collection = dataClass->CreateAllRecordsCollection ( session );
+
+				//VString query = CVSTR( "SELECT * FROM people WHERE id >= 100 AND id < 200" );
+
+				//ISQLCollection* collection = dataClass->CreateQueryRecordsCollection( query, session );
+
+
+				sLONG collectionCount = collection->GetCount(session);
+
+				DebugMsg ( "collection count = %d\n", collectionCount );
+
+				ISQLPrimaryKey* primaryKey = collection->RetainPrimaryKey ( session, 1 );
+
+				std::vector<VString> keyAttributes;
+
+				primaryKey->GetAttributeNames ( keyAttributes );
+
+				DebugMsg ( "key attributes are\n" );
+
+				for ( std::vector<VString>::iterator it = keyAttributes.begin(); it != keyAttributes.end(); ++it )
+				{
+					DebugMsg ( "%V = %V\n", & ( *it ), primaryKey->GetAttribute ( *it ) );
+				}
+
+				ISQLEntity* entity = collection->RetainEntity ( session, 2 );
+
+				std::vector<VString> entityAttributes;
+
+				entity->GetAttributeNames ( entityAttributes );
+
+				DebugMsg ( "entity attributes are\n" );
+
+				for ( std::vector<VString>::iterator it = entityAttributes.begin(); it != entityAttributes.end(); ++it )
+				{
+					DebugMsg ( "%V = %V\n", & ( *it ), entity->GetAttribute ( *it ) );
+				}
+
+				ISQLEntity* newEntity = dataClass->CreateEntity();
+
+				newEntity->SetAttribute ( "id", VLong ( 100002 ) );
+
+				newEntity->SetAttribute ( "matricule", VLong ( 15 ) );
+
+				newEntity->SetAttribute ( "first_name", CVSTR ( "demo" ) );
+
+				newEntity->SetAttribute ( "last_name", CVSTR ( "SQL model" ) );
+
+				VTime birthDate;
+
+				birthDate.FromUTCTime ( 2012, 12, 11, 0, 0, 0, 0 );
+
+				newEntity->SetAttribute ( "date_of_birth", birthDate );
+
+				VError error = newEntity->Save ( session );
+
+				if ( error != VE_OK )
+				{
+					DebugMsg ( "Entity not created!\n" );
+				}
+
+				newEntity->SetAttribute ( "first_name",  CVSTR ( "update demo" ) );
+
+				error = newEntity->Save ( session );
+
+				if ( error != VE_OK )
+				{
+					DebugMsg ( "Entity not updated!\n" );
+				}
+
+				error = newEntity->Delete ( session );
+
+				if ( error != VE_OK )
+				{
+					DebugMsg ( "Entity not deleted!\n" );
+				}
+
+				ReleaseRefCountable ( &newEntity );
+
+				ReleaseRefCountable ( &entity );
+
+				ReleaseRefCountable ( &primaryKey );
+
+				ReleaseRefCountable ( &collection );
+			}
+		}
+
+		ReleaseRefCountable ( &model );
+
+		ReleaseRefCountable ( &modelComponent );
+
+		ReleaseRefCountable ( &session );
+	}
+
+	ReleaseRefCountable ( &params );
+
+	ReleaseRefCountable ( &connector );
+
+	DebugMsg ( "\n-------------- END DEMO SQL Model -------------\n" );
 }

@@ -28,7 +28,6 @@
 class VSolution;
 class VProject;
 class VSolutionStartupParameters;
-class ISourceControlManager;
 class VProjectItem;
 class ISolutionBreakPointsManager;
 class VSolutionFileDirtyStampSaver;
@@ -44,7 +43,7 @@ class ISolutionMessageManager : public XBOX::IRefCountable
 public:
 	virtual void CheckErrorStack() const = 0;
 	virtual void DisplayMessage(const XBOX::VString& inMessage) const = 0;
-	virtual bool DisplayOkCancelMessage(const XBOX::VString& inTitle, const XBOX::VString& inMessage) const = 0;
+	virtual bool DisplayOkCancelMessage(const XBOX::VString& inMessage) const = 0;
 	virtual void GetLocalizedStringFromError(const XBOX::VError inError, XBOX::VString& outLocalizedString) const = 0;
 	virtual void GetLocalizedStringFromResourceName(const XBOX::VString& inResName, XBOX::VString& outLocalizedString) const = 0;
 };
@@ -59,22 +58,19 @@ class VSolutionManager : public XBOX::VObject
 {
 public:
 	static	VSolutionManager*				Get() { return sSolutionManager; }
-	static	bool							Init();
+	static	bool							Init( bool inWithProjectItemUniqueID);
 	static	void							DeInit();
 
 			/** @brief	The startup parameters, message managers, breakpoints manager and solution user are retained */
 			VSolution*						CreateNewSolution( VSolutionStartupParameters* inSolutionStartupParameters, ISolutionMessageManager* inSolutionMessageManager = NULL, ISolutionBreakPointsManager* inSolutionBreakPointsManager = NULL, ISolutionUser* inSolutionUser = NULL);
-			VSolution*						CreateNewSolution( const XBOX::VFilePath& inSolutionFilePath, ISolutionMessageManager* inSolutionMessageManager = NULL, ISolutionBreakPointsManager* inSolutionBreakPointsManager = NULL, ISolutionUser* inSolutionUser = NULL);
-			VSolution*						CreateNewSolutionFromTemplate( const XBOX::VFilePath& inSolutionFilePath, const XBOX::VFolder& inSolutionTemplateFolder, ISolutionMessageManager* inSolutionMessageManager = NULL, ISolutionBreakPointsManager* inSolutionBreakPointsManager = NULL, ISolutionUser* inSolutionUser = NULL);
+            VSolution*						CreateNewSolution( const XBOX::VFilePath& inSolutionFilePath, ISolutionMessageManager* inSolutionMessageManager = NULL, ISolutionBreakPointsManager* inSolutionBreakPointsManager = NULL, ISolutionUser* inSolutionUser = NULL);
+	VSolution*						CreateNewSolutionFromTemplate( const XBOX::VFilePath& inSolutionFilePath, const XBOX::VFolder& inSolutionTemplateFolder, ISolutionMessageManager* inSolutionMessageManager = NULL, ISolutionBreakPointsManager* inSolutionBreakPointsManager = NULL, ISolutionUser* inSolutionUser = NULL);
+    
 			/** @brief	The startup parameters, message managers, breakpoints manager and solution user are retained */
-			VSolution*						OpenSolution( VSolutionStartupParameters* inSolutionStartupParameters, ISolutionMessageManager* inSolutionMessageManager = NULL, ISolutionBreakPointsManager* inSolutionBreakPointsManager = NULL, ISolutionUser* inSolutionUser = NULL);
-			VSolution*						OpenSolution( const XBOX::VFilePath& inSolutionFilePath, ISolutionMessageManager* inSolutionMessageManager = NULL, ISolutionBreakPointsManager* inSolutionBreakPointsManager = NULL, ISolutionUser* inSolutionUser = NULL, bool inOpenProjectSymbolsTable = true);
+            VSolution*						OpenSolution( VSolutionStartupParameters* inSolutionStartupParameters, ISolutionMessageManager* inSolutionMessageManager = NULL, ISolutionBreakPointsManager* inSolutionBreakPointsManager = NULL, ISolutionUser* inSolutionUser = NULL);
+    		VSolution*						OpenSolution( const XBOX::VFilePath& inSolutionFilePath, ISolutionMessageManager* inSolutionMessageManager = NULL, ISolutionBreakPointsManager* inSolutionBreakPointsManager = NULL, ISolutionUser* inSolutionUser = NULL, bool inOpenProjectSymbolsTable = true);
 
 			bool							CloseSolution( VSolution *inSolution);
-
-			void							SetSourceControlManager( ISourceControlManager* inSourceControlManager);
-			ISourceControlManager*			GetSourceControlManager() const { return fSourceControlManager; }
-
 private:
 			VSolutionManager();
 			VSolutionManager( const VSolutionManager &);
@@ -84,8 +80,6 @@ private:
 	static VSolutionManager					*sSolutionManager;	// singleton
 
 			VSolution*						_CreateSolution( VSolutionStartupParameters* inSolutionStartupParameters, ISolutionMessageManager* inSolutionMessageManager, ISolutionBreakPointsManager* inSolutionBreakPointsManager, ISolutionUser* inSolutionUser);
-
-			ISourceControlManager			*fSourceControlManager;
 };
 
 
@@ -96,23 +90,15 @@ public:
 
 	virtual	void		SynchronizeFromSolution() = 0;
 
-	virtual void		SetTreeItemSelected(VProjectItem* inProjectItem, bool inState) = 0;
-
 	virtual VProject*	GetSelectedProject() const = 0;
 	
 	virtual	IDocumentParserManager::Priority	GetDocumentParsingPriority( const XBOX::VFilePath& inDocumentPath) = 0;
 
-	virtual void		StartParsingFiles( sLONG inExpectedCount ) = 0;
-	virtual void		ParsedOneFile() = 0;
-	virtual void		StopParsingFiles() = 0;
-
-	virtual void		ParsingComplete( VProjectItem *inProjectItem ) = 0;
+	virtual void		UpdateParsingStatus( sLONG inPendingParsingRequest ) = 0;
 
 	virtual	void		DoProjectItemsChanged( const VectorOfFilePathes& inChangedPathes ) = 0;
 	virtual	void		DoProjectItemsDeleted( const VectorOfFilePathes& inDeletedPathes ) = 0;
 	virtual	void		DoProjectFileDeleted() = 0;
-
-	virtual	void		DoSourceControlStatusChanged( const VectorOfProjectItems& inProjectItems)	{;}
 
 	virtual	void		DoStartPossibleLongTimeOperation()											{;}
 	virtual	void		DoEndPossibleLongTimeOperation()											{;}
@@ -170,7 +156,7 @@ public:
 			/** @brief	Require each project to stop handling file system notifications. */
 			XBOX::VError					StopWatchingFileSystem();
 			/** @brief	Require each project to start updating its symbols table. */
-			XBOX::VError					StartUpdatingSymbolTable();
+            XBOX::VError					StartUpdatingSymbolTable();
 			/** @brief	Require each project to stop updating its symbols table. */
 			XBOX::VError					StopUpdatingSymbolTable();
 
@@ -260,7 +246,7 @@ public:
 	// ---------------------------------------
 	// operations generales sur les elements d'une solution
 	// ---------------------------------------
-	VProjectItem*	ImportExistingFile( XBOX::VError& outError, VProjectItem *inParentItem, const XBOX::VFilePath& inSourceFilePath);
+	VProjectItem*	ImportExistingFile( XBOX::VError& outError, const XBOX::VFilePath& inDestinationPath, const XBOX::VFilePath& inSourceFilePath);
 	VProjectItem*	ImportExistingFolder( XBOX::VError& outError, VProjectItem *inParentItem, const XBOX::VFilePath& inSourceFolderPath);
 	XBOX::VError	RemoveItem( VProjectItem *inProjectItem, bool inDeletePhysicalItems);
 	XBOX::VError	RemoveItems( const VectorOfProjectItems& inProjectItems, bool inDeletePhysicalItems);
@@ -273,19 +259,6 @@ public:
 
 	VProjectItem*	CreateFileItemFromPath( XBOX::VError& outError, const XBOX::VFilePath& inPath, bool inRecursive);
 	VProjectItem*	CreateFolderItemFromPath( XBOX::VError& outError, const XBOX::VFilePath& inPath, bool inRecursive, bool inSynchronizeWithFileSystem);
-
-	// ---------------------------------------
-	// Source Control
-	// ---------------------------------------
-	void						ConnectProjectsToSourceControl(XBOX::VString& inSourceControlId);
-	void						SetSourceControlID(XBOX::VString& inSourceControlID) { fSourceControlID = inSourceControlID; }
-	XBOX::VString				GetSourceControlID() const {return fSourceControlID;} 
-
-	XBOX::VError	AddToSourceControl(const VectorOfProjectItems& inProjectItems);
-	XBOX::VError	GetLatestVersion(const VectorOfProjectItems& inSelectedProjectItems);
-	XBOX::VError	CheckOut(const VectorOfProjectItems& inSelectedProjectItems);
-	XBOX::VError	CheckIn(const VectorOfProjectItems& inSelectedProjectItems);
-	XBOX::VError	Revert(const VectorOfProjectItems& inSelectedProjectItems);
 
 	// ---------------------------------------
 	// VSolutionStartupParameters
@@ -325,10 +298,6 @@ public:
 
 	// Documents parsing handling
 	IDocumentParserManager*			GetDocumentParserManager() { return fParsingManager; }
-	// Notification about documents parsing
-	void							DoStartParsingFiles( sLONG inExpectedCount);
-	void							DoStopParsingFiles();
-	void							DoParsedOneFile();
 
 	// ---------------------------------------
 	// Pour obtenir le gestionnaire de breakpoints attache a la solution
@@ -356,19 +325,11 @@ public:
 	static XBOX::VFolder*	RetainRunningServerFilesFolder( bool inAllUsers = false);
 
 	static bool				GetPidFromRunningServerFile (const XBOX::VString &inFileName, uLONG *outPid);
+	
+	void SetBaseFolderPathStr(const ESymbolFileBaseFolder& inType, const XBOX::VString& inPathStr, const bool& inRefreshProjectsDatabase);
+	void GetBaseFolderPathStr(const ESymbolFileBaseFolder& inType, XBOX::VString& outPathStr);
 
 private:
-	// enum purement technique pour factoriser du code (concernant pour
-	// le moment le source control)
-	typedef enum {
-		eADD_TO_SOURCE_CONTROL,	
-		eGET_LATEST_VERSION,									
-		eCHECKOUT,										
-		eCHECKIN,	
-		eREVERT,
-		eQUERY_INFO
-	} _e_Command;
-
 			/**	@brief	Set the root item of the solution. The project item is retained. */
 			void			_SetSolutionItem( VProjectItem *inProjectItem);
 
@@ -406,8 +367,6 @@ private:
 	XBOX::VError			_SaveSolutionFile( bool inForceSave = false);
 
 	XBOX::VError			_LoadPermissions ( bool inCreateIfDoesNotExist = false );
-
-	XBOX::VError			_DispatchCommandByProject(_e_Command inCommand, const VectorOfProjectItems& inSelectedProjectItems);
 
 							/** @brief	A project item is referenced when its reference is stored in the solution file.
 										Typically, projects, tagged items and external references are referenced. */
@@ -447,15 +406,14 @@ private:
 	VSolutionStartupParameters*		fSolutionStartupParameters;
 	ISolutionMessageManager*		fSolutionMessageManager;
 
-	XBOX::VString					fSourceControlID;
 	ISolutionUser*					fSolutionUser;
 	XBOX::VValueBag*				fPermissions;
 	bool							fPermissionsHaveBeenModified;
 
 	ISolutionBreakPointsManager*	fBreakPointsManager;
 	IDocumentParserManager*			fParsingManager;
-
-
+	
+	std::map<ESymbolFileBaseFolder, XBOX::VString> fBaseFolderPosixPathStrings;
 };
 
 

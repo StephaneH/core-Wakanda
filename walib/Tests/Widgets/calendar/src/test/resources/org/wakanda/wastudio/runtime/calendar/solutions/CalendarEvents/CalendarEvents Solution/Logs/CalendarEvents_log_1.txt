@@ -1,0 +1,138 @@
+2012-11-01 13:58:06 [com.wakanda-software.CalendarEvents] INFO - Opening the solution
+2012-11-01 13:58:06 [com.wakanda-software.CalendarEvents] INFO - Opening the users and groups directory
+2012-11-01 13:58:06 [com.wakanda-software.CalendarEvents] INFO - Users and groups directory opened (duration: 7 ms)
+2012-11-01 13:58:06 [com.wakanda-software.CalendarEvents.CalendarEvents] INFO - Opening the project
+2012-11-01 13:58:06 [com.wakanda-software.CalendarEvents.CalendarEvents] INFO - Opening the database
+2012-11-01 13:58:06 [com.wakanda-software.CalendarEvents.CalendarEvents] INFO - Database opened (duration: 4 ms)
+2012-11-01 13:58:06 [com.wakanda-software.CalendarEvents.CalendarEvents] INFO - Project opened (duration: 10 ms)
+2012-11-01 13:58:06 [com.wakanda-software.CalendarEvents.ServerAdmin] INFO - Opening the project
+2012-11-01 13:58:06 [com.wakanda-software.CalendarEvents.ServerAdmin] INFO - Project opened (duration: 2 ms)
+2012-11-01 13:58:06 [com.wakanda-software.CalendarEvents] INFO - Solution opened (duration: 43 ms)
+2012-11-01 13:58:06 [com.wakanda-software.CalendarEvents] INFO - Starting the solution
+2012-11-01 13:58:06 [com.wakanda-software.CalendarEvents.CalendarEvents] INFO - Starting the project
+2012-11-01 13:58:06 [com.wakanda-software.CalendarEvents.CalendarEvents] INFO - Starting the HTTP server
+2012-11-01 13:58:06 [com.wakanda-software.CalendarEvents.CalendarEvents] INFO - HTTP server started (duration: 27 ms)
+2012-11-01 13:58:06 [com.wakanda-software.CalendarEvents.CalendarEvents] INFO - Project started (duration: 44 ms)
+2012-11-01 13:58:06 [com.wakanda-software.CalendarEvents.ServerAdmin] INFO - Starting the project
+2012-11-01 13:58:06 [com.wakanda-software.CalendarEvents.ServerAdmin] INFO - Starting the HTTP server
+2012-11-01 13:58:06 [com.wakanda-software.CalendarEvents.ServerAdmin] INFO - HTTP server started (duration: 59 ms)
+2012-11-01 13:58:06 [com.wakanda-software.CalendarEvents.ServerAdmin] INFO - Project started (duration: 96 ms)
+2012-11-01 13:58:06 [com.wakanda-software.CalendarEvents.CalendarEvents] INFO - Executing the bootstrap(s)
+2012-11-01 13:58:06 [com.wakanda-software.CalendarEvents.CalendarEvents] INFO - Bootstrap(s) executed (duration: 0 ms)
+2012-11-01 13:58:06 [com.wakanda-software.CalendarEvents.ServerAdmin] INFO - Executing the bootstrap(s)
+2012-11-01 13:58:06 [com.wakanda-software.CalendarEvents.ServerAdmin] INFO - Bootstrap(s) executed (duration: 5 ms)
+2012-11-01 13:58:06 [com.wakanda-software.CalendarEvents] INFO - Solution started (duration: 147 ms)
+2012-11-01 14:05:52 [com.wakanda-software.CalendarEvents] INFO - Stopping the solution
+2012-11-01 14:05:52 [com.wakanda-software.CalendarEvents.CalendarEvents] INFO - Stopping the project
+2012-11-01 14:05:54 [com.wakanda-software.CalendarEvents.CalendarEvents] INFO - Project stopped (duration: 2033 ms)
+2012-11-01 14:05:54 [com.wakanda-software.CalendarEvents.ServerAdmin] INFO - Stopping the project
+2012-11-01 14:05:56 [com.wakanda-software.CalendarEvents.ServerAdmin] INFO - Project stopped (duration: 2021 ms)
+2012-11-01 14:05:56 [com.wakanda-software.CalendarEvents] INFO - Solution stopped (duration: 4055 ms)
+2012-11-01 14:05:56 [com.wakanda-software.CalendarEvents] INFO - Closing the solution
+2012-11-01 14:05:56 [com.wakanda-software.CalendarEvents.CalendarEvents] INFO - Closing the project
+2012-11-01 14:05:56 [com.wakanda-software.CalendarEvents.CalendarEvents] INFO - Closing the database
+2012-11-01 14:05:56 [com.wakanda-software.CalendarEvents.CalendarEvents] INFO - Database closed (duration: 401 ms)
+2012-11-01 14:05:56 [com.wakanda-software.CalendarEvents.CalendarEvents] INFO - Project closed (duration: 401 ms)
+2012-11-01 14:05:56 [com.wakanda-software.CalendarEvents.ServerAdmin] INFO - Closing the project
+2012-11-01 14:05:56 [com.wakanda-software.CalendarEvents.ServerAdmin] INFO - Project closed (duration: 2 ms)
+2012-11-01 14:05:56 [com.wakanda-software.CalendarEvents] INFO - Solution closed (duration: 806 ms)
+2012-11-01 15:25:17 [com.wakanda-software.CalendarEvents] INFO - Opening the solution
+2012-11-01 15:25:17 [com.wakanda-software.CalendarEvents] INFO - Opening the users and groups directory
+2012-11-01 15:25:17 [com.wakanda-software.CalendarEvents] INFO - Users and groups directory opened (duration: 13 ms)
+2012-11-01 15:25:17 [com.wakanda-software.CalendarEvents.CalendarEvents] INFO - Opening the project
+2012-11-01 15:25:17 [com.wakanda-software.CalendarEvents.CalendarEvents] INFO - Opening the database
+2012-11-01 15:25:17 [com.wakanda-software.CalendarEvents.CalendarEvents] INFO - Database opened (duration: 4 ms)
+2012-11-01 15:25:17 [com.wakanda-software.CalendarEvents.CalendarEvents] INFO - Project opened (duration: 11 ms)
+2012-11-01 15:25:17 [com.wakanda-software.CalendarEvents.ServerAdmin] INFO - Opening the project
+2012-11-01 15:25:17 [com.wakanda-software.CalendarEvents.ServerAdmin] INFO - Project opened (duration: 2 ms)
+2012-11-01 15:25:17 [com.wakanda-software.CalendarEvents] INFO - Solution opened (duration: 50 ms)
+2012-11-01 15:25:17 [com.wakanda-software.CalendarEvents] INFO - Starting the solution
+2012-11-01 15:25:17 [com.wakanda-software.CalendarEvents.CalendarEvents] INFO - Starting the project
+2012-11-01 15:25:18 [com.wakanda-software.CalendarEvents.CalendarEvents] INFO - Starting the HTTP server
+2012-11-01 15:25:18 [com.wakanda-software.CalendarEvents.CalendarEvents] INFO - HTTP server started (duration: 31 ms)
+2012-11-01 15:25:18 [com.wakanda-software.CalendarEvents.CalendarEvents] INFO - Project started (duration: 52 ms)
+2012-11-01 15:25:18 [com.wakanda-software.CalendarEvents.ServerAdmin] INFO - Starting the project
+2012-11-01 15:25:18 [com.wakanda-software.CalendarEvents.ServerAdmin] INFO - Starting the HTTP server
+2012-11-01 15:25:18 [com.wakanda-software.CalendarEvents.ServerAdmin] INFO - HTTP server started (duration: 68 ms)
+2012-11-01 15:25:18 [com.wakanda-software.CalendarEvents.ServerAdmin] INFO - Project started (duration: 108 ms)
+2012-11-01 15:25:18 [com.wakanda-software.CalendarEvents.CalendarEvents] INFO - Executing the bootstrap(s)
+2012-11-01 15:25:18 [com.wakanda-software.CalendarEvents.CalendarEvents] INFO - Bootstrap(s) executed (duration: 0 ms)
+2012-11-01 15:25:18 [com.wakanda-software.CalendarEvents.ServerAdmin] INFO - Executing the bootstrap(s)
+2012-11-01 15:25:18 [com.wakanda-software.CalendarEvents.ServerAdmin] INFO - Bootstrap(s) executed (duration: 6 ms)
+2012-11-01 15:25:18 [com.wakanda-software.CalendarEvents] INFO - Solution started (duration: 167 ms)
+2012-11-01 15:33:20 [com.wakanda-software.CalendarEvents] INFO - Opening the solution
+2012-11-01 15:33:20 [com.wakanda-software.CalendarEvents] INFO - Opening the users and groups directory
+2012-11-01 15:33:20 [com.wakanda-software.CalendarEvents] INFO - Users and groups directory opened (duration: 27 ms)
+2012-11-01 15:33:20 [com.wakanda-software.CalendarEvents.CalendarEvents] INFO - Opening the project
+2012-11-01 15:33:20 [com.wakanda-software.CalendarEvents.CalendarEvents] INFO - Opening the database
+2012-11-01 15:33:20 [com.wakanda-software.CalendarEvents.CalendarEvents] INFO - Database opened (duration: 3 ms)
+2012-11-01 15:33:20 [com.wakanda-software.CalendarEvents.CalendarEvents] INFO - Project opened (duration: 9 ms)
+2012-11-01 15:33:20 [com.wakanda-software.CalendarEvents.ServerAdmin] INFO - Opening the project
+2012-11-01 15:33:20 [com.wakanda-software.CalendarEvents.ServerAdmin] INFO - Project opened (duration: 3 ms)
+2012-11-01 15:33:20 [com.wakanda-software.CalendarEvents] INFO - Solution opened (duration: 65 ms)
+2012-11-01 15:33:20 [com.wakanda-software.CalendarEvents] INFO - Starting the solution
+2012-11-01 15:33:20 [com.wakanda-software.CalendarEvents.CalendarEvents] INFO - Starting the project
+2012-11-01 15:33:20 [com.wakanda-software.CalendarEvents.CalendarEvents] INFO - Starting the HTTP server
+2012-11-01 15:33:20 [com.wakanda-software.CalendarEvents.CalendarEvents] INFO - HTTP server started (duration: 33 ms)
+2012-11-01 15:33:20 [com.wakanda-software.CalendarEvents.CalendarEvents] INFO - Project started (duration: 57 ms)
+2012-11-01 15:33:20 [com.wakanda-software.CalendarEvents.ServerAdmin] INFO - Starting the project
+2012-11-01 15:33:20 [com.wakanda-software.CalendarEvents.ServerAdmin] INFO - Starting the HTTP server
+2012-11-01 15:33:20 [com.wakanda-software.CalendarEvents.ServerAdmin] INFO - HTTP server started (duration: 67 ms)
+2012-11-01 15:33:20 [com.wakanda-software.CalendarEvents.ServerAdmin] INFO - Project started (duration: 108 ms)
+2012-11-01 15:33:20 [com.wakanda-software.CalendarEvents.CalendarEvents] INFO - Executing the bootstrap(s)
+2012-11-01 15:33:20 [com.wakanda-software.CalendarEvents.CalendarEvents] INFO - Bootstrap(s) executed (duration: 0 ms)
+2012-11-01 15:33:20 [com.wakanda-software.CalendarEvents.ServerAdmin] INFO - Executing the bootstrap(s)
+2012-11-01 15:33:20 [com.wakanda-software.CalendarEvents.ServerAdmin] INFO - Bootstrap(s) executed (duration: 6 ms)
+2012-11-01 15:33:20 [com.wakanda-software.CalendarEvents] INFO - Solution started (duration: 173 ms)
+2012-11-01 15:33:53 [com.wakanda-software.CalendarEvents] INFO - Stopping the solution
+2012-11-01 15:33:53 [com.wakanda-software.CalendarEvents.CalendarEvents] INFO - Stopping the project
+2012-11-01 15:33:55 [com.wakanda-software.CalendarEvents.CalendarEvents] INFO - Project stopped (duration: 2038 ms)
+2012-11-01 15:33:55 [com.wakanda-software.CalendarEvents.ServerAdmin] INFO - Stopping the project
+2012-11-01 15:33:57 [com.wakanda-software.CalendarEvents.ServerAdmin] INFO - Project stopped (duration: 2027 ms)
+2012-11-01 15:33:57 [com.wakanda-software.CalendarEvents] INFO - Solution stopped (duration: 4066 ms)
+2012-11-01 15:33:57 [com.wakanda-software.CalendarEvents] INFO - Closing the solution
+2012-11-01 15:33:57 [com.wakanda-software.CalendarEvents.CalendarEvents] INFO - Closing the project
+2012-11-01 15:33:57 [com.wakanda-software.CalendarEvents.CalendarEvents] INFO - Closing the database
+2012-11-01 15:33:57 [com.wakanda-software.CalendarEvents.CalendarEvents] INFO - Database closed (duration: 402 ms)
+2012-11-01 15:33:57 [com.wakanda-software.CalendarEvents.CalendarEvents] INFO - Project closed (duration: 402 ms)
+2012-11-01 15:33:57 [com.wakanda-software.CalendarEvents.ServerAdmin] INFO - Closing the project
+2012-11-01 15:33:57 [com.wakanda-software.CalendarEvents.ServerAdmin] INFO - Project closed (duration: 2 ms)
+2012-11-01 15:33:58 [com.wakanda-software.CalendarEvents] INFO - Solution closed (duration: 808 ms)
+2012-11-01 15:36:01 [com.wakanda-software.CalendarEvents] INFO - Opening the solution
+2012-11-01 15:36:01 [com.wakanda-software.CalendarEvents] INFO - Opening the users and groups directory
+2012-11-01 15:36:01 [com.wakanda-software.CalendarEvents] INFO - Users and groups directory opened (duration: 10 ms)
+2012-11-01 15:36:01 [com.wakanda-software.CalendarEvents.CalendarEvents] INFO - Opening the project
+2012-11-01 15:36:01 [com.wakanda-software.CalendarEvents.CalendarEvents] INFO - Opening the database
+2012-11-01 15:36:01 [com.wakanda-software.CalendarEvents.CalendarEvents] INFO - Database opened (duration: 3 ms)
+2012-11-01 15:36:01 [com.wakanda-software.CalendarEvents.CalendarEvents] INFO - Project opened (duration: 9 ms)
+2012-11-01 15:36:01 [com.wakanda-software.CalendarEvents.ServerAdmin] INFO - Opening the project
+2012-11-01 15:36:01 [com.wakanda-software.CalendarEvents.ServerAdmin] INFO - Project opened (duration: 2 ms)
+2012-11-01 15:36:01 [com.wakanda-software.CalendarEvents] INFO - Solution opened (duration: 46 ms)
+2012-11-01 15:36:01 [com.wakanda-software.CalendarEvents] INFO - Starting the solution
+2012-11-01 15:36:01 [com.wakanda-software.CalendarEvents.CalendarEvents] INFO - Starting the project
+2012-11-01 15:36:01 [com.wakanda-software.CalendarEvents.CalendarEvents] INFO - Starting the HTTP server
+2012-11-01 15:36:01 [com.wakanda-software.CalendarEvents.CalendarEvents] INFO - HTTP server started (duration: 31 ms)
+2012-11-01 15:36:01 [com.wakanda-software.CalendarEvents.CalendarEvents] INFO - Project started (duration: 52 ms)
+2012-11-01 15:36:01 [com.wakanda-software.CalendarEvents.ServerAdmin] INFO - Starting the project
+2012-11-01 15:36:01 [com.wakanda-software.CalendarEvents.ServerAdmin] INFO - Starting the HTTP server
+2012-11-01 15:36:01 [com.wakanda-software.CalendarEvents.ServerAdmin] INFO - HTTP server started (duration: 63 ms)
+2012-11-01 15:36:01 [com.wakanda-software.CalendarEvents.ServerAdmin] INFO - Project started (duration: 103 ms)
+2012-11-01 15:36:01 [com.wakanda-software.CalendarEvents.CalendarEvents] INFO - Executing the bootstrap(s)
+2012-11-01 15:36:01 [com.wakanda-software.CalendarEvents.CalendarEvents] INFO - Bootstrap(s) executed (duration: 0 ms)
+2012-11-01 15:36:01 [com.wakanda-software.CalendarEvents.ServerAdmin] INFO - Executing the bootstrap(s)
+2012-11-01 15:36:01 [com.wakanda-software.CalendarEvents.ServerAdmin] INFO - Bootstrap(s) executed (duration: 5 ms)
+2012-11-01 15:36:01 [com.wakanda-software.CalendarEvents] INFO - Solution started (duration: 162 ms)
+2012-11-01 15:36:41 [com.wakanda-software.CalendarEvents] INFO - Stopping the solution
+2012-11-01 15:36:41 [com.wakanda-software.CalendarEvents.CalendarEvents] INFO - Stopping the project
+2012-11-01 15:36:43 [com.wakanda-software.CalendarEvents.CalendarEvents] INFO - Project stopped (duration: 2039 ms)
+2012-11-01 15:36:43 [com.wakanda-software.CalendarEvents.ServerAdmin] INFO - Stopping the project
+2012-11-01 15:36:45 [com.wakanda-software.CalendarEvents.ServerAdmin] INFO - Project stopped (duration: 2026 ms)
+2012-11-01 15:36:45 [com.wakanda-software.CalendarEvents] INFO - Solution stopped (duration: 4066 ms)
+2012-11-01 15:36:45 [com.wakanda-software.CalendarEvents] INFO - Closing the solution
+2012-11-01 15:36:45 [com.wakanda-software.CalendarEvents.CalendarEvents] INFO - Closing the project
+2012-11-01 15:36:45 [com.wakanda-software.CalendarEvents.CalendarEvents] INFO - Closing the database
+2012-11-01 15:36:45 [com.wakanda-software.CalendarEvents.CalendarEvents] INFO - Database closed (duration: 401 ms)
+2012-11-01 15:36:45 [com.wakanda-software.CalendarEvents.CalendarEvents] INFO - Project closed (duration: 401 ms)
+2012-11-01 15:36:45 [com.wakanda-software.CalendarEvents.ServerAdmin] INFO - Closing the project
+2012-11-01 15:36:45 [com.wakanda-software.CalendarEvents.ServerAdmin] INFO - Project closed (duration: 2 ms)
+2012-11-01 15:36:46 [com.wakanda-software.CalendarEvents] INFO - Solution closed (duration: 807 ms)

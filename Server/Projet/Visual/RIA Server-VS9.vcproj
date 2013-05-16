@@ -38,7 +38,7 @@
 			<Tool
 				Name="VCCustomBuildTool"
 				Description="RIA Server CopyFiles"
-				CommandLine="CALL &quot;$(SolutionDir)\..\..\Tools\Build\scripts_compil_$(BranchName)\Scripts\CopyFilesVS9.bat&quot; &quot;$(TargetDir)&quot; E&#x0D;&#x0A;"
+				CommandLine="CALL &quot;$(SolutionDir)\..\..\Tools\Build\scripts_compil_$(BranchName)\Scripts\CopyFilesVS9.bat&quot; &quot;$(TargetDir)&quot; E&#x0D;&#x0A;CALL &quot;$(SolutionDir)\..\..\Tools\Build\scripts_compil_$(BranchName)\Scripts\CopyFilesVS9.bat&quot; &quot;$(TargetDir)&quot; E+&#x0D;&#x0A;"
 				Outputs="AllFile for RIA Server"
 			/>
 			<Tool
@@ -131,225 +131,6 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="App - RIA Server Release|Win32"
-			OutputDirectory="..\..\..\Apps\Win\Final\Wakanda Server\"
-			IntermediateDirectory=".\ObjH\$(PlatformName)\Release\Wakanda Server\"
-			ConfigurationType="1"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC70.vsprops;.\manifest.vsprops;$(Solutiondir)\Default Compiler Settings.vsprops;$(SolutionDir)\WebKit_Settings.vsprops"
-			UseOfMFC="0"
-			ATLMinimizesCRunTimeLibraryUsage="false"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-				Description="Versionning $(TargetName) ..."
-				CommandLine="if exist c:\perl\bin\perl.exe c:\perl\bin\perl.exe $(SolutionDir)..\..\Tools\Versionning\Wakanda_versionning_win.perl &quot;$(ProjectDir)\WakandaVersNum.h&quot;&#x0D;&#x0A;if exist c:\perl\bin\perl.exe c:\perl\bin\perl.exe $(SolutionDir)..\..\Tools\Versionning\versionning_waf.pl    &quot;$(ProjectDir)\..\..\..\walib\WAF\Loader.js&quot;&#x0D;&#x0A;"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-				Description="RIA Server CopyFiles"
-				CommandLine="CALL &quot;$(SolutionDir)\..\..\Tools\Build\scripts_compil_$(BranchName)\Scripts\CopyFilesVS9.bat&quot; &quot;$(TargetDir)&quot; E&#x0D;&#x0A;"
-				Outputs="AllFile for RIA Server"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-				PreprocessorDefinitions="_DEBUG"
-				AdditionalIncludeDirectories="..\HSRC"
-				MkTypLibCompatible="true"
-				SuppressStartupBanner="true"
-				TargetEnvironment="1"
-				TypeLibraryName=".\..\..\Apps\Win\Final\4D Server.tlb"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				Optimization="2"
-				InlineFunctionExpansion="0"
-				AdditionalIncludeDirectories="..\..\Sources;..\..\..\Common\Sources;&quot;..\..\..\..\..\XToolbox\$(BranchName)\&quot;;&quot;..\..\..\..\..\Components\$(BranchName)\&quot;"
-				PreprocessorDefinitions="NDEBUG;newlicence=1;WIN32;_WINDOWS;MACVER=0;WINVER=0x500;VERS_65=1;NEWNC=1;xserver=1;XBACKUP=1;TESTS_IN_4D=1;RIA_SERVER=1"
-				StringPooling="true"
-				ExceptionHandling="2"
-				RuntimeLibrary="2"
-				StructMemberAlignment="0"
-				EnableFunctionLevelLinking="true"
-				TreatWChar_tAsBuiltInType="false"
-				ForceConformanceInForLoopScope="true"
-				RuntimeTypeInfo="true"
-				UsePrecompiledHeader="2"
-				PrecompiledHeaderThrough="headers4d.h"
-				PrecompiledHeaderFile="$(IntDir)\$(TargetName).pch"
-				AssemblerListingLocation="$(IntDir)\"
-				ProgramDataBaseFileName="$(IntDir)\"
-				BrowseInformation="0"
-				WarningLevel="3"
-				SuppressStartupBanner="true"
-				CallingConvention="2"
-				CompileAs="0"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG,RIA_SERVER"
-				Culture="1033"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)..\..\..\Common\Visual\&quot;;&quot;$(SolutionDir)\..\..\CoreRuntime\$(BranchName)\Resources\MergedResources.WIN\&quot;"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="shfolder.lib delayimp.lib imm32.lib winmm.lib version.lib oledlg.lib ws2_32.lib sensapi.lib Rpcrt4.lib Iphlpapi.lib shlwapi.lib comctl32.lib"
-				OutputFile="$(OutDir)Wakanda Server.exe"
-				LinkIncremental="1"
-				SuppressStartupBanner="true"
-				DelayLoadDLLs=""
-				GenerateDebugInformation="true"
-				StackReserveSize="262144"
-				StackCommitSize="65536"
-				LargeAddressAware="2"
-				RandomizedBaseAddress="1"
-				DataExecutionPrevention="0"
-				TargetMachine="1"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-			/>
-		</Configuration>
-		<Configuration
-			Name="App - RIA Server Beta|Win32"
-			OutputDirectory="..\..\..\Apps\Win\Beta\Wakanda Server\"
-			IntermediateDirectory=".\ObjH\$(PlatformName)\Beta\Wakanda Server\"
-			ConfigurationType="1"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC70.vsprops;.\manifest.vsprops;$(Solutiondir)\Default Compiler Settings.vsprops;$(SolutionDir)\WebKit_Settings.vsprops"
-			UseOfMFC="0"
-			ATLMinimizesCRunTimeLibraryUsage="false"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-				Description="Versionning $(TargetName) ..."
-				CommandLine="if exist c:\perl\bin\perl.exe c:\perl\bin\perl.exe $(SolutionDir)..\..\Tools\Versionning\Wakanda_versionning_win.perl &quot;$(ProjectDir)\WakandaVersNum.h&quot;&#x0D;&#x0A;if exist c:\perl\bin\perl.exe c:\perl\bin\perl.exe $(SolutionDir)..\..\Tools\Versionning\versionning_waf.pl    &quot;$(ProjectDir)\..\..\..\walib\WAF\Loader.js&quot;&#x0D;&#x0A;"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-				Description="RIA Server CopyFiles"
-				CommandLine="CALL &quot;$(SolutionDir)\..\..\Tools\Build\scripts_compil_$(BranchName)\Scripts\CopyFilesVS9.bat&quot; &quot;$(TargetDir)&quot; E&#x0D;&#x0A;"
-				Outputs="AllFile for RIA Server"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-				PreprocessorDefinitions="_DEBUG"
-				AdditionalIncludeDirectories="..\HSRC"
-				MkTypLibCompatible="true"
-				SuppressStartupBanner="true"
-				TargetEnvironment="1"
-				TypeLibraryName=".\..\..\Apps\Win\Final\4D Server.tlb"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				Optimization="2"
-				InlineFunctionExpansion="0"
-				AdditionalIncludeDirectories="..\..\Sources;..\..\..\Common\Sources;&quot;..\..\..\..\..\XToolbox\$(BranchName)\&quot;;&quot;..\..\..\..\..\Components\$(BranchName)\&quot;"
-				PreprocessorDefinitions="NDEBUG;newlicence=1;WIN32;_WINDOWS;MACVER=0;WINVER=0x500;VERS_65=1;NEWNC=1;xserver=1;XBACKUP=1;TESTS_IN_4D=1;RIA_SERVER=1"
-				StringPooling="true"
-				ExceptionHandling="2"
-				RuntimeLibrary="2"
-				StructMemberAlignment="0"
-				EnableFunctionLevelLinking="true"
-				TreatWChar_tAsBuiltInType="false"
-				ForceConformanceInForLoopScope="true"
-				RuntimeTypeInfo="true"
-				UsePrecompiledHeader="2"
-				PrecompiledHeaderThrough="headers4d.h"
-				PrecompiledHeaderFile="$(IntDir)\$(TargetName).pch"
-				AssemblerListingLocation="$(IntDir)\"
-				ProgramDataBaseFileName="$(IntDir)\"
-				BrowseInformation="0"
-				WarningLevel="3"
-				SuppressStartupBanner="true"
-				DebugInformationFormat="3"
-				CallingConvention="2"
-				CompileAs="0"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG,RIA_SERVER"
-				Culture="1033"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)..\..\..\Common\Visual\&quot;;&quot;$(SolutionDir)\..\..\CoreRuntime\$(BranchName)\Resources\MergedResources.WIN\&quot;"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="shfolder.lib delayimp.lib imm32.lib winmm.lib version.lib oledlg.lib ws2_32.lib sensapi.lib Rpcrt4.lib Iphlpapi.lib shlwapi.lib comctl32.lib"
-				OutputFile="$(OutDir)Wakanda Server.exe"
-				LinkIncremental="1"
-				SuppressStartupBanner="true"
-				DelayLoadDLLs=""
-				GenerateDebugInformation="true"
-				StackReserveSize="262144"
-				StackCommitSize="65536"
-				LargeAddressAware="2"
-				RandomizedBaseAddress="1"
-				DataExecutionPrevention="0"
-				TargetMachine="1"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-			/>
-		</Configuration>
-		<Configuration
 			Name="App - RIA Server Debug|x64"
 			OutputDirectory="..\..\..\Apps\Win64\Debug\Wakanda Server\"
 			IntermediateDirectory=".\ObjH\$(PlatformName)\Debug\Wakanda Server\"
@@ -366,7 +147,7 @@
 			<Tool
 				Name="VCCustomBuildTool"
 				Description="RIA Server CopyFiles"
-				CommandLine="CALL &quot;$(SolutionDir)\..\..\Tools\Build\scripts_compil_$(BranchName)\Scripts\CopyFilesVS9.bat&quot; &quot;$(TargetDir)&quot; E&#x0D;&#x0A;"
+				CommandLine="CALL &quot;$(SolutionDir)\..\..\Tools\Build\scripts_compil_$(BranchName)\Scripts\CopyFilesVS9.bat&quot; &quot;$(TargetDir)&quot; E&#x0D;&#x0A;CALL &quot;$(SolutionDir)\..\..\Tools\Build\scripts_compil_$(BranchName)\Scripts\CopyFilesVS9.bat&quot; &quot;$(TargetDir)&quot; E+&#x0D;&#x0A;"
 				Outputs="AllFile for RIA Server"
 			/>
 			<Tool
@@ -459,6 +240,115 @@
 			/>
 		</Configuration>
 		<Configuration
+			Name="App - RIA Server Release|Win32"
+			OutputDirectory="..\..\..\Apps\Win\Final\Wakanda Server\"
+			IntermediateDirectory=".\ObjH\$(PlatformName)\Release\Wakanda Server\"
+			ConfigurationType="1"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC70.vsprops;.\manifest.vsprops;$(Solutiondir)\Default Compiler Settings.vsprops;$(SolutionDir)\WebKit_Settings.vsprops"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+				Description="Versionning $(TargetName) ..."
+				CommandLine="if exist c:\perl\bin\perl.exe c:\perl\bin\perl.exe $(SolutionDir)..\..\Tools\Versionning\Wakanda_versionning_win.perl &quot;$(ProjectDir)\WakandaVersNum.h&quot;&#x0D;&#x0A;if exist c:\perl\bin\perl.exe c:\perl\bin\perl.exe $(SolutionDir)..\..\Tools\Versionning\versionning_waf.pl    &quot;$(ProjectDir)\..\..\..\walib\WAF\Loader.js&quot;&#x0D;&#x0A;"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+				Description="RIA Server CopyFiles"
+				CommandLine="CALL &quot;$(SolutionDir)\..\..\Tools\Build\scripts_compil_$(BranchName)\Scripts\CopyFilesVS9.bat&quot; &quot;$(TargetDir)&quot; E&#x0D;&#x0A;CALL &quot;$(SolutionDir)\..\..\Tools\Build\scripts_compil_$(BranchName)\Scripts\CopyFilesVS9.bat&quot; &quot;$(TargetDir)&quot; E+&#x0D;&#x0A;"
+				Outputs="AllFile for RIA Server"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				PreprocessorDefinitions="_DEBUG"
+				AdditionalIncludeDirectories="..\HSRC"
+				MkTypLibCompatible="true"
+				SuppressStartupBanner="true"
+				TargetEnvironment="1"
+				TypeLibraryName=".\..\..\Apps\Win\Final\4D Server.tlb"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="2"
+				InlineFunctionExpansion="0"
+				AdditionalIncludeDirectories="..\..\Sources;..\..\..\Common\Sources;&quot;..\..\..\..\..\XToolbox\$(BranchName)\&quot;;&quot;..\..\..\..\..\Components\$(BranchName)\&quot;"
+				PreprocessorDefinitions="NDEBUG;newlicence=1;WIN32;_WINDOWS;MACVER=0;WINVER=0x500;VERS_65=1;NEWNC=1;xserver=1;XBACKUP=1;TESTS_IN_4D=1;RIA_SERVER=1"
+				StringPooling="true"
+				ExceptionHandling="2"
+				RuntimeLibrary="2"
+				StructMemberAlignment="0"
+				EnableFunctionLevelLinking="true"
+				TreatWChar_tAsBuiltInType="false"
+				ForceConformanceInForLoopScope="true"
+				RuntimeTypeInfo="true"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="headers4d.h"
+				PrecompiledHeaderFile="$(IntDir)\$(TargetName).pch"
+				AssemblerListingLocation="$(IntDir)\"
+				ProgramDataBaseFileName="$(IntDir)\"
+				BrowseInformation="0"
+				WarningLevel="3"
+				SuppressStartupBanner="true"
+				CallingConvention="2"
+				CompileAs="0"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG,RIA_SERVER"
+				Culture="1033"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)..\..\..\Common\Visual\&quot;;&quot;$(SolutionDir)\..\..\CoreRuntime\$(BranchName)\Resources\MergedResources.WIN\&quot;"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="shfolder.lib delayimp.lib imm32.lib winmm.lib version.lib oledlg.lib ws2_32.lib sensapi.lib Rpcrt4.lib Iphlpapi.lib shlwapi.lib comctl32.lib"
+				OutputFile="$(OutDir)Wakanda Server.exe"
+				LinkIncremental="1"
+				SuppressStartupBanner="true"
+				DelayLoadDLLs=""
+				GenerateDebugInformation="true"
+				StackReserveSize="262144"
+				StackCommitSize="65536"
+				LargeAddressAware="2"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
+				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
 			Name="App - RIA Server Release|x64"
 			OutputDirectory="..\..\..\Apps\Win64\Final\Wakanda Server\"
 			IntermediateDirectory=".\ObjH\$(PlatformName)\Release\Wakanda Server\"
@@ -475,7 +365,7 @@
 			<Tool
 				Name="VCCustomBuildTool"
 				Description="RIA Server CopyFiles"
-				CommandLine="CALL &quot;$(SolutionDir)\..\..\Tools\Build\scripts_compil_$(BranchName)\Scripts\CopyFilesVS9.bat&quot; &quot;$(TargetDir)&quot; E&#x0D;&#x0A;"
+				CommandLine="CALL &quot;$(SolutionDir)\..\..\Tools\Build\scripts_compil_$(BranchName)\Scripts\CopyFilesVS9.bat&quot; &quot;$(TargetDir)&quot; E&#x0D;&#x0A;CALL &quot;$(SolutionDir)\..\..\Tools\Build\scripts_compil_$(BranchName)\Scripts\CopyFilesVS9.bat&quot; &quot;$(TargetDir)&quot; E+&#x0D;&#x0A;"
 				Outputs="AllFile for RIA Server"
 			/>
 			<Tool
@@ -566,6 +456,116 @@
 			/>
 		</Configuration>
 		<Configuration
+			Name="App - RIA Server Beta|Win32"
+			OutputDirectory="..\..\..\Apps\Win\Beta\Wakanda Server\"
+			IntermediateDirectory=".\ObjH\$(PlatformName)\Beta\Wakanda Server\"
+			ConfigurationType="1"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC70.vsprops;.\manifest.vsprops;$(Solutiondir)\Default Compiler Settings.vsprops;$(SolutionDir)\WebKit_Settings.vsprops"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+				Description="Versionning $(TargetName) ..."
+				CommandLine="if exist c:\perl\bin\perl.exe c:\perl\bin\perl.exe $(SolutionDir)..\..\Tools\Versionning\Wakanda_versionning_win.perl &quot;$(ProjectDir)\WakandaVersNum.h&quot;&#x0D;&#x0A;if exist c:\perl\bin\perl.exe c:\perl\bin\perl.exe $(SolutionDir)..\..\Tools\Versionning\versionning_waf.pl    &quot;$(ProjectDir)\..\..\..\walib\WAF\Loader.js&quot;&#x0D;&#x0A;"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+				Description="RIA Server CopyFiles"
+				CommandLine="CALL &quot;$(SolutionDir)\..\..\Tools\Build\scripts_compil_$(BranchName)\Scripts\CopyFilesVS9.bat&quot; &quot;$(TargetDir)&quot; E&#x0D;&#x0A;CALL &quot;$(SolutionDir)\..\..\Tools\Build\scripts_compil_$(BranchName)\Scripts\CopyFilesVS9.bat&quot; &quot;$(TargetDir)&quot; E+&#x0D;&#x0A;"
+				Outputs="AllFile for RIA Server"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				PreprocessorDefinitions="_DEBUG"
+				AdditionalIncludeDirectories="..\HSRC"
+				MkTypLibCompatible="true"
+				SuppressStartupBanner="true"
+				TargetEnvironment="1"
+				TypeLibraryName=".\..\..\Apps\Win\Final\4D Server.tlb"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="2"
+				InlineFunctionExpansion="0"
+				AdditionalIncludeDirectories="..\..\Sources;..\..\..\Common\Sources;&quot;..\..\..\..\..\XToolbox\$(BranchName)\&quot;;&quot;..\..\..\..\..\Components\$(BranchName)\&quot;"
+				PreprocessorDefinitions="NDEBUG;newlicence=1;WIN32;_WINDOWS;MACVER=0;WINVER=0x500;VERS_65=1;NEWNC=1;xserver=1;XBACKUP=1;TESTS_IN_4D=1;RIA_SERVER=1"
+				StringPooling="true"
+				ExceptionHandling="2"
+				RuntimeLibrary="2"
+				StructMemberAlignment="0"
+				EnableFunctionLevelLinking="true"
+				TreatWChar_tAsBuiltInType="false"
+				ForceConformanceInForLoopScope="true"
+				RuntimeTypeInfo="true"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="headers4d.h"
+				PrecompiledHeaderFile="$(IntDir)\$(TargetName).pch"
+				AssemblerListingLocation="$(IntDir)\"
+				ProgramDataBaseFileName="$(IntDir)\"
+				BrowseInformation="0"
+				WarningLevel="3"
+				SuppressStartupBanner="true"
+				DebugInformationFormat="3"
+				CallingConvention="2"
+				CompileAs="0"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG,RIA_SERVER"
+				Culture="1033"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)..\..\..\Common\Visual\&quot;;&quot;$(SolutionDir)\..\..\CoreRuntime\$(BranchName)\Resources\MergedResources.WIN\&quot;"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="shfolder.lib delayimp.lib imm32.lib winmm.lib version.lib oledlg.lib ws2_32.lib sensapi.lib Rpcrt4.lib Iphlpapi.lib shlwapi.lib comctl32.lib"
+				OutputFile="$(OutDir)Wakanda Server.exe"
+				LinkIncremental="1"
+				SuppressStartupBanner="true"
+				DelayLoadDLLs=""
+				GenerateDebugInformation="true"
+				StackReserveSize="262144"
+				StackCommitSize="65536"
+				LargeAddressAware="2"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
+				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
 			Name="App - RIA Server Beta|x64"
 			OutputDirectory="..\..\..\Apps\Win64\Beta\Wakanda Server\"
 			IntermediateDirectory=".\ObjH\$(PlatformName)\Beta\Wakanda Server\"
@@ -582,7 +582,7 @@
 			<Tool
 				Name="VCCustomBuildTool"
 				Description="RIA Server CopyFiles"
-				CommandLine="CALL &quot;$(SolutionDir)\..\..\Tools\Build\scripts_compil_$(BranchName)\Scripts\CopyFilesVS9.bat&quot; &quot;$(TargetDir)&quot; E&#x0D;&#x0A;"
+				CommandLine="CALL &quot;$(SolutionDir)\..\..\Tools\Build\scripts_compil_$(BranchName)\Scripts\CopyFilesVS9.bat&quot; &quot;$(TargetDir)&quot; E&#x0D;&#x0A;CALL &quot;$(SolutionDir)\..\..\Tools\Build\scripts_compil_$(BranchName)\Scripts\CopyFilesVS9.bat&quot; &quot;$(TargetDir)&quot; E+&#x0D;&#x0A;"
 				Outputs="AllFile for RIA Server"
 			/>
 			<Tool
@@ -704,22 +704,6 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="App - RIA Server Release|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="App - RIA Server Beta|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="App - RIA Server Debug|x64"
 					ExcludedFromBuild="true"
 					>
@@ -728,7 +712,23 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
+					Name="App - RIA Server Release|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
 					Name="App - RIA Server Release|x64"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="App - RIA Server Beta|Win32"
 					ExcludedFromBuild="true"
 					>
 					<Tool
@@ -768,22 +768,6 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="App - RIA Server Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="1"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="App - RIA Server Beta|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="1"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="App - RIA Server Debug|x64"
 					>
 					<Tool
@@ -792,7 +776,23 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
+					Name="App - RIA Server Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
 					Name="App - RIA Server Release|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="App - RIA Server Beta|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -856,6 +856,10 @@
 				Name="Solution"
 				>
 				<File
+					RelativePath="..\..\Sources\VBreakPointsManager.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\Sources\VDataService.cpp"
 					>
 				</File>
@@ -885,6 +889,14 @@
 				</File>
 				<File
 					RelativePath="..\..\..\Common\Sources\VProjectItemBehaviour.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Sources\VRemoteDebuggerBreakpointsManager.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Sources\VRemoteDebuggerBreakpointsManager.h"
 					>
 				</File>
 				<File
@@ -965,6 +977,14 @@
 				</File>
 				<File
 					RelativePath="..\..\..\Common\Sources\VRIAServerComponentBridgeTypes.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Sources\VRIAServerSupervisor.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Sources\VRIAServerSupervisor.h"
 					>
 				</File>
 			</Filter>

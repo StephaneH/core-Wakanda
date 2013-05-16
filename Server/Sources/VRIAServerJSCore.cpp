@@ -83,19 +83,273 @@ void VRIAServerJSCore::GetDefinition( ClassDefinition& outDefinition)
 		{ "recentlyOpenedSolution", js_callStaticFunction<_getRecentSolution>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
 		{ "setDebuggerServer", js_callStaticFunction<_setDebuggerServer>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
 		{ "getDebuggerServer", js_callStaticFunction<_getDebuggerServer>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
+		{ "isDebugging", js_callStaticFunction<_isDebugging>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
+		{ "stopDebugger", js_callStaticFunction<_stopDebugger>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
+		{ "startDebugger", js_callStaticFunction<_startDebugger>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
+		{ "canSetDebuggerServer", js_callStaticFunction<_canSetDebuggerServer>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
+		{ "setBreakpoints", js_callStaticFunction<_setBreakpoints>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
+		{ "removeBreakpoints", js_callStaticFunction<_removeBreakpoints>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
+		{ "getDebuggerStatus", js_callStaticFunction<_getDebuggerStatus>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
+		{ "getBreakpoints", js_callStaticFunction<_getBreakpoints>, JS4D::PropertyAttributeReadOnly | JS4D::PropertyAttributeDontDelete },
 		{ 0, 0, 0}
 	};
-	
+
 	outDefinition.className = "ServerCore";
 	outDefinition.initialize = js_initialize<Initialize>;
 	outDefinition.finalize = js_finalize<Finalize>;
 	outDefinition.staticFunctions = functions;
 }
 
+void VRIAServerJSCore::_canSetDebuggerServer( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication)
+{
+	sLONG result = 0;
+
+	if (inApplication != NULL)
+	{
+		VRIAContext* riaContext = VRIAJSRuntimeContext::GetApplicationContextFromJSContext(ioParms.GetContext(), inApplication);
+		sLONG	dbgType;
+		if (ioParms.GetLongParam( 1, &dbgType ))
+		{
+			result = inApplication->CanSetDebuggerServer( riaContext, (WAKDebuggerType_t)dbgType);
+		}
+	}
+
+	ioParms.ReturnNumber( result);
+}
+
+void VRIAServerJSCore::_setBreakpoints( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication)
+{
+	sLONG result = 0;
+
+	if (inApplication != NULL)
+	{
+		VRIAContext*	riaContext = VRIAJSRuntimeContext::GetApplicationContextFromJSContext(ioParms.GetContext(), inApplication);
+		std::size_t		nbParams = ioParms.CountParams();
+		VJSContext		ctx = ioParms.GetContext();
+
+		for( std::size_t idx=1; idx<=nbParams; idx++ )
+		{
+			VJSArray		jsArray(ctx);
+			VJSValue		jsValue(ctx);
+			VJSObject		jsObj(ctx);
+
+			if (ioParms.IsArrayParam(idx))
+			{
+
+				ioParms.GetParamArray(idx,jsArray);
+				
+				for ( std::size_t fieldIdx = 0; fieldIdx < jsArray.GetLength(); fieldIdx++ )
+				{
+					jsValue = jsArray.GetValueAt(fieldIdx);
+					if (jsValue.GetType() == JS4D::eTYPE_OBJECT)
+					{
+						jsObj = jsValue.GetObject();
+						sLONG lineNb = jsObj.GetPropertyAsLong(CVSTR("lineNb"),NULL,NULL);
+
+						if (jsObj.HasProperty(CVSTR("file")))
+						{
+							VString url;
+							jsObj.GetPropertyAsString(CVSTR("file"),NULL,url);
+
+							result = inApplication->SetBreakpoint( riaContext, url, lineNb );
+							if (!result)
+							{
+								break;
+							}
+						}
+					}
+				}
+			}
+
+		}
+	}
+
+	ioParms.ReturnNumber( result);
+}
+
+void VRIAServerJSCore::_removeBreakpoints( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication)
+{
+	sLONG result = 0;
+
+	if (inApplication != NULL)
+	{
+		VRIAContext*	riaContext = VRIAJSRuntimeContext::GetApplicationContextFromJSContext(ioParms.GetContext(), inApplication);
+		std::size_t		nbParams = ioParms.CountParams();
+		VJSContext		ctx = ioParms.GetContext();
+
+		for( std::size_t idx=1; idx<=nbParams; idx++ )
+		{
+			VJSArray		jsArray(ctx);
+			VJSValue		jsValue(ctx);
+			VJSObject		jsObj(ctx);
+
+			if (ioParms.IsArrayParam(idx))
+			{
+
+				ioParms.GetParamArray(idx,jsArray);
+				
+				for ( std::size_t fieldIdx = 0; fieldIdx < jsArray.GetLength(); fieldIdx++ )
+				{
+					jsValue = jsArray.GetValueAt(fieldIdx);
+					if (jsValue.GetType() == JS4D::eTYPE_OBJECT)
+					{
+						jsObj = jsValue.GetObject();
+						sLONG lineNb = jsObj.GetPropertyAsLong(CVSTR("lineNb"),NULL,NULL);
+
+						if (jsObj.HasProperty(CVSTR("file")))
+						{
+							VString url;
+							jsObj.GetPropertyAsString(CVSTR("file"),NULL,url);
+
+							result = inApplication->RemoveBreakpoint( riaContext, url, lineNb );
+							if (!result)
+							{
+								break;
+							}
+						}
+					}
+				}
+			}
+
+		}
+	}
+
+	ioParms.ReturnNumber( result);
+}
+
+void VRIAServerJSCore::_getDebuggerStatus( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication)
+{
+	bool		started;
+	sLONG		breakpointsTimeStamp;
+	bool		connected;
+	bool		pendingContexts;
+	sLONG		debuggingEventsTimeStamp;
+	WAKDebuggerType_t	WAKDebuggerType;
+
+	if (inApplication != NULL)
+	{
+		//VRIAContext*	riaContext = VRIAJSRuntimeContext::GetApplicationContextFromJSContext(ioParms.GetContext(), inApplication);
+		inApplication->GetDebuggerStatus( WAKDebuggerType, started, breakpointsTimeStamp, connected, debuggingEventsTimeStamp, pendingContexts);
+	}
+	VString		result("{\"started\":");
+	if (started)
+	{
+		result += "true";
+	}
+	else
+	{
+		result += "false";
+	}
+	result += ",\"debuggerType\":";
+	switch(WAKDebuggerType)
+	{
+	case WEB_INSPECTOR_TYPE:
+		result += "\"REMOTE_DEBUGGER\"";
+		break;
+	case REGULAR_DBG_TYPE:
+		result += "\"WAKANDA_DEBUGGER\"";
+		break;
+	default:
+		result += "\"NO_DEBUGGER\"";
+	}
+	result += ",\"breakpointsTimeStamp\":";
+	result.AppendLong8(breakpointsTimeStamp);
+	result += ",\"debuggerConnected\":";
+	if (connected)
+	{
+		result += "true";
+	}
+	else
+	{
+		result += "false";
+	}
+	result += ",\"debuggingPendingContexts\":";
+	if (pendingContexts)
+	{
+		result += "true";
+	}
+	else
+	{
+		result += "false";
+	}
+	result += ",\"debuggingEventsTimeStamp\":";
+	result.AppendLong8(debuggingEventsTimeStamp);
+	result += "}";
+	ioParms.ReturnString( result );
+}
+void VRIAServerJSCore::_getBreakpoints( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication)
+{
+	sLONG result = 0;
+	VString	vstrInput,vstrOutput;
+	VJSArray	jsArray(ioParms.GetContext());
+
+	XBOX::VJSContext	ctx = ioParms.GetContext();
+	inApplication->GetBreakpoints(&ctx,jsArray);
+	ioParms.ReturnValue(jsArray);
+
+}
 
 void VRIAServerJSCore::_setDebuggerServer( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication)
 {
-#if 1//defined(WKA_USE_UNIFIED_DBG)
+
+	if (!inApplication)
+	{
+		ioParms.ReturnUndefinedValue();
+		return;
+	}
+	
+	VRIAContext* riaContext = VRIAJSRuntimeContext::GetApplicationContextFromJSContext(ioParms.GetContext(), inApplication);
+
+	sLONG	dbgType;
+	DebugMsg("\n\n !!!! \n VRIAServerJSCore::_setDebuggerServer CALLED!!!!!\n\n\n");
+	if (ioParms.GetLongParam( 1, &dbgType ))
+	{
+		WAKDebuggerType_t	l_type = REGULAR_DBG_TYPE;
+		if (dbgType)
+		{
+			l_type = WEB_INSPECTOR_TYPE;
+		}
+
+		VSetDebuggerServerMessage *setDebuggerMsg = new VSetDebuggerServerMessage( inApplication, riaContext, l_type);
+		setDebuggerMsg->PostTo( VTask::GetMain());
+		ReleaseRefCountable( &setDebuggerMsg);
+		ioParms.ReturnNullValue();
+	}
+	else
+	{
+		ioParms.ReturnUndefinedValue();
+	}
+
+}
+
+
+void VRIAServerJSCore::_startDebugger( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication)
+{
+
+	if (!inApplication)
+	{
+		ioParms.ReturnUndefinedValue();
+		return;
+	}
+	
+	/*VRIAContext* riaContext = VRIAJSRuntimeContext::GetApplicationContextFromJSContext(ioParms.GetContext(), inApplication);
+
+	DebugMsg("\n\n !!!! \n VRIAServerJSCore::_startDebugger CALLED!!!!!\n\n\n");
+
+	{
+		VStartDebuggerMessage *startDebuggerMsg = new VStartDebuggerMessage( inApplication, riaContext );
+		startDebuggerMsg->PostTo( VTask::GetMain() );
+		ReleaseRefCountable( &startDebuggerMsg);
+		ioParms.ReturnNumber(0);
+	}*/
+
+	VRIAContext* riaContext = VRIAJSRuntimeContext::GetApplicationContextFromJSContext(ioParms.GetContext(), inApplication);
+
+	ioParms.ReturnNumber( inApplication->StartDebugger(riaContext) );
+}
+
+void VRIAServerJSCore::_stopDebugger( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication)
+{
 	if (!inApplication)
 	{
 		ioParms.ReturnUndefinedValue();
@@ -104,34 +358,20 @@ void VRIAServerJSCore::_setDebuggerServer( XBOX::VJSParms_callStaticFunction& io
 
 	VRIAContext* riaContext = VRIAJSRuntimeContext::GetApplicationContextFromJSContext(ioParms.GetContext(), inApplication);
 
-	sLONG	l_dbg_type;
-	DebugMsg("\n\n !!!! \n VRIAServerJSCore::_setDebuggerServer CALLED!!!!!\n\n\n");
-	if (ioParms.GetLongParam( 1, &l_dbg_type ))
-	{
-		WAKDebuggerType_t	l_type = REGULAR_DBG_TYPE;
-		if (l_dbg_type)
-		{
-			l_type = WEB_INSPECTOR_TYPE;
-		}
-		if (!inApplication->SetDebuggerServer(riaContext,l_type))
-		{
-			ioParms.ReturnNullValue();
-		}
-		else
-		{
-			ioParms.ReturnUndefinedValue();
-		}
-	}
-	else
+	ioParms.ReturnNumber( inApplication->StopDebugger(riaContext) );
+}
+
+void VRIAServerJSCore::_isDebugging( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication)
+{
+	if (!inApplication)
 	{
 		ioParms.ReturnUndefinedValue();
+		return;
 	}
 
-#else
-	{
-		ioParms.ReturnUndefinedValue();
-	}
-#endif
+	VRIAContext* riaContext = VRIAJSRuntimeContext::GetApplicationContextFromJSContext(ioParms.GetContext(), inApplication);
+
+	ioParms.ReturnNumber( inApplication->IsDebugging(riaContext) );
 }
 
 void VRIAServerJSCore::_getDebuggerServer( XBOX::VJSParms_callStaticFunction& ioParms, VRIAServerProject* inApplication)

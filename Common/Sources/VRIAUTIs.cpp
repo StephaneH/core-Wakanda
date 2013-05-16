@@ -38,6 +38,7 @@ namespace RIAFileKind
 	const XBOX::VString kMatchFileExtension		   ( "Match"          );
 	const XBOX::VString kWebComponentFileExtension ( "waComponent"    );
 	const XBOX::VString kCacheUAGFileExtension     ( "cacheUAG"       );
+	const XBOX::VString kLogFileExtension		   ( "waLog"	      );
 
 
 	// Standard extensions

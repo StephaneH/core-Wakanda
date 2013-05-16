@@ -33,4 +33,8 @@
 		Name="ICU_INCLUDE"
 		Value="$(SolutionDir)..\..\icu\4.8\icu\include\"
 	/>
+	<UserMacro
+		Name="DLL_ICU_DIRECTORY"
+		Value="$(SolutionDir)\..\..\icu\4.8\projets\win\$(PlatformName)\$(ConfigurationName)"
+	/>
 </VisualStudioPropertySheet>

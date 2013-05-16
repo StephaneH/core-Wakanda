@@ -4,9 +4,12 @@
 
 */
 
-//var pathToTest = application.getFolder("path") + "test-directory.js";
-//require("unitTest").run(pathToTest).getReport();
-
-//require("md5").MD5("default:Wakanda:password")
-
-//directory.filterUsers("*Filter")
+var session = application.currentSession();
+  var expected = {
+                name: "default guest",
+                ID: "00000000000000000000000000000000",
+                fullName: "default guest"
+            };
+var user = session.user;
+user;
+          

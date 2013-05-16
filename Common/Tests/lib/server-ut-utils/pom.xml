@@ -1,19 +1,19 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.wakanda.qa.utils</groupId>
+	<groupId>org.wakanda.qa.utils</groupId>
 	<artifactId>server-ut-utils</artifactId>
-	<version>1.0-SNAPSHOT</version>
+	<version>1.0.2</version>
 	<description>Provides utilities for QA test projects</description>
 
 	<distributionManagement>
 		<repository>
 			<id>releases</id>
-			<url>http://192.168.223.120:9000/nexus/content/repositories/releases</url>
+			<url>http://194.98.194.72:9000/nexus/content/repositories/releases</url>
 		</repository>
 		<snapshotRepository>
 			<id>snapshots</id>
-			<url>http://192.168.223.120:9000/nexus/content/repositories/snapshots</url>
+			<url>http://194.98.194.72:9000/nexus/content/repositories/snapshots</url>
 		</snapshotRepository>
 	</distributionManagement>
 
@@ -50,6 +50,12 @@
 			<version>1.3.2</version>
 		</dependency>
 
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.1</version>
+		</dependency>
+		
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
