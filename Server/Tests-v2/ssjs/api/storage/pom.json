@@ -1,0 +1,5 @@
+{
+    "desc": "Tests of the Storage API",
+    "kind": "ssjs",
+    "oldJenkinsName": "TestServerSessionStorage"
+}

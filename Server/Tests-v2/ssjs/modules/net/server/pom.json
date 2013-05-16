@@ -1,0 +1,5 @@
+{
+    "desc": "Tests of the Net Module (server side)",
+    "kind": "ssjs",
+    "oldJenkinsName": ["TestServerServerNetJenkinsRun_01", "TestServerServerNetJenkinsRun_02", "TestServerServerNetJenkinsRun_03"]
+}

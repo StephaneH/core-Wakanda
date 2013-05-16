@@ -1,0 +1,5 @@
+{
+    "desc": "Tests of the MySQLConnector Module",
+    "kind": "ssjs",
+    "oldJenkinsName": "TestServerMySQLConnectorMySQLConnector"
+}

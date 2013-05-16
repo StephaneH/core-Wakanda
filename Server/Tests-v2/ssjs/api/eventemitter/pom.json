@@ -1,0 +1,5 @@
+{
+    "desc": "Tests of the EventEmitter API",
+    "kind": "ssjs",
+    "oldJenkinsName": "TestServerEventEmitter"
+}
