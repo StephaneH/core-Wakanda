@@ -423,6 +423,17 @@ VError VRIAServerProject::Close()
 	VError err = VE_OK;
 	StErrorContextInstaller errContext;
 
+	if (fJSContextPool != NULL)
+	{
+		VSyncEvent *syncEvent = fJSContextPool->WaitForNumberOfUsedContextEqualZero();
+		if (syncEvent != NULL)
+		{
+			syncEvent->Lock( 5000);
+			syncEvent->Release();
+		}
+		fJSContextPool->Clean();
+	}
+
 	fContextCreationEnabled = false;
 
 	if (fContextMgr != NULL)
@@ -430,10 +441,13 @@ VError VRIAServerProject::Close()
 		VSyncEvent *syncEvent = fContextMgr->WaitForRegisteredContextsCountZero();
 		if (syncEvent != NULL)
 		{
-			syncEvent->Lock();
+			syncEvent->Lock( 5000); // sc 22/03/2013, add timeout
 			syncEvent->Release();
 		}
 	}
+
+	if (fContextMgr->GetRegisteredContextsCount() > 0)
+		vThrowError( VE_RIA_PROJECT_IS_BUSY);
 
 	ReleaseRefCountable( &fRPCService);
 
@@ -757,10 +771,8 @@ VError VRIAServerProject::Stop()
 	}
 
 	if (fJSContextPool != NULL)
-	{
 		fJSContextPool->SetEnabled( false);
-		fJSContextPool->Clear();
-	}
+
 	logger.LogMessagesFromErrorContext( fLoggerID, errContext.GetContext());
 
 	fState.started = false;
@@ -991,51 +1003,71 @@ VError VRIAServerProject::ReloadCatalog( VRIAContext* inContext)
 			{
 				VJSGlobalContext::AbortAllDebug();
 			}
+
 			// Post 'catalogWillReload' message to the services
 			_PostServicesMessage( L"catalogWillReload");
 		
 			if (fDatabase != NULL)
 			{
 				if (fDataService != NULL)
-				{
 					fDataService->SetDatabase( NULL);
-				}
 				
+				// Disable the application context (VRIAContext) creation to prevent the creation of base contexts and the using of the current opened database
+				bool contextCreationEnabled = _SetContextCreationEnabled( false);
+				
+				// Disable the JavaScript context creation for this application
+				bool jsContextPoolEnabled = fJSContextPool->SetEnabled( false);
+
+				// Drop all the JavaScript contexts of the solution to release the existing application contexts
+				// sc 22/03/2013, review context pools cleaning mechanism
+				uLONG remainingContextsCount = 0;
+				VRIAServerJSContextMgr *jsContextMgr = VRIAServerApplication::Get()->GetJSContextMgr();
+				jsContextMgr->BeginPoolsCleanup();
+				err = jsContextMgr->CleanAllPools( 5000, &remainingContextsCount);
+				jsContextMgr->EndPoolsCleanup();
+
 				if (err == VE_OK)
 				{
-					// Disable the application context (VRIAContext) creation to prevent the creation of base contexts and the using of the current opened database
-					bool contextCreationEnabled = _SetContextCreationEnabled( false);
-					
-					// Disable the JavaScript context creation for this application
-					bool jsContextPoolEnabled = fJSContextPool->SetEnabled( false);
-
-					// Drop all the JavaScript contexts of the solution to release the existing application contexts
+					if (remainingContextsCount == 0)
 					{
-						VJSContextPoolCleaner cleaner;
-						cleaner.CleanAll();
-					}
-					
-					// Ensure the application is not used anymore
-					ReleaseRefCountable( &context);
+						// Ensure the application is not used anymore
+						ReleaseRefCountable( &context);
 
-					if (fContextMgr != NULL)
-					{
-						VSyncEvent *syncEvent = fContextMgr->WaitForRegisteredContextsCountZero();
-						if (syncEvent != NULL)
+						if (fContextMgr != NULL)
 						{
-							syncEvent->Lock();
-							syncEvent->Release();
+							VSyncEvent *syncEvent = fContextMgr->WaitForRegisteredContextsCountZero();
+							if (syncEvent != NULL)
+							{
+								syncEvent->Lock( 5000); // sc 22/03/2013, add timeout
+								syncEvent->Release();
+							}
+						}
+
+						if (fContextMgr->GetRegisteredContextsCount() == 0)
+						{
+							// Here, nobody can access to the database so it's safe detach it and to close it
+							CDB4DBase *db = fDatabase;
+							fDatabase = NULL;
+							_CloseAndReleaseDatabase( db);
+						}
+						else
+						{
+							err = vThrowError( VE_RIA_PROJECT_IS_BUSY);
 						}
 					}
-
-					// Here, nobody can access to the database so it's safe detach it and to close it
-					CDB4DBase *db = fDatabase;
-					fDatabase = NULL;
-					_CloseAndReleaseDatabase( db);
-
-					_SetContextCreationEnabled( contextCreationEnabled);
-					fJSContextPool->SetEnabled( jsContextPoolEnabled);
+					else
+					{
+						VString remainingContexts;
+						remainingContexts.FromLong( remainingContextsCount);
+						err = vThrowError( VE_RIA_JS_CONTEXT_STILL_IN_USE, remainingContexts);
+					}
 				}
+
+				if ((err != VE_OK) && (fDatabase != NULL))
+					fDataService->SetDatabase( fDatabase);
+
+				_SetContextCreationEnabled( contextCreationEnabled);
+				fJSContextPool->SetEnabled( jsContextPoolEnabled);
 			}
 			else
 			{
@@ -1071,6 +1103,9 @@ VError VRIAServerProject::ReloadCatalog( VRIAContext* inContext)
 				_SetContextCreationEnabled( contextCreationEnabled);
 				fJSContextPool->SetEnabled( jsContextPoolEnabled);
 			}
+
+			if (err != VE_OK)
+				err = vThrowError( VE_RIA_CANNOT_RELOAD_DATABASE);
 
 			// Post 'catalogDidReload' message to the services
 			_PostServicesMessage( L"catalogDidReload");
@@ -4370,12 +4405,16 @@ void VSetDebuggerServerMessage::DoExecute()
 {
 	if (fApplication != NULL)
 	{
-		VJSContextPoolCleaner cleaner;
+		VRIAServerJSContextMgr *jsContextMgr = VRIAServerApplication::Get()->GetJSContextMgr();
 
-		// drop all JS contexts of the application
-		cleaner.CleanAll();
-		
+		// drop all JS contexts of the solution
+		// sc 22/03/2013, review context pools cleaning mechanism
+		jsContextMgr->BeginPoolsCleanup();
+		jsContextMgr->CleanAllPools( 5000, NULL);
+
 		fApplication->_SetDebuggerServer( fContext, fDebuggerType);
+
+		jsContextMgr->EndPoolsCleanup();
 	}
 }
 

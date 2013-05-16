@@ -55,6 +55,24 @@ public:
 	virtual	XBOX::VError				ReleaseJSContext( XBOX::VJSGlobalContext* inContext);
 
 			void						GetAllPools( std::vector<VJSContextPool*>& outPools) const;
+			
+			/*	Context pool cleaning utilities:
+				call CleanAllPools() to release all JavaScript contexts:	contextMgr->BeginPoolsCleanup();
+																			contextMgr->CleanAllPools( 5000, NULL);
+																			contextMgr->EndPoolsCleanup();
+			*/
+
+			/** @brief	BeginPoolsCleanup() prevents all context pools from providing JavaScript contexts and touch all context pools */
+			void						BeginPoolsCleanup();
+			/*** @brief	EndPoolsCleanup() allows all context pools to provide JavaScript contexts */
+			void						EndPoolsCleanup();
+			/** @brief	CleanAllPools() asks each pool to release all JavaScript contexts
+						- first, it asks for aborting all JS contexts paused in debug mode and for terminating all workers
+						- then, it waits for number of used contexts equal 0 with a maximum timeout defined by inTimeoutMs
+						- if not NULL, outRemainingContexts contains the number of contexts which are still used
+			*/
+			XBOX::VError				CleanAllPools( sLONG inTimeoutMs, uLONG* outRemainingContexts);
+			bool						IsPoolsAreBeingCleaned() const		{ return fPoolsAreBeingCleaned > 0; }
 
 			// Private utilities
 			void						_RegisterPool( VJSContextPool *inPool);
@@ -63,32 +81,7 @@ public:
 private:
 			SetOfPool					fSetOfPool;
 	mutable	XBOX::VCriticalSection		fSetOfPoolMutex;
-};
-
-
-
-// ----------------------------------------------------------------------------
-
-
-
-class VJSContextPoolCleaner : public XBOX::VObject
-{
-public:
-			VJSContextPoolCleaner();
-	virtual	~VJSContextPoolCleaner();
-
-			XBOX::VError	CleanAll();
-
-private:
-			VJSContextPoolCleaner( const VJSContextPoolCleaner& inSource)	{ assert(false); }
-
-			typedef struct sPoolInfo
-			{
-				VJSContextPool	*fPool;
-				bool			fEnabledState;
-			} sPoolInfo;
-			
-			std::vector<sPoolInfo>	fPoolToClean;
+			sLONG						fPoolsAreBeingCleaned;
 };
 
 
@@ -228,7 +221,8 @@ public:
 						RetainContext() returns this one. If all contexts are used, a new context is created and added to the set of reusable contexts. */
 			XBOX::VJSGlobalContext*			RetainContext( XBOX::VError& outError, bool inReusable, XBOX::VJSGlobalContext* inPreferedContext = NULL);
 
-			/** @brief	Call ReleaseContext() each time you finished using the context. Contexts which are not reusable are destroyed. */
+			/** @brief	Call ReleaseContext() each time you finished using the context. Contexts which are not reusable are destroyed.
+						The context will not be reused if the pool has been touched since context has been created */
 			XBOX::VError					ReleaseContext( XBOX::VJSGlobalContext* inContext);
 
 			/** @brief	Disable the pool to prevent it from providing JavaScript contexts.
@@ -241,10 +235,20 @@ public:
 			void							SetContextReusingEnabled( bool inEnabled);
 			bool							IsContextReusingEnabled() const;
 
-			XBOX::VSyncEvent*				WaitForNumberOfUsedContextEqualZero();
+			/** @brief	Release all unused contexts and clear reusable contexts set */
+			void							Clean();
+			
+			/**	@brief	Touch() increment internal pool modification stamp
+						All contexts created before stamp was incremented will not be reused */
+			void							Touch();
 
+			XBOX::VSyncEvent*				WaitForNumberOfUsedContextEqualZero();
+			uLONG							GetUsedContextsCount() const;
+
+		#if 0
 			/**	@brief	Clear() wait for number of used contexts equal 0 and clear the reusable contexts set. */
 			XBOX::VError					Clear();
+		#endif
 
 			/** @brief	Required scripts are evaluated for each JavaScript context. */
 			void							AppendRequiredScript( const XBOX::VFilePath& inPath);
@@ -290,6 +294,7 @@ private:
 			IJSContextPoolDelegate			*fDelegate;
 
 			// Contexts pooling
+			uLONG							fStamp;			
 			MapOfJSContext					fUsedContexts;			// pool of used contexts (reusable and non-reusable)
 			MapOfJSContext					fUnusedContexts;		// pool of unused contexts which are reusable
 			sLONG							fReusableContextCount;

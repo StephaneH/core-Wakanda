@@ -531,11 +531,28 @@ VError VRIAServerSolution::Stop()
 		(*iter)->OnStop();
 	}
 
+	if (VRIAServerApplication::Get()->GetDebuggingAuthorized())
+		VJSGlobalContext::AbortAllDebug();
+
 	VJSWorker::TerminateAll();
 
 	for (VectorOfApplication_iter iter = fApplicationsCollection.begin() ; iter != fApplicationsCollection.end() ; ++iter)
 	{
 		(*iter)->Stop();
+	}
+
+	// sc 22/03/2013, clean the context pools
+	uLONG remainingContextsCount = 0;
+	VRIAServerJSContextMgr *jsContextMgr = VRIAServerApplication::Get()->GetJSContextMgr();
+	jsContextMgr->BeginPoolsCleanup();
+	jsContextMgr->CleanAllPools( 5000, &remainingContextsCount);
+	jsContextMgr->EndPoolsCleanup();
+
+	if (remainingContextsCount > 0)
+	{
+		VString remainingContexts;
+		remainingContexts.FromLong( remainingContextsCount);
+		vThrowError( VE_RIA_JS_CONTEXT_STILL_IN_USE, remainingContexts);
 	}
 
 	fState.started = false;

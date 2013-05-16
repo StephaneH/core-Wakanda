@@ -140,6 +140,18 @@ VSyncEvent* VRIAContextManager::WaitForRegisteredContextsCountZero()
 }
 
 
+uLONG VRIAContextManager::GetRegisteredContextsCount() const
+{
+	uLONG result = 0;
+	if (fSetOfContextMutex.Lock())
+	{
+		result = (uLONG) fSetOfContext.size();
+		fSetOfContextMutex.Unlock();
+	}
+	return result;
+}
+
+
 
 // ----------------------------------------------------------------------------
 

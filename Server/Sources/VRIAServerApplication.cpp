@@ -1259,8 +1259,24 @@ void VRIAServerApplication::_OnStartup( VRIAServerStartupParameters *inStartupPa
 								globalContext = NULL;
 							}
 
+							// sc 22/03/2013, review context pool cleaning mechanism
+							if (VRIAServerApplication::Get()->GetDebuggingAuthorized())
+								VJSGlobalContext::AbortAllDebug();
+
+							VJSWorker::TerminateAll();
+
 							fJSContextPool->SetEnabled( false);
-							fJSContextPool->Clear();
+
+							if (fJSContextPool != NULL)
+							{
+								VSyncEvent *syncEvent = fJSContextPool->WaitForNumberOfUsedContextEqualZero();
+								if (syncEvent != NULL)
+								{
+									syncEvent->Lock( 5000);
+									syncEvent->Release();
+								}
+								fJSContextPool->Clean();
+							}
 
 							delete fJSContextPool;
 							fJSContextPool = NULL;
@@ -1316,11 +1332,6 @@ VError VRIAServerApplication::_OpenSolutionAsCurrentSolution( VSolutionStartupPa
 			{
 				designSolution->StopWatchingFileSystem();
 				designSolution->StopUpdatingSymbolTable();
-			}
-
-			if (GetDebuggingAuthorized())
-			{
-				VJSGlobalContext::AbortAllDebug();
 			}
 
 			err = fSolution->Stop();
@@ -1441,12 +1452,7 @@ VError VRIAServerApplication::_CloseCurrentSolution()
 				designSolution->StopUpdatingSymbolTable();
 			}
 
-			if (GetDebuggingAuthorized())
-			{
-				VJSGlobalContext::AbortAllDebug();
-			}
 			err = fSolution->Stop();
-
 			xbox_assert(err == VE_OK);
 		}
 
@@ -1778,18 +1784,4 @@ XBOX::VFileSystemNamespace* VRIAServerJSRuntimeDelegate::RetainRuntimeFileSystem
 {
 	return RetainRefCountable( VRIAServerApplication::Get()->GetFileSystemNamespace());
 }
-
-
-
-// ----------------------------------------------------------------------------
-
-
-
-void VDropAllJSContextsMessage::DoExecute()
-{
-	VJSContextPoolCleaner cleaner;
-	cleaner.CleanAll();
-}
-
-//**
 

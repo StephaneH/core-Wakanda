@@ -1,3 +1,19 @@
+/*
+ * This file is part of Wakanda software, licensed by 4D under
+ *  (i) the GNU General Public License version 3 (GNU GPL v3), or
+ *  (ii) the Affero General Public License version 3 (AGPL v3) or
+ *  (iii) a commercial license.
+ * This file remains the exclusive property of 4D and/or its licensors
+ * and is protected by national and international legislations.
+ * In any event, Licensee's compliance with the terms and conditions
+ * of the applicable license constitutes a prerequisite to any use of this file.
+ * Except as otherwise expressly stated in the applicable license,
+ * such license does not include any other license or rights on this file,
+ * 4D's and/or its licensors' trademarks and/or other proprietary rights.
+ * Consequently, no title, copyright or other proprietary rights
+ * other than those specified in the applicable license is granted.
+ */
+
 function onCollectionChange(type) {
     $$('restoreButton').hide();
     $$(type + 'DownLogIcon').hide();
@@ -325,6 +341,8 @@ WAF.onAfterInit = function onAfterInit() {// @lock
                 "name" : "never", 
                 "path" : ""
             }];
+        
+            sources[attr + 'Logs'].orderBy('date desc');
             sources[attr + 'Logs'].sync();
         }
         if($("#settingsContainer").is(":visible") && sources.projects.name){
@@ -531,6 +549,12 @@ init: function init_admin() {
                 i,
                 sol,
                 runPosition = 0;
+                
+                if(response.length === 0){
+                    adminObject.disableInterface();
+                    adminObject.showMessage('info', "Please use the Browse button to open your solution.");
+                    return false;
+                }
 
                 recentSolutions = [];
                 for (i = 0; sol = response[i]; i++) {
@@ -582,19 +606,18 @@ init: function init_admin() {
         try {
             webAdmin.getCurrentRunningHashAsync({
                 "onsuccess": function(response) {
-                    if (response !== null) {
+                var sol = sources.solutions;
+                    if ( solutions.length === 0 || (response !== null && ((sol.isRunning && sol.hash !== response) || (!sol.isRunning && sol.hash == response))) ){
                         for (i = 0; i < adminObject.reloadingSetTimeOut.length; i++) {
                             clearTimeout(adminObject.reloadingSetTimeOut[i]);
                         }
                         adminObject.reloadingSetTimeOut = [];
-                        if (callback === null) {
+                        if (callback === null || typeof callback === "undefined") {
                             window.location.reload();
                         } else {
-                            console.log("response is: ", response);
                             callback();
                         }
                     } else {
-                        console.log("response is: ", response);
                         adminObject.reloadingSetTimeOut.push(setTimeout(adminObject.waitServerAndCallback, 1000, callback));
                     }
                 },

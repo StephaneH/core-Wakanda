@@ -304,20 +304,4 @@ private:
 };
 
 
-
-// ----------------------------------------------------------------------------
-
-
-
-class VDropAllJSContextsMessage : public XBOX::VMessage
-{
-public:
-			VDropAllJSContextsMessage()		{;}
-	virtual ~VDropAllJSContextsMessage()	{;}
-
-protected:
-	virtual	void	DoExecute();
-};
-
-
 #endif

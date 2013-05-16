@@ -59,7 +59,7 @@ Admin.prototype.hideMessage =function hideMessage(){
  */
 Admin.prototype.disableInterface = function disableInterface(){
     var elems = ["repairButton", "backupButton", "compactButton", "verifyButton", "dataButton", 
-    "restoreButton", "applicationSettings", "general_info_btn",  "startStopSol", "settingsSol", "debuggerCont", "solutionCombobox", "matrix1" ];
+    "restoreButton", "applicationSettings", "general_info_btn",  "startStopSol", "settingsSol", "debuggerCont", "solutionCombobox", "matrix1"];
 		
     for (var i = 0; i < elems.length; i++) {
         $$(elems[i]).disable();
@@ -303,7 +303,9 @@ Admin.prototype.cropProjectTitle = function (){
         value, 
         projectName;
         
-        
+    if (typeof projectName === 'undefined'){
+    	return false;
+    }    
     space = $("#container14").width() - 880;
     value = $("#richText10");    
     if( value.width() > space ){

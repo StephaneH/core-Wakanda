@@ -229,7 +229,19 @@
         <trans-unit resname="ERR_iasv_1067" id="67">
           <source>Model file '{param1}' not found</source>
           <target>Model file '{param1}' not found</target>
-        </trans-unit>		
+        </trans-unit>
+        <trans-unit resname="ERR_iasv_1075" id="75">
+          <source>One or more JavaScript contexts are in use and cannot be released (number of contexts: {p1})</source>
+          <target>One or more JavaScript contexts are in use and cannot be released (number of contexts: {p1})</target>
+        </trans-unit>
+        <trans-unit resname="ERR_iasv_1076" id="76">
+          <source>This project is busy. One or more resources may still have access to it</source>
+          <target>This project is busy. One or more resources may still have access to it</target>
+        </trans-unit>
+        <trans-unit resname="ERR_iasv_1077" id="77">
+          <source>Cannot reload the model</source>
+          <target>Cannot reload the model</target>
+        </trans-unit>
       </group>
     </body>
   </file>

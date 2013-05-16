@@ -5,7 +5,6 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
-import org.python.modules.thread.thread;
 import org.wakanda.wastudio.common.Utils;
 
 public class TestCasesAdmin extends Template {
@@ -18,11 +17,9 @@ public void maximizeWindow() {}
 			boolean launchServerOnlyOneTime) {
 		super(browserName, soluString, launchServerOnlyOneTime);
 	}
-	 
 	
-	 
 	@Test
-	public void testSolutionName() throws InterruptedException {
+	public void remoteTools_admin_testSolutionName() throws InterruptedException {
 		
 		fDriver.get("http://127.0.0.1:8080");
 		Thread.sleep(500);
@@ -34,7 +31,7 @@ public void maximizeWindow() {}
 	}
 	
 	@Test
-	public void testButtonStop_exist() throws InterruptedException {
+	public void remoteTools_admin_testButtonStop_exist() throws InterruptedException {
 		
 		fDriver.get("http://127.0.0.1:8080");
 		Thread.sleep(500);
@@ -55,7 +52,7 @@ public void maximizeWindow() {}
 	}
 	
 	@Test
-	public void testButtonStart_exist() throws InterruptedException {
+	public void remoteTools_admin_testButtonStart_exist() throws InterruptedException {
 		
 		fDriver.get("http://127.0.0.1:8080");
 		Thread.sleep(1000);
@@ -78,7 +75,7 @@ public void maximizeWindow() {}
 	}
 	
 	@Test
-	public void testButtonBrowse_exist() throws InterruptedException {
+	public void remoteTools_admin_testButtonBrowse_exist() throws InterruptedException {
 		
 		fDriver.get("http://127.0.0.1:8080");
 		Thread.sleep(500);
@@ -90,7 +87,7 @@ public void maximizeWindow() {}
 	}
 	
 	@Test
-	public void testButtonBrowse_popup_exist() throws InterruptedException {
+	public void remoteTools_admin_testButtonBrowse_popup_exist() throws InterruptedException {
 		
 		fDriver.get("http://127.0.0.1:8080");
 		Thread.sleep(1000);
@@ -111,7 +108,7 @@ public void maximizeWindow() {}
 	}
 	
 	@Test
-	public void testButtonBrowse_popup_buttonCancel_exist() throws InterruptedException {
+	public void remoteTools_admin_testButtonBrowse_popup_buttonCancel_exist() throws InterruptedException {
 		
 		fDriver.get("http://127.0.0.1:8080");
 		Thread.sleep(1000);
@@ -124,7 +121,7 @@ public void maximizeWindow() {}
 	}
 	
 	@Test
-	public void testButtonBrowse_popup_buttonLaunch_exist() throws InterruptedException {
+	public void remoteTools_admin_testButtonBrowse_popup_buttonLaunch_exist() throws InterruptedException {
 		
 		fDriver.get("http://127.0.0.1:8080");
 		Thread.sleep(1000);
@@ -135,11 +132,9 @@ public void maximizeWindow() {}
 		
 		assertEquals("Browse Solution button launch is : ", "OK", resultsAtt);
 	}
-	
-	
-	
+
 	@Test
-	public void testButtonBrowse_popup_typeInput_exist() throws InterruptedException {
+	public void remoteTools_admin_testButtonBrowse_popup_typeInput_exist() throws InterruptedException {
 		
 		fDriver.get("http://127.0.0.1:8080");
 		Thread.sleep(1000);
@@ -162,9 +157,8 @@ public void maximizeWindow() {}
 		
 	}
 	
-	
 	@Test
-	public void testSolutionName_enabled_combobox() throws InterruptedException {
+	public void remoteTools_admin_testSolutionName_enabled_combobox() throws InterruptedException {
 		
 		fDriver.get("http://127.0.0.1:8080");
 		Thread.sleep(1000);
@@ -189,10 +183,8 @@ public void maximizeWindow() {}
 		
 	}
 	
-	
-	
 	@Test
-	public void testButton_generalInfo_exist() throws InterruptedException {
+	public void remoteTools_admin_testButton_generalInfo_exist() throws InterruptedException {
 		
 		fDriver.get("http://127.0.0.1:8080");
 		Thread.sleep(1000);
@@ -213,7 +205,7 @@ public void maximizeWindow() {}
 	}
 	
 	@Test
-	public void testTitle_admin_exist() throws InterruptedException {
+	public void remoteTools_admin_testTitle_admin_exist() throws InterruptedException {
 		
 		fDriver.get("http://127.0.0.1:8080");
 		Thread.sleep(1000);
@@ -227,48 +219,14 @@ public void maximizeWindow() {}
 			}
 		}
 		
-		Thread.sleep(500);
-				
-		Thread.sleep(1000);
-		Thread.sleep(1000);
-		
-		long end = System.currentTimeMillis() + 20000;
-		while (System.currentTimeMillis() < end) {
-			Thread.sleep(100);
-			String resultsAtt = fDriver.findElement(By.xpath("//*[@id='label60']")).getText(); 
-			if (resultsAtt.equals("General Info")) {
-				break;
-			}
-		}
-		Thread.sleep(500);
-				
 		String resultsAtt = fDriver.findElement(By.xpath("//*[@id='richText1']")).getText();
 		
 		assertEquals("Title administration is : ", "Wakanda Server Administration", resultsAtt);
 		
-		String resultsAtt = fDriver.findElement(By.xpath("//*[@id='richText2']")).getText();
-		
-		assertEquals("Solution Name is enabled : ", "Maintenance", resultsAtt);
-		
-		String resultsAtt = fDriver.findElement(By.xpath("//*[@id='richText1']")).getText();
-		long end = System.currentTimeMillis() + 20000;
-		while (System.currentTimeMillis() < end) {
-			Thread.sleep(100);
-			String resultsAtt = fDriver.findElement(By.xpath("//*[@id='richText1']")).getText(); 
-			if (resultsAtt.equals("Wakanda Server Administration")) {
-				break;
-			}
-		}
-		
-		String resultsAtt = fDriver.findElement(By.xpath("//*[@id='richText1']")).getText();
-		String resultsAtt = fDriver.findElement(By.xpath("//*[@id='richText2']")).getText();
-		
-		assertEquals("Solution Name is enabled : ", "Maintenance", resultsAtt);
-		
 	}
 	
 	@Test
-	public void testTab_opt1_exist() throws InterruptedException {
+	public void remoteTools_admin_testTab_opt1_exist() throws InterruptedException {
 		
 		fDriver.get("http://127.0.0.1:8080");
 		Thread.sleep(1000);
@@ -282,7 +240,6 @@ public void maximizeWindow() {}
 			}
 		}
 		
-		
 		String resultsAtt = fDriver.findElement(By.xpath("//*[@id='richText7']")).getText();
 		
 		assertEquals("Text for first opt1 is : ", "Datastore cache size:", resultsAtt);
@@ -290,12 +247,11 @@ public void maximizeWindow() {}
 	}
 	
 	@Test
-	public void testTab_opt1_result_exist() throws InterruptedException {
+	public void remoteTools_admin_testTab_opt1_result_exist() throws InterruptedException {
 		
 		fDriver.get("http://127.0.0.1:8080");
 		Thread.sleep(1000);
 		
-		String resultsAtt = fDriver.findElement(By.xpath("//*[@id='cashSizeValue']")).getText();
 		long end = System.currentTimeMillis() + 20000;
 		while (System.currentTimeMillis() < end) {
 			Thread.sleep(100);
@@ -312,7 +268,7 @@ public void maximizeWindow() {}
 	} 
 	
 	@Test
-	public void testTab_opt2_exist() throws InterruptedException {
+	public void remoteTools_admin_testTab_opt2_exist() throws InterruptedException {
 		
 		fDriver.get("http://127.0.0.1:8080");
 		Thread.sleep(1000);
@@ -326,7 +282,6 @@ public void maximizeWindow() {}
 			}
 		}
 		
-		
 		String resultsAtt = fDriver.findElement(By.xpath("//*[@id='richText8']")).getText();
 		
 		assertEquals("Text for first opt2 is : ", "Flush data buffers every:", resultsAtt);
@@ -334,7 +289,7 @@ public void maximizeWindow() {}
 	}
 	
 	@Test
-	public void testTab_opt2_result_exist() throws InterruptedException {
+	public void remoteTools_admin_testTab_opt2_result_exist() throws InterruptedException {
 		
 		fDriver.get("http://127.0.0.1:8080");
 		Thread.sleep(1000);
@@ -348,7 +303,6 @@ public void maximizeWindow() {}
 			}
 		}
 		
-		
 		String resultsAtt = fDriver.findElement(By.xpath("//*[@id='dataBufferValue']")).getText();
 		
 		assertEquals("Result for first opt2 is : ", "15 s", resultsAtt);
@@ -356,7 +310,7 @@ public void maximizeWindow() {}
 	}
 	
 	@Test
-	public void testTab_opt3_exist() throws InterruptedException {
+	public void remoteTools_admin_testTab_opt3_exist() throws InterruptedException {
 		
 		fDriver.get("http://127.0.0.1:8080");
 		Thread.sleep(1000);
@@ -370,7 +324,6 @@ public void maximizeWindow() {}
 			}
 		}
 		
-		
 		String resultsAtt = fDriver.findElement(By.xpath("//*[@id='richText9']")).getText();
 		
 		assertEquals("Text for first opt3 is : ", "Authentification type:", resultsAtt);
@@ -378,7 +331,7 @@ public void maximizeWindow() {}
 	}
 	
 	@Test
-	public void testTab_opt3_result_exist() throws InterruptedException {
+	public void remoteTools_admin_testTab_opt3_result_exist() throws InterruptedException {
 		
 		fDriver.get("http://127.0.0.1:8080");
 		Thread.sleep(1000);
@@ -392,7 +345,6 @@ public void maximizeWindow() {}
 			}
 		}
 		
-		
 		String resultsAtt = fDriver.findElement(By.xpath("//*[@id='authentificationValue']")).getText();
 		
 		assertEquals("Result for first opt3 is : ", "basic", resultsAtt);
@@ -400,7 +352,7 @@ public void maximizeWindow() {}
 	}
 	
 	@Test
-	public void testEditSolutionSettings_buttonEditSolutionSettings_exist() throws InterruptedException {
+	public void remoteTools_admin_testEditSolutionSettings_buttonEditSolutionSettings_exist() throws InterruptedException {
 		
 		fDriver.get("http://127.0.0.1:8080");
 		Thread.sleep(1000);
@@ -414,7 +366,6 @@ public void maximizeWindow() {}
 			}
 		}
 		
-		
 		String resultsAtt = fDriver.findElement(By.xpath("//*[@id='richText2']")).getText();
 		
 		assertEquals("Solution Name is enabled : ", "Solution Settings", resultsAtt);
@@ -422,7 +373,7 @@ public void maximizeWindow() {}
 	}
 	
 	@Test
-	public void testEditProjectSettings_buttonEditProjectSettings_exist() throws InterruptedException {
+	public void remoteTools_admin_testEditProjectSettings_buttonEditProjectSettings_exist() throws InterruptedException {
 		
 		fDriver.get("http://127.0.0.1:8080");
 		Thread.sleep(1000);
@@ -436,7 +387,6 @@ public void maximizeWindow() {}
 			}
 		}
 		
-		
 		String resultsAtt = fDriver.findElement(By.xpath("//*[@id='label7']")).getText();
 		
 		assertEquals("Solution Name is enabled : ", "Settings", resultsAtt);
@@ -444,7 +394,7 @@ public void maximizeWindow() {}
 	}
 	
 	@Test
-	public void testEditSolutionSettings_popup_exist() throws InterruptedException {
+	public void remoteTools_admin_testEditSolutionSettings_popup_exist() throws InterruptedException {
 		
 		fDriver.get("http://127.0.0.1:8080");
 		Thread.sleep(500);
@@ -465,9 +415,8 @@ public void maximizeWindow() {}
 		
 	}
 	
-	
 	@Test
-	public void testEditProjectSettings_popup_exist() throws InterruptedException {
+	public void remoteTools_admin_testEditProjectSettings_popup_exist() throws InterruptedException {
 		
 		fDriver.get("http://127.0.0.1:8080");
 		Thread.sleep(500);
@@ -487,7 +436,7 @@ public void maximizeWindow() {}
 	}
 	
 	@Test
-	public void testOpenSolution_Opening1Solution() throws InterruptedException {
+	public void remoteTools_admin_testOpenSolution_Opening1Solution() throws InterruptedException {
 		
 		Utils.killServer();
 		
@@ -532,7 +481,7 @@ public void maximizeWindow() {}
 	}
 	
 	@Test
-	public void testOpenSolution_Opening1Solution_https() throws InterruptedException {
+	public void remoteTools_admin_testOpenSolution_Opening1Solution_https() throws InterruptedException {
 		
 		Utils.killServer();
 		
@@ -578,7 +527,7 @@ public void maximizeWindow() {}
 	}
 	
 	@Test
-	public void testOpenSolution_OpeningXSolution() throws InterruptedException {
+	public void remoteTools_admin_testOpenSolution_OpeningXSolution() throws InterruptedException {
 		
 		Utils.killServer();
 		
@@ -621,7 +570,7 @@ public void maximizeWindow() {}
 	}
 	
 	@Test
-	public void testOpenSolution_OpeningXSolution_https() throws InterruptedException {
+	public void remoteTools_admin_testOpenSolution_OpeningXSolution_https() throws InterruptedException {
 		
 		Utils.killServer();
 		
@@ -664,10 +613,8 @@ public void maximizeWindow() {}
 		Utils.killServer();		
 	}
 	
-	
-	
 	@Test
-	public void testXSolutionNameProjects_exists() throws InterruptedException {
+	public void remoteTools_admin_testXSolutionNameProjects_exists() throws InterruptedException {
 		
 		int y = 0;
 		
@@ -723,9 +670,8 @@ public void maximizeWindow() {}
 		Utils.killServer();
 	}
 	
-	
 	@Test
-	public void testgetMaintenanceSolution_adminSolution1() throws InterruptedException {
+	public void remoteTools_admin_testgetMaintenanceSolution_adminSolution1() throws InterruptedException {
 		
 		JavascriptExecutor js = (JavascriptExecutor) fDriver;
 		
@@ -774,9 +720,8 @@ public void maximizeWindow() {}
 	
 	}
 	
-	
 	@Test
-	public void testgetMaintenanceSolution_adminSolutionXProject() throws InterruptedException {
+	public void remoteTools_admin_testgetMaintenanceSolution_adminSolutionXProject() throws InterruptedException {
 
 		JavascriptExecutor js = (JavascriptExecutor) fDriver;
 		
@@ -825,9 +770,8 @@ public void maximizeWindow() {}
 		
 	}
 	
-	
 	@Test
-	public void testButtonVerify_exist() throws InterruptedException {
+	public void remoteTools_admin_testButtonVerify_exist() throws InterruptedException {
 		
 		Utils.killServer();
 		
@@ -879,9 +823,8 @@ public void maximizeWindow() {}
 		
 	}
 	
-	
 	@Test
-	public void testButtonVerify_functionnal() throws InterruptedException {
+	public void remoteTools_admin_testButtonVerify_functionnal() throws InterruptedException {
 		
 		Utils.killServer();
 		
@@ -939,10 +882,8 @@ public void maximizeWindow() {}
 		
 	}
 	
-	
-	
 	@Test
-	public void testButtonRepair_exist() throws InterruptedException {
+	public void remoteTools_admin_testButtonRepair_exist() throws InterruptedException {
 		
 		Utils.killServer();
 
@@ -987,7 +928,7 @@ public void maximizeWindow() {}
 	}
 	
 	@Test
-	public void testButtonRepair_functionnal() throws InterruptedException {
+	public void remoteTools_admin_testButtonRepair_functionnal() throws InterruptedException {
 		
 		Utils.killServer();
 		
@@ -1043,7 +984,7 @@ public void maximizeWindow() {}
 	}
 	
 	@Test
-	public void testButtonCompact_exist() throws InterruptedException {
+	public void remoteTools_admin_testButtonCompact_exist() throws InterruptedException {
 		
 		Utils.killServer();
 
@@ -1088,7 +1029,7 @@ public void maximizeWindow() {}
 	}
 	
 	@Test
-	public void testButtonCompact_functionnal() throws InterruptedException {
+	public void remoteTools_admin_testButtonCompact_functionnal() throws InterruptedException {
 		
 		Utils.killServer();
 				
@@ -1139,34 +1080,20 @@ public void maximizeWindow() {}
 		
 		assertEquals("Compact button is : ", "Data was compacted successfully.", result2);		
 		
-	
-		assertEquals("Verify button is : ", "Data was compacted successfully.", result2);		
-		
-		assertEquals("Compact button is : ", "Data was compacted successfully.", result2);		
-		
 	}
 	
 	@Test
-	public void testButtonCompact_exist() throws InterruptedException {
-		
-		fDriver.get("http://127.0.0.1:8080");
-		Thread.sleep(500);
-		
-		fDriver.findElement(By.id("maintenanceTab")).click();
-		
-		String result = fDriver.findElement(By.id("label6")).getText();
-		
-		assertEquals("Compact button is : ", "Compact", result);	
-		
-	}
-	
-	public void testButtonBackup_exist() throws InterruptedException {
+	public void remoteTools_admin_testButtonBackup_exist() throws InterruptedException {
 
 		
 		
 		Utils.killServer();
 				
 		Utils.runTheServer();
+		
+		fDriver.get("http://127.0.0.1:8080");
+		Thread.sleep(500);
+		
 		JavascriptExecutor js = (JavascriptExecutor) fDriver;
 		
 		while (System.currentTimeMillis() < 1000) {
@@ -1196,9 +1123,6 @@ public void maximizeWindow() {}
 		
 		fDriver.findElement(By.id("backupButton")).click();
 		Thread.sleep(1000);
-		String result = fDriver.findElement(By.id("label6")).getText();
-		
-		assertEquals("Compact button is : ", "Compact", result);	
 		
 		String result = fDriver.findElement(By.id("label9")).getText();
 		
@@ -1206,9 +1130,8 @@ public void maximizeWindow() {}
 		
 	}
 	
-	
 	@Test
-	public void testButtonBackup_functionnal() throws InterruptedException {
+	public void remoteTools_admin_testButtonBackup_functionnal() throws InterruptedException {
 		
 		Utils.killServer();
 				
@@ -1243,44 +1166,8 @@ public void maximizeWindow() {}
 		}
 		
 		Thread.sleep(1000);
-		fDriver.findElement(By.id("compactButton")).click();
-		JavascriptExecutor js = (JavascriptExecutor) fDriver;
-
-		while (System.currentTimeMillis() < 1000) {
-			Thread.sleep(500);
-			Long elementLength = (Long) js.executeScript("return $('#solutionCombobox option').length");
-			if (elementLength > 0) {
-				break;
-			}
-		}
-		
-		Long elementLength = (Long) js.executeScript("return $('#solutionCombobox option').length");
-		for (int x = 1; x <= elementLength ; x++) {
-			String mySolution = fDriver.findElement(By.xpath("//*[@id='solutionCombobox']/select/option["+x+"]")).getAttribute("innerHTML");
-			if(mySolution.equals( "adminMaintenanceSol&nbsp;" )) {
-				
-				fDriver.findElement(By.xpath("//*[@id='solutionCombobox']/button")).click();
-				Thread.sleep(500);
-				fDriver.findElement(By.xpath("//*[@id='waf-body']/ul/li["+x+"]/a")).click();
-				Thread.sleep(1000);
-				break;
-				
-			} 
-			
-		}
-		
-		Thread.sleep(1000);
 		fDriver.findElement(By.id("backupButton")).click();
 	
-		long end = System.currentTimeMillis() + 60000;
-		while (System.currentTimeMillis() < end) {
-			Thread.sleep(500);
-			String result = fDriver.findElement(By.xpath("//*[@id='main_project_container']/div[1]")).getText();
-			
-			if (result.equals("Data was compacted successfully.")) {
-				break;
-			}
-		}
 		long end = System.currentTimeMillis() + 60000;
 		while (System.currentTimeMillis() < end) {
 			Thread.sleep(500);
@@ -1293,15 +1180,12 @@ public void maximizeWindow() {}
 		
 		String result2 = fDriver.findElement(By.xpath("//*[@id='main_project_container']/div[1]")).getText();
 		
-		assertEquals("Verify button is : ", "Data was compacted successfully.", result2);		
-		String result2 = fDriver.findElement(By.xpath("//*[@id='main_project_container']/div[1]")).getText();
-		
 		assertEquals("Backup button is : ", "Data was backed up successfully.", result2);		
 		
 	}
 
 	@Test
-	public void testButtonRestore_exist() throws InterruptedException {
+	public void remoteTools_admin_testButtonRestore_exist() throws InterruptedException {
 
 		
 		Utils.killServer();
@@ -1337,41 +1221,7 @@ public void maximizeWindow() {}
 			
 		}
 
-		
-		fDriver.findElement(By.id("backupButton")).click();
-		
-		fDriver.findElement(By.id("restoreButton")).click();
 		Thread.sleep(1000);
-		
-		String result = fDriver.findElement(By.id("richText3")).getText();
-		while (System.currentTimeMillis() < 1000) {
-			Thread.sleep(500);
-			Long elementLength = (Long) js.executeScript("return $('#solutionCombobox option').length");
-			if (elementLength > 0) {
-				break;
-			}
-		}
-		
-		Long elementLength = (Long) js.executeScript("return $('#solutionCombobox option').length");
-		for (int x = 1; x <= elementLength ; x++) {
-			Thread.sleep(500);
-			String mySolution = fDriver.findElement(By.xpath("//*[@id='solutionCombobox']/select/option["+x+"]")).getAttribute("innerHTML");
-			if(mySolution.equals( "adminMaintenanceSol&nbsp;" )) {
-				
-				fDriver.findElement(By.xpath("//*[@id='solutionCombobox']/button")).click();
-				Thread.sleep(500);
-				fDriver.findElement(By.xpath("//*[@id='waf-body']/ul/li["+x+"]/a")).click();
-				Thread.sleep(1000);
-				break;
-				
-			} 
-			
-		}
-
-		Thread.sleep(1000);
-		fDriver.findElement(By.id("restoreButton")).click();
-		
-		String result = fDriver.findElement(By.id("richText3")).getText();
 		fDriver.findElement(By.id("restoreButton")).click();
 		
 		String result = fDriver.findElement(By.id("richText3")).getText();
@@ -1381,7 +1231,7 @@ public void maximizeWindow() {}
 }
 
 	@Test
-	public void testButtonRestore_functionnal() throws InterruptedException {
+	public void remoteTools_admin_testButtonRestore_functionnal() throws InterruptedException {
 		
 		Utils.killServer();
 				
@@ -1437,18 +1287,8 @@ public void maximizeWindow() {}
 	}
 	
 	@Test
-	public void testLog_exist() throws InterruptedException {
-		
-
-		fDriver.findElement(By.id("compactButton")).click();
-		fDriver.findElement(By.id("restoreButton")).click();
+	public void remoteTools_admin_testLog_exist() throws InterruptedException {
 	
-		Utils.runTheServer(path);
-		
-		assertEquals("Verify button is : ", "Data was restored successfully.", result2);		
-		assertEquals("Restore button is : ", "Data was restored successfully.", result2);		
-		Utils.runTheServer(path);
-		
 		fDriver.get("http://127.0.0.1:8080");
 		Thread.sleep(500);
 		
@@ -1459,7 +1299,7 @@ public void maximizeWindow() {}
 	}
 
 	@Test
-	public void testSolutionXProject__exist() throws InterruptedException {
+	public void remoteTools_admin_testSolutionXProject__exist() throws InterruptedException {
 		
 		Utils.killServer();
 		

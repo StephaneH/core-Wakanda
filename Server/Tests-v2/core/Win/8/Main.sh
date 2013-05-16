@@ -4,7 +4,7 @@ echo "
  [INFO]-------------------------------------
  [INFO]
  [INFO]
- [INFO] 4D | Auto Test Linux | Wakanda Server 
+ [INFO] 4D | Auto Test Win8 | Wakanda Server 
  [INFO] Main Shell Script
  [INFO]
  [INFO]
@@ -234,183 +234,183 @@ echo "[INFO]-----------------------------------------------------------"
 # EOF
 # echo "[INFO]----------------------------------------------------------"
 
-# echo "[INFO]-----------------------------------------------------------"
-# echo "[INFO]-----------------Test Case number 6------------------------"
-# TESTCASE6=$(echo "Test Case Number 6 : We need to check if the permission file is X")
-# TESTCASE6_1=$(echo "Test Case Number 6_1 : We need to check if the permission file is W")
-# echo "${TESTCASE6}"
-# echo "${TESTCASE6_1}"
+echo "[INFO]-----------------------------------------------------------"
+echo "[INFO]-----------------Test Case number 6------------------------"
+TESTCASE6=$(echo "Test Case Number 6 : We need to check if the permission file is X")
+TESTCASE6_1=$(echo "Test Case Number 6_1 : We need to check if the permission file is W")
+echo "${TESTCASE6}"
+echo "${TESTCASE6_1}"
 
-# #Le test doit Ãªtre effectuÃ© pour chaque OS
+#Le test doit Ãªtre effectuÃ© pour chaque OS
 
-# echo "For X permission"
-# if [ -x ${HomeDirectoryRelease}Wakanda\ Server ]
-# then 
-#  echo "Wakanda File is executable well Release"
+echo "For X permission"
+if [ -x ${HomeDirectoryRelease}Wakanda\ Server ]
+then 
+ echo "Wakanda File is executable well Release"
  
-# #[INFO]-------------Score for Junit----------
+#[INFO]-------------Score for Junit----------
 
-# SCORE6=0
+SCORE6=0
 
-# if [ "${SCORE6}" -eq "0" ]
+if [ "${SCORE6}" -eq "0" ]
  
-# then
-#     echo ":1 : Test passed"
+then
+    echo ":1 : Test passed"
 
-# #[INFO]--------Junit File creation-----------
+#[INFO]--------Junit File creation-----------
 
-# #Wrote in the Junit File
-# cat >> "${HomeDirectory}${Directory}Junit-report/$(date +%d-%m-%Y)-GoNoGo-Server-Junit-file.xml" <<EOF
-#   <testcase name="$TESTCASE6-[Passed]" passed="true" time="DV">
-#      <success message="Test Passed, The Permission are Ok"><![CDATA[Test passed, The permission are Ok]]></success>
-#   </testcase>
-# EOF
+#Wrote in the Junit File
+cat >> "${HomeDirectory}${Directory}Junit-report/$(date +%d-%m-%Y)-GoNoGo-Server-Junit-file.xml" <<EOF
+  <testcase name="$TESTCASE6-[Passed]" passed="true" time="DV">
+     <success message="Test Passed, The Permission are Ok"><![CDATA[Test passed, The permission are Ok]]></success>
+  </testcase>
+EOF
 
-# #[INFO]----------------Number 6 / true-------
+#[INFO]----------------Number 6 / true-------
 
-# else
-#     echo ":0 : Test got an error"
+else
+    echo ":0 : Test got an error"
 
-# #[INFO]--------Junit File creation-----------
+#[INFO]--------Junit File creation-----------
 
-# #Wrote in the Junit File
-# cat >> "${HomeDirectory}${Directory}Junit-report/$(date +%d-%m-%Y)-GoNoGo-Server-Junit-file.xml" <<EOF
-#   <testcase name="$TESTCASE6-[Error]" passed="false" time="DV">
-#      <error message="Test Error"><![CDATA[Test Error]]></error>
-#   </testcase>
-# EOF
+#Wrote in the Junit File
+cat >> "${HomeDirectory}${Directory}Junit-report/$(date +%d-%m-%Y)-GoNoGo-Server-Junit-file.xml" <<EOF
+  <testcase name="$TESTCASE6-[Error]" passed="false" time="DV">
+     <error message="Test Error"><![CDATA[Test Error]]></error>
+  </testcase>
+EOF
 
-# #[INFO]----------------Number 6 / Error------
+#[INFO]----------------Number 6 / Error------
 
-# fi
+fi
 
-# #[INFO]-------------Score for Junit----------  
+#[INFO]-------------Score for Junit----------  
 
-# else
-#  echo "Wakanda File isn't executable in Release"
+else
+ echo "Wakanda File isn't executable in Release"
 
-# #[INFO]-------------Score for Junit-----------
+#[INFO]-------------Score for Junit-----------
 
-# SCORE6_1=1
+SCORE6_1=1
 
-# if [ "${SCORE6_1}" -eq "1" ]
+if [ "${SCORE6_1}" -eq "1" ]
  
-# then
-#     echo ":0 : Test Failed"
+then
+    echo ":0 : Test Failed"
 
-# #[INFO]--------Junit File creation-----------
+#[INFO]--------Junit File creation-----------
 
-# #Wrote in the Junit File
-# cat >> "${HomeDirectory}${Directory}Junit-report/$(date +%d-%m-%Y)-GoNoGo-Server-Junit-file.xml" <<EOF
-#   <testcase name="$TESTCASE6-[Failed]" passed="false" time="DV">
-#      <failure message="Test Failed, The permission aren't Ok"><![CDATA[Test Failed, The permission aren't Ok]]></failure>
-#   </testcase>
-# EOF
+#Wrote in the Junit File
+cat >> "${HomeDirectory}${Directory}Junit-report/$(date +%d-%m-%Y)-GoNoGo-Server-Junit-file.xml" <<EOF
+  <testcase name="$TESTCASE6-[Failed]" passed="false" time="DV">
+     <failure message="Test Failed, The permission aren't Ok"><![CDATA[Test Failed, The permission aren't Ok]]></failure>
+  </testcase>
+EOF
 
-# #[INFO]----------------Number 6_1 / false-------
+#[INFO]----------------Number 6_1 / false-------
 
-# else
-#     echo ":1 : Test got an error"
-# #[INFO]--------Junit File creation-----------
+else
+    echo ":1 : Test got an error"
+#[INFO]--------Junit File creation-----------
 
-# #Wrote in the Junit File
-# cat >> "${HomeDirectory}${Directory}Junit-report/$(date +%d-%m-%Y)-GoNoGo-Server-Junit-file.xml" <<EOF
-#   <testcase name="$TESTCASE6-[Error]" passed="false" time="DV">
-#      <error message="Test error"><![CDATA[Test Error]]></error>
-#   </testcase>
-# EOF
+#Wrote in the Junit File
+cat >> "${HomeDirectory}${Directory}Junit-report/$(date +%d-%m-%Y)-GoNoGo-Server-Junit-file.xml" <<EOF
+  <testcase name="$TESTCASE6-[Error]" passed="false" time="DV">
+     <error message="Test error"><![CDATA[Test Error]]></error>
+  </testcase>
+EOF
 
-# #[INFO]----------------Number 6_1 / Error-------
+#[INFO]----------------Number 6_1 / Error-------
 
-# fi
-# #[INFO]-------------Score for Junit-----------
+fi
+#[INFO]-------------Score for Junit-----------
  
-# fi
+fi
 
-# echo "For W permission" 
-# if [ -w ${HomeDirectoryRelease}Wakanda\ Server ]
-# then 
-#   echo "Wakanda File can be written well in Release"
+echo "For W permission" 
+if [ -w ${HomeDirectoryRelease}Wakanda\ Server ]
+then 
+  echo "Wakanda File can be written well in Release"
   
-# #[INFO]-------------Score for Junit----------
+#[INFO]-------------Score for Junit----------
 
-# SCORE6_1=0
+SCORE6_1=0
 
-# if [ "${SCORE6_1}" -eq "0" ]
+if [ "${SCORE6_1}" -eq "0" ]
  
-# then
-#     echo ":1 : Test passed"
+then
+    echo ":1 : Test passed"
 
-# #[INFO]--------Junit File creation-----------
+#[INFO]--------Junit File creation-----------
 
-# #Wrote in the Junit File
-# cat >> "${HomeDirectory}${Directory}Junit-report/$(date +%d-%m-%Y)-GoNoGo-Server-Junit-file.xml" <<EOF
-#   <testcase name="$TESTCASE6_1-[Passed]" passed="true" time="DV">
-#      <success message="Test Passed, The permission are Ok"><![CDATA[Test passed, The permission are Ok]]></success>
-#   </testcase>
-# EOF
+#Wrote in the Junit File
+cat >> "${HomeDirectory}${Directory}Junit-report/$(date +%d-%m-%Y)-GoNoGo-Server-Junit-file.xml" <<EOF
+  <testcase name="$TESTCASE6_1-[Passed]" passed="true" time="DV">
+     <success message="Test Passed, The permission are Ok"><![CDATA[Test passed, The permission are Ok]]></success>
+  </testcase>
+EOF
 
-# #[INFO]----------------Number 6_1 / true-------
+#[INFO]----------------Number 6_1 / true-------
 
-# else
-#     echo ":0 : Test got an error"
+else
+    echo ":0 : Test got an error"
 
-# #[INFO]--------Junit File creation-----------
+#[INFO]--------Junit File creation-----------
 
-# #Wrote in the Junit File
-# cat >> "${HomeDirectory}${Directory}Junit-report/$(date +%d-%m-%Y)-GoNoGo-Server-Junit-file.xml" <<EOF
-#   <testcase name="$TESTCASE6_1-[Error]" passed="false" time="DV">
-#      <error message="Test Error"><![CDATA[Test Error]]></error>
-#   </testcase>
-# EOF
+#Wrote in the Junit File
+cat >> "${HomeDirectory}${Directory}Junit-report/$(date +%d-%m-%Y)-GoNoGo-Server-Junit-file.xml" <<EOF
+  <testcase name="$TESTCASE6_1-[Error]" passed="false" time="DV">
+     <error message="Test Error"><![CDATA[Test Error]]></error>
+  </testcase>
+EOF
 
-# #[INFO]----------------Number 6_1 / Error------
+#[INFO]----------------Number 6_1 / Error------
 
-# fi
+fi
 
-# #[INFO]-------------Score for Junit---------- 
+#[INFO]-------------Score for Junit---------- 
 
-# else 
-#   echo "Wakanda File cannot be written well in Release"
+else 
+  echo "Wakanda File cannot be written well in Release"
   
-# #[INFO]-------------Score for Junit-----------
+#[INFO]-------------Score for Junit-----------
 
-# SCORE6_2_1=1
+SCORE6_2_1=1
 
-# if [ "${SCORE6_2_1}" -eq "1" ]
+if [ "${SCORE6_2_1}" -eq "1" ]
  
-# then
-#     echo ":0 : Test Failed"
+then
+    echo ":0 : Test Failed"
 
-# #[INFO]--------Junit File creation-----------
+#[INFO]--------Junit File creation-----------
 
-# #Wrote in the Junit File
-# cat >> "${HomeDirectory}${Directory}Junit-report/$(date +%d-%m-%Y)-GoNoGo-Server-Junit-file.xml" <<EOF
-#   <testcase name="$TESTCASE6_1-[Failed]" passed="false" time="DV">
-#      <failure message="Test Failed, The permission aren't Ok"><![CDATA[Test Failed, The permission aren't Ok]]></failure>
-#   </testcase>
-# EOF
+#Wrote in the Junit File
+cat >> "${HomeDirectory}${Directory}Junit-report/$(date +%d-%m-%Y)-GoNoGo-Server-Junit-file.xml" <<EOF
+  <testcase name="$TESTCASE6_1-[Failed]" passed="false" time="DV">
+     <failure message="Test Failed, The permission aren't Ok"><![CDATA[Test Failed, The permission aren't Ok]]></failure>
+  </testcase>
+EOF
 
-# #[INFO]----------------Number 6_2_1 / false-------
+#[INFO]----------------Number 6_2_1 / false-------
 
-# else
-#     echo ":1 : Test got an error"
-# #[INFO]--------Junit File creation-----------
+else
+    echo ":1 : Test got an error"
+#[INFO]--------Junit File creation-----------
 
-# #Wrote in the Junit File
-# cat >> "${HomeDirectory}${Directory}Junit-report/$(date +%d-%m-%Y)-GoNoGo-Server-Junit-file.xml" <<EOF
-#   <testcase name="$TESTCASE6_1-[Error]" passed="false" time="DV">
-#      <error message="Test error"><![CDATA[Test Error]]></error>
-#   </testcase>
-# EOF
+#Wrote in the Junit File
+cat >> "${HomeDirectory}${Directory}Junit-report/$(date +%d-%m-%Y)-GoNoGo-Server-Junit-file.xml" <<EOF
+  <testcase name="$TESTCASE6_1-[Error]" passed="false" time="DV">
+     <error message="Test error"><![CDATA[Test Error]]></error>
+  </testcase>
+EOF
 
-# #[INFO]----------------Number 6_2_1 / Error-------
+#[INFO]----------------Number 6_2_1 / Error-------
 
-# fi
-# #[INFO]-------------Score for Junit-----------
+fi
+#[INFO]-------------Score for Junit-----------
 
-# fi
-# echo "[INFO]-----------------------------------------------------------"
+fi
+echo "[INFO]-----------------------------------------------------------"
 
 echo "[INFO]-----------------------------------------------------------"
 echo "[INFO]-----------------Test Case number 7------------------------"

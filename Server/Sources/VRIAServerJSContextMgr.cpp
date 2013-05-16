@@ -42,6 +42,7 @@ USING_TOOLBOX_NAMESPACE
 
 
 VRIAServerJSContextMgr::VRIAServerJSContextMgr()
+: fPoolsAreBeingCleaned(0)
 {
 }
 
@@ -153,6 +154,87 @@ void VRIAServerJSContextMgr::GetAllPools( std::vector<VJSContextPool*>& outPools
 }
 
 
+void VRIAServerJSContextMgr::BeginPoolsCleanup()
+{
+	if (testAssert(fPoolsAreBeingCleaned == 0))
+	{
+		++fPoolsAreBeingCleaned;
+
+		if (fSetOfPoolMutex.Lock())
+		{
+			for (SetOfPool_iter iter = fSetOfPool.begin() ; iter != fSetOfPool.end() ; ++iter)
+				(*iter)->Touch();
+
+			fSetOfPoolMutex.Unlock();
+		}
+	}
+}
+
+
+void VRIAServerJSContextMgr::EndPoolsCleanup()
+{
+	if (testAssert(fPoolsAreBeingCleaned == 1))
+		--fPoolsAreBeingCleaned;
+}
+
+
+VError VRIAServerJSContextMgr::CleanAllPools( sLONG inTimeoutMs, uLONG* outRemainingContexts)
+{
+	VError err = VE_OK;
+
+	assert(fPoolsAreBeingCleaned > 0);
+
+	// First, ask for aborting all JS contexts paused in debug mode
+	if (VRIAServerApplication::Get()->GetDebuggingAuthorized())
+	{
+		VJSGlobalContext::AbortAllDebug();
+	}
+
+	// Ask for terminating all workers
+	VJSWorker::TerminateAll();
+
+	if (fSetOfPoolMutex.Lock())
+	{
+		// Wait for number of used contexts equal 0 with a maximum timeout
+		uLONG maxTime = VSystem::GetCurrentTime() + inTimeoutMs;
+		uLONG usedContextsCount = 0;
+
+		do
+		{
+			usedContextsCount = 0;
+
+			for (SetOfPool_iter iter = fSetOfPool.begin() ; iter != fSetOfPool.end() ; ++iter)
+			{
+				usedContextsCount += (*iter)->GetUsedContextsCount();
+			}
+
+			if ((usedContextsCount > 0) && (VSystem::GetCurrentTime() < maxTime))
+			{
+				VTask::GetCurrent()->Sleep( 100);
+				continue;
+			}
+
+		} while ((usedContextsCount > 0) && (VSystem::GetCurrentTime() < maxTime));
+
+		usedContextsCount = 0;
+
+		// Release all unused contexts
+		for (SetOfPool_iter iter = fSetOfPool.begin() ; iter != fSetOfPool.end() ; ++iter)
+		{
+			usedContextsCount += (*iter)->GetUsedContextsCount();
+			(*iter)->Clean();
+		}
+
+		if (outRemainingContexts != NULL)
+			*outRemainingContexts = usedContextsCount;
+
+		fSetOfPoolMutex.Unlock();
+	}
+
+	return err;
+}
+
+
 void VRIAServerJSContextMgr::_RegisterPool( VJSContextPool *inPool)
 {
 	if (inPool == NULL)
@@ -182,47 +264,6 @@ void VRIAServerJSContextMgr::_UnRegisterPool( VJSContextPool *inPool)
 		}
 		fSetOfPoolMutex.Unlock();
 	}
-}
-
-
-
-// ----------------------------------------------------------------------------
-
-
-
-VJSContextPoolCleaner::VJSContextPoolCleaner()
-{
-	// retreive the list of JS context pool and save the enabled state for each pool
-	std::vector<VJSContextPool*> pools;
-	
-	VRIAServerApplication::Get()->GetJSContextMgr()->GetAllPools( pools);
-	for (std::vector<VJSContextPool*>::iterator iter = pools.begin() ; iter != pools.end() ; ++iter)
-	{
-		sPoolInfo poolInfo = { *iter, (*iter)->IsEnabled()};
-		fPoolToClean.push_back( poolInfo);
-	}
-}
-
-
-VJSContextPoolCleaner::~VJSContextPoolCleaner()
-{
-	// restore the enabled state of each pool
-	for (std::vector<sPoolInfo>::iterator iter = fPoolToClean.begin() ; iter != fPoolToClean.end() ; ++iter)
-		(*iter).fPool->SetEnabled( (*iter).fEnabledState);
-}
-
-
-VError VJSContextPoolCleaner::CleanAll()
-{
-	VError err = VE_OK;
-	
-	for (std::vector<sPoolInfo>::iterator iter = fPoolToClean.begin() ; (iter != fPoolToClean.end()) && (err == VE_OK) ; ++iter)
-	{
-		(*iter).fPool->SetEnabled( false);
-		err = (*iter).fPool->Clear();
-	}
-
-	return err;
 }
 
 
@@ -636,9 +677,13 @@ class VJSContextInfo : public XBOX::VObject
 {
 public:
 
-	VJSContextInfo() : fGlobalObject(NULL), fDebuggerActive(false), fReusable(false) {;}
+	VJSContextInfo() : fGlobalObject(NULL), fDebuggerActive(false), fReusable(false), fStampOfPool(0) {;}
 
-	VJSContextInfo( const VJSContextInfo& inSource) : fGlobalObject(inSource.fGlobalObject), fDebuggerActive(inSource.fDebuggerActive), fReusable( inSource.fReusable) {;}
+	VJSContextInfo( const VJSContextInfo& inSource)
+	: fGlobalObject(inSource.fGlobalObject)
+	, fDebuggerActive(inSource.fDebuggerActive)
+	, fReusable( inSource.fReusable)
+	, fStampOfPool( inSource.fStampOfPool) {;}
 
 	virtual ~VJSContextInfo() {;}
 
@@ -647,6 +692,7 @@ public:
 		fGlobalObject = inSource.fGlobalObject;
 		fDebuggerActive = inSource.fDebuggerActive;
 		fReusable = inSource.fReusable;
+		fStampOfPool = inSource.fStampOfPool;
 		return *this;
 	}
 
@@ -659,11 +705,15 @@ public:
 	void				SetReusable( bool inReusable) { fReusable = inReusable; }
 	bool				IsReusable() const { return fReusable; }
 
+	void				SetStampOfPool( uLONG inStamp) { fStampOfPool = inStamp; }
+	uLONG				GetStampOfPool() const { return fStampOfPool; }
+
 private:
 
 	XBOX::VJSGlobalObject*	fGlobalObject;
 	bool					fDebuggerActive;	// state of the debugger when context was created
 	bool					fReusable;
+	uLONG					fStampOfPool;		// the stamp of the pool when context was created
 };
 
 
@@ -672,13 +722,14 @@ const size_t kREUSABLE_JSCONTEXT_MAX_COUNT = 50;
 
 
 VJSContextPool::VJSContextPool()
-:  fManager(NULL), fEnabled(true), fContextReusingEnabled(true), fDelegate(NULL), fNoUsedContextEvent(NULL), fReusableContextCount(0)
+:  fManager(NULL), fEnabled(true), fContextReusingEnabled(true), fDelegate(NULL), fNoUsedContextEvent(NULL), fReusableContextCount(0), fStamp(0)
 {
+	assert(false);
 }
 
 
 VJSContextPool::VJSContextPool( VRIAServerJSContextMgr *inMgr, IJSContextPoolDelegate* inDelegate)
-: fManager(inMgr), fEnabled(true), fContextReusingEnabled(true), fDelegate(inDelegate), fNoUsedContextEvent(NULL), fReusableContextCount(0)
+: fManager(inMgr), fEnabled(true), fContextReusingEnabled(true), fDelegate(inDelegate), fNoUsedContextEvent(NULL), fReusableContextCount(0), fStamp(0)
 {
 	xbox_assert(fManager != NULL);
 }
@@ -718,7 +769,7 @@ VJSGlobalContext* VJSContextPool::RetainContext( VError& outError, bool inReusab
 
 	VJSGlobalContext *globalContext = NULL;
 
-	if (fEnabled)
+	if (fEnabled && !fManager->IsPoolsAreBeingCleaned())
 	{
 		if (inReusable && fContextReusingEnabled)
 		{
@@ -739,9 +790,11 @@ VJSGlobalContext* VJSContextPool::RetainContext( VError& outError, bool inReusab
 					xbox_assert(iter->second->IsReusable());
 
 					VJSGlobalObject *globalObject = iter->second->GetGlobalObject();
-					if (globalObject != NULL && globalObject->IsIncludedFilesHaveBeenChanged())
+
+					// If some included files have been changed or is the pool has been touched, the context is invalid and must not be reused
+					bool isInvalid = globalObject->IsIncludedFilesHaveBeenChanged() || (iter->second->GetStampOfPool() < fStamp);
+					if (globalObject != NULL && isInvalid)
 					{
-						// If some included files have been changed, the context is invalid and must not be reused
 						VJSGlobalContext *gContext = iter->first;
 						
 						// Remove this context from unused contexts pool
@@ -803,6 +856,7 @@ VJSGlobalContext* VJSContextPool::RetainContext( VError& outError, bool inReusab
 						VJSContext jsContext( globalContext);
 						info->SetGlobalObject( jsContext.GetGlobalObjectPrivateInstance());
 						info->SetDebuggerActive( VJSGlobalContext::IsDebuggerActive());
+						info->SetStampOfPool( fStamp);
 
 						if (inReusable && fContextReusingEnabled && (fReusableContextCount < kREUSABLE_JSCONTEXT_MAX_COUNT))
 						{
@@ -846,9 +900,11 @@ VError VJSContextPool::ReleaseContext( VJSGlobalContext* inContext)
 				if (fContextReusingEnabled && found->second->IsReusable())
 				{
 					VJSGlobalObject *globalObject = found->second->GetGlobalObject();
-					if (globalObject != NULL && globalObject->IsIncludedFilesHaveBeenChanged())
+
+					// If some included files have been changed or is the pool has been touched, the context is invalid and must not be reused
+					bool isInvalid = globalObject->IsIncludedFilesHaveBeenChanged() || (found->second->GetStampOfPool() < fStamp);
+					if (globalObject != NULL && isInvalid)
 					{
-						// If some included files have been changed, the context is invalid and must not be reused
 						isReusable = false;
 					}
 					else
@@ -923,6 +979,54 @@ bool VJSContextPool::IsContextReusingEnabled() const
 }
 
 
+uLONG VJSContextPool::GetUsedContextsCount() const
+{
+	uLONG count = 0;
+	if (fPoolMutex.Lock())
+	{
+		count = (uLONG) fUsedContexts.size();
+		fPoolMutex.Unlock();
+	}
+	return count;
+}
+
+
+void VJSContextPool::Clean()
+{
+	if (fPoolMutex.Lock())
+	{
+		for (MapOfJSContext_iter iter = fUnusedContexts.begin() ; iter != fUnusedContexts.end() ; ++iter)
+		{
+			xbox_assert(iter->second->IsReusable());
+
+			VJSGlobalObject *globalObject = iter->second->GetGlobalObject();
+			if (globalObject != NULL)
+				globalObject->GarbageCollect();
+
+			_ReleaseContext( iter->first);
+
+			delete iter->second;
+			--fReusableContextCount;
+		}
+
+		assert(fReusableContextCount == 0);
+		fUnusedContexts.clear();
+
+		fPoolMutex.Unlock();
+	}
+}
+
+
+void VJSContextPool::Touch()
+{
+	if (fPoolMutex.Lock())
+	{
+		++fStamp;
+		fPoolMutex.Unlock();
+	}
+}
+
+
 VSyncEvent* VJSContextPool::WaitForNumberOfUsedContextEqualZero()
 {
 	VSyncEvent *syncEvent = NULL;
@@ -947,6 +1051,7 @@ VSyncEvent* VJSContextPool::WaitForNumberOfUsedContextEqualZero()
 }
 
 
+#if 0
 VError VJSContextPool::Clear()
 {
 	VError err = VE_OK;
@@ -988,6 +1093,7 @@ VError VJSContextPool::Clear()
 
 	return err;
 }
+#endif
 
 
 void VJSContextPool::AppendRequiredScript( const VFilePath& inPath)

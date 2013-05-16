@@ -39,6 +39,8 @@ public:
 			/** @brief	Returns the event on which to wait and which must be released, returns NULL if all contexts are already unregistered. */
 			XBOX::VSyncEvent*			WaitForRegisteredContextsCountZero();
 
+			uLONG						GetRegisteredContextsCount() const;
+
 private:
 
 			VRIAContextManager();

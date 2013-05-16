@@ -21,7 +21,7 @@ public void maximizeWindow() {}
 	
 	
 	@Test 
-	public void testLeftColumnDataStoreClass_exist() throws InterruptedException {
+	public void remoteTools_dataBrowser_testLeftColumnDataStoreClass_exist() throws InterruptedException {
 		
 		fDriver.get("http://127.0.0.1:8081/walib/dataBrowser/index.html");
 		Thread.sleep(500);
@@ -43,7 +43,7 @@ public void maximizeWindow() {}
 	}
 	
 	@Test
-	public void testDataClassName_exist() throws InterruptedException {
+	public void remoteTools_dataBrowser_testDataClassName_exist() throws InterruptedException {
 		
 		fDriver.get("http://127.0.0.1:8081/walib/dataBrowser/index.html");
 		Thread.sleep(500);
@@ -64,7 +64,7 @@ public void maximizeWindow() {}
 	}
 	
 	@Test 
-	public void testButtonClose_All_exist() throws InterruptedException {
+	public void remoteTools_dataBrowser_testButtonClose_All_exist() throws InterruptedException {
 		
 		fDriver.get("http://127.0.0.1:8081/walib/dataBrowser/index.html");
 		Thread.sleep(500);
@@ -76,7 +76,7 @@ public void maximizeWindow() {}
 	} 
 	
 	@Test 
-	public void testButtonClose_All_action() throws InterruptedException {
+	public void remoteTools_dataBrowser_testButtonClose_All_action() throws InterruptedException {
 		
 		fDriver.get("http://127.0.0.1:8081/walib/dataBrowser/index.html");
 		Thread.sleep(500);
@@ -94,7 +94,7 @@ public void maximizeWindow() {}
 	} 
 	
 	@Test 
-	public void testButtonExport_exist() throws InterruptedException {
+	public void remoteTools_dataBrowser_testButtonExport_exist() throws InterruptedException {
 		
 		fDriver.get("http://127.0.0.1:8081/walib/dataBrowser/index.html");
 		Thread.sleep(500);
@@ -106,7 +106,7 @@ public void maximizeWindow() {}
 	} 
 	
 	@Test 
-	public void testButtonExport_action() throws InterruptedException {
+	public void remoteTools_dataBrowser_testButtonExport_action() throws InterruptedException {
 		
 		fDriver.get("http://127.0.0.1:8081/walib/dataBrowser/index.html");
 		Thread.sleep(500);
@@ -120,7 +120,7 @@ public void maximizeWindow() {}
 	} 
 	
 	@Test 
-	public void testTabDataClass_exist() throws InterruptedException {
+	public void remoteTools_dataBrowser_testTabDataClass_exist() throws InterruptedException {
 		
 		fDriver.get("http://127.0.0.1:8081/walib/dataBrowser/index.html");
 		Thread.sleep(500);
@@ -144,7 +144,7 @@ public void maximizeWindow() {}
 	
 	
 	@Test 
-	public void testQuery_exist() throws InterruptedException {
+	public void remoteTools_dataBrowser_testQuery_exist() throws InterruptedException {
 		
 		fDriver.get("http://127.0.0.1:8081/walib/dataBrowser/index.html");
 		Thread.sleep(500);
@@ -157,7 +157,7 @@ public void maximizeWindow() {}
 	
 		
 	@Test 
-	public void testGridForEachDataClass_exist() throws InterruptedException {
+	public void remoteTools_dataBrowser_testGridForEachDataClass_exist() throws InterruptedException {
 		
 		fDriver.get("http://127.0.0.1:8081/walib/dataBrowser/index.html");
 		Thread.sleep(500);
@@ -189,7 +189,7 @@ public void maximizeWindow() {}
 	}
 	
 	@Test 
-	public void testDataLoadedForEachGrid() throws InterruptedException {
+	public void remoteTools_dataBrowser_testDataLoadedForEachGrid() throws InterruptedException {
 		
 		fDriver.get("http://127.0.0.1:8081/walib/dataBrowser/index.html");
 		Thread.sleep(500);
@@ -215,7 +215,7 @@ public void maximizeWindow() {}
 	}
 	
 	@Test 
-	public void testAddNewEntitie_exist() throws InterruptedException {
+	public void remoteTools_dataBrowser_testAddNewEntitie_exist() throws InterruptedException {
 		
 		fDriver.get("http://127.0.0.1:8081/walib/dataBrowser/index.html");
 		Thread.sleep(500);
@@ -229,7 +229,7 @@ public void maximizeWindow() {}
 	
 	
 	@Test 
-	public void testAddNewEntitie_action() throws InterruptedException {
+	public void remoteTools_dataBrowser_testAddNewEntitie_action() throws InterruptedException {
 		
 		fDriver.get("http://127.0.0.1:8081/walib/dataBrowser/index.html");
 		Thread.sleep(500);
@@ -280,7 +280,7 @@ public void maximizeWindow() {}
 	
 	
 	@Test 
-	public void testRemoveEntitie_exist() throws InterruptedException {
+	public void remoteTools_dataBrowser_testRemoveEntitie_exist() throws InterruptedException {
 		
 		fDriver.get("http://127.0.0.1:8081/walib/dataBrowser/index.html");
 		Thread.sleep(500);
@@ -293,7 +293,7 @@ public void maximizeWindow() {}
 	}
 	
 	@Test 
-	public void testRemoveEntitie_action() throws InterruptedException {
+	public void remoteTools_dataBrowser_testRemoveEntitie_action() throws InterruptedException {
 		
 		fDriver.get("http://127.0.0.1:8081/walib/dataBrowser/index.html");
 		Thread.sleep(500);
@@ -314,7 +314,7 @@ public void maximizeWindow() {}
 
 	
 	@Test 
-	public void testAutoFormForEachDataClass_exist() throws InterruptedException {
+	public void remoteTools_dataBrowser_testAutoFormForEachDataClass_exist() throws InterruptedException {
 		
 		fDriver.get("http://127.0.0.1:8081/walib/dataBrowser/index.html");
 		Thread.sleep(500);
@@ -331,7 +331,7 @@ public void maximizeWindow() {}
 	}
 	
 	@Test 
-	public void testAutoFormForEachEntitie_exist() throws InterruptedException {
+	public void remoteTools_dataBrowser_testAutoFormForEachEntitie_exist() throws InterruptedException {
 		
 		fDriver.get("http://127.0.0.1:8081/walib/dataBrowser/index.html");
 		Thread.sleep(500);
@@ -360,7 +360,7 @@ public void maximizeWindow() {}
 
 	
 	@Test 
-	public void testAutoForMoveBetweenEntities_previous_exist() throws InterruptedException {
+	public void remoteTools_dataBrowser_testAutoForMoveBetweenEntities_previous_exist() throws InterruptedException {
 		
 		fDriver.get("http://127.0.0.1:8081/walib/dataBrowser/index.html");
 		Thread.sleep(500);
@@ -380,7 +380,7 @@ public void maximizeWindow() {}
 	 
 	 
 	@Test 
-	public void testAutoForMoveBetweenEntities_previous_action() throws InterruptedException {
+	public void remoteTools_dataBrowser_testAutoForMoveBetweenEntities_previous_action() throws InterruptedException {
 		
 		fDriver.get("http://127.0.0.1:8081/walib/dataBrowser/index.html");
 		Thread.sleep(500);
@@ -410,7 +410,7 @@ public void maximizeWindow() {}
 	}
 	
 	@Test 
-	public void testAutoForMoveBetweenEntities_next_exist() throws InterruptedException {
+	public void remoteTools_dataBrowser_testAutoForMoveBetweenEntities_next_exist() throws InterruptedException {
 		
 		fDriver.get("http://127.0.0.1:8081/walib/dataBrowser/index.html");
 		Thread.sleep(500);
@@ -427,7 +427,7 @@ public void maximizeWindow() {}
 	}
 	
 	@Test 
-	public void testAutoForMoveBetweenEntities_next_action() throws InterruptedException {
+	public void remoteTools_dataBrowser_testAutoForMoveBetweenEntities_next_action() throws InterruptedException {
 		
 		fDriver.get("http://127.0.0.1:8081/walib/dataBrowser/index.html");
 		Thread.sleep(500);
@@ -456,7 +456,7 @@ public void maximizeWindow() {}
 	
 	
 	@Test 
-	public void testAutoForEntities_add_exist() throws InterruptedException {
+	public void remoteTools_dataBrowser_testAutoForEntities_add_exist() throws InterruptedException {
 		
 		fDriver.get("http://127.0.0.1:8081/walib/dataBrowser/index.html");
 		Thread.sleep(500);
@@ -475,7 +475,7 @@ public void maximizeWindow() {}
 	
 	
 	@Test 
-	public void testAutoForEntities_add_action() throws InterruptedException {
+	public void remoteTools_dataBrowser_testAutoForEntities_add_action() throws InterruptedException {
 		
 		fDriver.get("http://127.0.0.1:8081/walib/dataBrowser/index.html");
 		Thread.sleep(500);
@@ -525,7 +525,7 @@ public void maximizeWindow() {}
 
 	
 	@Test 
-	public void testAutoForEntities_find_exist() throws InterruptedException {
+	public void remoteTools_dataBrowser_testAutoForEntities_find_exist() throws InterruptedException {
 		
 		fDriver.get("http://127.0.0.1:8081/walib/dataBrowser/index.html");
 		Thread.sleep(500);
@@ -544,7 +544,7 @@ public void maximizeWindow() {}
 	
 	
 	@Test 
-	public void testAutoForEntities_find_action() throws InterruptedException {
+	public void remoteTools_dataBrowser_testAutoForEntities_find_action() throws InterruptedException {
 		
 		fDriver.get("http://127.0.0.1:8081/walib/dataBrowser/index.html");
 		Thread.sleep(500);
@@ -571,7 +571,7 @@ public void maximizeWindow() {}
 	}
 
 	@Test 
-	public void testAutoForMoveBetweenEntities_remove_exist() throws InterruptedException {
+	public void remoteTools_dataBrowser_testAutoForMoveBetweenEntities_remove_exist() throws InterruptedException {
 		
 		fDriver.get("http://127.0.0.1:8081/walib/dataBrowser/index.html");
 		Thread.sleep(500);
@@ -588,7 +588,7 @@ public void maximizeWindow() {}
 	}
 	
 	@Test 
-	public void testAutoForMoveBetweenEntities_remove_action() throws InterruptedException {
+	public void remoteTools_dataBrowser_testAutoForMoveBetweenEntities_remove_action() throws InterruptedException {
 		
 		fDriver.get("http://127.0.0.1:8081/walib/dataBrowser/index.html");
 		Thread.sleep(500);
@@ -607,7 +607,7 @@ public void maximizeWindow() {}
 	}
 
 	@Test 
-	public void testAutoForEntities_save_exist() throws InterruptedException {
+	public void remoteTools_dataBrowser_testAutoForEntities_save_exist() throws InterruptedException {
 		
 		fDriver.get("http://127.0.0.1:8081/walib/dataBrowser/index.html");
 		Thread.sleep(500);
@@ -624,7 +624,7 @@ public void maximizeWindow() {}
 	}
 	
 	@Test 
-	public void testAutoForMoveBetweenEntities_save_action() throws InterruptedException {
+	public void remoteTools_dataBrowser_testAutoForMoveBetweenEntities_save_action() throws InterruptedException {
 		
 		fDriver.get("http://127.0.0.1:8081/walib/dataBrowser/index.html");
 		Thread.sleep(500);

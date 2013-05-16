@@ -27,7 +27,7 @@ Admin.prototype.verifyApplication  =  function verifyApplication(solutionPath, p
         solutionPath: solutionPath,
         applicationName: projectName
     };
-		
+	
     // disable interface and start listening for progress
     adminObject.maintenanceStart();
 
@@ -48,13 +48,17 @@ Admin.prototype.verifyApplication  =  function verifyApplication(solutionPath, p
                 
             adminObject.console.getMaintenanceLog();
             adminObject.showMessage('success', adminObject.resources.VERIFY_SUCC_MSG);
+            window.setTimeout(adminObject.hideMessage,4000);
         },
         "onerror": function(response) {
             adminObject.maintenanceEnd();
             adminObject.showMessage('error', adminObject.resources.VERIFY_ERR_MSG);
             console.log(response);
+            window.setTimeout(adminObject.hideMessage,4000);
         }
     }, option);
+    
+    
 };
 
 
@@ -88,11 +92,13 @@ Admin.prototype.backupApplication  =   function backupApplication(solutionPath, 
             sources.backupLogs.orderBy('date desc');
             adminObject.console.getMaintenanceLog();
             adminObject.showMessage('success', adminObject.resources.BACKUP_SUCC_MSG);
+            window.setTimeout(adminObject.hideMessage,4000);
         },
         "onerror": function(response) {
             adminObject.maintenanceEnd();
             adminObject.showMessage('error', adminObject.resources.BACKUP_ERR_MSG);
             console.log(response);
+            window.setTimeout(adminObject.hideMessage,4000);
         }
     }, option);
 };
@@ -108,13 +114,22 @@ Admin.prototype.compactApplication = function compactApplication(solutionPath, p
         
     if (sources.solutions.isRunning) {
         if (confirm(adminObject.resources.CONFIRM_MSG) ) {
-            localStorage.callback = "compact";
-            localStorage.solutionPath  = solutionPath;
-            localStorage.projectName = projectName;
-            adminObject.stopSolution();
+            adminObject.disableInterface();
+            adminObject.showMessage('info', adminObject.resources.STOP_SOLUTION_MSG);
+            if(webAdmin.closeSolution()){
+                    localStorage.callback = "compact";
+                    localStorage.solutionPath  = solutionPath;
+                    localStorage.projectName = projectName;
+            	adminObject.reloadingSetTimeOut.push(setTimeout(adminObject.waitServerAndCallback, 1000, null));
+        	}
         }
+            
     } else {
         
+        if(solutionPath == null){
+            solutionPath = localStorage.solutionPath;
+            projectName = localStorage.projectName;
+        }
         var option = {
             solutionPath: solutionPath,
             applicationName: projectName
@@ -139,12 +154,14 @@ Admin.prototype.compactApplication = function compactApplication(solutionPath, p
                     
                     adminObject.console.getMaintenanceLog();
                     adminObject.showMessage('success', adminObject.resources.COMPACT_SUCC_MSG);
+                    window.setTimeout(adminObject.hideMessage,4000);
                         
                 },
                 "onerror": function(response) {                    
                     adminObject.maintenanceEnd();
                     adminObject.showMessage('error', adminObject.resources.COMPACT_ERR_MSG);
                     console.log(response);
+                    window.setTimeout(adminObject.hideMessage,4000);
                 }
             }, option);
         } catch (e) {
@@ -165,11 +182,16 @@ Admin.prototype.repairApplication = function repairApplication(solutionPath, pro
         
     if (sources.solutions.isRunning) {
         if (confirm(adminObject.resources.CONFIRM_MSG) ) {
-            localStorage.callback = "repair";
-            localStorage.solutionPath  = solutionPath;
-            localStorage.projectName = projectName;
-            adminObject.stopSolution();            
+            adminObject.disableInterface();
+            adminObject.showMessage('info', adminObject.resources.STOP_SOLUTION_MSG);
+            if(webAdmin.closeSolution()){
+                localStorage.callback = "repair";
+                localStorage.solutionPath  = solutionPath;
+                localStorage.projectName = projectName;
+                adminObject.reloadingSetTimeOut.push(setTimeout(adminObject.waitServerAndCallback, 1000, null));
+            }
         }
+        
     } else {
         try {
             var option = {
@@ -194,12 +216,13 @@ Admin.prototype.repairApplication = function repairApplication(solutionPath, pro
                     
                     adminObject.console.getMaintenanceLog();
                     adminObject.showMessage('success', adminObject.resources.REPAIR_SUCC_MSG);
-                        
+                    window.setTimeout(adminObject.hideMessage,4000);    
                 },
                 "onerror": function(response) {                    
                     adminObject.maintenanceEnd();
                     adminObject.showMessage('error', adminObject.resources.REPAIR_ERR_MSG);
                     console.log(response);
+                    window.setTimeout(adminObject.hideMessage,4000);
                 }
             }, option);
         } catch (e) {
@@ -220,11 +243,16 @@ Admin.prototype.restoreApplication = function restoreApplication(solutionPath, p
    
     if (sources.solutions.isRunning) {
         if (confirm(adminObject.resources.CONFIRM_MSG)) {
-            localStorage.callback = "restore";
-            localStorage.solutionPath  = solutionPath;
-            localStorage.projectName = projectName
-            localStorage.restoreDate = restoreDate;
-            adminObject.stopSolution();
+            adminObject.disableInterface();
+            adminObject.showMessage('info', adminObject.resources.STOP_SOLUTION_MSG);
+            if(webAdmin.closeSolution()){
+                localStorage.callback = "restore";
+                localStorage.solutionPath  = solutionPath;
+                localStorage.projectName = projectName;
+                localStorage.restoreDate = restoreDate;
+                adminObject.reloadingSetTimeOut.push(setTimeout(adminObject.waitServerAndCallback, 1000, null));
+            }
+            
         }
     } else {
         
@@ -245,12 +273,14 @@ Admin.prototype.restoreApplication = function restoreApplication(solutionPath, p
                     adminObject.maintenanceEnd();
                     
                     adminObject.console.getMaintenanceLog();
-                    adminObject.showMessage('success', adminObject.resources.RESTORE_SUCC_MSG);                    
+                    adminObject.showMessage('success', adminObject.resources.RESTORE_SUCC_MSG);  
+                    window.setTimeout(adminObject.hideMessage,4000);                  
                 },
                 "onerror": function(response) {
                     adminObject.maintenanceEnd();
-                    adminObject.showMessage('error', adminObject.resources.RESTORE_ERR_MSG);
+                    adminObject.showMessage('error', adminObject.resources.RESTORE_ERR_MSG);                    
                     console.log(response);
+                    window.setTimeout(adminObject.hideMessage,4000);
                 }
             }, option);
         } catch (e) {
@@ -300,9 +330,7 @@ Admin.prototype.stopSolution = function stopSolution() {
     adminObject.showMessage('info', adminObject.resources.STOP_SOLUTION_MSG);
     webAdmin.closeSolutionAsync({
         "onSuccess": function() {
-            adminObject.reloadingSetTimeOut.push(setTimeout(adminObject.waitServerAndCallback, 9000, function() {
-                window.location.reload();
-            }));
+            adminObject.reloadingSetTimeOut.push(setTimeout(adminObject.waitServerAndCallback, 1000));
 
         },
         "onerror": function(response) {
@@ -329,7 +357,7 @@ Admin.prototype.startSolution = function startSolution() {
     adminObject.disableInterface();
     webAdmin.openSolutionByPathAsync({
         "onSuccess": function() {
-            adminObject.reloadingSetTimeOut.push(setTimeout(adminObject.waitServerAndCallback, 5000, function() {
+            adminObject.reloadingSetTimeOut.push(setTimeout(adminObject.waitServerAndCallback,  1000, function() {
                 window.location.reload();
             }));
 
@@ -420,25 +448,36 @@ Admin.prototype.getLogs = function getLogs(path){
 Admin.prototype.openSolutionByPath = function openSolutionByPath(path){
 
     var ext = path.substr(path.length-11);
+    var modal = $('#openModal .alert-info');
     if( ext === ".waSolution"){
         webAdmin.openSolutionByPathAsync({
         "onSuccess": function(response) {
-
-            var modal = $('#openModal .alert-info');
-            modal.append('<p>Please wait while your solution is being loaded. This process may take a few seconds. <span id="timer"><b>10</b>s</span></p>');
-            window.setInterval(function(){
-                var timer = $("#timer b");
-                var oldValue = +($("#timer b").html());
-                timer.html(--oldValue);
-            },1000);
-            adminObject.reloadingSetTimeOut.push(setTimeout(adminObject.waitServerAndCallback, 9000, function() {
-                window.location.reload();
-            }));
-        },
+                modal.find('p').empty();
+                if(response && response.hasOwnProperty('error') ){
+                    modal.append('<p class="error" style="color:red">'+ response.message +'</p>');
+                } else {                
+                    modal.append('<p>Please wait while your solution is being loaded. This process may take a few seconds. <span id="timer"><b>10</b>s</span></p>');
+                    
+                    window.setInterval(function(){
+                        var timer = $("#timer b");
+                        var oldValue = +($("#timer b").html());
+                        timer.html(--oldValue);
+                    },1000);
+                    adminObject.reloadingSetTimeOut.push(setTimeout(adminObject.waitServerAndCallback, 1000, function() {
+                        window.location.reload();
+                    }));
+                }
+            },
         "onerror": function(response) {
             console.log("error");
         }
         },path);
+    } else {
+    modal.find('p.error').empty();
+    	elm = modal.find('p.missing');
+    	if (elm.length ===0) {
+    		modal.append('<p>.waSolution extension is missing, please enter the absolution Path</p>');
+    	}
     }
     
 };
