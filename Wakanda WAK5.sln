@@ -132,14 +132,14 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Component - UsersAndGroups"
 		{6E9F29C6-2757-45FB-B9A4-AA30F5E852F4} = {6E9F29C6-2757-45FB-B9A4-AA30F5E852F4}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "JavaScriptCore", "..\..\webkit\534.53\JavaScriptCore\JavaScriptCore.vcproj\JavaScriptCore\JavaScriptCore.vcproj", "{011D10F1-B656-4A1B-A0C3-3842F02122C5}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "JavaScriptCore", "..\..\webkit\534.53.W5\JavaScriptCore\JavaScriptCore.vcproj\JavaScriptCore\JavaScriptCore.vcproj", "{011D10F1-B656-4A1B-A0C3-3842F02122C5}"
 	ProjectSection(ProjectDependencies) = postProject
 		{AA8A5A85-592B-4357-BC60-E0E91E026AF6} = {AA8A5A85-592B-4357-BC60-E0E91E026AF6}
 		{3DDD06A6-25C3-41D2-BA1F-B372400D9D46} = {3DDD06A6-25C3-41D2-BA1F-B372400D9D46}
 		{CE2F6AB7-0D2D-4CC2-B91C-45544901254F} = {CE2F6AB7-0D2D-4CC2-B91C-45544901254F}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WTF", "..\..\webkit\534.53\JavaScriptCore\JavaScriptCore.vcproj\WTF\WTF.vcproj", "{AA8A5A85-592B-4357-BC60-E0E91E026AF6}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WTF", "..\..\webkit\534.53.W5\JavaScriptCore\JavaScriptCore.vcproj\WTF\WTF.vcproj", "{AA8A5A85-592B-4357-BC60-E0E91E026AF6}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Component - Security Manager", "..\..\Components\WAK5\Security Manager\Projects\Visual\Security Manager-VS9.vcproj", "{EB3D718E-58C2-46FA-9A3F-86E3DC0B9E04}"
 	ProjectSection(ProjectDependencies) = postProject

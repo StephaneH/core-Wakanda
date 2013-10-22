@@ -85,7 +85,7 @@ _DataClass.prototype = {
 
 var
 UPLOAD_MESSAGES = {
-    ENABLE_TO_UPLOAD    : "Enable to upload the files",
+    ENABLE_TO_UPLOAD    : "File Upload Error",
     CONFLICT_MESSAGE    : " conflict(s) arose in the file(s) selected to upload. Do you want to replace them?",
     NOFILE              : {
        errCode              : 2501,
@@ -112,6 +112,16 @@ UPLOAD_MESSAGES = {
        message              : "The file : '@filename' is too large( @filesize ). (The maximum is : @maximum)",
        componentSignature   : "dbmg"
     },
+    FILE_EXTENSION_NOT_ALLOWED   : {
+       errCode              : 2505,
+       message              : "File extension '@fileType' is not allowed for upload. (allowed extensions: @allowedExtension)",
+       componentSignature   : "dbmg"
+    },
+    FILE_EXTENSION_NOT_DETECTED   : {
+       errCode              : 2505,
+       message              : "File extension is not detected (allowed extensions: @allowedExtension)",
+       componentSignature   : "dbmg"
+    }, 
     SERVICE_NOT_STARTED : {
        errCode              : 2506,
        message              : "The upload service is not started !",
@@ -154,7 +164,9 @@ function _upload(request, response) {
     
     try{
         config          = JSON.parse(request.parts[request.parts.count-1].asText);
-        folder          = Folder(ds.getDataFolder().path + (config.folder?config.folder:'tmp'));
+        folder          = ds.getDataFolder().path + (config.folder?config.folder:'tmp');
+        folder          = folder.replace('//','/');
+        folder          = Folder(folder);
         datasource      = config.datasource;
         replaceIfExist  = config.replace;
     }catch(e){
@@ -172,7 +184,7 @@ function _upload(request, response) {
         });
     }
     
-    verifyProcessImpl(uploader , folder , {
+    verifyProcessImpl(uploader , folder.path , {
         errorIfConflicts : false
     });
     
@@ -181,6 +193,7 @@ function _upload(request, response) {
         return JSON.stringify(res);
     }
     
+    //folder  = Folder(ds.getDataFolder().path + (config.folder?config.folder:'tmp'));
     /**
      * Upload process
      */
@@ -301,7 +314,7 @@ function _verify(request, response){
     
     try{
         info    = JSON.parse(request.parts[0].asText);
-        folder  = Folder(ds.getDataFolder().path + info.folder);
+        folder  = ds.getDataFolder().path + info.folder;
         
         uploader.addFiles(info.files);
     }catch(e){
@@ -315,6 +328,7 @@ function _verify(request, response){
      *  5 - Verify for each file the size (maximum file size exceeded ?)
      *  6 - Verify for each file if it already exist
      */
+
     verifyProcessImpl(uploader , folder , {
         errorIfConflicts : false
     });
@@ -374,17 +388,30 @@ function verifyProcessImpl(uploader , folder , options){
     uploadService,
     uploadUtils = require('upload/uploadUtils'),
     resultObj   = uploader.getResult(),
-    appService  = application.settings.services;
+    appService  = application.settings.services,    
+    allowedExtensions,
+    allowedExtensionsReg;;
     
+
     /**
      * 2 - Verify the folder if does not exist
      */
-    if(!folder.exists){
-        try{
-            folder.create();
-        }catch(e){
-            resultObj.addNewError(UPLOAD_MESSAGES.ERROR_FOLDER);
+
+    try {
+        
+    	folder = folder.replace('//','/');
+    	folder = Folder(folder);
+        var parentFolder = ds.getDataFolder().path;
+        
+        if (folder.path.substr(0, parentFolder.length) === parentFolder) {
+    		if(!folder.exists){
+        		folder.create();
+        	}
+        } else {
+        	throw "folder path containes malicious characters";
         }
+    } catch(e){
+    	resultObj.addNewError(UPLOAD_MESSAGES.ERROR_FOLDER);
     }
     
     /**
@@ -398,6 +425,10 @@ function verifyProcessImpl(uploader , folder , options){
         uploadService   = appService.upload;
         maxSize         = isNaN(uploadService.maxSize) ? -1 : parseFloat(uploadService.maxSize);
         sizeUnity       = uploadService.sizeUnity || 'kb';
+
+    	allowedExtensions = uploadService.allowedExtensions ? uploadService.allowedExtensions : "gif;jpeg;jpg;png;bmp;svg" ;
+    	allowedExtensionsReg = allowedExtensions.replace( new RegExp(';', 'g'), '$|') + '$';
+		allowedExtensionsReg = new RegExp(allowedExtensionsReg, 'i');
         
         uploader.setMaxFiles(isNaN(uploadService.maxFiles) ? -1 : parseInt(uploadService.maxFiles));
         uploader.setMaxSize(byteSize(maxSize , sizeUnity));
@@ -414,8 +445,11 @@ function verifyProcessImpl(uploader , folder , options){
         }
         
         uploader.validateAll(function(resObj){
-            var
+            var file, ext, extIndex; 
+            
             file = File(folder,this.name);
+            
+            
             
             /**
              * 5 - Verify for each file the size (maximum file size exceeded ?)
@@ -430,6 +464,19 @@ function verifyProcessImpl(uploader , folder , options){
                 resObj.addNewError(_err);
             }
             
+            if( (extIndex = this.name.lastIndexOf('.')) === -1){
+                _err = clone(UPLOAD_MESSAGES.FILE_EXTENSION_NOT_DETECTED);
+                _err.message = _err.message.replace(/@allowedExtension/g , allowedExtensions);                
+                resObj.addNewError(_err);
+            } else {
+            	ext  = this.name.substr(extIndex+1).toLowerCase();
+            	if(!ext.match(allowedExtensionsReg)){
+                	_err = clone(UPLOAD_MESSAGES.FILE_EXTENSION_NOT_ALLOWED);
+                	_err.message = _err.message.replace(/@fileType/g , ext);
+                	_err.message = _err.message.replace(/@allowedExtension/g , allowedExtensions);                
+                	resObj.addNewError(_err);
+            	}
+            }
             /**
              * 6 - Verify for each file if it already exist
              */

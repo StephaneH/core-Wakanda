@@ -270,7 +270,7 @@ set(LibZipBuild	${LibZipProj}/Build/${BRANCH_TAG}${CMAKE_BUILD_TYPE}${ARCH_TAG})
 add_subdirectory(${LibZipProj} ${LibZipBuild})
 
 
-set(WebKitRoot	${Depot}/webkit/534.53 CACHE INTERNAL "Path to WebKit src.")
+set(WebKitRoot	${Depot}/webkit/534.53.W5 CACHE INTERNAL "Path to WebKit src.")
 set(WebCoreRoot	${WebKitRoot}/WebCore CACHE INTERNAL "Path to JavascriptCore src.")
 
 set(JsCoreRoot	${WebKitRoot}/JavaScriptCore CACHE INTERNAL "Path to JavascriptCore src.")

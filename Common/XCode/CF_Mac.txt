@@ -51,12 +51,12 @@ LA______mBsB %DEPOT%XToolbox/%BRANCH%/Frameworks %ARCHS%/KernelIPC%LibMode_SR%.f
 LA______mBsB %DEPOT%XToolbox/%BRANCH%/Frameworks %ARCHS%/XML%LibMode_SR%.framework.dSYM
 LA______mBsB %DEPOT%XToolbox/%BRANCH%/Frameworks %ARCHS%/4DJavaScript%LibMode_SR%.framework.dSYM
 
-LA______mbsb %DEPOT%webkit/534.53/JavaScriptCore/build_%ARCHS%/%LibModeCompil%/4DJavaScriptCore.framework
-LA______mBsB %DEPOT%webkit/534.53/JavaScriptCore/build_%ARCHS%/Production/4DJavaScriptCore.framework
-LA______mbs_ %DEPOT%webkit/534.53/WebCore/build_%ARCHS%/%LibModeCompil%/4DWebCore.framework
-LA______mBs_ %DEPOT%webkit/534.53/WebCore/build_%ARCHS%/Production/4DWebCore.framework
-LA______mbs_ %DEPOT%webkit/534.53/WebKit/build_%ARCHS%/%LibModeCompil%/4DWebKit.framework
-LA______mBs_ %DEPOT%webkit/534.53/WebKit/build_%ARCHS%/Production/4DWebKit.framework
+LA______mbsb %DEPOT%webkit/534.53.W5/JavaScriptCore/build_%ARCHS%/%LibModeCompil%/4DJavaScriptCore.framework
+LA______mBsB %DEPOT%webkit/534.53.W5/JavaScriptCore/build_%ARCHS%/Production/4DJavaScriptCore.framework
+LA______mbs_ %DEPOT%webkit/534.53.W5/WebCore/build_%ARCHS%/%LibModeCompil%/4DWebCore.framework
+LA______mBs_ %DEPOT%webkit/534.53.W5/WebCore/build_%ARCHS%/Production/4DWebCore.framework
+LA______mbs_ %DEPOT%webkit/534.53.W5/WebKit/build_%ARCHS%/%LibModeCompil%/4DWebKit.framework
+LA______mBs_ %DEPOT%webkit/534.53.W5/WebKit/build_%ARCHS%/Production/4DWebKit.framework
 
 LA______mAsA %DEPOT%icu/4.8/Frameworks %ARCHS%/icu%LibMode_SR%.framework
 LA______mpsp %DEPOT%libzip/0.10/Frameworks %ARCHS%/libzip%LibMode_SR%.framework

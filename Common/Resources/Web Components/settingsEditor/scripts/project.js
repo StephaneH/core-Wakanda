@@ -361,6 +361,7 @@ function projectActivate() {
                         $('#maxSize_4').val(service.maxSize ? service.maxSize : defaultValue.services[service.name].maxSize);
                         $('#maxFiles_4').val(service.maxFiles ? service.maxFiles : defaultValue.services[service.name].maxFiles);
                         $('#sizeUnity_4').val(service.sizeUnity ? service.sizeUnity : defaultValue.services[service.name].sizeUnity);
+                        $('#allowedExtensions_4').val(service.allowedExtensions ? service.allowedExtensions : defaultValue.services[service.name].allowedExtensions);
 
                         if(parseInt($('#maxSize_4').val()) < 0){
                             $('#maxSize_4').val('unlimited')
@@ -668,7 +669,7 @@ function serviceEvent() {
                 break;
         }
 
-        if(jsonData.service[index].name == 'upload' && id != 'sizeUnity') {
+        if(jsonData.service[index].name == 'upload' && ['maxSize', 'maxFiles'].indexOf(id) >= 0) {
                 if(this.value < 0 || (isNaN(this.value) && this.value != 'unlimited')){
                     this.value = 'unlimited';
                 }
@@ -1161,7 +1162,8 @@ function projectDefault() {
                 autoStart : 'true',
                 maxSize : '-1',
                 sizeUnity : 'kb',
-                maxFiles : '-1'
+                maxFiles : '-1',
+                allowedExtensions : 'gif;jpeg;jpg;png;bmp;svg'
             },
             'Git HTTP Service' : {
                 enabled : 'true',
@@ -1638,6 +1640,11 @@ function displayServices() {
                 txt_html +=     '<label for="maxFiles_4">Maximum Files:</label>';
                 txt_html +=     '<input id="maxFiles_4" type="text" class="numeric service uilt0" min="0" step="1" mandatory="true" size="8"/>';
                 txt_html +=     '<div class="plus stepper inline"/><div class="min stepper inline"/>';
+                txt_html += '</div>';
+
+                txt_html += '<div class="level6">';
+                txt_html +=     '<label for="allowedExtensions_4">Allowed Extensions:</label>';
+                txt_html +=     '<input id="allowedExtensions_4" type="text" class="service" mandatory="true" size="28"/>';
                 txt_html += '</div>';
                 break;
         }

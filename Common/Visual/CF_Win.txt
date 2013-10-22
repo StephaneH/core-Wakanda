@@ -168,15 +168,15 @@ LA______m*s* %Depot%zlib\1.2.5\projects\Win\%LibPlateforme%\DLL %LibMode%\4Dzlib
 LA______mAsA %Depot%libzip\0.10\Projects\Win32\libzip\%LibPlateforme%\%LibMode%\4Dlibzip%LibModeDebug%.dll
 LA______m*s* %Depot%libzip\0.10\Projects\Win32\libzip\%LibPlateforme%\%LibMode%\4Dlibzip%LibModeDebug%.pdb
 
-LA______mRsR %Depot%webkit\534.53\build\dll\%LibPlateforme%\JavaScriptCore.dll
-LA______mBsB %Depot%webkit\534.53\build\dll\%LibPlateforme%\JavaScriptCore_Beta.dll
-LA______mDsD %Depot%webkit\534.53\build\dll\%LibPlateforme%\JavaScriptCore_Debug.dll
-LA______m*s* %Depot%webkit\534.53\build\dll\%LibPlateforme%\JavaScriptCore%LibMode_SR2%.pdb
-LA______mDsD %Depot%webkit\534.53\build\dll\%LibPlateforme%\JavaScriptCore_Debug.map
+LA______mRsR %Depot%webkit\534.53.W5\build\dll\%LibPlateforme%\JavaScriptCore.dll
+LA______mBsB %Depot%webkit\534.53.W5\build\dll\%LibPlateforme%\JavaScriptCore_Beta.dll
+LA______mDsD %Depot%webkit\534.53.W5\build\dll\%LibPlateforme%\JavaScriptCore_Debug.dll
+LA______m*s* %Depot%webkit\534.53.W5\build\dll\%LibPlateforme%\JavaScriptCore%LibMode_SR2%.pdb
+LA______mDsD %Depot%webkit\534.53.W5\build\dll\%LibPlateforme%\JavaScriptCore_Debug.map
 
-LA______mAs_W%Depot%webkit\534.53\build\bin\%LibPlateforme%\WebKit%LibMode_SR2%.dll
-LA______m*s_W%Depot%webkit\534.53\build\bin\%LibPlateforme%\Webkit%LibMode_SR2%.pdb
-LA______mAs_W%Depot%webkit\534.53\build\bin\%LibPlateforme%\WebKit.resources
+LA______mAs_W%Depot%webkit\534.53.W5\build\bin\%LibPlateforme%\WebKit%LibMode_SR2%.dll
+LA______m*s_W%Depot%webkit\534.53.W5\build\bin\%LibPlateforme%\Webkit%LibMode_SR2%.pdb
+LA______mAs_W%Depot%webkit\534.53.W5\build\bin\%LibPlateforme%\WebKit.resources
 
 L*______mAsA %Depot%Wakanda\%Branch%\Server\Resources\SSJS\Modules
 

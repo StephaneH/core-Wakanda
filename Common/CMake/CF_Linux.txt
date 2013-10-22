@@ -42,7 +42,7 @@ LAsA %DEPOT%XToolbox/%BRANCH%/XML/Projects/CMake/Build/%LibMode%%ARCHS%/Xml%LibM
 LAsA %DEPOT%XToolbox/%BRANCH%/JavaScript/Projects/CMake/Build/%LibMode%%ARCHS%/JavaScript%LibMode_SR%.so
 LAsA %DEPOT%XToolbox/%BRANCH%/Graphics/Projects/CMake/Build/%LibMode%%ARCHS%/Graphics%LibMode_SR%.so
 
-LAsA %DEPOT%webkit/534.53/JavaScriptCore/CMake/Build/%BRANCH%%LibMode%%ARCHS%/JsCore%LibMode_SR%.so
+LAsA %DEPOT%webkit/534.53.W5/JavaScriptCore/CMake/Build/%BRANCH%%LibMode%%ARCHS%/JsCore%LibMode_SR%.so
 LAsA %DEPOT%curl/7.19.7/CMake/Build/%BRANCH%%LibMode%%ARCHS%/Curl%LibMode_SR%.so
 LAsA %DEPOT%icu/4.8/projets/CMake/Build/%BRANCH%%LibMode%%ARCHS%/Icu%LibMode_SR%.so
 
