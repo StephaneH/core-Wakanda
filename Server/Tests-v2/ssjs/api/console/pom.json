@@ -1,0 +1,7 @@
+{
+    "description": "Tests of the ConsoleLog API",
+    "kind": "ssjs",
+    "tester": "geoffrey.beauny@4d.com",
+    "visibility": "public",
+    "developer": "alexandre.morgaut@4d.com"
+}

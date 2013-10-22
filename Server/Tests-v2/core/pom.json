@@ -1,0 +1,8 @@
+{
+    "description": "Main GoNoGo Server tests",
+    "kind": "shell",
+    "oldJenkinsName": "GoNoGoServer",
+    "tester": "geoffrey.beauny@4d.com",
+    "visibility": "public",
+    "developer": "sergiy.temnikov@4d.com"  
+}

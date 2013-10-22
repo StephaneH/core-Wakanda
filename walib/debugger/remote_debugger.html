@@ -1,0 +1,106 @@
+<!--
+* This file is part of Wakanda software, licensed by 4D under
+*  (i) the GNU General Public License version 3 (GNU GPL v3), or
+*  (ii) the Affero General Public License version 3 (AGPL v3) or
+*  (iii) a commercial license.
+* This file remains the exclusive property of 4D and/or its licensors
+* and is protected by national and international legislations.
+* In any event, Licensee's compliance with the terms and conditions
+* of the applicable license constitutes a prerequisite to any use of this file.
+* Except as otherwise expressly stated in the applicable license,
+* such license does not include any other license or rights on this file,
+* 4D's and/or its licensors' trademarks and/or other proprietary rights.
+* Consequently, no title, copyright or other proprietary rights
+* other than those specified in the applicable license is granted.
+-->
+<html manifest="remoteDebugger.appCache">
+    <head>
+
+        <title>Wakanda Remote Debugger</title>
+
+        <link rel = "stylesheet" href = "/walib/debugger/css/redmond/jquery-ui-1.8.24.custom.css" />
+        <link rel = "stylesheet" href = "/walib/debugger/css/index.css" />
+		<script type = "text/javascript" src = "/walib/WAF/lib/jquery/jquery.min.js"></script>
+        <script type = "text/javascript" src = "/walib/WAF/lib/jquery-ui/jquery-ui.min.js"></script>
+        <script type = "text/javascript" src = "/walib/debugger/js/skeleton.js"></script>
+        <script type="text/javascript">
+            window.applicationCache.addEventListener('updateready', function(e) {
+                if (window.applicationCache.status == window.applicationCache.UPDATEREADY) {
+                    // Browser downloaded a new app cache.
+                    // Swap it in and reload the page to get the new hotness.
+                    window.applicationCache.swapCache();
+                    if (confirm('Your current version of the Wakanda Web Remote Debugger is out of date. Would you like to load the right one?')) {
+                        window.location.reload();
+                    }
+                } else {
+                    // Manifest didn't changed. Nothing new to serve.
+                }
+            }, false);
+        </script>
+
+    </head>
+    <body>
+
+        <div id="main">
+        	<div id="tabs">
+	            <div id="contexts">
+                    <h2>Wakanda Server Context List</h2>
+                    <div id="contexts_list">
+                    </div>
+	            </div>
+	            <div id="debuggerFrames">
+	                <div id="framesDiv">
+	                </div>
+	            </div>
+	        </div>
+        </div>
+		<div id="notifications">
+			<span id='show_notif_request' class="grey12">Click <span class="blue"><strong>here</strong></span> to allow Notifications</span>
+		</div>
+        <div id="states">
+            <span>Host:</span>
+            <span id="wakserv_host"></span>
+
+            <span>Port:</span>
+            <span id="wakserv_port"></span>
+
+            <span>Connection State:</span>
+            <span id="wakserv_state"></span>
+
+            <span>Solution Name:</span>
+            <span id="wakserv_solution"></span>
+            <p id="username_form">
+                <label for="conn_pb">connection pb (bad server or authentication pb):</label>
+            </p>
+        </div>
+
+        <!--AUTHENTICATION DIALOG BEGIN-->
+
+        <div id="auth" class="hidden">
+                   <table style="width:100%">
+                    <tr>
+                        <td style="width:auto">
+                            Login :
+                        </td>
+                        <td>
+                            <input id="login" type="text"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width:auto">
+                            Password :
+                        </td>
+                        <td>
+                            <input id="password" type="password"/>
+                        </td>
+                    </tr>
+                </table>
+                <br/>
+                <span id="errorMsg"></span> <a id="auth_submit">Send</a>
+        </div>
+
+        <!--AUTHENTICATION DIALOG END-->
+
+    </body>
+
+</html>

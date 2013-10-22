@@ -1,0 +1,76 @@
+# Les fichiers sont classes par répertoire de destination
+# Le 1er et le 2eme flag indique la langue L suivit de l'initial de la langue 
+# F pour French, E pour English, A pour automoatique, et * pour toutes les langues 
+# le  9eme et le 10eme flag indique le produit Wakanda Studio : m et son Mode
+# le 11eme et le 12eme flag indique le produit Wakanda Server : s et son Mode
+# le 13 Flag indique la platforme Blanc pour toutes les platformes W pour Win32 x pour x64
+# Pour le mode on peut avoir 
+# A pour tous les modes, D pour debug, B pour beta et R pour release
+# ou les complements
+# d pour tous les modes sauf debug,
+# b pour tous les modes sauf beta,
+# r pour tous les modes sauf release,
+# * pour les fichier pdb qui seront copie pour debug et beta et les releases issues uniquement de la compilation
+#
+# Chaque fichier est contenu dans des sections pour indiquer leur destination 
+# %Target% pour pour la racine du répertoire final
+# %Target%4D Extensions pour pour le répertoire 4D Extensions contenue dans le repertoire final
+# %Target%Components pour pour le répertoire Components contenue dans le repertoire final
+# %Target%Resources pour pour le répertoire Resources contenue dans le repertoire final
+# ATTENTION NE PAS METTRE D ESPACE APRES LES [] SINON PLANTAGE
+#
+# Voici les variables que vous avez a dispo
+# %Depot% pour l'emplacement du depot sur votre poste
+# %DepotRIA% pour l'emplacement du depot RIA sur votre poste
+# %LibMode% libélé du mode Debug, Beta ou Release
+# %LibModeCompil% libele du mode Debug, Beta, ou Final
+# %LibMode_SR%  libélé du mode Debug, Beta ou vide pour Release
+# %LibMode_SR2% libélé du mode _Debug, _Beta ou vide pour Release
+# %LibModeDebug% vaut Debug si le mode de la compil est debug sinon vaut vide
+# %LibModeDebug1% vaut D si le mode de la compil est debug sinon vaut vide
+# %LibWin% vaut Win32 pour une compil 32 bits ou Win64 pour une compil 64 bits
+# %LibPlateforme% vaut Win32 pour une compil 32 bits ou x64 pour une compil 64 bits
+# %LibWin_x64% vaut Win pour une compil 32 bits ou Win64 pour une compil 64 bits
+# %Branch% vaut le nom de la branche (main,12.x,11.x)
+# %x64% vaut x64\ quand la compil est en 64 bits
+# %Arch% vaut i386 pour Win32 et amd64 pour Win64
+# %NbBits% vaut 32 pour Win32 et 64 pour Win64
+# %NameApp% equivaut au nom du produit compiler
+#
+# Si le chemin est un nom de fichier ou *.*, l'application procedera à une mise à jour
+# Si le chemin est un nom de repertoire 
+#    sans \ correspond à une copy du repertoire (arboresence compris)
+#    avec \ correspond à une copy de tout le contenue du repertoire (arboresence compris) 
+#
+# Il est possible de mettre des traces grace un # apres les flags
+#    ex : LA______masa #ON pour activer la trace ou MASAEA #OFF pour la descactiver
+# Il est possible de filtrer des extensions pour ne pas copier avec Fsuivit des extensions a ne pas copier
+#    ex : LA______masa F.dll .map .pdb pour ne pas copier ces extensions (util pour les composant) 
+#         et MASAEAmasa F pour le descativer
+
+LA______mAsA [%Target%]
+LA______mAsA %Depot%Components\%Branch%\components\%x64%RemoteEntity\RemoteEntity%LibMode_SR%.dll
+LA______m*s* %Depot%Components\%Branch%\components\%x64%RemoteEntity\RemoteEntity%LibMode_SR%.pdb
+LA______mAsA %Depot%Components\%Branch%\components\%x64%SQLEntity\SQLEntity%LibMode_SR%.dll
+LA______m*s* %Depot%Components\%Branch%\components\%x64%SQLEntity\SQLEntity%LibMode_SR%.pdb
+
+LA______mAsA %Depot%Components\%Branch%\components\%x64%MySQLConnector%LibMode_SR%.bundle\MySQLConnector%LibMode_SR%.dll
+LA______m*s* %Depot%Components\%Branch%\components\%x64%MySQLConnector%LibMode_SR%.bundle\MySQLConnector%LibMode_SR%.pdb
+LA______mDsD %Depot%Components\%Branch%\components\%x64%MySQLConnector%LibMode_SR%.bundle\MySQLConnector%LibMode_SR%.map
+
+LA______mAsA %Depot%XToolbox\%Branch%\SQL\Projects\Visual\%LibPlateforme%\%LibMode%\SQLUtilities%LibModeDebug%.dll
+LA______m*s* %Depot%XToolbox\%Branch%\SQL\Projects\Visual\%LibPlateforme%\%LibMode%\SQLUtilities%LibModeDebug%.pdb
+LA______mDsD %Depot%XToolbox\%Branch%\SQL\Projects\Visual\%LibPlateforme%\%LibMode%\SQLUtilities%LibModeDebug%.map
+
+LA______mAsA %Depot%XToolbox\%Branch%\SQLModel\Projects\Visual\%LibPlateforme%\%LibMode%\SQLModel%LibModeDebug%.dll
+LA______m*s* %Depot%XToolbox\%Branch%\SQLModel\Projects\Visual\%LibPlateforme%\%LibMode%\SQLModel%LibModeDebug%.pdb
+LA______mDsD %Depot%XToolbox\%Branch%\SQLModel\Projects\Visual\%LibPlateforme%\%LibMode%\SQLModel%LibModeDebug%.map
+
+LA______mAsA [%Target%Native Components\]
+LA______mAsA F.dll .map .pdb 
+LA______mAsA %Depot%Components\%Branch%\components\%x64%MySQLConnector%LibMode_SR%.bundle
+LA______mAsA F
+
+LA______mAsA [%Target%\Modules\]
+L*______mAsA %Depot%Wakanda\%Branch%\Server\Resources\SSJS\ModulesEnterprise\
+

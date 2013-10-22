@@ -1,0 +1,163 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.wakanda.qa.commons</groupId>
+	<artifactId>server-parent</artifactId>
+	<version>1.0.2</version>
+	<packaging>pom</packaging>
+	<name>server-parent</name>
+	<description>Provides the parent architecture for server testing projects</description>
+
+	<properties>
+		<runServerClass>org.wakanda.qa.commons.server.ut.RunServer</runServerClass>
+		<stopServerClass>org.wakanda.qa.commons.server.ut.StopServer</stopServerClass>
+		<testEntry>TestsEntry</testEntry>
+	</properties>
+
+	<distributionManagement>
+		<repository>
+			<id>releases</id>
+			<url>http://194.98.194.72:9000/nexus/content/repositories/releases</url>
+		</repository>
+		<snapshotRepository>
+			<id>snapshots</id>
+			<url>http://194.98.194.72:9000/nexus/content/repositories/snapshots</url>
+		</snapshotRepository>
+	</distributionManagement>
+
+	<profiles>
+		<profile>
+			<id>parent</id>
+		</profile>
+		<profile>
+			<id>testing</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<build>
+				<defaultGoal>test</defaultGoal>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-jar-plugin</artifactId>
+						<version>2.2</version>
+						<executions>
+							<execution>
+								<phase>package</phase>
+								<goals>
+									<goal>test-jar</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>exec-maven-plugin</artifactId>
+						<version>1.2</version>
+						<executions>
+							<execution>
+								<id>start-server</id>
+								<phase>test</phase>
+								<goals>
+									<goal>java</goal>
+								</goals>
+								<configuration>
+									<mainClass>${runServerClass}</mainClass>
+								</configuration>
+							</execution>
+							<execution>
+								<id>exec-tests</id>
+								<phase>test</phase>
+								<goals>
+									<goal>exec</goal>
+								</goals>
+								<configuration>
+									<executable>mvn</executable>
+									<arguments>
+										<argument>-s</argument>
+										<argument>settings.xml</argument>
+										<argument>org.apache.maven.plugins:maven-surefire-plugin:test</argument>
+									</arguments>
+								</configuration>
+							</execution>
+							<execution>
+								<id>stop-server</id>
+								<phase>test</phase>
+								<goals>
+									<goal>java</goal>
+								</goals>
+								<configuration>
+									<mainClass>${stopServerClass}</mainClass>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<version>2.14</version>
+						<executions>
+							<execution>
+								<id>default-test</id>
+								<configuration>
+									<skip>true</skip>
+								</configuration>
+							</execution>
+							<execution>
+								<id>default-cli</id>
+								<configuration>
+									<test>${testEntry}</test>
+								</configuration>
+							</execution>
+						</executions>
+						<configuration>
+							<testFailureIgnore>true</testFailureIgnore>
+						</configuration>
+					</plugin>
+
+				</plugins>
+			</build>
+
+			<dependencies>
+				<dependency>
+					<groupId>org.wakanda.qa.commons</groupId>
+					<artifactId>commons-server</artifactId>
+					<version>1.0.16</version>
+				</dependency>
+
+				<dependency>
+					<groupId>org.wakanda.qa.commons</groupId>
+					<artifactId>junit-params</artifactId>
+					<version>1.0</version>
+				</dependency>
+
+			</dependencies>
+
+			<repositories>
+				<repository>
+					<id>releases</id>
+					<url>http://194.98.194.72:9000/nexus/content/repositories/releases</url>
+					<snapshots>
+						<enabled>false</enabled>
+					</snapshots>
+					<releases>
+						<updatePolicy>always</updatePolicy>
+					</releases>
+				</repository>
+				<repository>
+					<id>snapshots</id>
+					<url>http://194.98.194.72:9000/nexus/content/repositories/snapshots</url>
+					<releases>
+						<enabled>false</enabled>
+					</releases>
+					<snapshots>
+						<updatePolicy>always</updatePolicy>
+					</snapshots>
+				</repository>
+			</repositories>
+		</profile>
+	</profiles>
+
+</project>

@@ -1,0 +1,263 @@
+# Les fichiers sont classes par répertoire de destination
+# Le 1er et le 2eme flag indique la langue L suivit de l'initial de la langue 
+# F pour French, E pour English, A pour automoatique, et * pour toutes les langues 
+# le  9eme et le 10eme flag indique le produit Wakanda Studio : m et son Mode
+# le 11eme et le 12eme flag indique le produit Wakanda Server : s et son Mode
+# le 13 Flag indique la platforme Blanc pour toutes les platformes W pour Win32 x pour x64
+# Pour le mode on peut avoir 
+# A pour tous les modes, D pour debug, B pour beta et R pour release
+# ou les complements
+# d pour tous les modes sauf debug,
+# b pour tous les modes sauf beta,
+# r pour tous les modes sauf release,
+# * pour les fichier pdb qui seront copie pour debug et beta et les releases issues uniquement de la compilation
+#
+# Chaque fichier est contenu dans des sections pour indiquer leur destination 
+# %Target% pour pour la racine du répertoire final
+# %Target%4D Extensions pour pour le répertoire 4D Extensions contenue dans le repertoire final
+# %Target%Components pour pour le répertoire Components contenue dans le repertoire final
+# %Target%Resources pour pour le répertoire Resources contenue dans le repertoire final
+# ATTENTION NE PAS METTRE D ESPACE APRES LES [] SINON PLANTAGE
+#
+# Voici les variables que vous avez a dispo
+# %Depot% pour l'emplacement du depot sur votre poste
+# %DepotRIA% pour l'emplacement du depot RIA sur votre poste
+# %LibMode% libélé du mode Debug, Beta ou Release
+# %LibModeCompil% libele du mode Debug, Beta, ou Final
+# %LibMode_SR%  libélé du mode Debug, Beta ou vide pour Release
+# %LibMode_SR2% libélé du mode _Debug, _Beta ou vide pour Release
+# %LibModeDebug% vaut Debug si le mode de la compil est debug sinon vaut vide
+# %LibModeDebug1% vaut D si le mode de la compil est debug sinon vaut vide
+# %LibWin% vaut Win32 pour une compil 32 bits ou Win64 pour une compil 64 bits
+# %LibPlateforme% vaut Win32 pour une compil 32 bits ou x64 pour une compil 64 bits
+# %LibWin_x64% vaut Win pour une compil 32 bits ou Win64 pour une compil 64 bits
+# %Branch% vaut le nom de la branche (main,12.x,11.x)
+# %x64% vaut x64\ quand la compil est en 64 bits
+# %Arch% vaut i386 pour Win32 et amd64 pour Win64
+# %NbBits% vaut 32 pour Win32 et 64 pour Win64
+# %NameApp% equivaut au nom du produit compiler
+#
+# Si le chemin est un nom de fichier ou *.*, l'application procedera à une mise à jour
+# Si le chemin est un nom de repertoire 
+#    sans \ correspond à une copy du repertoire (arboresence compris)
+#    avec \ correspond à une copy de tout le contenue du repertoire (arboresence compris) 
+#
+# Il est possible de mettre des traces grace un # apres les flags
+#    ex : LA______masa #ON pour activer la trace ou MASAEA #OFF pour la descactiver
+# Il est possible de filtrer des extensions pour ne pas copier avec Fsuivit des extensions a ne pas copier
+#    ex : LA______masa F.dll .map .pdb pour ne pas copier ces extensions (util pour les composant) 
+#         et MASAEAmasa F pour le descativer
+
+LA______mAsA [%Target%]
+LA______mAsA %Depot%Wakanda\%Branch%\Apps\%LibWin_x64%\%LibModeCompil%\%NameApp%\%NameApp%.exe
+LA______m*s* %Depot%Wakanda\%Branch%\Apps\%LibWin_x64%\%LibModeCompil%\%NameApp%\%NameApp%.pdb
+
+LA______mDsDW%redistVisual%\Debug_NonRedist\x86\Microsoft.VC90.DebugCRT\
+LA______mdsdW%redistVisual%\x86\Microsoft.VC90.CRT\
+LA______mDsDx%redistVisual%\Debug_NonRedist\amd64\Microsoft.VC90.DebugCRT\
+LA______mdsdx%redistVisual%\amd64\Microsoft.VC90.CRT\
+
+LA______mAsA %Depot%Components\%Branch%\components\%x64%db4d%LibMode_SR%.bundle\DB4D%LibMode_SR%.dll
+LA______m*s* %Depot%Components\%Branch%\components\%x64%db4d%LibMode_SR%.bundle\DB4D%LibMode_SR%.pdb
+LA______mDsD %Depot%Components\%Branch%\components\%x64%db4d%LibMode_SR%.bundle\DB4D%LibMode_SR%.map
+
+LA______mAs_ %Depot%Components\%Branch%\components\%x64%codeeditor%LibMode_SR%.bundle\codeeditor%LibMode_SR%.dll
+LA______m*s_ %Depot%Components\%Branch%\components\%x64%codeeditor%LibMode_SR%.bundle\codeeditor%LibMode_SR%.pdb
+LA______mDs_ %Depot%Components\%Branch%\components\%x64%codeeditor%LibMode_SR%.bundle\codeeditor%LibMode_SR%.map
+
+LA______mAsA %Depot%Components\%Branch%\components\%x64%languagesyntax%LibMode_SR%.bundle\languagesyntax%LibMode_SR%.dll
+LA______m*s* %Depot%Components\%Branch%\components\%x64%languagesyntax%LibMode_SR%.bundle\languagesyntax%LibMode_SR%.pdb
+LA______mDsD %Depot%Components\%Branch%\components\%x64%languagesyntax%LibMode_SR%.bundle\languagesyntax%LibMode_SR%.map
+
+LA______mAsA %Depot%Components\%Branch%\components\%x64%SecurityManager%LibMode_SR%.bundle\SecurityManager%LibMode_SR%.dll
+LA______m*s* %Depot%Components\%Branch%\components\%x64%SecurityManager%LibMode_SR%.bundle\SecurityManager%LibMode_SR%.pdb
+LA______mDsD %Depot%Components\%Branch%\components\%x64%SecurityManager%LibMode_SR%.bundle\SecurityManager%LibMode_SR%.map
+
+LA______mAs_ %Depot%Components\%Branch%\components\%x64%webviewer%LibMode_SR%.bundle\webviewer%LibMode_SR%.dll
+LA______m*s_ %Depot%Components\%Branch%\components\%x64%webviewer%LibMode_SR%.bundle\webviewer%LibMode_SR%.pdb
+LA______mDs_ %Depot%Components\%Branch%\components\%x64%webviewer%LibMode_SR%.bundle\webviewer%LibMode_SR%.map
+
+LA______mAsA %Depot%Components\%Branch%\components\%x64%zip%LibMode_SR%.bundle\zip%LibMode_SR%.dll
+LA______m*s* %Depot%Components\%Branch%\components\%x64%zip%LibMode_SR%.bundle\zip%LibMode_SR%.pdb
+LA______mDsD %Depot%Components\%Branch%\components\%x64%zip%LibMode_SR%.bundle\zip%LibMode_SR%.map
+
+LA______mAsA %Depot%Components\%Branch%\components\%x64%UsersAndGroups%LibMode_SR%.bundle\UsersAndGroups%LibMode_SR%.dll
+LA______m*s* %Depot%Components\%Branch%\components\%x64%UsersAndGroups%LibMode_SR%.bundle\UsersAndGroups%LibMode_SR%.pdb
+LA______mDsD %Depot%Components\%Branch%\components\%x64%UsersAndGroups%LibMode_SR%.bundle\UsersAndGroups%LibMode_SR%.map
+
+LA______mAsA %Depot%Components\%Branch%\components\%x64%httpserver%LibMode_SR%.bundle\httpserver%LibMode_SR%.dll
+LA______m*s* %Depot%Components\%Branch%\components\%x64%httpserver%LibMode_SR%.bundle\httpserver%LibMode_SR%.pdb
+LA______mDsD %Depot%Components\%Branch%\components\%x64%httpserver%LibMode_SR%.bundle\httpserver%LibMode_SR%.map
+
+LA______mAs_ %Depot%4eDimension\%Branch%\NewMac2Win\build\%LibPlateforme%\%LibMode%\ASINTPPC.dll
+LA______m*s_ %Depot%4eDimension\%Branch%\NewMac2Win\build\%LibPlateforme%\%LibMode%\ASINTPPC.pdb
+
+LA______mAs_W%Depot%Cairo\1.8.8\%LibPlateforme%\%LibMode%\Cairo.dll
+LA______m*s_W%Depot%Cairo\1.8.8\%LibPlateforme%\%LibMode%\Cairo.pdb
+
+LA______mAsA %Depot%curl\7.19.7\build\%LibPlateforme%\DLL\%LibMode%\libcurl%LibModeDebug1%.dll
+#LA______m*s* %Depot%curl\7.19.7\build\%LibPlateforme%\DLL\%LibMode%\libcurl%LibModeDebug1%.pdb
+
+LA______mDs_W%Depot%opencflite\476.17.2\windows\%LibPlateforme%\%LibMode%\CFLiteLib_Debug.dll
+LA______mds_W%Depot%opencflite\476.17.2\windows\%LibPlateforme%\%LibMode%\CFLiteLib.dll
+#LA______m*s_W%Depot%opencflite\476.17.2\windows\%LibPlateforme%\%LibMode%\CFLiteLib.pdb
+
+LA______mAs_ %Depot%cppunit\1.11.4\src\cppunit\%x64%%LibMode%\cppunit%LibModeDebug1%_dll.dll
+LA______m*s_ %Depot%cppunit\1.11.4\src\cppunit\%x64%%LibMode%\cppunit%LibModeDebug1%_dll.pdb
+LA______mDs_ %Depot%cppunit\1.11.4\src\cppunit\%x64%%LibMode%\cppunitd_dll.map
+
+LA______mAsA %Depot%icu\4.8\projets\win\%LibPlateforme%\%LibMode%\icu%LibMode_SR%.dll
+LA______m*s* %Depot%icu\4.8\projets\win\%LibPlateforme%\%LibMode%\icu%LibMode_SR%.pdb
+LA______mAsA %Depot%icu\4.8\data_4d\icudt48l.dat
+
+LA______mAs_W%Depot%libxml2\2.7.6\%LibPlateforme%\%LibMode%\lib\libxml2.dll
+#LA______m*s_W%Depot%libxml2\2.7.6\%LibPlateforme%\%LibMode%\lib\libxml2.pdb
+
+LA______mAs_W%Depot%libxslt\1.1.26\%LibPlateforme%\%LibMode%\lib\libxslt.dll
+#LA______m*s_W%Depot%libxslt\1.1.26\%LibPlateforme%\%LibMode%\lib\libxslt.pdb
+
+LA______mAsA %Depot%openssl\1.0.0d\%x64%Dll%LibModeDebug%\libeay32.dll
+LA______m*s* %Depot%openssl\1.0.0d\%x64%Dll%LibModeDebug%\libeay32.pdb
+LA______mAsA %Depot%openssl\1.0.0d\%x64%Dll%LibModeDebug%\ssleay32.dll
+LA______m*s* %Depot%openssl\1.0.0d\%x64%Dll%LibModeDebug%\ssleay32.pdb
+
+LA______mAsA %Depot%pthreads\2.9.1\%LibPlateforme%\%LibMode%\pthreadVC2.dll
+LA______m*s* %Depot%pthreads\2.9.1\%LibPlateforme%\%LibMode%\pthreadVC2.pdb
+
+LA______mAs_W%Depot%sqlite\3.6.20\%LibPlateforme%\%LibMode%\sqlite.dll
+LA______m*s_W%Depot%sqlite\3.6.20\%LibPlateforme%\%LibMode%\sqlite.pdb
+
+LA______mAsA %Depot%xerces\3.0.1\xerces\Build\%LibPlateforme%\%LibMode%\xerces-c_3_0%LibModeDebug1%.dll
+LA______m*s* %Depot%xerces\3.0.1\xerces\Build\%LibPlateforme%\%LibMode%\xerces-c_3_0%LibModeDebug1%.pdb
+
+LA______mAsA %Depot%XToolbox\%Branch%\Kernel\Projects\Visual\%LibPlateforme%\%LibMode%\Kernel%LibModeDebug%.dll
+LA______m*s* %Depot%XToolbox\%Branch%\Kernel\Projects\Visual\%LibPlateforme%\%LibMode%\Kernel%LibModeDebug%.pdb
+LA______mDsD %Depot%XToolbox\%Branch%\Kernel\Projects\Visual\%LibPlateforme%\%LibMode%\Kernel%LibModeDebug%.map
+
+LA______mAsA %Depot%XToolbox\%Branch%\KernelIPC\Projects\Visual\%LibPlateforme%\%LibMode%\KernelIPC%LibModeDebug%.dll
+LA______m*s* %Depot%XToolbox\%Branch%\KernelIPC\Projects\Visual\%LibPlateforme%\%LibMode%\KernelIPC%LibModeDebug%.pdb
+LA______mDsD %Depot%XToolbox\%Branch%\KernelIPC\Projects\Visual\%LibPlateforme%\%LibMode%\KernelIPC%LibModeDebug%.map
+
+LA______mAs_ %Depot%XToolbox\%Branch%\GUI\Projects\Visual\%x64%%LibMode%\GUI%LibModeDebug%.dll
+LA______m*s_ %Depot%XToolbox\%Branch%\GUI\Projects\Visual\%x64%%LibMode%\GUI%LibModeDebug%.pdb
+LA______mDs_ %Depot%XToolbox\%Branch%\GUI\Projects\Visual\%x64%%LibMode%\GUI%LibModeDebug%.map
+
+LA______mAsA %Depot%XToolbox\%Branch%\Graphics\Projects\Visual\%LibPlateforme%\%LibMode%\Graphics%LibModeDebug%.dll
+LA______m*s* %Depot%XToolbox\%Branch%\Graphics\Projects\Visual\%LibPlateforme%\%LibMode%\Graphics%LibModeDebug%.pdb
+LA______mDsD %Depot%XToolbox\%Branch%\Graphics\Projects\Visual\%LibPlateforme%\%LibMode%\Graphics%LibModeDebug%.map
+
+LA______mAsA %Depot%XToolbox\%Branch%\Javascript\Projects\Visual\%LibPlateforme%\%LibMode%\4DJavascript%LibModeDebug%.dll
+LA______m*s* %Depot%XToolbox\%Branch%\Javascript\Projects\Visual\%LibPlateforme%\%LibMode%\4DJavascript%LibModeDebug%.pdb
+LA______mDsD %Depot%XToolbox\%Branch%\Javascript\Projects\Visual\%LibPlateforme%\%LibMode%\4DJavascript%LibModeDebug%.map
+
+LA______mAsA %Depot%XToolbox\%Branch%\JSDebugger\Projects\Visual\%LibPlateforme%\%LibMode%\JSDebugger%LibMode_SR%.dll
+LA______m*s* %Depot%XToolbox\%Branch%\JSDebugger\Projects\Visual\%LibPlateforme%\%LibMode%\JSDebugger%LibMode_SR%.pdb
+LA______mDsD %Depot%XToolbox\%Branch%\JSDebugger\Projects\Visual\%LibPlateforme%\%LibMode%\JSDebugger%LibMode_SR%.map
+
+LA______mAsA %Depot%XToolbox\%Branch%\ServerNet\Projects\Visual\%LibPlateforme%\%LibMode%\ServerNet%LibModeDebug%.dll
+LA______m*s* %Depot%XToolbox\%Branch%\ServerNet\Projects\Visual\%LibPlateforme%\%LibMode%\ServerNet%LibModeDebug%.pdb
+LA______mDsD %Depot%XToolbox\%Branch%\ServerNet\Projects\Visual\%LibPlateforme%\%LibMode%\ServerNet%LibModeDebug%.map
+
+LA______mAsA %Depot%XToolbox\%Branch%\XML\Projects\Visual\%LibPlateforme%\%LibMode%\XML%LibModeDebug%.dll
+LA______m*s* %Depot%XToolbox\%Branch%\XML\Projects\Visual\%LibPlateforme%\%LibMode%\XML%LibModeDebug%.pdb
+LA______mDsD %Depot%XToolbox\%Branch%\XML\Projects\Visual\%LibPlateforme%\%LibMode%\XML%LibModeDebug%.map
+
+LA______mAsA %Depot%zlib\1.2.5\projects\Win\%LibPlateforme%\DLL %LibMode%\4Dzlib%LibModeDebug1%.dll
+LA______m*s* %Depot%zlib\1.2.5\projects\Win\%LibPlateforme%\DLL %LibMode%\4Dzlib%LibModeDebug1%.pdb
+
+LA______mAsA %Depot%libzip\0.10\Projects\Win32\libzip\%LibPlateforme%\%LibMode%\4Dlibzip%LibModeDebug%.dll
+LA______m*s* %Depot%libzip\0.10\Projects\Win32\libzip\%LibPlateforme%\%LibMode%\4Dlibzip%LibModeDebug%.pdb
+
+LA______mRsR %Depot%webkit\534.53\build\dll\%LibPlateforme%\JavaScriptCore.dll
+LA______mBsB %Depot%webkit\534.53\build\dll\%LibPlateforme%\JavaScriptCore_Beta.dll
+LA______mDsD %Depot%webkit\534.53\build\dll\%LibPlateforme%\JavaScriptCore_Debug.dll
+LA______m*s* %Depot%webkit\534.53\build\dll\%LibPlateforme%\JavaScriptCore%LibMode_SR2%.pdb
+LA______mDsD %Depot%webkit\534.53\build\dll\%LibPlateforme%\JavaScriptCore_Debug.map
+
+LA______mAs_W%Depot%webkit\534.53\build\bin\%LibPlateforme%\WebKit%LibMode_SR2%.dll
+LA______m*s_W%Depot%webkit\534.53\build\bin\%LibPlateforme%\Webkit%LibMode_SR2%.pdb
+LA______mAs_W%Depot%webkit\534.53\build\bin\%LibPlateforme%\WebKit.resources
+
+L*______mAsA %Depot%Wakanda\%Branch%\Server\Resources\SSJS\Modules
+
+L*______mAs_ %Depot%Wakanda\%Branch%\Studio\Extensions
+
+LA______m_sA [%Target%walib\]
+LA______mAs_ [%Target%Resources\Web Components\walib\]
+L*______mAsA %Depot%Wakanda\%Branch%\walib\WAF
+L*______m_sA %Depot%Wakanda\%Branch%\walib\dataBrowser
+L*______m_sA %Depot%Wakanda\%Branch%\walib\debugger
+
+LA______mAsA [%Target%Native Components\]
+LA______mAsA F.dll .map .pdb 
+LA______mAs_ %Depot%Components\%Branch%\components\%x64%codeeditor%LibMode_SR%.bundle
+LA______mAsA %Depot%Components\%Branch%\components\%x64%HttpServer%LibMode_SR%.bundle
+LA______mAsA %Depot%Components\%Branch%\components\%x64%languagesyntax%LibMode_SR%.bundle
+LA______mAsA %Depot%Components\%Branch%\components\%x64%SecurityManager%LibMode_SR%.bundle
+LA______mAs_ %Depot%Components\%Branch%\components\%x64%webviewer%LibMode_SR%.bundle
+LA______mAsA %Depot%Components\%Branch%\components\%x64%UsersAndGroups%LibMode_SR%.bundle
+LA______mAsA %Depot%Components\%Branch%\components\%x64%zip%LibMode_SR%.bundle
+LA______mAsA F
+
+LA______mAsA [%Target%Resources\Internal Components\]
+
+LA______mAs_ [%Target%Resources\Internal Components\coreDialog.4dbase\]
+LA______mDs_ %Depot%4DComponents\%Branch%\Internal Components\coreDialog.4dbase\
+LA______mds_ %Depot%4DComponents\%Branch%\Internal Components\Build\Components\coreDialog.4dbase\
+LA______mds_ %Depot%4DComponents\%Branch%\Internal Components\coreDialog.4dbase\Resources
+
+LA______mAs_ [%Target%Resources\Internal Components\studio.4dbase\]
+L*______mDs_ %Depot%Wakanda\%Branch%\Studio\Internal Components\studio_%Branch%.4dbase\
+L*______mds_ %Depot%Wakanda\%Branch%\Studio\Internal Components\Build\Components\studio.4dbase\
+L*______mds_ %Depot%Wakanda\%Branch%\Studio\Internal Components\studio_%Branch%.4dbase\Resources
+
+LA______mAsA [%Target%Resources\]
+LA______mAs_ %Depot%CoreRuntime\%Branch%\Resources\KeyboardMapping.WIN.XML
+LA______mAsA %Depot%XToolbox\%Branch%\Kernel\Resources\BasicUTIs.WIN.plist
+LA______mAs_ %Depot%CoreRuntime\%Branch%\Resources\PreferencesPages.xml
+LA______mAs_ %Depot%CoreRuntime\%Branch%\Resources\Images
+
+LA______mAs_ %Depot%CoreRuntime\%Branch%\Resources\ByteSwap.TXT
+LA______mAs_ %Depot%CoreRuntime\%Branch%\Resources\Language Support
+
+LA______m_sA [%Target%Resources\Templates\]
+L*______m_sA %Depot%Wakanda\%Branch%\Server\Resources\Default Solution\Admin
+
+LA______mAsA [%Target%Resources\%LibLangueLproj%\]
+LA______mAsA %Depot%XToolbox\%Branch%\JavaScript\Resources\%LibLangueLproj%\Errors_javascript_%Lib2Langue%.xlf
+LA______mAsA %Depot%XToolbox\%Branch%\Kernel\Resources\%LibLangueLproj%\Errors_xbox_%Lib2Langue%.xlf
+LA______mAsA %Depot%XToolbox\%Branch%\ServerNet\Resources\%LibLangueLproj%\ServerNet%Lib2Langue%.xlf
+LA______mAs_ %Depot%CoreRuntime\%Branch%\Resources\%LibLangueLproj%\4D_Themes%Lib2Langue%.xlf
+LA______mAs_ %Depot%CoreRuntime\%Branch%\Resources\%LibLangueLproj%\4D_Constants%Lib2Langue%.xlf
+LA______mAsA %Depot%CoreRuntime\%Branch%\Resources\%LibLangueLproj%\4D_LangEditKeyWords%Lib2Langue%.xlf
+LA______mAs_ %Depot%CoreRuntime\%Branch%\Resources\%LibLangueLproj%\4DAppCommon%Lib2Langue%.xlf
+LA______mAs_ %Depot%CoreRuntime\%Branch%\Resources\%LibLangueLproj%\4DDBError%Lib2Langue%.xlf
+LA______mAs_ %Depot%CoreRuntime\%Branch%\Resources\%LibLangueLproj%\4DDebugger%Lib2Langue%.xlf
+LA______mAs_ %Depot%CoreRuntime\%Branch%\Resources\%LibLangueLproj%\Common%Lib2Langue%.xlf
+LA______mAs_ %Depot%CoreRuntime\%Branch%\Resources\%LibLangueLproj%\Errors_4d_%Lib2Langue%.xlf
+LA______mAs_ %Depot%CoreRuntime\%Branch%\Resources\%LibLangueLproj%\ToolBox%Lib2Langue%.xlf
+
+LA______mAsA %Depot%Components\%Branch%\DB4D\Resources\%LibLangueLproj%\
+
+LA______mAsA [%Target%Resources\DB4D\]
+LA______mAsA %Depot%Components\%Branch%\DB4D\Resources\directoryRest.js
+LA______mAsA %Depot%Components\%Branch%\DB4D\Resources\ImpExpRest.js
+LA______mAsA %Depot%Components\%Branch%\DB4D\Resources\methodCall.js
+LA______mAsA %Depot%Components\%Branch%\DB4D\Resources\ModelLoadTime.js
+LA______mAsA %Depot%Components\%Branch%\DB4D\Resources\RemoteMethodCall.js
+LA______mAsA %Depot%Components\%Branch%\DB4D\Resources\reporting.js
+
+LA______mAsA [%Target%Resources\]
+L*______mAs_ %Depot%Wakanda\%Branch%\Studio\Resources\Info.plist
+LA______mAs_ %Depot%Wakanda\%Branch%\Studio\Resources\
+L*______m_sA %Depot%Wakanda\%Branch%\Server\Resources\Default Solution
+L*______m_sA %Depot%Wakanda\%Branch%\Server\Resources\remote_traces.skeleton
+L*______m_sA %Depot%Wakanda\%Branch%\Server\Resources\%LibLangueLproj%
+L*______m_sA %Depot%Wakanda\%Branch%\Server\Resources\Info.plist
+LA______mAsA %Depot%Wakanda\%Branch%\Common\Resources\
+LA______mAs_ %Depot%CoreRuntime\%Branch%\Resources\gram.4dsyntax
+LA______mAs_ %Depot%CoreRuntime\%Branch%\Resources\default.4DSettings
+LA______mAs_ [%Target%Resources\Templates\Blank\WebFolder\images\]
+
+LA______m_sA [%Target%Resources\wkhtmltopdf\]
+L*______m_sA %Depot%Wakanda\%Branch%\Server\Resources\wkhtmltopdf.WIN\

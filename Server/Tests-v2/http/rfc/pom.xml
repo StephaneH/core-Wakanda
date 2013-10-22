@@ -1,0 +1,33 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.wakanda.qa</groupId>
+	<artifactId>HTTP-RFC-Test</artifactId>
+	<version>1.0</version>
+	<name>HTTP-RFC-Test</name>
+
+	<parent>
+		<groupId>org.wakanda.qa.commons</groupId>
+		<artifactId>server-parent</artifactId>
+		<version>1.0.2</version>
+	</parent>
+
+	<properties>
+		<jenkins.old.name>HTTP_RFC_Server</jenkins.old.name>
+		<description>Compliance tests with HTTP RFC 2616 (HTTP/1.1)</description>
+		<tester>ouissam.gouni@4d.com</tester>
+		<developer>yannick.trinh@4d.com</developer>
+		<visibility>public</visibility>
+		<runServerClass>org.wakanda.qa.test.http.RunServer</runServerClass>
+		<stopServerClass>org.wakanda.qa.test.http.StopServer</stopServerClass>
+	</properties>
+
+	<repositories>
+		<repository>
+			<id>parent-pom</id>
+			<url>http://194.98.194.72:9000/nexus/content/repositories/releases</url>
+		</repository>
+	</repositories>
+
+</project>
+

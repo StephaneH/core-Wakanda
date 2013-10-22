@@ -1,0 +1,7 @@
+{
+    "description": "Tests of the HTTPServer API",
+    "kind": "ssjs",
+    "tester": "geoffrey.beauny@4d.com",
+    "visibility": "public",
+    "developer": "yannick.trinh4d.com"
+}

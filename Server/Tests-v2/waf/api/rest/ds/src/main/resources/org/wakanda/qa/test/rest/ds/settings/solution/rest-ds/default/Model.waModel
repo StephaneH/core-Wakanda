@@ -1,0 +1,913 @@
+﻿<?xml version="1.0" encoding="UTF-8"?><EntityModelCatalog>
+
+<extraProperties ____objectunic="true" version="1">
+
+	<classes ____objectunic="true">
+
+		<CaSeSeNsItIvE ____objectunic="true" panelColor="#E5B9B7">
+
+			<panel ____objectunic="true" isOpen="true" pathVisible="false">
+
+				<position ____objectunic="true" X="565" Y="14"/>
+</panel>
+</CaSeSeNsItIvE>
+
+		<CAsEsEnSiTiVe ____objectunic="true" panelColor="#8DB3E2">
+
+			<panel ____objectunic="true" isOpen="true" pathVisible="false">
+
+				<position ____objectunic="true" X="800" Y="199"/>
+</panel>
+</CAsEsEnSiTiVe>
+
+		<MethodCaseSensitive ____objectunic="true" panelColor="#70CCC2">
+
+			<panel ____objectunic="true" isOpen="true" pathVisible="false">
+
+				<position ____objectunic="true" X="799" Y="16"/>
+</panel>
+</MethodCaseSensitive>
+
+		<AttributeCaseSensitive ____objectunic="true" panelColor="#B8CCE4">
+
+			<panel ____objectunic="true" isOpen="true" pathVisible="false">
+
+				<position ____objectunic="true" X="1063" Y="26"/>
+</panel>
+</AttributeCaseSensitive>
+
+		<Stamp ____objectunic="true" panelColor="#C3D69B">
+
+			<panel ____objectunic="true" isOpen="true" pathVisible="false">
+
+				<position ____objectunic="true" X="320" Y="196"/>
+</panel>
+</Stamp>
+
+		<Master1 ____objectunic="true" panelColor="#eee">
+
+			<panel ____objectunic="true" pathVisible="false" isOpen="true">
+
+				<position ____objectunic="true" X="570" Y="331"/>
+</panel>
+</Master1>
+
+		<Master2 ____objectunic="true" panelColor="#D8D8D8">
+
+			<panel ____objectunic="true" isOpen="true" pathVisible="false">
+
+				<position ____objectunic="true" X="818" Y="328"/>
+</panel>
+</Master2>
+
+		<SimpleFilter ____objectunic="true" panelColor="#70CCC2">
+
+			<panel ____objectunic="true" isOpen="true" pathVisible="false">
+
+				<position ____objectunic="true" X="568" Y="141"/>
+</panel>
+</SimpleFilter>
+
+		<Simple ____objectunic="true" panelColor="#548DD4">
+
+			<panel ____objectunic="true" isOpen="true" pathVisible="true">
+
+				<position ____objectunic="true" X="305" Y="11"/>
+</panel>
+</Simple>
+
+		<ScopePublic ____objectunic="true" panelColor="#BFBFBF">
+
+			<panel ____objectunic="true" isOpen="true" pathVisible="false">
+
+				<position ____objectunic="true" X="18" Y="11"/>
+</panel>
+</ScopePublic>
+
+		<ScopePublicOnServer ____objectunic="true" panelColor="#C3D69B">
+
+			<panel ____objectunic="true" isOpen="true" pathVisible="false">
+
+				<position ____objectunic="true" X="35" Y="330"/>
+</panel>
+</ScopePublicOnServer>
+
+		<SubComplex ____objectunic="true" panelColor="#C3D69B">
+
+			<panel ____objectunic="true" isOpen="true" pathVisible="true">
+
+				<position ____objectunic="true" X="827" Y="548"/>
+</panel>
+</SubComplex>
+
+		<SuperComplex ____objectunic="true" panelColor="#76923C">
+
+			<panel ____objectunic="true" isOpen="true" pathVisible="false">
+
+				<position ____objectunic="true" X="569" Y="530"/>
+</panel>
+</SuperComplex>
+
+		<Complex ____objectunic="true" panelColor="#D88CFF">
+
+			<panel ____objectunic="true" isOpen="true" pathVisible="false">
+
+				<position ____objectunic="true" X="32" Y="460"/>
+</panel>
+</Complex>
+
+		<MasterComplex ____objectunic="true" panelColor="#A88CFF">
+
+			<panel ____objectunic="true" isOpen="true" pathVisible="false">
+
+				<position ____objectunic="true" X="305" Y="684"/>
+</panel>
+</MasterComplex>
+
+		<Attributes ____objectunic="true" panelColor="#76923C">
+
+			<panel ____objectunic="true" isOpen="true" pathVisible="true">
+
+				<position ____objectunic="true" X="1081" Y="200"/>
+</panel>
+</Attributes>
+
+		<Alias ____objectunic="true" panelColor="#76923C">
+
+			<panel ____objectunic="true" isOpen="true" pathVisible="true">
+
+				<position ____objectunic="true" X="321" Y="349"/>
+</panel>
+</Alias>
+
+		<Slave1 ____objectunic="true" panelColor="#BFBFBF">
+
+			<panel ____objectunic="true" isOpen="true" pathVisible="false">
+
+				<position ____objectunic="true" X="302" Y="469"/>
+</panel>
+</Slave1>
+
+		<KeyLong ____objectunic="true" panelColor="#B8CCE4">
+
+			<panel ____objectunic="true" isOpen="true" pathVisible="true">
+
+				<position ____objectunic="true" X="47" Y="1254"/>
+</panel>
+</KeyLong>
+
+		<KeyString ____objectunic="true" panelColor="#D8D8D8">
+
+			<panel ____objectunic="true" isOpen="true">
+
+				<position ____objectunic="true" X="48" Y="1450"/>
+</panel>
+</KeyString>
+
+		<KeyNumber ____objectunic="true" panelColor="#8DB3E2">
+
+			<panel ____objectunic="true" isOpen="true" pathVisible="true">
+
+				<position ____objectunic="true" X="290" Y="1255"/>
+</panel>
+</KeyNumber>
+
+		<KeyUuid ____objectunic="true" panelColor="#7F7F7F">
+
+			<panel ____objectunic="true" isOpen="true" pathVisible="true">
+
+				<position ____objectunic="true" X="293" Y="1450"/>
+</panel>
+</KeyUuid>
+
+		<KeyLong64 ____objectunic="true" panelColor="#C3D69B">
+
+			<panel ____objectunic="true" isOpen="true" pathVisible="true">
+
+				<position ____objectunic="true" X="52" Y="1641"/>
+</panel>
+</KeyLong64>
+
+		<Master3 ____objectunic="true" panelColor="#548DD4">
+
+			<panel ____objectunic="true" isOpen="true" pathVisible="true">
+
+				<position ____objectunic="true" X="291" Y="1643"/>
+</panel>
+</Master3>
+
+		<Method ____objectunic="true" panelColor="#996699">
+
+			<panel ____objectunic="true" isOpen="true" pathVisible="true">
+
+				<position ____objectunic="true" X="672" Y="1653"/>
+</panel>
+</Method>
+
+		<UpdateComplex ____objectunic="true" panelColor="#70CCC2">
+
+			<panel ____objectunic="true" isOpen="true" pathVisible="true">
+
+				<position ____objectunic="true" X="316" Y="2068"/>
+</panel>
+</UpdateComplex>
+
+		<UpdateSimple ____objectunic="true" panelColor="#7F7F7F">
+
+			<panel ____objectunic="true" isOpen="true" pathVisible="true">
+
+				<position ____objectunic="true" X="42" Y="2069"/>
+</panel>
+</UpdateSimple>
+</classes>
+
+	<model ____objectunic="true" workspaceLeft="0" workspaceTop="1969">
+
+		<relationCurve ____objectunic="true" run="true" mode="1"/>
+</model>
+</extraProperties>
+
+<dataClasses name="Alias" className="Alias" collectionName="AliasCollection" scope="public">
+
+	<attributes name="ID" kind="storage" scope="public" unique="true" autosequence="true" type="long" indexKind="btree" primKey="true"/>
+
+</dataClasses>
+
+<dataClasses name="AttributeCaseSensitive" className="AttributeCaseSensitive" collectionName="AttributeCaseSensitiveCollection" scope="public">
+
+	<attributes name="ID" kind="storage" scope="public" unique="true" autosequence="true" type="long" indexKind="btree" primKey="true"/>
+
+	<attributes name="as_StRiNg" kind="storage" scope="public" type="string"/>
+
+	<attributes name="as_sTrInG" kind="storage" scope="public" type="string"/>
+
+</dataClasses>
+
+<dataClasses name="Attributes" className="Attributes" collectionName="AttributesCollection" scope="public">
+
+	<attributes name="ID" kind="storage" scope="public" unique="true" autosequence="true" type="long" indexKind="btree" primKey="true"/>
+
+	<attributes name="as_string" kind="storage" scope="public" type="string"/>
+
+	<attributes name="as_number" kind="storage" scope="public" type="number"/>
+
+	<attributes name="ac_string" kind="calculated" scope="public" type="string" scriptKind="javascript">
+
+		<onGet from="guidedModel.Attributes.ac_string.onGet"/>
+
+	</attributes>
+
+	<attributes name="ac_number" kind="calculated" scope="public" type="number" scriptKind="javascript">
+
+		<onGet from="guidedModel.Attributes.ac_number.onGet"/>
+
+	</attributes>
+
+	<attributes name="ar_master2" kind="relatedEntity" scope="public" type="Master2" path="Master2"/>
+
+	<attributes name="aa_master2__as_string" kind="alias" scope="public" type="string" path="ar_master2.as_string"/>
+
+	<attributes name="aaa_master2__ar_master1__as_number" kind="alias" scope="public" type="number" path="ar_master2.ar_master1.as_number"/>
+
+	<methods name="mcls_getar" applyTo="dataClass" scope="public" from="guidedModel.Attributes.methods.mcls_getar"/>
+
+	<methods name="mcls_getec" applyTo="dataClass" scope="public" from="guidedModel.Attributes.methods.mcls_getec"/>
+
+	<methods name="mcls_param_getar" applyTo="dataClass" scope="public" from="guidedModel.Attributes.methods.mcls_param_getar"/>
+
+	<methods name="mcls_param_getec" applyTo="dataClass" scope="public" from="guidedModel.Attributes.methods.mcls_param_getec"/>
+
+	<methods name="mcol_getar" applyTo="entityCollection" scope="public" from="guidedModel.Attributes.collectionMethods.mcol_getar"/>
+
+	<methods name="mcol_getec" applyTo="entityCollection" scope="public" from="guidedModel.Attributes.collectionMethods.mcol_getec"/>
+
+	<methods name="mcol_param_getar" applyTo="entityCollection" scope="public" from="guidedModel.Attributes.collectionMethods.mcol_param_getar"/>
+
+	<methods name="mcol_param_getec" applyTo="entityCollection" scope="public" from="guidedModel.Attributes.collectionMethods.mcol_param_getec"/>
+
+</dataClasses>
+
+<dataClasses name="CaSeSeNsItIvE" className="CaSeSeNsItIvE" collectionName="CaSeSeNsItIvECollection" scope="public">
+
+	<attributes name="ID" kind="storage" scope="public" unique="true" autosequence="true" type="long" indexKind="btree" primKey="true"/>
+
+	<attributes name="as_string_1" kind="storage" scope="public" type="string"/>
+
+</dataClasses>
+
+<dataClasses name="CAsEsEnSiTiVe" className="CAsEsEnSiTiVe" collectionName="CAsEsEnSiTiVeCollection" scope="public">
+
+	<attributes name="ID" kind="storage" scope="public" unique="true" autosequence="true" type="long" indexKind="btree" primKey="true"/>
+
+	<attributes name="as_string_2" kind="storage" scope="public" type="string"/>
+
+</dataClasses>
+
+<dataClasses name="Complex" className="Complex" collectionName="ComplexCollection" scope="public">
+
+	<attributes name="ID" kind="storage" scope="public" unique="true" autosequence="true" type="long" indexKind="btree" primKey="true"/>
+
+	<attributes name="as_string" kind="storage" scope="public" type="string"/>
+
+	<attributes name="as_bool" kind="storage" scope="public" type="bool"/>
+
+	<attributes name="as_byte" kind="storage" scope="public" type="byte"/>
+
+	<attributes name="as_word" kind="storage" scope="public" type="word"/>
+
+	<attributes name="as_long" kind="storage" scope="public" type="long"/>
+
+	<attributes name="as_long64" kind="storage" scope="public" type="long64"/>
+
+	<attributes name="as_number" kind="storage" scope="public" type="number"/>
+
+	<attributes name="as_duration" kind="storage" scope="public" type="duration"/>
+
+	<attributes name="as_uuid" kind="storage" scope="public" type="uuid"/>
+
+	<attributes name="as_date" kind="storage" scope="public" type="date" simpleDate="false"/>
+
+	<attributes name="as_blob" kind="storage" scope="public" type="blob"/>
+
+	<attributes name="as_image" kind="storage" scope="public" type="image"/>
+
+	<attributes name="ac_string" kind="calculated" scope="public" type="string" scriptKind="javascript">
+
+		<onGet from="guidedModel.Complex.ac_string.onGet"/>
+
+	</attributes>
+
+	<attributes name="ac_bool" kind="calculated" scope="public" type="bool" scriptKind="javascript">
+
+		<onGet from="guidedModel.Complex.ac_bool.onGet"/>
+
+	</attributes>
+
+	<attributes name="ac_byte" kind="calculated" scope="public" type="byte" scriptKind="javascript">
+
+		<onGet from="guidedModel.Complex.ac_byte.onGet"/>
+
+	</attributes>
+
+	<attributes name="ac_word" kind="calculated" scope="public" type="word" scriptKind="javascript">
+
+		<onGet from="guidedModel.Complex.ac_word.onGet"/>
+
+	</attributes>
+
+	<attributes name="ac_long" kind="calculated" scope="public" type="long" scriptKind="javascript">
+
+		<onGet from="guidedModel.Complex.ac_long.onGet"/>
+
+	</attributes>
+
+	<attributes name="ac_long64" kind="calculated" scope="public" type="long64" scriptKind="javascript">
+
+		<onGet from="guidedModel.Complex.ac_long64.onGet"/>
+
+	</attributes>
+
+	<attributes name="ac_number" kind="calculated" scope="public" type="number" scriptKind="javascript">
+
+		<onGet from="guidedModel.Complex.ac_number.onGet"/>
+
+	</attributes>
+
+	<attributes name="ac_duration" kind="calculated" scope="public" type="duration" scriptKind="javascript">
+
+		<onGet from="guidedModel.Complex.ac_duration.onGet"/>
+
+	</attributes>
+
+	<attributes name="ac_uuid" kind="calculated" scope="public" type="uuid" scriptKind="javascript">
+
+		<onGet from="guidedModel.Complex.ac_uuid.onGet"/>
+
+	</attributes>
+
+	<attributes name="ac_date" kind="calculated" scope="public" type="date" simpleDate="false" scriptKind="javascript">
+
+		<onGet from="guidedModel.Complex.ac_date.onGet"/>
+
+	</attributes>
+
+	<attributes name="ac_blob" kind="calculated" scope="public" type="blob" scriptKind="javascript">
+
+		<onGet from="guidedModel.Complex.ac_blob.onGet"/>
+
+	</attributes>
+
+	<attributes name="ac_image" kind="calculated" scope="public" type="image" scriptKind="javascript">
+
+		<onGet from="guidedModel.Complex.ac_image.onGet"/>
+
+	</attributes>
+
+	<attributes name="ar_masterComplex" kind="relatedEntity" scope="public" type="MasterComplex" path="MasterComplex"/>
+
+	<attributes name="ars_slave1" kind="relatedEntities" scope="public" type="Slave1Collection" reversePath="true" path="ar_complex"/>
+
+	<attributes name="aa_masterComplex__as_string" kind="alias" scope="public" type="string" path="ar_masterComplex.as_string"/>
+
+</dataClasses>
+
+<dataClasses name="KeyLong" className="KeyLong" collectionName="KeyLongCollection" scope="public">
+
+	<attributes name="ID_long" kind="storage" scope="public" unique="true" autosequence="true" type="long" indexKind="btree" primKey="true"/>
+
+	<attributes name="as_string" kind="storage" scope="public" type="string"/>
+
+	<attributes name="as_number" kind="storage" scope="public" type="number"/>
+
+	<attributes name="ar_master3" kind="relatedEntity" scope="public" type="Master3" path="Master3"/>
+
+</dataClasses>
+
+<dataClasses name="KeyLong64" className="KeyLong64" collectionName="KeyLong64Collection" scope="public">
+
+	<attributes name="ID_long64" kind="storage" scope="public" unique="true" autosequence="true" type="long64" indexKind="btree" primKey="true"/>
+
+	<attributes name="as_string" kind="storage" scope="public" type="string"/>
+
+	<attributes name="as_number" kind="storage" scope="public" type="number"/>
+
+	<attributes name="ar_master3" kind="relatedEntity" scope="public" type="Master3" path="Master3"/>
+
+</dataClasses>
+
+<dataClasses name="KeyNumber" className="KeyNumber" collectionName="KeyNumberCollection" scope="public">
+
+	<attributes name="ID_number" kind="storage" scope="public" unique="true" type="number" indexKind="btree" primKey="true"/>
+
+	<attributes name="as_string" kind="storage" scope="public" type="string"/>
+
+	<attributes name="as_number" kind="storage" scope="public" type="number"/>
+
+	<attributes name="ar_master3" kind="relatedEntity" scope="public" type="Master3" path="Master3"/>
+
+</dataClasses>
+
+<dataClasses name="KeyString" className="KeyString" collectionName="KeyStringCollection" scope="public">
+
+	<attributes name="ID_string" kind="storage" scope="public" unique="true" type="string" indexKind="btree" primKey="true"/>
+
+	<attributes name="as_string" kind="storage" scope="public" type="string"/>
+
+	<attributes name="as_number" kind="storage" scope="public" type="number"/>
+
+	<attributes name="ar_master3" kind="relatedEntity" scope="public" type="Master3" path="Master3"/>
+
+</dataClasses>
+
+<dataClasses name="KeyUuid" className="KeyUuid" collectionName="KeyUuidCollection" scope="public">
+
+	<attributes name="ID_uuid" kind="storage" scope="public" unique="true" autosequence="true" autogenerate="true" type="uuid" indexKind="btree" primKey="true"/>
+
+	<attributes name="as_string" kind="storage" scope="public" type="string"/>
+
+	<attributes name="as_number" kind="storage" scope="public" type="number"/>
+
+	<attributes name="ar_master3" kind="relatedEntity" scope="public" type="Master3" path="Master3"/>
+
+</dataClasses>
+
+<dataClasses name="Master1" className="Master1" collectionName="Master1Collection" scope="public">
+
+	<attributes name="ID" kind="storage" scope="public" unique="true" autosequence="true" type="long" indexKind="btree" primKey="true"/>
+
+	<attributes name="as_string" kind="storage" scope="public" type="string"/>
+
+	<attributes name="as_number" kind="storage" scope="public" type="number"/>
+
+	<attributes name="ars_master2" kind="relatedEntities" scope="public" type="Master2Collection" reversePath="true" path="ar_master1"/>
+
+	<attributes name="ars_updateComplex" kind="relatedEntities" scope="public" type="UpdateComplexCollection" reversePath="true" path="ar_master1"/>
+
+	<attributes name="ars_updateSimple" kind="relatedEntities" scope="public" type="UpdateSimpleCollection" reversePath="true" path="ar_master1"/>
+
+</dataClasses>
+
+<dataClasses name="Master2" className="Master2" collectionName="Master2Collection" scope="public">
+
+	<attributes name="ID" kind="storage" scope="public" unique="true" autosequence="true" type="long" indexKind="btree" primKey="true"/>
+
+	<attributes name="as_string" kind="storage" scope="public" type="string"/>
+
+	<attributes name="as_number" kind="storage" scope="public" type="number"/>
+
+	<attributes name="ar_master1" kind="relatedEntity" scope="public" type="Master1" path="Master1"/>
+
+	<attributes name="ars_attributes" kind="relatedEntities" scope="public" type="AttributesCollection" reversePath="true" path="ar_master2"/>
+
+</dataClasses>
+
+<dataClasses name="Master3" className="Master3" collectionName="Master3Collection" scope="public">
+
+	<attributes name="ID" kind="storage" scope="public" unique="true" autosequence="true" type="long" indexKind="btree" primKey="true"/>
+
+	<attributes name="as_string" kind="storage" scope="public" type="string"/>
+
+	<attributes name="as_number" kind="storage" scope="public" type="number"/>
+
+	<attributes name="ars_keyLong" kind="relatedEntities" scope="public" type="KeyLongCollection" reversePath="true" path="ar_master3"/>
+
+	<attributes name="ars_keyNumber" kind="relatedEntities" scope="public" type="KeyNumberCollection" reversePath="true" path="ar_master3"/>
+
+	<attributes name="ars_keyString" kind="relatedEntities" scope="public" type="KeyStringCollection" reversePath="true" path="ar_master3"/>
+
+	<attributes name="ars_keyUuid" kind="relatedEntities" scope="public" type="KeyUuidCollection" reversePath="true" path="ar_master3"/>
+
+	<attributes name="ars_keyLong64" kind="relatedEntities" scope="public" type="KeyLong64Collection" reversePath="true" path="ar_master3"/>
+
+</dataClasses>
+
+<dataClasses name="MasterComplex" className="MasterComplex" collectionName="MasterComplexCollection" scope="public">
+
+	<attributes name="ID" kind="storage" scope="public" unique="true" autosequence="true" type="long" indexKind="btree" primKey="true"/>
+
+	<attributes name="as_string" kind="storage" scope="public" type="string"/>
+
+	<attributes name="as_bool" kind="storage" scope="public" type="bool"/>
+
+	<attributes name="as_byte" kind="storage" scope="public" type="byte"/>
+
+	<attributes name="as_word" kind="storage" scope="public" type="word"/>
+
+	<attributes name="as_long" kind="storage" scope="public" type="long"/>
+
+	<attributes name="as_long64" kind="storage" scope="public" type="long64"/>
+
+	<attributes name="as_number" kind="storage" scope="public" type="number"/>
+
+	<attributes name="as_duration" kind="storage" scope="public" type="duration"/>
+
+	<attributes name="as_uuid" kind="storage" scope="public" type="uuid"/>
+
+	<attributes name="as_date" kind="storage" scope="public" type="date" simpleDate="false"/>
+
+	<attributes name="as_blob" kind="storage" scope="public" type="blob"/>
+
+	<attributes name="as_image" kind="storage" scope="public" type="image"/>
+
+	<attributes name="ars_complex" kind="relatedEntities" scope="public" type="ComplexCollection" reversePath="true" path="ar_masterComplex"/>
+
+	<attributes name="ar_superComplex" kind="relatedEntities" scope="public" type="SuperComplexCollection" reversePath="true" path="ari_masterComplex"/>
+
+</dataClasses>
+
+<dataClasses name="Method" className="Method" collectionName="MethodCollection" scope="public">
+
+	<attributes name="ID" kind="storage" scope="public" unique="true" autosequence="true" type="long" primKey="true"/>
+
+	<attributes name="as_string" kind="storage" scope="public" type="string"/>
+
+	<attributes name="as_long" kind="storage" scope="public" type="long"/>
+
+	<methods name="mcls_getar" applyTo="dataClass" scope="public" from="guidedModel.Method.methods.mcls_getar"/>
+
+	<methods name="mcls_getec" applyTo="dataClass" scope="public" from="guidedModel.Method.methods.mcls_getec"/>
+
+	<methods name="mcls_getString" applyTo="dataClass" scope="public" from="guidedModel.Method.methods.mcls_getString"/>
+
+	<methods name="mcls_param_getar" applyTo="dataClass" scope="public" from="guidedModel.Method.methods.mcls_param_getar"/>
+
+	<methods name="mcls_param_getec" applyTo="dataClass" scope="public" from="guidedModel.Method.methods.mcls_param_getec"/>
+
+	<methods name="mcls_param_getString" applyTo="dataClass" scope="public" from="guidedModel.Method.methods.mcls_param_getString"/>
+
+	<methods name="mcol_getar" applyTo="entityCollection" scope="public" from="guidedModel.Method.collectionMethods.mcol_getar"/>
+
+	<methods name="mcol_getec" applyTo="entityCollection" scope="public" from="guidedModel.Method.collectionMethods.mcol_getec"/>
+
+	<methods name="mcol_getString" applyTo="entityCollection" scope="public" from="guidedModel.Method.collectionMethods.mcol_getString"/>
+
+	<methods name="mcol_param_getar" applyTo="entityCollection" scope="public" from="guidedModel.Method.collectionMethods.mcol_param_getar"/>
+
+	<methods name="mcol_param_getec" applyTo="entityCollection" scope="public" from="guidedModel.Method.collectionMethods.mcol_param_getec"/>
+
+	<methods name="mcol_param_getString" applyTo="entityCollection" scope="public" from="guidedModel.Method.collectionMethods.mcol_param_getString"/>
+
+</dataClasses>
+
+<dataClasses name="MethodCaseSensitive" className="MethodCaseSensitive" collectionName="MethodCaseSensitiveCollection" scope="public">
+
+	<attributes name="ID" kind="storage" scope="public" unique="true" autosequence="true" type="long" indexKind="btree" primKey="true"/>
+
+	<attributes name="as_string" kind="storage" scope="public" type="string"/>
+
+	<methods name="mcls_cAsEsEnSiTivE" applyTo="dataClass" scope="public" from="guidedModel.MethodCaseSensitive.methods.mcls_cAsEsEnSiTivE"/>
+
+	<methods name="mcls_CaSeSeNsItIvE" applyTo="dataClass" scope="public" from="guidedModel.MethodCaseSensitive.methods.mcls_CaSeSeNsItIvE"/>
+
+</dataClasses>
+
+<dataClasses name="ScopePublic" className="ScopePublic" collectionName="ScopePublicCollection" scope="public">
+
+	<attributes name="ID" kind="storage" scope="public" unique="true" autosequence="true" type="long" indexKind="btree" primKey="true"/>
+
+	<attributes name="as_scope_private" kind="storage" scope="private" type="string"/>
+
+	<attributes name="as_scope_protected" kind="storage" scope="protected" type="string"/>
+
+	<attributes name="as_scope_public_on_server" kind="storage" scope="publicOnServer" type="string"/>
+
+	<attributes name="as_scope_public" kind="storage" scope="public" type="string"/>
+
+	<methods name="mcls_scope_private" applyTo="dataClass" scope="private" from="guidedModel.ScopePublic.methods.mcls_scope_private"/>
+
+	<methods name="mcls_scope_protected" applyTo="dataClass" scope="protected" from="guidedModel.ScopePublic.methods.mcls_scope_protected"/>
+
+	<methods name="mcls_scope_public" applyTo="dataClass" scope="public" from="guidedModel.ScopePublic.methods.mcls_scope_public"/>
+
+	<methods name="mcls_scope_public_on_server" applyTo="dataClass" scope="publicOnServer" from="guidedModel.ScopePublic.methods.mcls_scope_public_on_server"/>
+
+</dataClasses>
+
+<dataClasses name="ScopePublicOnServer" className="ScopePublicOnServer" collectionName="ScopePublicOnServerCollection" scope="publicOnServer">
+
+	<attributes name="ID" kind="storage" scope="public" unique="true" autosequence="true" type="long" indexKind="btree" primKey="true"/>
+
+	<attributes name="a_scope_public" kind="storage" scope="public" type="string"/>
+
+</dataClasses>
+
+<dataClasses name="Simple" className="Simple" collectionName="SimpleCollection" scope="public">
+
+	<attributes name="ID" kind="storage" scope="public" unique="true" autosequence="true" type="long" indexKind="btree" primKey="true"/>
+
+	<attributes name="as_string" kind="storage" scope="public" type="string"/>
+
+	<attributes name="as_long" kind="storage" scope="public" type="long"/>
+
+	<attributes name="as_date" kind="storage" scope="public" type="date" simpleDate="false"/>
+
+</dataClasses>
+
+<dataClasses name="SimpleFilter" className="SimpleFilter" collectionName="SimpleFilterCollection" scope="public">
+
+	<attributes name="ID" kind="storage" scope="public" unique="true" autosequence="true" type="long" indexKind="btree" primKey="true"/>
+
+	<attributes name="as_string" kind="storage" scope="public" type="string"/>
+
+	<attributes name="as_long" kind="storage" scope="public" type="long"/>
+
+	<attributes name="as_date" kind="storage" scope="public" type="date" simpleDate="false"/>
+
+</dataClasses>
+
+<dataClasses name="Slave1" className="Slave1" collectionName="Slave1Collection" scope="public">
+
+	<attributes name="ID" kind="storage" scope="public" unique="true" autosequence="true" type="long" indexKind="btree" primKey="true"/>
+
+	<attributes name="as_string" kind="storage" scope="public" type="string"/>
+
+	<attributes name="as_long" kind="storage" scope="public" type="long"/>
+
+	<attributes name="ar_superComplex" kind="relatedEntity" scope="public" type="SuperComplex" path="SuperComplex"/>
+
+	<attributes name="ar_complex" kind="relatedEntity" scope="public" type="Complex" path="Complex"/>
+
+	<attributes name="ar_updateComplex" kind="relatedEntity" scope="public" type="UpdateComplex" path="UpdateComplex"/>
+
+</dataClasses>
+
+<dataClasses name="Stamp" className="Stamp" collectionName="StampCollection" scope="public">
+
+	<attributes name="ID" kind="storage" scope="public" unique="true" autosequence="true" type="long" indexKind="btree" primKey="true"/>
+
+	<attributes name="as_string" kind="storage" scope="public" type="string"/>
+
+	<attributes name="as_long" kind="storage" scope="public" type="long"/>
+
+</dataClasses>
+
+<dataClasses name="SuperComplex" className="SuperComplex" collectionName="SuperComplexCollection" scope="public">
+
+	<attributes name="ID" kind="storage" scope="public" unique="true" autosequence="true" type="long" indexKind="btree" primKey="true"/>
+
+	<attributes name="asi_string" kind="storage" scope="public" type="string"/>
+
+	<attributes name="asi_bool" kind="storage" scope="public" type="bool"/>
+
+	<attributes name="asi_byte" kind="storage" scope="public" type="byte"/>
+
+	<attributes name="asi_word" kind="storage" scope="public" type="word"/>
+
+	<attributes name="asi_long" kind="storage" scope="public" type="long"/>
+
+	<attributes name="asi_long64" kind="storage" scope="public" type="long64"/>
+
+	<attributes name="asi_number" kind="storage" scope="public" type="number"/>
+
+	<attributes name="asi_duration" kind="storage" scope="public" type="duration"/>
+
+	<attributes name="asi_uuid" kind="storage" scope="public" type="uuid"/>
+
+	<attributes name="asi_date" kind="storage" scope="public" type="date" simpleDate="false"/>
+
+	<attributes name="asi_blob" kind="storage" scope="public" type="blob"/>
+
+	<attributes name="asi_image" kind="storage" scope="public" type="image"/>
+
+	<attributes name="aci_string" kind="calculated" scope="public" type="string" scriptKind="javascript">
+
+		<onGet from="guidedModel.SuperComplex.aci_string.onGet"/>
+
+	</attributes>
+
+	<attributes name="aci_bool" kind="calculated" scope="public" type="bool" scriptKind="javascript">
+
+		<onGet from="guidedModel.SuperComplex.aci_bool.onGet"/>
+
+	</attributes>
+
+	<attributes name="aci_byte" kind="calculated" scope="public" type="byte" scriptKind="javascript">
+
+		<onGet from="guidedModel.SuperComplex.aci_byte.onGet"/>
+
+	</attributes>
+
+	<attributes name="aci_word" kind="calculated" scope="public" type="word" scriptKind="javascript">
+
+		<onGet from="guidedModel.SuperComplex.aci_word.onGet"/>
+
+	</attributes>
+
+	<attributes name="aci_long" kind="calculated" scope="public" type="long" scriptKind="javascript">
+
+		<onGet from="guidedModel.SuperComplex.aci_long.onGet"/>
+
+	</attributes>
+
+	<attributes name="aci_long64" kind="calculated" scope="public" type="long64" scriptKind="javascript">
+
+		<onGet from="guidedModel.SuperComplex.aci_long64.onGet"/>
+
+	</attributes>
+
+	<attributes name="aci_number" kind="calculated" scope="public" type="number" scriptKind="javascript">
+
+		<onGet from="guidedModel.SuperComplex.aci_number.onGet"/>
+
+	</attributes>
+
+	<attributes name="aci_duration" kind="calculated" scope="public" type="duration" scriptKind="javascript">
+
+		<onGet from="guidedModel.SuperComplex.aci_duration.onGet"/>
+
+	</attributes>
+
+	<attributes name="aci_uuid" kind="calculated" scope="public" type="uuid" scriptKind="javascript">
+
+		<onGet from="guidedModel.SuperComplex.aci_uuid.onGet"/>
+
+	</attributes>
+
+	<attributes name="aci_date" kind="calculated" scope="public" type="date" simpleDate="false" scriptKind="javascript">
+
+		<onGet from="guidedModel.SuperComplex.aci_date.onGet"/>
+
+	</attributes>
+
+	<attributes name="aci_blob" kind="calculated" scope="public" type="blob" scriptKind="javascript">
+
+		<onGet from="guidedModel.SuperComplex.aci_blob.onGet"/>
+
+	</attributes>
+
+	<attributes name="aci_image" kind="calculated" scope="public" type="image" scriptKind="javascript">
+
+		<onGet from="guidedModel.SuperComplex.aci_image.onGet"/>
+
+	</attributes>
+
+	<attributes name="ari_masterComplex" kind="relatedEntity" scope="public" type="MasterComplex" path="MasterComplex"/>
+
+	<attributes name="arsi_slave1" kind="relatedEntities" scope="public" type="Slave1Collection" reversePath="true" path="ar_superComplex"/>
+
+</dataClasses>
+
+<dataClasses name="SubComplex" className="SubComplex" collectionName="SubComplexCollection" scope="public" extends="SuperComplex">
+
+	<attributes name="asi_string" kind="storage" scope="public" type="string"/>
+
+	<attributes name="asi_bool" kind="storage" scope="public" type="bool"/>
+
+	<attributes name="asi_byte" kind="storage" scope="public" type="byte"/>
+
+	<attributes name="asi_word" kind="storage" scope="public" type="word"/>
+
+	<attributes name="asi_long" kind="storage" scope="public" type="long"/>
+
+	<attributes name="asi_long64" kind="storage" scope="public" type="long64"/>
+
+	<attributes name="asi_number" kind="storage" scope="public" type="number"/>
+
+	<attributes name="asi_duration" kind="storage" scope="public" type="duration"/>
+
+	<attributes name="asi_uuid" kind="storage" scope="public" type="uuid"/>
+
+	<attributes name="asi_date" kind="storage" scope="public" type="date" simpleDate="false"/>
+
+	<attributes name="asi_blob" kind="storage" scope="public" type="blob"/>
+
+	<attributes name="asi_image" kind="storage" scope="public" type="image"/>
+
+	<attributes name="aci_string" kind="calculated" scope="public" type="string" scriptKind="javascript">
+
+		<onGet from="guidedModel.SuperComplex.aci_string.onGet"/>
+
+	</attributes>
+
+	<attributes name="aci_bool" kind="calculated" scope="public" type="bool" scriptKind="javascript">
+
+		<onGet from="guidedModel.SuperComplex.aci_bool.onGet"/>
+
+	</attributes>
+
+	<attributes name="aci_byte" kind="calculated" scope="public" type="byte" scriptKind="javascript">
+
+		<onGet from="guidedModel.SuperComplex.aci_byte.onGet"/>
+
+	</attributes>
+
+	<attributes name="arsi_slave1" kind="relatedEntities" scope="public" type="Slave1Collection" path="ar_superComplex"/>
+
+	<attributes name="ac_string" kind="calculated" scope="public" type="string" scriptKind="javascript">
+
+		<onGet from="guidedModel.SubComplex.ac_string.onGet"/>
+
+	</attributes>
+
+	<attributes name="ac_bool" kind="calculated" scope="public" type="bool" scriptKind="javascript"/>
+
+	<attributes name="ac_byte" kind="calculated" scope="public" type="byte" scriptKind="javascript"/>
+
+	<attributes name="ac_word" kind="calculated" scope="public" type="word" scriptKind="javascript"/>
+
+	<attributes name="ac_long" kind="calculated" scope="public" type="long" scriptKind="javascript"/>
+
+	<attributes name="ac_long64" kind="calculated" scope="public" type="long64" scriptKind="javascript"/>
+
+	<attributes name="ac_number" kind="calculated" scope="public" type="number" scriptKind="javascript"/>
+
+	<attributes name="ac_duration" kind="calculated" scope="public" type="duration" scriptKind="javascript"/>
+
+	<attributes name="ac_uuid" kind="calculated" scope="public" type="uuid" scriptKind="javascript"/>
+
+	<attributes name="ac_date" kind="calculated" scope="public" type="date" simpleDate="false" scriptKind="javascript"/>
+
+	<attributes name="ac_blob" kind="calculated" scope="public" type="blob" scriptKind="javascript"/>
+
+	<attributes name="ac_image" kind="calculated" scope="public" type="image" scriptKind="javascript"/>
+
+</dataClasses>
+
+<dataClasses name="UpdateComplex" className="UpdateComplex" collectionName="UpdateComplexCollection" scope="public">
+
+	<attributes name="ID" kind="storage" scope="public" unique="true" autosequence="true" type="long" primKey="true"/>
+
+	<attributes name="as_string" kind="storage" scope="public" type="string"/>
+
+	<attributes name="as_bool" kind="storage" scope="public" type="bool"/>
+
+	<attributes name="as_byte" kind="storage" scope="public" type="byte"/>
+
+	<attributes name="as_word" kind="storage" scope="public" type="word"/>
+
+	<attributes name="as_long" kind="storage" scope="public" type="long"/>
+
+	<attributes name="as_long64" kind="storage" scope="public" type="long64"/>
+
+	<attributes name="as_number" kind="storage" scope="public" type="number"/>
+
+	<attributes name="as_duration" kind="storage" scope="public" type="duration"/>
+
+	<attributes name="as_uuid" kind="storage" scope="public" type="uuid"/>
+
+	<attributes name="as_date" kind="storage" scope="public" type="date" simpleDate="false"/>
+
+	<attributes name="as_blob" kind="storage" scope="public" type="blob"/>
+
+	<attributes name="as_image" kind="storage" scope="public" type="image"/>
+
+	<attributes name="ar_master1" kind="relatedEntity" scope="public" type="Master1" path="Master1"/>
+
+	<attributes name="ars_slave1" kind="relatedEntities" scope="public" type="Slave1Collection" reversePath="true" path="ar_updateComplex"/>
+
+</dataClasses>
+
+<dataClasses name="UpdateSimple" className="UpdateSimple" collectionName="UpdateSimpleCollection" scope="public">
+
+	<attributes name="ID" kind="storage" scope="public" unique="true" autosequence="true" type="long" primKey="true"/>
+
+	<attributes name="as_string" kind="storage" scope="public" type="string"/>
+
+	<attributes name="as_long" kind="storage" scope="public" type="long"/>
+
+	<attributes name="as_date" kind="storage" scope="public" type="date" simpleDate="false"/>
+
+	<attributes name="ar_master1" kind="relatedEntity" scope="public" type="Master1" path="Master1"/>
+
+</dataClasses>
+</EntityModelCatalog>
