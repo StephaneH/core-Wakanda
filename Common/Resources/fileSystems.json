@@ -1,0 +1,12 @@
+[
+	{
+		"name":"THEMES_CUSTOM",
+		"parent":".USER_HOME_DIRECTORY",
+		"path":"Wakanda/Themes"
+	},
+	{
+		"name":"WIDGETS_CUSTOM",
+		"parent":".USER_HOME_DIRECTORY",
+		"path":"Wakanda/Widgets"
+	}
+]

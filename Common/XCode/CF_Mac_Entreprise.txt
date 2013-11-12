@@ -1,0 +1,61 @@
+# Les fichiers sont classes par rpertoire de destination
+# Le 1er et le 2eme flag indique la langue L suivit de l'initial de la langue 
+# F pour French, E pour English, A pour automatique, et * pour toutes les langues 
+# le 3eme et le 4 eme flag indique le produit Mono : M et son Mode
+# le 5eme et le 6 eme flag indique le produit Serveur : S et son Mode
+# le 7eme et le 8 eme flag indique le produit Engine : E et son Mode
+# le 9eme et le 10eme flag indique le produit Wakanda Studio : m et son Mode
+# le 11eme & le 12eme flag indique le produit Wakanda Server : s et son Mode
+# 
+# Pour le mode on peut avoir 
+# A pour tous les modes, D pour debug, B pour beta et R pour release
+# ou les complements
+# d pour tous les modes sauf debug,
+# b pour tous les modes sauf beta,
+# r pour tous les modes sauf release,
+#
+# Chaque fichier est contenu dans des sections pour indiquer leur destination 
+# ATTENTION NE PAS METTRE D ESPACE APRES LES [] SINON PLANTAGE
+#
+# Voici les variables que vous avez a dispo
+# %DEPOT% pour l'emplacement du depot sur votre poste
+# %PRODUCT_NAME%
+# %DIR_COMPONENT%
+# %LibModeCompil% libele du mode Debug, Beta, ou Final
+# %Lib2Langue%
+# %LibMode_SR% libl du mode Debug, Beta ou vide pour Release
+#
+# Si le chemin est un nom de repertoire 
+#    sans / correspond  une copy du repertoire (arboresence compris)
+#    avec / correspond  une copy de tout le contenue du repertoire (arboresence compris) 
+#
+
+#LES EXTENSIONS#######################
+
+#LES FRAMEWORKS#######################
+LA______mAsA [%TARGET%%PRODUCT_NAME%.app/Contents/Frameworks]
+LA______mAsA %DEPOT%XToolbox/%BRANCH%/Frameworks %ARCHS%/SQLUtilities%LibMode_SR%.framework
+LA______mAsA %DEPOT%XToolbox/%BRANCH%/Frameworks %ARCHS%/SQLModel%LibMode_SR%.framework
+LA______mAsA %DEPOT%Components/%BRANCH%/Frameworks %ARCHS%/%LibMode%/RemoteEntity%LibMode_SR%.framework
+LA______mAsA %DEPOT%Components/%BRANCH%/Frameworks %ARCHS%/%LibMode%/SQLEntity%LibMode_SR%.framework
+
+#LES COMPOSANTS INTERNES#######################
+LA______mAsA [%TARGET%%DIR_COMPONENT%Native Components/]
+LA______mBsB %DEPOT%Components/%BRANCH%/components %ARCHS%/%LibModeCompil%/MySQLConnector%LibMode_SR%.bundle.dSYM
+
+LA______mAsA [%TARGET%%DIR_COMPONENT%Native Components/MySQLConnector%LibMode_SR%.bundle/Contents/]
+LA______mAsA %DEPOT%Components/%BRANCH%/components %ARCHS%/%LibModeCompil%/MySQLConnector%LibMode_SR%.bundle/Contents/MacOS
+LA______mAsA %DEPOT%Components/%BRANCH%/components %ARCHS%/%LibModeCompil%/MySQLConnector%LibMode_SR%.bundle/Contents/info.plist
+LA______mAsA %DEPOT%Components/%BRANCH%/MySQLConnector/Resources
+
+LA______mAsA [%TARGET%%DIR_COMPONENT%Native Components/]
+LA______mBsB %DEPOT%Components/%BRANCH%/components %ARCHS%/%LibModeCompil%/MSSQLConnector%LibMode_SR%.bundle.dSYM
+
+LA______mAsA [%TARGET%%DIR_COMPONENT%Native Components/MSSQLConnector%LibMode_SR%.bundle/Contents/]
+LA______mAsA %DEPOT%Components/%BRANCH%/components %ARCHS%/%LibModeCompil%/MSSQLConnector%LibMode_SR%.bundle/Contents/MacOS
+LA______mAsA %DEPOT%Components/%BRANCH%/components %ARCHS%/%LibModeCompil%/MSSQLConnector%LibMode_SR%.bundle/Contents/info.plist
+LA______mAsA %DEPOT%Components/%BRANCH%/MSSQLConnector/Resources
+
+LA______mAsA [%TARGET%%PRODUCT_NAME%.app/Contents/Modules/]
+L*______mAsA %DEPOT%Wakanda/%branch%/Server/Resources/SSJS/ModulesEnterprise/
+

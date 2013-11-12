@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<VisualStudioPropertySheet
+	ProjectType="Visual C++"
+	Version="8.00"
+	Name="Default Compiler Settings"
+	>
+	<Tool
+		Name="VCCLCompilerTool"
+		AdditionalOptions="/MP"
+		PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;_HAS_ITERATOR_DEBUGGING=0;_BIND_TO_CURRENT_CRT_VERSION=1"
+		MinimalRebuild="false"
+		ExceptionHandling="2"
+		TreatWChar_tAsBuiltInType="false"
+	/>
+	<Tool
+		Name="VCLinkerTool"
+		EnableUAC="false"
+	/>
+	<UserMacro
+		Name="BranchName"
+		Value="WAK6"
+	/>
+</VisualStudioPropertySheet>

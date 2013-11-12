@@ -1,0 +1,57 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.wakanda.qa.wastudio</groupId>
+  <artifactId>textInput</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+
+	<properties>
+      <jenkins.old.name>TextInputRuntime</jenkins.old.name>
+	  <tester>ahmed.rajouani.alaoui@4d.com</tester>
+		<developer>jean-bernard.piot@4d.com</developer>
+		<visibility>public</visibility>
+		<description>Tests of the Text Input Widget at run time</description>
+    </properties>
+	
+   <dependencies>
+		<dependency>
+			<groupId>org.wakanda.qa</groupId>
+			<artifactId>gui-runtime-utils</artifactId>
+			<version>LATEST</version>
+		</dependency>
+	</dependencies>
+
+	<repositories>
+		<repository>
+			<id>snapshots</id>
+			<url>http://194.98.194.72:9000/nexus/content/repositories/snapshots/</url>
+		</repository>
+	</repositories>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.2</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>test-jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.9</version>
+				<configuration>
+					<test>TestsEntry</test>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+	<name>checkbox-runtime</name>
+</project>
