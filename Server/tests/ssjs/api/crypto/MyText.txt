@@ -1,0 +1,428 @@
+			   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+				QUELQUES LIGNES DE COMMANDE POUR OPENSSL
+			   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+Table des matières
+──────────────────
+
+Création d'une chaine de confiance
+.. Mise en place de l'autorité de certification (CA)
+..... Plusieurs méthodes
+..... Préparer l'autorité racine
+..... Préparer l'autorité intermédiaire
+..... Obtention d'un certificat pour le service web
+..... Tests de validation
+..... Concaténer les certificats pour le serveur web de 4D
+Manipulation des clés et des certificats
+.. Convertion du certificat client .crt en .pem
+.. Conversion de PKCS#12 vers PEM
+.. Conversion d'un fichier PKCS#12 en .pem (tout dans le même fichier, buggé ?):
+.. Convertion PEM vers PKCS#12
+.. Voir le contenu du certificat
+.. Vérifier qu'une clé et un certificat sont appariés en comparant leur modulus
+.. Ajouter / Retirer un cryptage à la clé
+.. Convertion du certificat client .crt en .pem
+.. Vérifier le paramétrage du serveur
+
+
+
+
+
+Création d'une chaine de confiance
+══════════════════════════════════
+
+Mise en place de l'autorité de certification (CA)
+─────────────────────────────────────────────────
+
+Plusieurs méthodes
+╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+
+  On devrait sans doute utiliser le script [CA.sh] pour accomplire ce
+  type de tâche. Les lignes de commandes suivantes montrent une méthode
+  moins automatisée.
+
+
+  [CA.sh] /System/Library/OpenSSL/misc/CA.sh
+
+
+Préparer l'autorité racine
+╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+
+  ╭────
+  │ > mkdir -p /Users/julien/Desktop/CERTS/RootAuthority
+  │ > cd /Users/julien/Desktop/CERTS/RootAuthority
+  │ > cp /System/Library/OpenSSL/openssl.cnf RootAuthority.conf
+  ╰────
+
+  Editer le fichier RootAuthority.conf et effectuer les changements
+  suivants :
+
+  ╭────
+  │ dir         =   /Users/julien/Desktop/CERTS/RootAuthority
+  │ certificate =   $dir/RootAuthorityCert.pem
+  │ private_key =   $dir/private/RootAuthorityKey.pem
+  │ 
+  │ countryName_default             =   FR
+  │ #stateOrProvinceName_default    =   Some-State
+  │ localityName_default            =   Clichy
+  │ 0.organizationName_default      =   4D
+  ╰────
+
+  Créer les sous répertoires de l'autorité racine, et initialier les
+  fichiers index.txt et serial (attention ASN1 !) :
+
+  ╭────
+  │ > mkdir certs newcerts private req
+  │ > touch index.txt
+  │ > echo 01 > serial
+  ╰────
+
+  Créer la clé et le certificat auto-signé de l'autorité racine :
+
+  ╭────
+  │ > openssl req -config ./RootAuthority.conf -new -x509 -newkey rsa:2048 -keyout ./private/RootAuthorityKey.pem -out ./RootAuthorityCert.pem -days 3650
+  │ 
+  │ -----
+  │ Country Name (2 letter code) [FR]:
+  │ State or Province Name (full name) []:
+  │ Locality Name (eg, city) [Clichy]:
+  │ Organization Name (eg, company) [4D]:
+  │ Organizational Unit Name (eg, section) []:RD Root Authority
+  │ Common Name (e.g. server FQDN or YOUR name) []:Julien Montmartin
+  │ Email Address []:
+  ╰────
+
+
+Préparer l'autorité intermédiaire
+╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+
+  ╭────
+  │ > mkdir -p /Users/julien/Desktop/CERTS/IntermediateAuthority
+  │ > cd /Users/julien/Desktop/CERTS/IntermediateAuthority
+  │ > cp ../RootAuthority/RootAuthority.conf ./IntermediateAuthority.conf
+  ╰────
+
+  Editer le fichier IntermediateAuthority.conf et effectuer les
+  changements suivants :
+
+  ╭────
+  │ dir         =   /Users/julien/Desktop/CERTS/IntermediateAuthority
+  │ certificate =   $dir/IntermediateAuthorityCert.pem
+  │ private_key =   $dir/private/IntermediateAuthorityKey.pem
+  ╰────
+
+  Comme précédemment, créer les sous répertoires de l'autorité
+  intermédiaire, et initialier les fichiers index.txt et serial
+  (attention ASN1 !) :
+
+  ╭────
+  │ > mkdir certs newcerts private req
+  │ > touch index.txt
+  │ > echo 01 > serial
+  ╰────
+
+  Créer la clé et la demande de signature de l'autorité intermédiaire
+
+  ╭────
+  │ > openssl req -config ./IntermediateAuthority.conf -new -nodes -newkey rsa:2048 -keyout ./private/IntermediateAuthorityKey.pem -out req/IntermediateAuthority.req -days 1095
+  │ 
+  │ -----
+  │ Country Name (2 letter code) [FR]:
+  │ State or Province Name (full name) []:
+  │ Locality Name (eg, city) [Clichy]:
+  │ Organization Name (eg, company) [4D]:
+  │ Organizational Unit Name (eg, section) []:RD Intermediate Authority
+  │ Common Name (e.g. server FQDN or YOUR name) []:Julien Montmartin
+  │ Email Address []:
+  │ 
+  │ Please enter the following 'extra' attributes
+  │ to be sent with your certificate request
+  │ A challenge password []:
+  │ An optional company name []:
+  ╰────
+
+  Signer la demande de l'autorité intermédiaire avec l'autorité racine :
+
+  ╭────
+  │ > openssl ca -config ../RootAuthority/RootAuthority.conf -policy policy_anything -extensions v3_ca -out ../RootAuthority/certs/IntermediateAuthorityCert.pem -in ./req/IntermediateAuthority.req
+  │ > cp ../RootAuthority/certs/IntermediateAuthorityCert.pem .
+  ╰────
+
+
+Obtention d'un certificat pour le service web
+╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+
+  ╭────
+  │ > mkdir -p /Users/julien/Desktop/CERTS/WebService
+  │ > cd /Users/julien/Desktop/CERTS/WebService
+  │ > mkdir private
+  ╰────
+
+  Créer la clé et la demande de signature du service web :
+
+  ╭────
+  │ > openssl req -config ../IntermediateAuthority/IntermediateAuthority.conf -new -nodes -newkey rsa:2048 -keyout ./WebServiceKey.pem -out WebService.req -days 1095
+  │ 
+  │ -----
+  │ Country Name (2 letter code) [FR]:
+  │ State or Province Name (full name) []:
+  │ Locality Name (eg, city) [Clichy]:
+  │ Organization Name (eg, company) [4D]:
+  │ Organizational Unit Name (eg, section) []:RD Web Service
+  │ Common Name (e.g. server FQDN or YOUR name) []:opt990-rd-jm.private.4d.fr
+  │ Email Address []:
+  │ 
+  │ Please enter the following 'extra' attributes
+  │ to be sent with your certificate request
+  │ A challenge password []:
+  │ An optional company name []:
+  ╰────
+
+  Signer la demande du service web avec l'autorité intermédiaire :
+
+  ╭────
+  │ > openssl ca -config ../IntermediateAuthority/IntermediateAuthority.conf -policy policy_anything -out ../IntermediateAuthority/certs/WebServiceCert.pem -in ./WebService.req 
+  │ > cp ../IntermediateAuthority/certs/WebServiceCert.pem .
+  ╰────
+
+
+Tests de validation
+╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+
+◊ Validation locale
+
+  On créé un ficher temporaire contenant toutes les autorités, et on
+  utilise la commande `verify' :
+
+  ╭────
+  │ > cat ./RootAuthority/RootAuthorityCert.pem ./IntermediateAuthority/IntermediateAuthorityCert.pem > IntermediateAuthority/Authorities.pem
+  │ 
+  │ > openssl verify -CAfile ./IntermediateAuthority/Authorities.pem ./WebService/WebServiceCert.pem 
+  │ ./WebService/WebServiceCert.pem: OK
+  ╰────
+
+
+◊ Validation client / serveur
+
+  On lance `s_server', par exemple sur PC
+
+  ╭────
+  │ C:\OpenSSL-Win64>bin\openssl.exe s_server -accept 4433 -CAfile IntermediateAuthorityCert.pem -cert WebServiceCert.pem -key WebServiceKey.pem
+  ╰────
+
+  Et `s_client', qui doit afficher la chaine de certifcats et conclure
+  par un ok.
+
+  ╭────
+  │ > openssl s_client -showcerts -connect opt990-rd-jm.private.4d.fr:4433 -CAfile RootAuthorityCert.pem 
+  │ 
+  │ CONNECTED(00000003)
+  │ depth=2 C = FR, L = Clichy, O = 4D, OU = RD Root Authority, CN = Julien Montmartin
+  │ verify return:1
+  │ depth=1 C = FR, L = Clichy, O = 4D, OU = RD Intermediate Authority, CN = Julien Montmartin
+  │ verify return:1
+  │ depth=0 C = FR, L = Clichy, O = 4D, OU = RD Web Service, CN = opt990-rd-jm.private.4d.fr
+  │ verify return:1
+  │ ---
+  │ Certificate chain
+  │  0 s:/C=FR/L=Clichy/O=4D/OU=RD Web Service/CN=opt990-rd-jm.private.4d.fr
+  │    i:/C=FR/L=Clichy/O=4D/OU=RD Intermediate Authority/CN=Julien Montmartin
+  │ -----BEGIN CERTIFICATE-----
+  │ ...
+  │ -----END CERTIFICATE-----
+  │  1 s:/C=FR/L=Clichy/O=4D/OU=RD Intermediate Authority/CN=Julien Montmartin
+  │    i:/C=FR/L=Clichy/O=4D/OU=RD Root Authority/CN=Julien Montmartin
+  │ -----BEGIN CERTIFICATE-----
+  │ ...
+  │ -----END CERTIFICATE-----
+  │ ---
+  │ Server certificate
+  │ subject=/C=FR/L=Clichy/O=4D/OU=RD Web Service/CN=opt990-rd-jm.private.4d.fr
+  │ issuer=/C=FR/L=Clichy/O=4D/OU=RD Intermediate Authority/CN=Julien Montmartin
+  │ ---
+  │ ...
+  │     Verify return code: 0 (ok)
+  │ ---
+  ╰────
+
+
+◊ Remarque
+
+  On peut supprimer tout ce qui ne fait pas strictement partie des
+  certificats
+
+
+Concaténer les certificats pour le serveur web de 4D
+╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+
+  Attention à l'ordre ! 4D attend en premier le certificat du service
+  web, puis les certificats intermédiaires (ordre des intermédiaires
+  probablement sans importance). Il n'est pas nécessaire d'inclure le
+  certificat de l'autorité racine.
+
+  ╭────
+  │ > mkdir -p /Users/julien/Desktop/CERTS/4D
+  │ > cd /Users/julien/Desktop/CERTS/4D
+  │ > cat ../WebService/WebServiceCert.pem ../IntermediateAuthority/IntermediateAuthorityCert.pem > ./cert.pem
+  │ > cp ../WebService/WebServiceKey.pem ./key.pem
+  ╰────
+
+  On peut ensuite tester avec `s_client' ou avec un navigateur :
+
+  ╭────
+  │ > openssl s_client -CAfile ../RootAuthority/RootAuthorityCert.pem -connect opt990-rd-jm.private.4d.fr:443 -showcerts
+  │ CONNECTED(00000003)
+  │ depth=2 C = FR, L = Clichy, O = 4D, OU = RD Root Authority, CN = Julien Montmartin
+  │ verify return:1
+  │ depth=1 C = FR, L = Clichy, O = 4D, OU = RD Intermediate Authority, CN = Julien Montmartin
+  │ verify return:1
+  │ depth=0 C = FR, L = Clichy, O = 4D, OU = RD Web Service, CN = opt990-rd-jm.private.4d.fr
+  │ verify return:1
+  │ ---
+  │ Certificate chain
+  │  0 s:/C=FR/L=Clichy/O=4D/OU=RD Web Service/CN=opt990-rd-jm.private.4d.fr
+  │    i:/C=FR/L=Clichy/O=4D/OU=RD Intermediate Authority/CN=Julien Montmartin
+  │ -----BEGIN CERTIFICATE-----
+  │ ...
+  │ -----END CERTIFICATE-----
+  │  1 s:/C=FR/L=Clichy/O=4D/OU=RD Intermediate Authority/CN=Julien Montmartin
+  │    i:/C=FR/L=Clichy/O=4D/OU=RD Root Authority/CN=Julien Montmartin
+  │ -----BEGIN CERTIFICATE-----
+  │ ...
+  │ -----END CERTIFICATE-----
+  │ ---
+  │ Server certificate
+  │ subject=/C=FR/L=Clichy/O=4D/OU=RD Web Service/CN=opt990-rd-jm.private.4d.fr
+  │ issuer=/C=FR/L=Clichy/O=4D/OU=RD Intermediate Authority/CN=Julien Montmartin
+  │ ---
+  │ ...
+  │     Verify return code: 0 (ok)
+  │ ---
+  ╰────
+
+  La réponse obtenue est la même que précédemment ! Dans le navigateur
+  (penser à installer l'authorité racine !) on accède à la page HTTPS
+  sans avertissement :
+
+  [./4DWelcome.png]
+
+
+Manipulation des clés et des certificats
+════════════════════════════════════════
+
+Convertion du certificat client .crt en .pem
+────────────────────────────────────────────
+
+  ╭────
+  │ > openssl x509 -inform der -in julien.montmartin\@fastmail.crt -out julien.montmartin\@fastmail.pem
+  ╰────
+
+  Le certificat semble équivalent dans le trousseau d'accès. Voir
+  fichier service. Fonctionne également dans l'autre sens avec `-inform
+  pem'.
+
+
+Conversion de PKCS#12 vers PEM
+──────────────────────────────
+
+  On extrait dabord le certificat client (`-clcerts'), sans cryptage
+  (`-nodes'), et pour l'instant sans la clé privée (`-nokeys')
+
+  ╭────
+  │ > openssl pkcs12 -in myCredentials.p12 -out myCertificate.pem -nodes -clcerts -nokeys
+  ╰────
+
+  On extrait ensuite la clé privée, ce coup ci sans certificat
+  (`-nocerts')
+
+  ╭────
+  │ > openssl pkcs12 -in myCredentials.p12 -out myPrivateKey.pem -nodes -nocerts
+  ╰────
+
+
+Conversion d'un fichier PKCS#12 en .pem (tout dans le même fichier, buggé ?):
+─────────────────────────────────────────────────────────────────────────────
+
+  ╭────
+  │ > openssl pkcs12 -in ./CertificatUtilisateurStartSSL.p12 -out ./CertificatUtilisateurStartSSL.pem
+  ╰────
+
+
+Convertion PEM vers PKCS#12
+───────────────────────────
+
+  La clé et le certificat sont séparés, et au format PEM. On les réuni
+  pour créer une accréditation au format PKCS#12
+
+  ╭────
+  │ > openssl pkcs12 -export -in myCertificate.pem -inkey myPrivateKey.pem -out myCredentials.p12
+  ╰────
+
+
+Voir le contenu du certificat
+─────────────────────────────
+
+  ╭────
+  │ > openssl x509 -in myCertificate.pem -subject -issuer -noout -nameopt multiline
+  ╰────
+
+
+Vérifier qu'une clé et un certificat sont appariés en comparant leur modulus
+────────────────────────────────────────────────────────────────────────────
+
+  ╭────
+  │  > openssl rsa -in myStartSSLKey.pem -noout -modulus | openssl md5
+  │ 1b79a8312e2149b6b50d519643bc64e8
+  │ 
+  │ > openssl x509 -in ./myServiceCert.pem -noout -modulus | openssl md5
+  │ 1b79a8312e2149b6b50d519643bc64e8
+  ╰────
+
+  Les deux même en boucle :
+
+  ╭────
+  │ > for k in *.key.pem ; do echo "---> $k" ; openssl rsa -in $k -noout -modulus | openssl md5 ; done 
+  │ 
+  │ > for c in *.cert.pem ; do echo "---> $c" ; openssl x509 -in $c -noout -modulus | openssl md5 ; done
+  ╰────
+
+
+Ajouter / Retirer un cryptage à la clé
+──────────────────────────────────────
+
+  On peut ajouter un cryptage symétriqque sur la clé avec la commande :
+
+  ╭────
+  │ > openssl rsa -in JULIEN_BITBUCKET.pem -out JULIEN_BITBUCKET_DES3.pem -des3
+  ╰────
+
+  On peut également retirer cette protection avec la commande :
+
+  ╭────
+  │ > openssl rsa -in JULIEN_BITBUCKET_DES3.pem -out JULIEN_BITBUCKET.pem
+  ╰────
+
+
+Convertion du certificat client .crt en .pem
+────────────────────────────────────────────
+
+  ╭────
+  │ > openssl x509 -inform der -in julien.montmartin\@fastmail.crt -out julien.montmartin\@fastmail.pem
+  ╰────
+
+  Le certificat semble équivalent dans le trousseau d'accès. Voir
+  fichier service.
+
+
+Vérifier le paramétrage du serveur
+──────────────────────────────────
+
+  On utilise la commande `client_s' d'OpenSSL pour voir le détail de ce
+  que renvoit le serveur :
+
+  ╭────
+  │ > openssl s_client -showcerts -connect jmontmartin.net:443
+  ╰────
+
+  On peut compter les certificats renvoyés !

@@ -1,0 +1,13 @@
+﻿[
+    {
+        "name" : "git",
+        "executable" :
+        [
+            { "path" : "/GIT_BIN/git" },
+            { "path" : "/USR_LOCAL/bin/git" },
+            { "path" : "/USR_LOCAL/git/bin/git" },
+            { "path" : "/USR_BIN/git" },
+            { "path" : "/USR_BIN/git/bin/git" }
+        ]
+    }
+]

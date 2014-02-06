@@ -1,0 +1,7 @@
+{
+    "description": "Tests of the Global Application Include API",
+    "kind": "ssjs",
+    "tester": "geoffrey.beauny@4d.com",
+    "visibility": "public",
+    "developer": "ke-fong.lin@4d.com"   
+}

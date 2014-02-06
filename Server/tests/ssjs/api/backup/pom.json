@@ -1,0 +1,6 @@
+{
+    "description": "Tests of the Backup API",
+    "kind": "ssjs",
+    "oldJenkinsName": "TestServerBackupBackupDataStore",
+    "gonogo": true
+}

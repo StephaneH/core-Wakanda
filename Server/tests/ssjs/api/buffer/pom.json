@@ -1,0 +1,8 @@
+{
+    "description": "Tests of the Buffer API",
+    "kind": "ssjs",
+    "oldJenkinsName": "TestServerBuffer",
+    "tester": "sebastien.courvoisier@4d.com",
+    "visibility": "public",
+    "developer": "ke-fong.lin@4d.com"
+}

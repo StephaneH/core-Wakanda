@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<VisualStudioPropertySheet
+	ProjectType="Visual C++"
+	Version="8.00"
+	Name="Xerces Settings"
+	>
+	<Tool
+		Name="VCCLCompilerTool"
+		AdditionalIncludeDirectories="&quot;$(SolutionDir)..\..\xerces\3.0.1\xerces\src&quot;"
+		PreprocessorDefinitions="XERCES_3_0_1"
+	/>
+	<UserMacro
+		Name="XERCES_OUTPUT"
+		Value="$(SolutionDir)..\..\xerces\3.0.1\xerces\Build\$(PlatformName)\$(ConfigurationName)\"
+	/>
+</VisualStudioPropertySheet>

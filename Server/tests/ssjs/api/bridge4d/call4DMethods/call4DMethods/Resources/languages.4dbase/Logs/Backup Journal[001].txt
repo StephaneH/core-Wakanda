@@ -1,0 +1,6 @@
+*** Full Backup aborted
+Error reported : Backup canceled by user.
+Scheduled : 25/10/2013 12:25
+Starting : 25/10/2013 12:25
+Ending : 25/10/2013 12:25
+

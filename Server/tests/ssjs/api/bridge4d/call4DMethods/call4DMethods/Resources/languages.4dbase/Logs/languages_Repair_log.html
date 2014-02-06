@@ -1,0 +1,621 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>4D Maintenance and Security Center Log</title>
+<style type="text/css">
+                    html
+                    {
+                        text-align: center;
+                    }
+                    body  
+                    { 
+                        background: #fff; 
+                        color: #333;
+                        text-align: left;
+                        font-size: 11pt;
+                        font-family: Verdana, Helvetica, sans-serif; 
+                        margin: 0px; 
+                        padding: 0px; 
+                    }
+                    a, a:visited 
+                    {
+                        color: #036;
+                    }
+                    h1 
+                    {
+                        color: #036;
+                        margin: 5px auto;
+                    }
+                    h2
+                    {
+                        font-size: small;
+                        font-weight: bold;
+                        color: #036;
+                        padding: 2px 10px;
+                        border: 1px solid #036;
+                        background-color: #eee;
+                    }
+                    h3
+                    {
+                        display: list-item;
+                        list-style-type: square;
+                        list-style-position: inside;
+                        margin: 0;
+                        padding-bottom: 3px;
+                        font-size: small;
+                        font-weight: normal;
+                    }
+                    table
+                    {
+                        text-align: left;
+                        border: 1px solid #036;
+                        width: 100%;
+                    }
+                    td, th
+                    {
+                        padding: 2px 10px;
+                        font-size: x-small;
+                    }
+                    #header
+                    {
+                        margin: 0 10px;
+                        text-align: center;
+                    }
+                    #header ul#menu
+                    {
+                        font-size: x-small;
+                        list-style-type: none;
+                    }
+                    #header ul#menu li
+                    {
+                        display: inline;
+                        padding: 5px 10px;
+                    }
+                    #contents
+                    {
+                        margin: 0 10px;
+                    }
+                    table#summary, table.move
+                    {
+                        color: #036;
+                    }
+                    table#summary tr td, table.move tr td
+                    {
+                        background-color: #eee;
+                    }
+                    table#summary tr td:first-child, table.move tr td:first-child 
+                    {
+                        font-weight: bold;
+                        width: 200px;
+                        background-color: #036;
+                        color: #fff;
+                        text-align: right;
+                    }
+					b.canceled
+					{
+						font-weight: bold;
+						color: forestgreen;
+					}
+                    .operations
+                    {
+                        display: block;
+                        margin: 0;
+                        padding: 0;
+                    }
+                    .hidden
+                    {
+                        display: none;
+                    }
+                    .operation
+                    {
+                        display: block;
+                        margin: 0;
+                        margin-left: 20px;
+                    }
+                    a.ok, a.ok:visited, .ok
+                    {
+                        color: forestgreen;
+                    }
+                    a.error, a.error:visited 
+                    {
+                        color: #f00;
+                    }
+                    a.warning, a.warning:visited
+                    {
+                        color: #f4ae36; 
+                    }
+                    h3 b.ok
+                    {
+                        font-weight: normal;
+                    }
+                    ul.errorsAndWarnings
+                    {
+                        list-style-type: none;
+                        border: 1px dotted #036;
+                        margin: 0;
+                        padding: 2px 10px;
+                        font-size: x-small;
+                    }
+                    li.error
+                    {
+                        margin: 2px 0;
+                        border-left: 5px solid #f00;
+                        padding-left: 5px;
+                    }
+                    li.warning
+                    {
+                        margin: 2px 0;
+                        padding-left: 5px;
+                        border-left: 5px solid #f4ae36;
+                    }
+                </style>
+<script type="text/javascript">
+<!--
+                        
+                            function display(calque)
+                            { 
+                                if(document.getElementById(calque).className == "operations hidden")
+                                    document.getElementById(calque).className = "operations";
+                                else 
+                                    document.getElementById(calque).style.display = document.getElementById(calque).style.display == "none" ? "block" : "none";
+                            }
+                            
+                            function showAll()
+                            {
+                                var x = document.getElementsByTagName('div');
+                                for (i = 0 ; i < x.length ; i++)
+                                {
+                                    if(x[i].className == "operations hidden")
+                                       x[i].className = "operations";
+                                       
+                                    else if(x[i].className == "operation hidden")
+                                       x[i].className = "operation"; 
+                                    
+                                    if(x[i].className == "operations" || x[i].className == "operations" )
+                                        x[i].style.display = "block"; 
+                                }
+                                showErrorsOrWarnings('error');
+                                showErrorsOrWarnings('warning');
+                            }
+                            
+                            function hideAll()
+                            {
+                                var x = document.getElementsByTagName('div');
+                                for (i = 0 ; i < x.length ; i++)
+                                    if(x[i].className == "operations" || x[i].className == "operations")
+                                        x[i].style.display = "none"; 
+                                hideErrorsOrWarnings('error');
+                                hideErrorsOrWarnings('warning');
+                            }
+                            
+                            function showErrorsOrWarnings(errorsOrWarnings)
+                            {
+                                var x = document.getElementsByTagName('li');
+                                var y = '';
+                                for (i = 0 ; i < x.length ; i++)
+                                    if(x[i].className == errorsOrWarnings)
+                                    {
+                                        y = x[i].parentNode;
+                                        while(y.className == "errorsAndWarnings" || y.className == "operation" || y.className == "operations")
+                                        {
+                                            y.style.display = "block";
+                                            y = y.parentNode;
+                                        }
+                                    }
+                            }
+                            
+                            function hideErrorsOrWarnings(errorsOrWarnings)
+                            {
+                                var x = document.getElementsByTagName('li');
+                                for (i = 0 ; i < x.length ; i++)
+                                {
+                                    if(x[i].className == errorsOrWarnings)
+                                    {
+                                        x[i].parentNode.style.display = "none"; 
+                                    }
+                                }
+                            }
+                         
+                    --></script>
+</head>
+<body>
+<div id="header">
+<h1>languages</h1>
+<table id="summary">
+<tr>
+<td>Operation:</td><td>Repair</td>
+</tr>
+<tr>
+<td>Structure file:</td><td>zebulon:Users:vlaluque:Desktop:languages.4dbase:languages.4DB</td>
+</tr>
+<tr>
+<td>Data file:</td><td>zebulon:Users:vlaluque:Desktop:languages.4dbase:languages.4DD</td>
+</tr>
+<tr>
+<td>OS: </td><td>Mac OS X (10.9)</td>
+</tr>
+<tr>
+<td>Started on: </td><td>2013-10-25T12:23:36+02:00</td>
+</tr>
+<tr>
+<td>Ended on: </td><td>2013-10-25T12:24:32+02:00</td>
+</tr>
+</table>
+<ul id="menu">
+<li>
+<a href="#" onclick="showAll();">Show all</a> / <a href="#" onclick="hideAll();">Hide all</a>
+</li>
+<li>
+<a href="#" onclick="showErrorsOrWarnings('error');">Show errors</a> / <a href="#" onclick="hideErrorsOrWarnings('error');">Hide errors</a>
+</li>
+<li>
+<a href="#" onclick="showErrorsOrWarnings('warning');">Show warnings</a> / <a href="#" onclick="hideErrorsOrWarnings('warning');">Hide warnings</a>
+</li>
+</ul>
+</div>
+<div id="contents">
+<!--Verify-->
+<h2>1. Opening the database in maintenance mode [<b class="ok">OK</b>]</h2>
+<!--Verify-->
+<h2>2. Repair [<a class="error" href="#N0x52c9c00N0x52f4490" onclick="display('N0x52c9c00N0x52f4490');">1 error</a>]  [<a class="warning" href="#N0x52c9c00N0x52f4490" onclick="display('N0x52c9c00N0x52f4490');">200 warnings</a>] </h2>
+<div id="N0x52c9c00N0x52f4490" class="operations">
+<div class="operation">
+<h3>Compacting auto sequence number definitions [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>Loading data tables [<a href="#N0x52c9c00N0x52f44f0" onclick="display('N0x52c9c00N0x52f44f0');" class="ok">OK</a>]</h3>
+<div id="N0x52c9c00N0x52f44f0" class="operations hidden">
+<div class="operation">
+<h3>Compacting data table headers [<b class="ok">OK</b>]</h3>
+</div>
+</div>
+</div>
+<div class="operation">
+<h3>Compacting BLOBs in table Resources [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>Compacting records in table Resources [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>Compacting BLOBs in table [Table#0] [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>Compacting records in table [Table#0] [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>Compacting auto sequence number definitions [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>Compacting data table definitions [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>Compacting data table definitions [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>Compacting relation definitions [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>Compacting backup index definitions [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>Loading data tables [<a class="warning" href="#N0x52c9c00N0x52f4700" onclick="display('N0x52c9c00N0x52f4700');">1 warning</a>] </h3>
+<div id="N0x52c9c00N0x52f4700" class="operations">
+<!--Error list-->
+<ul class="errorsAndWarnings">
+<li class="warning">Problem on the # 9 data table : Auto sequence number ID is invalid (5;80)</li>
+</ul>
+</div>
+<div id="N0x52c9c00N0x52f4700" class="operations">
+<div class="operation">
+<h3>Compacting data table headers [<b class="ok">OK</b>]</h3>
+</div>
+</div>
+</div>
+<div class="operation">
+<h3>Compacting BLOBs in table LanguageCodes [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>Compacting records in table LanguageCodes [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>Compacting BLOBs in table CountryCodes [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>Compacting records in table CountryCodes [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>Compacting BLOBs in table LanguageIndex [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>Compacting records in table LanguageIndex [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>Compacting BLOBs in table Names [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>Compacting records in table Names [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>Compacting BLOBs in table Reference [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>Compacting records in table Reference [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>Compacting BLOBs in table SeaMounts [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>Compacting records in table SeaMounts [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>Compacting BLOBs in table DetailSeaMounts [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>Compacting records in table DetailSeaMounts [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>Compacting BLOBs in table LINANEEN [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>Compacting records in table LINANEEN [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>Compacting BLOBs in table [Table#0] [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>Compacting records in table [Table#0] [<a class="error" href="#N0x52c9c00N0x52f4ac0" onclick="display('N0x52c9c00N0x52f4ac0');">1 error</a>]  [<a class="warning" href="#N0x52c9c00N0x52f4ac0" onclick="display('N0x52c9c00N0x52f4ac0');">199 warnings</a>] </h3>
+<div id="N0x52c9c00N0x52f4ac0" class="operations">
+<!--Error list-->
+<ul class="errorsAndWarnings">
+<li class="error">Additional errors : 372777</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 100 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 100 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 101 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 101 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 102 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 102 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 103 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 103 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 104 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 104 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 105 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 105 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 106 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 106 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 107 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 107 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 108 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 108 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 109 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 109 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 110 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 110 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 111 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 111 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 112 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 112 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 113 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 113 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 114 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 114 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 115 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 115 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 116 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 116 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 117 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 117 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 118 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 118 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 119 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 119 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 120 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 120 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 121 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 121 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 122 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 122 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 123 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 123 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 124 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 124 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 125 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 125 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 126 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 126 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 127 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 127 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 128 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 128 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 129 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 129 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 130 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 130 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 131 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 131 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 132 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 132 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 133 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 133 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 134 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 134 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 135 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 135 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 136 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 136 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 137 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 137 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 138 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 138 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 139 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 139 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 140 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 140 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 141 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 141 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 142 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 142 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 143 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 143 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 144 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 144 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 145 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 145 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 146 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 146 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 147 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 147 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 148 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 148 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 149 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 149 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 150 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 150 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 151 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 151 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 152 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 152 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 153 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 153 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 154 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 154 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 155 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 155 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 156 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 156 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 157 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 157 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 158 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 158 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 159 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 159 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 160 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 160 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 161 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 161 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 162 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 162 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 163 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 163 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 164 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 164 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 165 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 165 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 166 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 166 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 167 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 167 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 168 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 168 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 169 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 169 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 170 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 170 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 171 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 171 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 172 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 172 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 173 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 173 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 174 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 174 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 175 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 175 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 176 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 176 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 177 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 177 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 178 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 178 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 179 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 179 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 180 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 180 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 181 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 181 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 182 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 182 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 183 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 183 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 184 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 184 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 185 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 185 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 186 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 186 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 187 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 187 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 188 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 188 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 189 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 189 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 190 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 190 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 191 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 191 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 192 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 192 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 193 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 193 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 194 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 194 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 195 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 195 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 196 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 196 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 197 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 197 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 198 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 9} in record # 198 in the # 9 data table : External BLOB file is missing (6;142)</li>
+<li class="warning">Problem on field {Data Table# 9.Field# 8} in record # 199 in the # 9 data table : External BLOB file is missing (6;142)</li>
+</ul>
+</div>
+</div>
+<div class="operation">
+<h3>Move original [<b class="ok">OK</b>]</h3>
+<table class="move">
+<tr>
+<td>Source:</td><td>zebulon:Users:vlaluque:Desktop:languages.4dbase:languages.4DD</td>
+</tr>
+<tr>
+<td>Destination:</td><td>zebulon:Users:vlaluque:Desktop:languages.4dbase:Replaced Files (Repairing) 2013-10-25 12-23-36:languages.4DD</td>
+</tr>
+</table>
+</div>
+<div class="operation">
+<h3>Move the new file to the original location [<b class="ok">OK</b>]</h3>
+<table class="move">
+<tr>
+<td>Source:</td><td>zebulon:Users:vlaluque:Desktop:languages.4dbase:Replaced Files (Repairing) 2013-10-25 12-23-36:_languages.4DD</td>
+</tr>
+<tr>
+<td>Destination:</td><td>zebulon:Users:vlaluque:Desktop:languages.4dbase:languages.4DD</td>
+</tr>
+</table>
+</div>
+<div class="operation">
+<h3>Move original log file [<b class="ok">OK</b>]</h3>
+<table class="move">
+<tr>
+<td>Source:</td><td>zebulon:Users:vlaluque:Desktop:languages.4dbase:languages.journal</td>
+</tr>
+<tr>
+<td>Destination:</td><td>zebulon:Users:vlaluque:Desktop:languages.4dbase:Replaced Files (Repairing) 2013-10-25 12-23-36:languages.journal</td>
+</tr>
+</table>
+</div>
+<div class="operation">
+<h3>Move original index [<b class="ok">OK</b>]</h3>
+<table class="move">
+<tr>
+<td>Source:</td><td>zebulon:Users:vlaluque:Desktop:languages.4dbase:languages.4DIndx</td>
+</tr>
+<tr>
+<td>Destination:</td><td>zebulon:Users:vlaluque:Desktop:languages.4dbase:Replaced Files (Repairing) 2013-10-25 12-23-36:languages.4DIndx</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</body>
+</html>
