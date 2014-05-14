@@ -1,0 +1,119 @@
+﻿{
+	"toJSON": true,
+	"extraProperties": {
+		"version": "2",
+		"classes": {
+			"Element": {
+				"panelColor": "#E5B9B7",
+				"panel": {
+					"isOpen": "true",
+					"position": {
+						"X": 25,
+						"Y": 20
+					},
+					"pathVisible": true
+				}
+			}
+		},
+		"model": {
+			"workspaceLeft": 0,
+			"workspaceTop": 0,
+			"scriptMode": "manual"
+		}
+	},
+	"dataClasses": [
+		{
+			"collectionName": "ElementCollection",
+			"className": "Element",
+			"attributes": [
+				{
+					"name": "ID",
+					"kind": "storage",
+					"type": "long",
+					"autosequence": "true",
+					"unique": "true",
+					"primKey": "true"
+				},
+				{
+					"name": "word",
+					"scope": "public",
+					"type": "word",
+					"kind": "storage"
+				},
+				{
+					"name": "uuid",
+					"scope": "public",
+					"type": "uuid",
+					"kind": "storage"
+				},
+				{
+					"name": "string",
+					"scope": "public",
+					"type": "string",
+					"kind": "storage"
+				},
+				{
+					"name": "obj",
+					"scope": "public",
+					"type": "obj",
+					"kind": "storage"
+				},
+				{
+					"name": "number",
+					"scope": "public",
+					"type": "number",
+					"kind": "storage"
+				},
+				{
+					"name": "long64",
+					"scope": "public",
+					"type": "long64",
+					"kind": "storage"
+				},
+				{
+					"name": "long",
+					"scope": "public",
+					"type": "long",
+					"kind": "storage"
+				},
+				{
+					"name": "image",
+					"scope": "public",
+					"type": "image",
+					"kind": "storage"
+				},
+				{
+					"name": "duration",
+					"scope": "public",
+					"type": "duration",
+					"kind": "storage"
+				},
+				{
+					"name": "date",
+					"scope": "public",
+					"type": "date",
+					"kind": "storage"
+				},
+				{
+					"name": "byte",
+					"scope": "public",
+					"type": "byte",
+					"kind": "storage"
+				},
+				{
+					"name": "bool",
+					"scope": "public",
+					"type": "bool",
+					"kind": "storage"
+				},
+				{
+					"name": "blob",
+					"scope": "public",
+					"type": "blob",
+					"kind": "storage"
+				}
+			]
+		}
+	],
+	"type": []
+}

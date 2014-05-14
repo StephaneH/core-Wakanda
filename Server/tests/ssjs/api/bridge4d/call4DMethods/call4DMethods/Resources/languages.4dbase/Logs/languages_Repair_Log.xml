@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<verifylog operation="Repair" name="languages" structure="zebulon:Users:vlaluque:Desktop:languages.4dbase:languages.4DB" data="zebulon:Users:vlaluque:Desktop:languages.4dbase:languages.4DD" os="Mac OS X (10.9)">
+<start_timer time="2013-10-25T12:25:56+02:00"/>
+<step title="Opening the database in maintenance mode">
+</step>
+<step title="Repair">
+	<step title="Compacting auto sequence number definitions">
+	</step>
+	<step title="Loading data tables">
+		<step title="Compacting data table headers">
+		</step>
+	</step>
+	<step title="Compacting BLOBs in table Resources">
+	</step>
+	<step title="Compacting records in table Resources">
+	</step>
+	<step title="Compacting BLOBs in table [Table#0]">
+	</step>
+	<step title="Compacting records in table [Table#0]">
+	</step>
+	<step title="Compacting auto sequence number definitions">
+	</step>
+	<step title="Compacting data table definitions">
+	</step>
+	<step title="Compacting data table definitions">
+	</step>
+	<step title="Compacting relation definitions">
+	</step>
+	<step title="Compacting backup index definitions">
+	</step>
+	<step title="Loading data tables">
+		<step title="Compacting data table headers">
+		</step>
+	</step>
+	<step title="Compacting BLOBs in table LanguageCodes">
+	</step>
+	<step title="Compacting records in table LanguageCodes">
+	</step>
+	<step title="Compacting BLOBs in table CountryCodes">
+	</step>
+	<step title="Compacting records in table CountryCodes">
+	</step>
+	<step title="Compacting BLOBs in table LanguageIndex">
+	</step>
+	<step title="Compacting records in table LanguageIndex">
+	</step>
+	<step title="Compacting BLOBs in table Names">
+	</step>
+	<step title="Compacting records in table Names">
+	</step>
+	<step title="Compacting BLOBs in table Reference">
+	</step>
+	<step title="Compacting records in table Reference">
+	</step>
+	<step title="Compacting BLOBs in table SeaMounts">
+	</step>
+	<step title="Compacting records in table SeaMounts">
+	</step>
+	<step title="Compacting BLOBs in table DetailSeaMounts">
+	</step>
+	<step title="Compacting records in table DetailSeaMounts">
+	</step>
+	<step title="Compacting BLOBs in table LINANEEN">
+	</step>
+	<step title="Compacting records in table LINANEEN">
+	</step>
+	<step title="Compacting BLOBs in table [Table#0]">
+	</step>
+	<step title="Compacting records in table [Table#0]">
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 500 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 501 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 502 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 503 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 504 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 505 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 506 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 507 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 508 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 509 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 510 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 511 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 512 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 513 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 514 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 515 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 516 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 517 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 518 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 519 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 520 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 521 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 522 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 523 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 524 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 525 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 526 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 527 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 528 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 529 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 530 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 531 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 532 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 533 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 534 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 535 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 536 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 537 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 538 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 539 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 540 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 541 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 542 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 543 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 544 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 545 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 546 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 547 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 548 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 549 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 550 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 551 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 552 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 553 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 554 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 555 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 556 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 557 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 558 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 559 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 560 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 561 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 562 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 563 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 564 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 565 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 566 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 567 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 568 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 569 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 570 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 571 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 572 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 573 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 574 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 575 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 576 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 577 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 578 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 579 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 580 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 581 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 582 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 583 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 584 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 585 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 586 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 587 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 588 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 589 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 590 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 591 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 592 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 593 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 594 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 595 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 596 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 597 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 598 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 599 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 600 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 601 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 602 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 603 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 604 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 605 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 606 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 607 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 608 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 609 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 610 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 611 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 612 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 613 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 614 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 615 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 616 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 617 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 618 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 619 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 620 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 621 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 622 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 623 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 624 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 625 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 626 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 627 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 628 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 629 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 630 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 631 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 632 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 633 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 634 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 635 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 636 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 637 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 638 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 639 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 640 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 641 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 642 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 643 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 644 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 645 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 646 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 647 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 648 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 649 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 650 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 651 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 652 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 653 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 654 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 655 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 656 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 657 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 658 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 659 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 660 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 661 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 662 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 663 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 664 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 665 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 666 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 667 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 668 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 669 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 670 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 671 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 672 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 673 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 674 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 675 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 676 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 677 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 678 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 679 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 680 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 681 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 682 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 683 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 684 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 685 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 686 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 687 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 688 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 689 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 690 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 691 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 692 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 693 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 694 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 695 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 696 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 697 in the # 9 data table : External BLOB file is missing</warning>
+		<warning warning_type="6" warning_num="142">Problem on field {Data Table# 9.Field# 9} in record # 698 in the # 9 data table : External BLOB file is missing</warning>
+		<error error_type="0" error_num="0">Additional errors : 201</error>
+	</step>
+	<error error_type="0" error_num="0">CompactInto failed, error code is -1178437464 (user canceled)</error>
+	<error error_type="2019716984" error_num="6">Compact failed because user canceled it. The original data was not replaced.</error>
+</step>
+<stop_timer time="2013-10-25T12:28:50+02:00" success="false" user_canceled="true"/>
+</verifylog>

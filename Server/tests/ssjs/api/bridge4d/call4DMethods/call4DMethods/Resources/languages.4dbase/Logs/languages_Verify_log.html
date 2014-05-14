@@ -1,0 +1,568 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>4D Maintenance and Security Center Log</title>
+<style type="text/css">
+                    html
+                    {
+                        text-align: center;
+                    }
+                    body  
+                    { 
+                        background: #fff; 
+                        color: #333;
+                        text-align: left;
+                        font-size: 11pt;
+                        font-family: Verdana, Helvetica, sans-serif; 
+                        margin: 0px; 
+                        padding: 0px; 
+                    }
+                    a, a:visited 
+                    {
+                        color: #036;
+                    }
+                    h1 
+                    {
+                        color: #036;
+                        margin: 5px auto;
+                    }
+                    h2
+                    {
+                        font-size: small;
+                        font-weight: bold;
+                        color: #036;
+                        padding: 2px 10px;
+                        border: 1px solid #036;
+                        background-color: #eee;
+                    }
+                    h3
+                    {
+                        display: list-item;
+                        list-style-type: square;
+                        list-style-position: inside;
+                        margin: 0;
+                        padding-bottom: 3px;
+                        font-size: small;
+                        font-weight: normal;
+                    }
+                    table
+                    {
+                        text-align: left;
+                        border: 1px solid #036;
+                        width: 100%;
+                    }
+                    td, th
+                    {
+                        padding: 2px 10px;
+                        font-size: x-small;
+                    }
+                    #header
+                    {
+                        margin: 0 10px;
+                        text-align: center;
+                    }
+                    #header ul#menu
+                    {
+                        font-size: x-small;
+                        list-style-type: none;
+                    }
+                    #header ul#menu li
+                    {
+                        display: inline;
+                        padding: 5px 10px;
+                    }
+                    #contents
+                    {
+                        margin: 0 10px;
+                    }
+                    table#summary, table.move
+                    {
+                        color: #036;
+                    }
+                    table#summary tr td, table.move tr td
+                    {
+                        background-color: #eee;
+                    }
+                    table#summary tr td:first-child, table.move tr td:first-child 
+                    {
+                        font-weight: bold;
+                        width: 200px;
+                        background-color: #036;
+                        color: #fff;
+                        text-align: right;
+                    }
+					b.canceled
+					{
+						font-weight: bold;
+						color: forestgreen;
+					}
+                    .operations
+                    {
+                        display: block;
+                        margin: 0;
+                        padding: 0;
+                    }
+                    .hidden
+                    {
+                        display: none;
+                    }
+                    .operation
+                    {
+                        display: block;
+                        margin: 0;
+                        margin-left: 20px;
+                    }
+                    a.ok, a.ok:visited, .ok
+                    {
+                        color: forestgreen;
+                    }
+                    a.error, a.error:visited 
+                    {
+                        color: #f00;
+                    }
+                    a.warning, a.warning:visited
+                    {
+                        color: #f4ae36; 
+                    }
+                    h3 b.ok
+                    {
+                        font-weight: normal;
+                    }
+                    ul.errorsAndWarnings
+                    {
+                        list-style-type: none;
+                        border: 1px dotted #036;
+                        margin: 0;
+                        padding: 2px 10px;
+                        font-size: x-small;
+                    }
+                    li.error
+                    {
+                        margin: 2px 0;
+                        border-left: 5px solid #f00;
+                        padding-left: 5px;
+                    }
+                    li.warning
+                    {
+                        margin: 2px 0;
+                        padding-left: 5px;
+                        border-left: 5px solid #f4ae36;
+                    }
+                </style>
+<script type="text/javascript">
+<!--
+                        
+                            function display(calque)
+                            { 
+                                if(document.getElementById(calque).className == "operations hidden")
+                                    document.getElementById(calque).className = "operations";
+                                else 
+                                    document.getElementById(calque).style.display = document.getElementById(calque).style.display == "none" ? "block" : "none";
+                            }
+                            
+                            function showAll()
+                            {
+                                var x = document.getElementsByTagName('div');
+                                for (i = 0 ; i < x.length ; i++)
+                                {
+                                    if(x[i].className == "operations hidden")
+                                       x[i].className = "operations";
+                                       
+                                    else if(x[i].className == "operation hidden")
+                                       x[i].className = "operation"; 
+                                    
+                                    if(x[i].className == "operations" || x[i].className == "operations" )
+                                        x[i].style.display = "block"; 
+                                }
+                                showErrorsOrWarnings('error');
+                                showErrorsOrWarnings('warning');
+                            }
+                            
+                            function hideAll()
+                            {
+                                var x = document.getElementsByTagName('div');
+                                for (i = 0 ; i < x.length ; i++)
+                                    if(x[i].className == "operations" || x[i].className == "operations")
+                                        x[i].style.display = "none"; 
+                                hideErrorsOrWarnings('error');
+                                hideErrorsOrWarnings('warning');
+                            }
+                            
+                            function showErrorsOrWarnings(errorsOrWarnings)
+                            {
+                                var x = document.getElementsByTagName('li');
+                                var y = '';
+                                for (i = 0 ; i < x.length ; i++)
+                                    if(x[i].className == errorsOrWarnings)
+                                    {
+                                        y = x[i].parentNode;
+                                        while(y.className == "errorsAndWarnings" || y.className == "operation" || y.className == "operations")
+                                        {
+                                            y.style.display = "block";
+                                            y = y.parentNode;
+                                        }
+                                    }
+                            }
+                            
+                            function hideErrorsOrWarnings(errorsOrWarnings)
+                            {
+                                var x = document.getElementsByTagName('li');
+                                for (i = 0 ; i < x.length ; i++)
+                                {
+                                    if(x[i].className == errorsOrWarnings)
+                                    {
+                                        x[i].parentNode.style.display = "none"; 
+                                    }
+                                }
+                            }
+                         
+                    --></script>
+</head>
+<body>
+<div id="header">
+<h1>languages</h1>
+<table id="summary">
+<tr>
+<td>Operation:</td><td>Verify</td>
+</tr>
+<tr>
+<td>Structure file:</td><td>zebulon:Users:vlaluque:Desktop:languages.4dbase:languages.4DB</td>
+</tr>
+<tr>
+<td>Data file:</td><td>zebulon:Users:vlaluque:Desktop:languages.4dbase:languages.4DD</td>
+</tr>
+<tr>
+<td>OS: </td><td>Mac OS X (10.9)</td>
+</tr>
+<tr>
+<td>Started on: </td><td>2013-10-25T15:06:50+02:00</td>
+</tr>
+<tr>
+<td>Ended on: </td><td>2013-10-25T15:06:50+02:00</td>
+</tr>
+</table>
+<ul id="menu">
+<li>
+<a href="#" onclick="showAll();">Show all</a> / <a href="#" onclick="hideAll();">Hide all</a>
+</li>
+<li>
+<a href="#" onclick="showErrorsOrWarnings('error');">Show errors</a> / <a href="#" onclick="hideErrorsOrWarnings('error');">Hide errors</a>
+</li>
+<li>
+<a href="#" onclick="showErrorsOrWarnings('warning');">Show warnings</a> / <a href="#" onclick="hideErrorsOrWarnings('warning');">Hide warnings</a>
+</li>
+</ul>
+</div>
+<div id="contents">
+<!--Verify-->
+<h2>1. Opening the database in maintenance mode [<b class="ok">OK</b>]</h2>
+<!--Verify-->
+<h2>2. Verify the internal database of the structure [<a href="#N0x48f9e00N0x4940890" onclick="display('N0x48f9e00N0x4940890');" class="ok">OK</a>]</h2>
+<div id="N0x48f9e00N0x4940890" class="operations hidden">
+<div class="operation">
+<h3>Check bit tables for segment 1 [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>Check bit tables for segment 65 [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>Checking auto sequence number definitions [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>Checking chained list of deleted auto sequence number def initions [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>Checking data table definitions [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>Checking chained list of deleted table definitions [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>Checking relation definitions [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>Checking chained list of deleted relation definitions [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>Checking index definitions [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>Checking chained list of deleted index definitions [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>Checking backup index definitions [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>Checking chained list of deleted backup index definitions [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>Load data tables [<a href="#N0x48f9e00N0x4940b00" onclick="display('N0x48f9e00N0x4940b00');" class="ok">OK</a>]</h3>
+<div id="N0x48f9e00N0x4940b00" class="operations hidden">
+<div class="operation">
+<h3>Checking data table headers [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>Checking chained list of deleted data table headers [<b class="ok">OK</b>]</h3>
+</div>
+</div>
+</div>
+<div class="operation">
+<h3>Checking BLOBs in table Resources [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>Checking list of deleted BLOBs in table Resources [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>Checking records in table Resources [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>Checking list of deleted records in table Resources [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>Checking BLOBs in table [Table#0] [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>Checking list of deleted BLOBs in table [Table#0] [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>Checking records in table [Table#0] [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>Checking list of deleted records in table [Table#0] [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>Checking index B-tree Index 0 on kind (TYPE only) [<a href="#N0x48f9e00N0x4940d10" onclick="display('N0x48f9e00N0x4940d10');" class="ok">OK</a>]</h3>
+<div id="N0x48f9e00N0x4940d10" class="operations hidden">
+<div class="operation">
+<h3>Checking index page addresses on B-tree Index 0 on kind (TYPE only) [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>Checking index pages on B-tree Index 0 on kind (TYPE only) [<b class="ok">OK</b>]</h3>
+</div>
+</div>
+</div>
+<div class="operation">
+<h3>Checking index B-tree Index 1 on stamp (stamp) [<a href="#N0x48f9e00N0x4940da0" onclick="display('N0x48f9e00N0x4940da0');" class="ok">OK</a>]</h3>
+<div id="N0x48f9e00N0x4940da0" class="operations hidden">
+<div class="operation">
+<h3>Checking index page addresses on B-tree Index 1 on stamp (stamp) [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>Checking index pages on B-tree Index 1 on stamp (stamp) [<b class="ok">OK</b>]</h3>
+</div>
+</div>
+</div>
+<div class="operation">
+<h3>Checking index B-tree Index 2 on kind , id (TYPE and ID) [<a href="#N0x48f9e00N0x4940e30" onclick="display('N0x48f9e00N0x4940e30');" class="ok">OK</a>]</h3>
+<div id="N0x48f9e00N0x4940e30" class="operations hidden">
+<div class="operation">
+<h3>Checking index page addresses on B-tree Index 2 on kind , id (TYPE and ID) [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>Checking index pages on B-tree Index 2 on kind , id (TYPE and ID) [<b class="ok">OK</b>]</h3>
+</div>
+</div>
+</div>
+</div>
+<!--Verify-->
+<h2>3. Check Database Methods [<b class="ok">OK</b>]</h2>
+<!--Verify-->
+<h2>4. Check Trigger Methods [<a href="#N0x48f9e00N0x4940ef0" onclick="display('N0x48f9e00N0x4940ef0');" class="ok">OK</a>]</h2>
+<div id="N0x48f9e00N0x4940ef0" class="operations hidden">
+<div class="operation">
+<h3>loc_t_Fields [<b class="ok">OK</b>]</h3>
+</div>
+</div>
+<!--Verify-->
+<h2>5. Check Project Methods [<a class="warning" href="#N0x48f9e00N0x4940f50" onclick="display('N0x48f9e00N0x4940f50');">3 warnings</a>] </h2>
+<div id="N0x48f9e00N0x4940f50" class="operations">
+<div class="operation">
+<h3>_test [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>getRecordHash [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>HashBlob_BKDR [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>getText [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>getReal [<a class="warning" href="#N0x48f9e00N0x4941040" onclick="display('N0x48f9e00N0x4941040');">1 warning</a>] </h3>
+<div id="N0x48f9e00N0x4941040" class="operations">
+<!--Error list-->
+<ul class="errorsAndWarnings">
+<li class="warning">[l.3] : invalid table number</li>
+</ul>
+</div>
+</div>
+<div class="operation">
+<h3>getBool [<a class="warning" href="#N0x48f9e00N0x49410a0" onclick="display('N0x48f9e00N0x49410a0');">1 warning</a>] </h3>
+<div id="N0x48f9e00N0x49410a0" class="operations">
+<!--Error list-->
+<ul class="errorsAndWarnings">
+<li class="warning">[l.3] : invalid table number</li>
+</ul>
+</div>
+</div>
+<div class="operation">
+<h3>getDate [<a class="warning" href="#N0x48f9e00N0x4941100" onclick="display('N0x48f9e00N0x4941100');">1 warning</a>] </h3>
+<div id="N0x48f9e00N0x4941100" class="operations">
+<!--Error list-->
+<ul class="errorsAndWarnings">
+<li class="warning">[l.3] : invalid table number</li>
+</ul>
+</div>
+</div>
+<div class="operation">
+<h3>000UnicodeCheck [<b class="ok">OK</b>]</h3>
+</div>
+</div>
+<!--Verify-->
+<h2>6. Check Project Forms [<b class="ok">OK</b>]</h2>
+<!--Verify-->
+<h2>7. Check Table Forms [<a href="#N0x48f9e00N0x49411c0" onclick="display('N0x48f9e00N0x49411c0');" class="ok">OK</a>]</h2>
+<div id="N0x48f9e00N0x49411c0" class="operations hidden">
+<div class="operation">
+<h3>[LanguageCodes].Input [<a href="#N0x48f9e00N0x49411f0" onclick="display('N0x48f9e00N0x49411f0');" class="ok">OK</a>]</h3>
+<div id="N0x48f9e00N0x49411f0" class="operations hidden">
+<div class="operation">
+<h3>[LanguageCodes].Input.Page1.vRecNum (vRecNum) [<b class="ok">OK</b>]</h3>
+</div>
+</div>
+</div>
+<div class="operation">
+<h3>[LanguageCodes].Output [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>[CountryCodes].Input [<a href="#N0x48f9e00N0x4941280" onclick="display('N0x48f9e00N0x4941280');" class="ok">OK</a>]</h3>
+<div id="N0x48f9e00N0x4941280" class="operations hidden">
+<div class="operation">
+<h3>[CountryCodes].Input.Page1.vRecNum (vRecNum) [<b class="ok">OK</b>]</h3>
+</div>
+</div>
+</div>
+<div class="operation">
+<h3>[CountryCodes].Output [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>[LanguageIndex].Input [<a href="#N0x48f9e00N0x4941310" onclick="display('N0x48f9e00N0x4941310');" class="ok">OK</a>]</h3>
+<div id="N0x48f9e00N0x4941310" class="operations hidden">
+<div class="operation">
+<h3>[LanguageIndex].Input.Page1.vRecNum (vRecNum) [<b class="ok">OK</b>]</h3>
+</div>
+</div>
+</div>
+<div class="operation">
+<h3>[LanguageIndex].Output [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>[Names].Input [<a href="#N0x48f9e00N0x49413a0" onclick="display('N0x48f9e00N0x49413a0');" class="ok">OK</a>]</h3>
+<div id="N0x48f9e00N0x49413a0" class="operations hidden">
+<div class="operation">
+<h3>[Names].Input.Page0.vRecNum (vRecNum) [<b class="ok">OK</b>]</h3>
+</div>
+</div>
+</div>
+<div class="operation">
+<h3>[Names].Output [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>[Reference].Input [<a href="#N0x48f9e00N0x4941430" onclick="display('N0x48f9e00N0x4941430');" class="ok">OK</a>]</h3>
+<div id="N0x48f9e00N0x4941430" class="operations hidden">
+<div class="operation">
+<h3>[Reference].Input.Page1.vRecNum (vRecNum) [<b class="ok">OK</b>]</h3>
+</div>
+</div>
+</div>
+<div class="operation">
+<h3>[Reference].Output [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>[SeaMounts].Input [<a href="#N0x48f9e00N0x49414c0" onclick="display('N0x48f9e00N0x49414c0');" class="ok">OK</a>]</h3>
+<div id="N0x48f9e00N0x49414c0" class="operations hidden">
+<div class="operation">
+<h3>[SeaMounts].Input.Page1.vRecNum (vRecNum) [<b class="ok">OK</b>]</h3>
+</div>
+</div>
+</div>
+<div class="operation">
+<h3>[SeaMounts].Output [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>[DetailSeaMounts].Input [<a href="#N0x48f9e00N0x4941550" onclick="display('N0x48f9e00N0x4941550');" class="ok">OK</a>]</h3>
+<div id="N0x48f9e00N0x4941550" class="operations hidden">
+<div class="operation">
+<h3>[DetailSeaMounts].Input.Page0.vRecNum (vRecNum) [<b class="ok">OK</b>]</h3>
+</div>
+</div>
+</div>
+<div class="operation">
+<h3>[DetailSeaMounts].Output [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>[LINANEEN].Input [<a href="#N0x48f9e00N0x49415e0" onclick="display('N0x48f9e00N0x49415e0');" class="ok">OK</a>]</h3>
+<div id="N0x48f9e00N0x49415e0" class="operations hidden">
+<div class="operation">
+<h3>[LINANEEN].Input.Page1.vRecNum (vRecNum) [<b class="ok">OK</b>]</h3>
+</div>
+</div>
+</div>
+<div class="operation">
+<h3>[LINANEEN].Output [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>[loc_t_Fields].Input [<a href="#N0x48f9e00N0x4941670" onclick="display('N0x48f9e00N0x4941670');" class="ok">OK</a>]</h3>
+<div id="N0x48f9e00N0x4941670" class="operations hidden">
+<div class="operation">
+<h3>[loc_t_Fields].Input [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>[loc_t_Fields].Input.Page1.vRecNum (vRecNum) [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>[loc_t_Fields].Input.Page1.Variable1 (vLength) [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>[loc_t_Fields].Input.Page1.Variable2 (vBlobLength) [<b class="ok">OK</b>]</h3>
+</div>
+</div>
+</div>
+<div class="operation">
+<h3>[loc_t_Fields].Output [<b class="ok">OK</b>]</h3>
+</div>
+</div>
+<!--Verify-->
+<h2>8. Check User and Group information [<b class="ok">OK</b>]</h2>
+<!--Verify-->
+<h2>9. Check help tips [<b class="ok">OK</b>]</h2>
+<!--Verify-->
+<h2>10. Check the folders of the Explorer [<a href="#N0x48f9e00N0x49417f0" onclick="display('N0x48f9e00N0x49417f0');" class="ok">OK</a>]</h2>
+<div id="N0x48f9e00N0x49417f0" class="operations hidden">
+<div class="operation">
+<h3>Trash [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>Default Folder [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>Default Tables [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>Default Forms [<b class="ok">OK</b>]</h3>
+</div>
+<div class="operation">
+<h3>Default Project Methods [<b class="ok">OK</b>]</h3>
+</div>
+</div>
+<!--Verify-->
+<h2>11. Check menu bars and menus [<b class="ok">OK</b>]</h2>
+<!--Verify-->
+<h2>12. Check Lists [<b class="ok">OK</b>]</h2>
+<!--Verify-->
+<h2>13. Check Orphan Methods [<b class="ok">OK</b>]</h2>
+</div>
+</body>
+</html>

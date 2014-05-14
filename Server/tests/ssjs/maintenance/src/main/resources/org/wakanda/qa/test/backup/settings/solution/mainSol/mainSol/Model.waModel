@@ -1,0 +1,142 @@
+﻿{
+	"toJSON": true,
+	"extraProperties": {
+		"version": "2",
+		"classes": {
+			"DataClass1": {
+				"panelColor": "#8DB3E2",
+				"panel": {
+					"isOpen": "true",
+					"position": {
+						"X": 127,
+						"Y": 80
+					},
+					"pathVisible": true
+				}
+			},
+			"Company": {
+				"panelColor": "rgb(255, 78, 89)",
+				"panel": {
+					"isOpen": "true",
+					"position": {
+						"X": 648,
+						"Y": 218
+					},
+					"pathVisible": true
+				}
+			},
+			"Employee": {
+				"panelColor": "#CCC1D9",
+				"panel": {
+					"isOpen": "true",
+					"position": {
+						"X": 203,
+						"Y": 318
+					},
+					"pathVisible": true
+				}
+			}
+		},
+		"model": {
+			"scriptMode": "manual",
+			"workspaceLeft": 0,
+			"workspaceTop": 0
+		}
+	},
+	"dataClasses": [
+		{
+			"collectionName": "DataClass1Collection",
+			"className": "DataClass1",
+			"attributes": [
+				{
+					"name": "ID",
+					"kind": "storage",
+					"type": "long",
+					"autosequence": "true",
+					"unique": "true",
+					"primKey": "true"
+				},
+				{
+					"name": "cstring",
+					"scope": "public",
+					"type": "string",
+					"kind": "storage"
+				},
+				{
+					"name": "cbool",
+					"scope": "public",
+					"type": "bool",
+					"kind": "storage"
+				},
+				{
+					"name": "cdate",
+					"scope": "public",
+					"type": "date",
+					"kind": "storage"
+				}
+			]
+		},
+		{
+			"collectionName": "CompanyCollection",
+			"className": "Company",
+			"attributes": [
+				{
+					"name": "ID",
+					"kind": "storage",
+					"type": "long",
+					"autosequence": "true",
+					"unique": "true",
+					"primKey": "true"
+				},
+				{
+					"name": "name",
+					"scope": "public",
+					"type": "string",
+					"kind": "storage"
+				},
+				{
+					"name": "employeeCollection",
+					"scope": "public",
+					"reversePath": true,
+					"path": "employer",
+					"type": "EmployeeCollection",
+					"kind": "relatedEntities"
+				}
+			]
+		},
+		{
+			"collectionName": "EmployeeCollection",
+			"className": "Employee",
+			"attributes": [
+				{
+					"name": "ID",
+					"kind": "storage",
+					"type": "long",
+					"autosequence": "true",
+					"unique": "true",
+					"primKey": "true"
+				},
+				{
+					"name": "name",
+					"scope": "public",
+					"type": "string",
+					"kind": "storage"
+				},
+				{
+					"name": "salary",
+					"scope": "public",
+					"type": "number",
+					"kind": "storage"
+				},
+				{
+					"name": "employer",
+					"scope": "public",
+					"path": "Company",
+					"type": "Company",
+					"kind": "relatedEntity"
+				}
+			]
+		}
+	],
+	"type": []
+}

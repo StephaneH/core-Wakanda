@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<verifylog operation="Verify" name="languages" structure="Hell&apos;skitchen:WAK:languages.4dbase:languages.4DB" data="Hell&apos;skitchen:WAK:languages.4dbase:languages.4DD" os="Mac OS X (10.9)">
+<start_timer time="2013-10-25T15:59:30+02:00"/>
+<step title="Opening the database in maintenance mode">
+</step>
+<step title="Verify the internal database of the structure">
+	<step title="Check bit tables for segment 1">
+	</step>
+	<step title="Check bit tables for segment 65">
+	</step>
+	<step title="Checking auto sequence number definitions">
+	</step>
+	<step title="Checking chained list of deleted auto sequence number def initions">
+	</step>
+	<step title="Checking data table definitions">
+	</step>
+	<step title="Checking chained list of deleted table definitions">
+	</step>
+	<step title="Checking relation definitions">
+	</step>
+	<step title="Checking chained list of deleted relation definitions">
+	</step>
+	<step title="Checking index definitions">
+	</step>
+	<step title="Checking chained list of deleted index definitions">
+	</step>
+	<step title="Checking backup index definitions">
+	</step>
+	<step title="Checking chained list of deleted backup index definitions">
+	</step>
+	<step title="Load data tables">
+		<step title="Checking data table headers">
+		</step>
+		<step title="Checking chained list of deleted data table headers">
+		</step>
+	</step>
+	<step title="Checking BLOBs in table Resources">
+	</step>
+	<step title="Checking list of deleted BLOBs in table Resources">
+	</step>
+	<step title="Checking records in table Resources">
+	</step>
+	<step title="Checking list of deleted records in table Resources">
+	</step>
+	<step title="Checking BLOBs in table [Table#0]">
+	</step>
+	<step title="Checking list of deleted BLOBs in table [Table#0]">
+	</step>
+	<step title="Checking records in table [Table#0]">
+	</step>
+	<step title="Checking list of deleted records in table [Table#0]">
+	</step>
+	<step title="Checking index B-tree Index 0 on kind (TYPE only)">
+		<step title="Checking index page addresses on B-tree Index 0 on kind (TYPE only)">
+		</step>
+		<step title="Checking index pages on B-tree Index 0 on kind (TYPE only)">
+		</step>
+	</step>
+	<step title="Checking index B-tree Index 1 on stamp (stamp)">
+		<step title="Checking index page addresses on B-tree Index 1 on stamp (stamp)">
+		</step>
+		<step title="Checking index pages on B-tree Index 1 on stamp (stamp)">
+		</step>
+	</step>
+	<step title="Checking index B-tree Index 2 on kind , id (TYPE and ID)">
+		<step title="Checking index page addresses on B-tree Index 2 on kind , id (TYPE and ID)">
+		</step>
+		<step title="Checking index pages on B-tree Index 2 on kind , id (TYPE and ID)">
+		</step>
+	</step>
+</step>
+<step title="Check Database Methods">
+</step>
+<step title="Check Trigger Methods">
+	<step title="WikiStuff">
+		<info>WikiStuff : 9 lines</info>
+	</step>
+</step>
+<step title="Check Project Methods">
+	<step title="_test">
+		<info>_test : 148 lines</info>
+	</step>
+	<step title="getRecordHash">
+		<info>getRecordHash : 24 lines</info>
+	</step>
+	<step title="HashBlob_BKDR">
+		<info>HashBlob_BKDR : 47 lines</info>
+	</step>
+	<step title="getText">
+		<info>getText : 6 lines</info>
+	</step>
+	<step title="getReal">
+		<info>getReal : 3 lines</info>
+	</step>
+	<step title="getBool">
+		<info>getBool : 3 lines</info>
+	</step>
+	<step title="getDate">
+		<info>getDate : 5 lines</info>
+	</step>
+	<step title="000UnicodeCheck">
+		<info>000UnicodeCheck : 24 lines</info>
+	</step>
+	<step title="_test2">
+		<info>_test2 : 7 lines</info>
+	</step>
+	<info>9 project methods</info>
+</step>
+<step title="Check Project Forms">
+	<info>0 project forms</info>
+</step>
+<step title="Check Table Forms">
+	<step title="[LanguageCodes].Input">
+		<step title="[LanguageCodes].Input.Page1.vRecNum (vRecNum)">
+			<info>[LanguageCodes].Input.Page1.vRecNum (vRecNum) : 5 lines</info>
+		</step>
+	</step>
+	<step title="[LanguageCodes].Output">
+	</step>
+	<step title="[CountryCodes].Input">
+		<step title="[CountryCodes].Input.Page1.vRecNum (vRecNum)">
+			<info>[CountryCodes].Input.Page1.vRecNum (vRecNum) : 5 lines</info>
+		</step>
+	</step>
+	<step title="[CountryCodes].Output">
+	</step>
+	<step title="[LanguageIndex].Input">
+		<step title="[LanguageIndex].Input.Page1.vRecNum (vRecNum)">
+			<info>[LanguageIndex].Input.Page1.vRecNum (vRecNum) : 5 lines</info>
+		</step>
+	</step>
+	<step title="[LanguageIndex].Output">
+	</step>
+	<step title="[Names].Input">
+		<step title="[Names].Input.Page0.vRecNum (vRecNum)">
+			<info>[Names].Input.Page0.vRecNum (vRecNum) : 5 lines</info>
+		</step>
+	</step>
+	<step title="[Names].Output">
+	</step>
+	<step title="[Reference].Input">
+		<step title="[Reference].Input.Page1.vRecNum (vRecNum)">
+			<info>[Reference].Input.Page1.vRecNum (vRecNum) : 5 lines</info>
+		</step>
+	</step>
+	<step title="[Reference].Output">
+	</step>
+	<step title="[SeaMounts].Input">
+		<step title="[SeaMounts].Input.Page1.vRecNum (vRecNum)">
+			<info>[SeaMounts].Input.Page1.vRecNum (vRecNum) : 5 lines</info>
+		</step>
+	</step>
+	<step title="[SeaMounts].Output">
+	</step>
+	<step title="[DetailSeaMounts].Input">
+		<step title="[DetailSeaMounts].Input.Page0.vRecNum (vRecNum)">
+			<info>[DetailSeaMounts].Input.Page0.vRecNum (vRecNum) : 5 lines</info>
+		</step>
+	</step>
+	<step title="[DetailSeaMounts].Output">
+	</step>
+	<step title="[LINANEEN].Input">
+		<step title="[LINANEEN].Input.Page1.vRecNum (vRecNum)">
+			<info>[LINANEEN].Input.Page1.vRecNum (vRecNum) : 5 lines</info>
+		</step>
+	</step>
+	<step title="[LINANEEN].Output">
+	</step>
+	<step title="[WikiStuff].Input">
+		<step title="[WikiStuff].Input">
+			<info>[WikiStuff].Input : 0 lines</info>
+		</step>
+		<step title="[WikiStuff].Input.Page1.vRecNum (vRecNum)">
+			<info>[WikiStuff].Input.Page1.vRecNum (vRecNum) : 5 lines</info>
+		</step>
+		<step title="[WikiStuff].Input.Page1.Variable1 (vLength)">
+			<info>[WikiStuff].Input.Page1.Variable1 (vLength) : 3 lines</info>
+		</step>
+		<step title="[WikiStuff].Input.Page1.Variable2 (vBlobLength)">
+			<info>[WikiStuff].Input.Page1.Variable2 (vBlobLength) : 3 lines</info>
+		</step>
+	</step>
+	<step title="[WikiStuff].Output">
+	</step>
+	<info>18 table forms</info>
+</step>
+<step title="Check User and Group information">
+</step>
+<step title="Check help tips">
+</step>
+<step title="Check the folders of the Explorer">
+	<step title="Trash">
+	</step>
+	<step title="Default Folder">
+	</step>
+	<step title="Default Tables">
+	</step>
+	<step title="Default Forms">
+	</step>
+	<step title="Default Project Methods">
+	</step>
+</step>
+<step title="Check menu bars and menus">
+</step>
+<step title="Check Lists">
+</step>
+<step title="Check Orphan Methods">
+</step>
+<stop_timer time="2013-10-25T15:59:30+02:00" success="true" user_canceled="false"/>
+</verifylog>

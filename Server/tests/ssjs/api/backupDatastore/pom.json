@@ -1,0 +1,5 @@
+{
+    "description": "Tests of the backupDatastore API",
+    "kind": "ssjs",
+	"developper": "olivier.randriamanana@4d.com"
+}
