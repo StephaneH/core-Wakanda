@@ -1,1 +1,0 @@
-﻿addHttpRequestHandler(      "/ReadFile",      "bootStraps/handler.js",      "ReadFile" );

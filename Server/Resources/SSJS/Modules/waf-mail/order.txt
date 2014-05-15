@@ -1,6 +1,0 @@
-mail.js
-POP3.js
-pop3Client.js
-SMTP.js
-smtpClient.js
-threeDigitReply.js

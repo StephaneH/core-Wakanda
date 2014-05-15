@@ -1,5 +1,0 @@
-{
-    "desc": "Tests of the W3C FileSystem API",
-    "kind": "ssjs",
-    "oldJenkinsName": "TestServerW3CFileSystem"
-}

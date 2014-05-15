@@ -1,5 +1,0 @@
-{
-    "desc": "Basic compatibility tests with previous branches",
-    "kind": "ssjs",
-    "oldJenkinsName": "TestServerCompatibility"    
-}

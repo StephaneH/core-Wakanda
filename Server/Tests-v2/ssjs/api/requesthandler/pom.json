@@ -1,5 +1,0 @@
-{
-    "desc": "Tests of the RequestHandler API",
-    "kind": "ssjs",
-    "oldJenkinsName": "TestServerRemoteRemoteTest"
-}

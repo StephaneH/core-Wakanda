@@ -1,5 +1,0 @@
-{
-    "desc": "Tests of the SystemWorker API",
-    "kind": "ssjs",
-    "oldJenkinsName": "TestServerSystemWorkerTest"
-}

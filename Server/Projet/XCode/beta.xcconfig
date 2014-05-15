@@ -1,2 +1,0 @@
-#include "base.xcconfig"
-OTHER_LDFLAGS = -weak_framework icuBeta

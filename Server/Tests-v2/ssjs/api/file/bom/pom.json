@@ -1,5 +1,0 @@
-{
-    "desc": "Tests of the handling of BOM",
-    "kind": "ssjs",
-    "oldJenkinsName": "TestServerBOM"
-}

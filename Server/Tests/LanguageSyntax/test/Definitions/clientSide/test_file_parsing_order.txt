@@ -1,4 +1,0 @@
-gotodef_client_01.js
-gotodef_client_02.js
-gotodef_client_03.js
-gotodef_client_04.js

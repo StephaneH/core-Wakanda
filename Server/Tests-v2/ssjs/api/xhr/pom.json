@@ -1,5 +1,0 @@
-{
-    "desc": "Tests of the XHR API",
-    "kind": "ssjs",
-    "oldJenkinsName": "TestServerXHR"
-}

@@ -1,5 +1,0 @@
-{
-    "desc": "Tests of the DataStore API",
-    "kind": "ssjs",
-    "oldJenkinsName": ["TestServerDatastoreBackupWithNoJournal","TestServerMySQLBridgeDataClass","TestServerMySQLBridgeQuery", "TestServerDatastoreDataClass", "TestServerDatastoreDataClassPart2", "TestServerDatastoreQuery"]
-}

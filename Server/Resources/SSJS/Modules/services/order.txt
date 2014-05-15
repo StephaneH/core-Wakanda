@@ -1,8 +1,0 @@
-dataStore.js
-platform.js
-print.js
-rpc.js
-rpcServicePureJSImpl.js
-unitTest.js
-upload.js
-webApp.js

@@ -1,8 +1,10 @@
 Welcome to Wakanda!
 ===================
+
 An end-to-end JavaScript Development platform for Web & mobile applications.
 
-Please read the [Wiki page for full details](http://github.com/Wakanda/core-Wakanda/wiki) or visit [wakanda.org](http://www.wakanda.org/) for general product information.
+Please read the [Wiki page for full details](http://github.com/Wakanda/core-Wakanda/wiki)
+or visit [wakanda.org](http://www.wakanda.org/) for general product information.
 
 
 Wakanda is made of several parts, each having its own repository.

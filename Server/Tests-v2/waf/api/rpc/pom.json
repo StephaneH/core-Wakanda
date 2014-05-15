@@ -1,5 +1,0 @@
-{
-    "desc": "Tests of the RPC API",
-    "kind": "csjs",
-    "oldJenkinsName": "TestClientRPCRPCTest"
-}

@@ -1,9 +1,0 @@
-ArrayDefinitions.js
-BooleanDefinitions.js
-ClassDefinitions.js
-FunctionDefinitions.js
-NumberDefinitions.js
-ObjectDefinitions.js
-RegExpDefinitions.js
-StringDefinitions.js
-VariablesDefinitions.js
