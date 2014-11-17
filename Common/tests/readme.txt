@@ -1,0 +1,1 @@
+The "common" folder contains all the tests related to both Wakanda Studio and Wakanda Server (e.g. the installers). 

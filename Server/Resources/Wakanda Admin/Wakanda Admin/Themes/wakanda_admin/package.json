@@ -1,0 +1,14 @@
+{
+    "name": "wakanda_admin",
+    "author": "Wakanda",
+    "copyright": "GNU GPL v3, AGPL v3, Commercial",
+    "studio": {
+        "label": "Wakanda Admin",
+        "mobile": "false"
+    },
+    "version": "1.0.0",
+    "loadDependencies": [
+        {"id": "wakanda_admin/wakanda_admin.css", "path": "THEMES_CUSTOM"}
+    ],
+    "type":"custom"
+}

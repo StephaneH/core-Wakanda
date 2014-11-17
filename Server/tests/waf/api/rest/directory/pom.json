@@ -1,0 +1,9 @@
+{
+    "kind": "ssjs",
+    "oldJenkinsName": "Test",
+    "developer": "lr@4d.com",
+    "tester": "soufiane.tigrioui@4d.com",
+    "visibility": "public",
+    "description": "Tests of users authentication REST API",
+    "stable": true
+}

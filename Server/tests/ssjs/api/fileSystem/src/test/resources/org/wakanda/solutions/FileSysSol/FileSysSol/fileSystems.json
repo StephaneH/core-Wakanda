@@ -1,0 +1,22 @@
+[
+    {
+           "name":"PWINVAR1",
+           "path":"c:\\Utilisateurs\\" 
+    },
+    {
+           "name":"PMACVAR1",
+           "path":"\\\\Users\\" 
+    },
+    {
+           "name":"PWINVAR2",
+           "parent":"PWINVAR1",
+           "path":"myOtherDataforWin",
+           "writable":true
+    },
+    {
+           "name":"PMACVAR2",
+           "parent":"PMACVAR1",
+           "path":"myOtherDataforMac",
+           "writable":true
+    }
+]

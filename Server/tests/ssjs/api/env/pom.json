@@ -1,0 +1,10 @@
+{
+    "description": "Tests of the process.env",
+    "kind": "ssjs",
+    "oldJenkinsName": "processEnvTests",
+    "tester": "saad.yousfi@4d.com",
+    "visibility": "public",
+    "developer": "abdessamad.elkasimi@4d.com",
+    "enterpriseOnly": false,
+    "stable": true
+}

@@ -1,0 +1,11 @@
+{
+    "description": "Tests of the waf-ldap Module",
+    "kind": "ssjs",
+    "oldJenkinsName": "LdapConnector",
+    "tester": "saad.yousfi@4d.com",
+    "visibility": "public",
+    "developer": "ayoub.serti@4d.com",
+    "enterpriseOnly": true,
+    "gonogo": false,
+    "stable": true
+}

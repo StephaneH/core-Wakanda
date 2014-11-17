@@ -1,0 +1,79 @@
+﻿{
+	"toJSON": true,
+	"extraProperties": {
+		"version": "2",
+		"classes": {
+			"DataClass1": {
+				"panelColor": "#BFBFBF",
+				"panel": {
+					"isOpen": "true",
+					"pathVisible": true,
+					"position": {
+						"X": 25,
+						"Y": 20
+					}
+				}
+			},
+			"DataClass2": {
+				"panelColor": "#7F7F7F",
+				"panel": {
+					"isOpen": "true",
+					"position": {
+						"X": 275,
+						"Y": 20
+					}
+				}
+			}
+		},
+		"model": {
+			"scriptMode": "manual",
+			"workspaceLeft": 0,
+			"workspaceTop": 0
+		}
+	},
+	"dataClasses": [
+		{
+			"name": "DataClass1",
+			"className": "DataClass1",
+			"collectionName": "DataClass1Collection",
+			"scope": "public",
+			"attributes": [
+				{
+					"name": "ID",
+					"kind": "storage",
+					"scope": "public",
+					"unique": true,
+					"autosequence": true,
+					"type": "long",
+					"primKey": true
+				},
+				{
+					"name": "name",
+					"kind": "storage",
+					"scope": "public",
+					"type": "string"
+				},
+				{
+					"name": "number",
+					"kind": "storage",
+					"scope": "public",
+					"type": "number"
+				}
+			]
+		},
+		{
+			"collectionName": "DataClass2Collection",
+			"className": "DataClass2",
+			"attributes": [
+				{
+					"name": "ID",
+					"kind": "storage",
+					"type": "long",
+					"autosequence": "true",
+					"unique": "true",
+					"primKey": "true"
+				}
+			]
+		}
+	]
+}

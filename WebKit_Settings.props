@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets">
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros">
+    <WEBKIT_OUTPUT>$(DepotRoot)\webkit\534.53\build\dll\$(PlatformName)\</WEBKIT_OUTPUT>
+    <WEBKIT_OUTPUT_LIB>$(DepotRoot)\webkit\534.53\build\$(Configuration)\$(VisualStudioVersion)\lib\$(Platform)\</WEBKIT_OUTPUT_LIB>
+  </PropertyGroup>
+  <PropertyGroup />
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>"$(DepotRoot)\webkit\534.53\JavaScriptCore\4D\";"$(DepotRoot)\webkit\534.53\build\include\";"$(DepotRoot)\webkit\534.53\WebCore\inspector";"$(DepotRoot)\webkit\534.53\";%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <BuildMacro Include="WEBKIT_OUTPUT">
+      <Value>$(WEBKIT_OUTPUT)</Value>
+    </BuildMacro>
+    <BuildMacro Include="WEBKIT_OUTPUT_LIB">
+      <Value>$(WEBKIT_OUTPUT_LIB)</Value>
+    </BuildMacro>
+  </ItemGroup>
+</Project>

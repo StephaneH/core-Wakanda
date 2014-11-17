@@ -1,0 +1,15 @@
+{
+    "name": "shellWorker",
+    "description": "Module using SystemWorker to facilitate shell command execution",
+    "version": "1.0",
+    "author" : "4D Wakanda Team",
+    "homepage": "http://wakanda.org",
+    "main" : "./shellWorker",
+    "licenses" : [
+        {
+            "type": "Wakanda",
+            "url": "http://www.wakanda.org/license"
+        }
+    ],
+    "keywords": ["shell","SystemWorker"]
+}

@@ -1,0 +1,22 @@
+[
+    {
+           "name":"SWINVAR1",
+           "path":"c:\\Utilisateurs\\" 
+    },
+    {
+           "name":"SMACVAR1",
+           "path":"\\\\Users\\" 
+    },
+    {
+           "name":"SWINVAR2",
+           "parent":"SWINVAR1",
+           "path":"myOtherDataforWIN",
+           "writable":true
+    },
+    {
+           "name":"SMACVAR2",
+           "parent":"SMACVAR1",
+           "path":"myOtherDataforMac",
+           "writable":true
+    }
+]

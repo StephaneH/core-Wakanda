@@ -1,0 +1,1236 @@
+/*
+* This file is part of Wakanda software, licensed by 4D under
+*  (i) the GNU General Public License version 3 (GNU GPL v3), or
+*  (ii) the Affero General Public License version 3 (AGPL v3) or
+*  (iii) a commercial license.
+* This file remains the exclusive property of 4D and/or its licensors
+* and is protected by national and international legislations.
+* In any event, Licensee's compliance with the terms and conditions
+* of the applicable license constitutes a prerequisite to any use of this file.
+* Except as otherwise expressly stated in the applicable license,
+* such license does not include any other license or rights on this file,
+* 4D's and/or its licensors' trademarks and/or other proprietary rights.
+* Consequently, no title, copyright or other proprietary rights
+* other than those specified in the applicable license is granted.
+*/
+html {
+  min-height: 100%;
+}
+.waf-theme.wakanda_admin *:focus {
+  box-shadow: none;
+  outline: none;
+}
+.waf-theme.wakanda_admin .waf-widget-header,
+.waf-theme.wakanda_admin .waf-container.waf-widget-header {
+  border-width: 0 0 1px 0;
+  border-style: solid;
+  border-color: #d2d2d2;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  background-color: #f9f9f9;
+  font-size: 16px;
+  font-weight: normal;
+}
+.waf-theme.wakanda_admin .waf-widget-body,
+.waf-theme.wakanda_admin .waf-container.waf-widget-body {
+  background-color: #f2f2f2;
+}
+.waf-theme.wakanda_admin .waf-widget-footer,
+.waf-theme.wakanda_admin .waf-container.waf-widget-footer {
+  border-width: 1px 0 0 0;
+  border-style: solid;
+  border-color: #d2d2d2;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  background-color: #f9f9f9;
+}
+.waf-theme.wakanda_admin .waf-widget .waf-dataGrid-row.waf-widget-odd,
+.waf-theme.wakanda_admin .waf-widget-odd {
+  background-color: rgba(210, 210, 210, 0.050000000000000044);
+}
+.waf-theme.wakanda_admin .waf-accordion {
+  border-width: 1px;
+  border-style: solid;
+  border-color: #d2d2d2;
+  background-color: #ffffff;
+}
+.waf-theme.wakanda_admin .waf-accordion .accordion-section {
+  border-width: 1px 0 0;
+  border-style: inherit;
+  border-color: inherit;
+  border-radius: 0;
+  box-shadow: none;
+}
+.waf-theme.wakanda_admin .waf-accordion .accordion-section:first-of-type {
+  border-top-width: 0;
+  border-top-left-radius: inherit;
+  border-top-right-radius: inherit;
+}
+.waf-theme.wakanda_admin .waf-accordion .accordion-section:last-of-type {
+  border-bottom-left-radius: inherit;
+  border-bottom-right-radius: inherit;
+}
+.waf-theme.wakanda_admin .waf-accordion .accordion-section .waf-accordion-header {
+  background-color: #f9f9f9;
+  font-size: 16px;
+  font-weight: normal;
+  border-width: 0 0 1px 0;
+  border-style: inherit;
+  border-color: inherit;
+  border-radius: 0;
+  border-top-left-radius: inherit;
+  border-top-right-radius: inherit;
+  box-shadow: none;
+}
+.waf-theme.wakanda_admin .waf-accordion .accordion-section.waf-state-collapsed .waf-accordion-header {
+  border-bottom-left-radius: inherit;
+  border-bottom-right-radius: inherit;
+  border-bottom-width: 0;
+}
+.waf-theme.wakanda_admin .waf-accordion .accordion-section .waf-accordion-content {
+  background-color: #f2f2f2;
+  border-width: 0;
+  border-style: inherit;
+  border-color: inherit;
+  border-radius: 0;
+  border-bottom-left-radius: inherit;
+  border-bottom-right-radius: inherit;
+  box-shadow: none;
+}
+.waf-theme.wakanda_admin .waf-autoForm {
+  border-width: 1px;
+  border-style: solid;
+  border-color: #d2d2d2;
+  background-color: #ffffff;
+}
+.waf-theme.wakanda_admin .waf-autoForm .waf-toolbar {
+  padding-left: 0;
+}
+.waf-theme.wakanda_admin .waf-button {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  border-width: 1px;
+  border-style: solid;
+  border-color: transparent;
+  border-radius: 3px;
+  background-color: #eaebef;
+  color: #7b7c80;
+  line-height: 1.5;
+  font-family: "Myriad Pro", sans-serif;
+  font-size: 14px;
+  padding: 0;
+}
+.waf-theme.wakanda_admin .waf-button.waf-state-hover {
+  background-color: #edeef1;
+}
+.waf-theme.wakanda_admin .waf-button.waf-state-disabled {
+  opacity: 0.4;
+}
+.waf-theme.wakanda_admin .waf-button.waf-role-success {
+  border-color: transparent;
+  background-color: #9fbf2d;
+  color: #ffffff;
+}
+.waf-theme.wakanda_admin .waf-button.waf-role-success.waf-state-hover {
+  background-color: #adc94d;
+}
+.waf-theme.wakanda_admin .waf-button.waf-role-warning {
+  border-color: transparent;
+  background-color: #f05924;
+  color: #ffffff;
+}
+.waf-theme.wakanda_admin .waf-button.waf-role-warning.waf-state-hover {
+  background-color: #f27245;
+}
+.waf-theme.wakanda_admin .waf-button.waf-role-danger {
+  border-color: transparent;
+  background-color: #ef2523;
+  color: #ffffff;
+}
+.waf-theme.wakanda_admin .waf-button.waf-role-danger.waf-state-hover {
+  background-color: #f14644;
+}
+.waf-theme.wakanda_admin .waf-button.waf-role-info {
+  border-color: transparent;
+  background-color: #808388;
+  color: #ffffff;
+}
+.waf-theme.wakanda_admin .waf-button.waf-role-info.waf-state-hover {
+  background-color: #93969a;
+}
+.waf-theme.wakanda_admin .waf-buttonImage {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  border-width: 1px;
+  border-style: solid;
+  border-color: transparent;
+  border-radius: 3px;
+  background-color: #eaebef;
+  color: #7b7c80;
+  line-height: 1.5;
+  font-family: "Myriad Pro", sans-serif;
+  font-size: 14px;
+}
+.waf-theme.wakanda_admin .waf-buttonImage.waf-state-hover {
+  background-color: #edeef1;
+}
+.waf-theme.wakanda_admin .waf-buttonImage.waf-state-disabled {
+  opacity: 0.4;
+}
+.waf-theme.wakanda_admin .waf-buttonImage.waf-role-success {
+  border-color: transparent;
+  background-color: #9fbf2d;
+  color: #ffffff;
+}
+.waf-theme.wakanda_admin .waf-buttonImage.waf-role-success.waf-state-hover {
+  background-color: #adc94d;
+}
+.waf-theme.wakanda_admin .waf-buttonImage.waf-role-warning {
+  border-color: transparent;
+  background-color: #f05924;
+  color: #ffffff;
+}
+.waf-theme.wakanda_admin .waf-buttonImage.waf-role-warning.waf-state-hover {
+  background-color: #f27245;
+}
+.waf-theme.wakanda_admin .waf-buttonImage.waf-role-danger {
+  border-color: transparent;
+  background-color: #ef2523;
+  color: #ffffff;
+}
+.waf-theme.wakanda_admin .waf-buttonImage.waf-role-danger.waf-state-hover {
+  background-color: #f14644;
+}
+.waf-theme.wakanda_admin .waf-buttonImage.waf-role-info {
+  border-color: transparent;
+  background-color: #808388;
+  color: #ffffff;
+}
+.waf-theme.wakanda_admin .waf-buttonImage.waf-role-info.waf-state-hover {
+  background-color: #93969a;
+}
+.waf-theme.wakanda_admin .waf-buttonImage.waf-role-empty {
+  background-color: transparent;
+  border-width: 0;
+}
+.waf-theme.wakanda_admin .waf-buttonImage.waf-role-licence {
+  background-color: #2c2d31;
+  color: #ffffff;
+}
+.waf-theme.wakanda_admin .waf-canvas {
+  border-width: 1px;
+  border-style: solid;
+  border-color: #d2d2d2;
+  background-color: #ffffff;
+}
+.waf-theme.wakanda_admin .waf-checkbox .waf-checkbox-box {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  left: 0%;
+  top: 0%;
+  border-width: 1px;
+  border-style: solid;
+  border-color: #d2d2d2;
+}
+.waf-theme.wakanda_admin .waf-checkbox .waf-checkbox-icon {
+  position: absolute;
+  width: 80%;
+  height: 80%;
+  left: 9.999999999999998%;
+  top: 9.999999999999998%;
+}
+.waf-theme.wakanda_admin .waf-checkbox .waf-checkbox-icon.waf-icon-svg {
+  display: none;
+}
+.waf-theme.wakanda_admin .waf-checkbox.waf-state-hover .waf-checkbox-icon.waf-icon-svg {
+  display: block;
+}
+.waf-theme.wakanda_admin .waf-checkbox.waf-state-hover .waf-checkbox-icon-symbol {
+  fill: transparent;
+}
+.waf-theme.wakanda_admin .waf-checkbox.waf-state-hover .waf-checkbox-icon-symbol-shadow {
+  fill: transparent;
+}
+.waf-theme.wakanda_admin .waf-checkbox.waf-state-active .waf-checkbox-icon.waf-icon-svg {
+  display: block;
+}
+.waf-theme.wakanda_admin .waf-checkbox.waf-state-active .waf-checkbox-icon-symbol-shadow {
+  fill: transparent;
+}
+.waf-theme.wakanda_admin .waf-checkbox.waf-state-selected .waf-checkbox-icon.waf-icon-svg {
+  display: block;
+}
+.waf-theme.wakanda_admin .waf-checkbox.waf-state-selected .waf-checkbox-icon-symbol-shadow {
+  fill: transparent;
+}
+.waf-theme.wakanda_admin .waf-checkbox.waf-state-disabled {
+  opacity: 0.4;
+}
+.waf-theme.wakanda_admin .waf-combobox {
+  border-width: 0 0 2px 0;
+  border-style: solid;
+  border-color: #d2d2d2;
+  background-color: #f9f9f9;
+  color: #737373;
+}
+.waf-theme.wakanda_admin .waf-combobox .ui-icon {
+  display: block;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  background-repeat: no-repeat;
+  background-position: 50%;
+}
+.waf-theme.wakanda_admin .waf-combobox input {
+  padding: 5px;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+.waf-theme.wakanda_admin .waf-combobox input:focus {
+  outline: none;
+}
+.waf-theme.wakanda_admin .waf-combobox button {
+  border-width: 0 0 0 1px;
+  border-style: inherit;
+  border-color: inherit !important;
+  border-top-left-radius: 0;
+  border-top-right-radius: inherit;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: inherit;
+  background-color: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+.waf-theme.wakanda_admin .waf-combobox button .ui-icon {
+  margin: 0;
+}
+.waf-theme.wakanda_admin .waf-combobox.waf-state-active button {
+  border-width: 0;
+}
+.waf-theme.wakanda_admin .waf-combobox.waf-state-disabled {
+  opacity: 0.4;
+}
+.waf-theme.wakanda_admin .waf-combobox input {
+  font-size: 12px;
+}
+.waf-theme.wakanda_admin .waf-combobox .ui-icon {
+  background-image: url('images/widget-oldComboBox.png');
+}
+.waf-theme.wakanda_admin .waf-combobox button {
+  border-left: 0;
+}
+.waf-theme.wakanda_admin .waf-combobox.waf-role-menuLeft {
+  border-color: #1e1f23;
+  background-color: #3a3b3f;
+  color: #9a9da2;
+}
+.waf-theme.wakanda_admin .waf-combobox-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-width: 0 0 2px 0;
+  border-style: solid;
+  border-color: #d2d2d2;
+  background-color: #ffffff;
+  font-size: 14px;
+  color: #737373;
+  line-height: 1.5;
+  border-color: #d2d3d4;
+  border-radius: 0;
+  background-color: #f9f9f9;
+}
+.waf-theme.wakanda_admin .waf-combobox-list .ui-menu-item {
+  border-width: 0;
+  border-style: inherit;
+  border-color: inherit;
+}
+.waf-theme.wakanda_admin .waf-combobox-list .ui-menu-item a {
+  line-height: 1.5;
+  font-family: "Myriad Pro", sans-serif;
+  font-size: 14px;
+  color: #1e1e1e;
+  padding: 3px;
+  padding-left: 6px;
+  display: block;
+  width: 100%;
+  border-width: 0;
+  border-style: inherit;
+  border-color: inherit;
+  border-radius: inherit;
+}
+.waf-theme.wakanda_admin .waf-combobox-list .ui-menu-item a.ui-state-hover {
+  margin: 0;
+}
+.waf-theme.wakanda_admin .waf-combobox-list .ui-menu-item:first-of-type,
+.waf-theme.wakanda_admin .waf-combobox-list .ui-menu-item:first-of-type a {
+  border-top-left-radius: inherit;
+  border-top-right-radius: inherit;
+}
+.waf-theme.wakanda_admin .waf-combobox-list .ui-menu-item:last-of-type,
+.waf-theme.wakanda_admin .waf-combobox-list .ui-menu-item:last-of-type a {
+  border-bottom-left-radius: inherit;
+  border-bottom-right-radius: inherit;
+}
+.waf-theme.wakanda_admin .waf-combobox-list .ui-menu-item a.ui-state-hover,
+.waf-theme.wakanda_admin .waf-combobox-list .ui-menu-item a:hover {
+  background-image: none;
+  background-color: #adadad;
+  color: #ffffff;
+}
+.waf-theme.wakanda_admin .waf-container {
+  border-width: 1px;
+  border-style: solid;
+  border-color: #d2d2d2;
+  background-color: #ffffff;
+}
+.waf-theme.wakanda_admin .waf-container.waf-role-info {
+  color: #31708f;
+  background-color: #d9edf7;
+}
+.waf-theme.wakanda_admin .waf-container.waf-role-danger {
+  /*border: 1px solid #eec5cd;
+  border-radius: 3px;*/
+  background-color: #f2d8d9;
+  color: #b63a30;
+}
+.waf-theme.wakanda_admin .waf-container.waf-role-success {
+  /*border: 1px solid #d8e9c7;
+  border-radius: 3px;*/
+  background-color: #e0efd8;
+  color: #4d7840;
+}
+.waf-theme.wakanda_admin .waf-container.waf-role-warning {
+  color: #8a6d3b;
+  background-color: #fcf8e3;
+}
+.waf-theme.wakanda_admin .waf-container > .ui-icon {
+  width: 16px;
+  height: 16px;
+}
+.waf-theme.wakanda_admin .waf-container > .ui-resizable-handle {
+  display: block;
+  font-size: 0.1px;
+  position: absolute;
+}
+.waf-theme.wakanda_admin .waf-container > .ui-icon-gripsmall-diagonal-se {
+  background: url("images/widget-container-resizable.svg") 0 0 no-repeat;
+}
+.waf-theme.wakanda_admin .waf-container > .ui-resizable-se {
+  right: 3px;
+  bottom: 2px;
+}
+.waf-theme.wakanda_admin .waf-container.waf-role-layoutHeader {
+  border-width: 0;
+  background-color: #1d1d1d;
+  color: #f7f7f7;
+}
+.waf-theme.wakanda_admin .waf-container.waf-role-layoutMenu {
+  border-width: 0;
+  background-color: #232428;
+  color: #f7f7f7;
+  box-shadow: -8px 0 14px -7px #131418 inset;
+}
+.waf-theme.wakanda_admin .waf-container.waf-role-layoutMenu-top {
+  border-width: 0;
+  background-color: #2c2d31;
+  color: #9fa0a2;
+  box-shadow: 0 0 15px 4px #131418;
+}
+.waf-theme.wakanda_admin .waf-container.waf-role-layoutMainArea {
+  border-width: 0;
+  background-color: #eef2f5;
+}
+.waf-theme.wakanda_admin .waf-container.waf-role-dashboardBox-header {
+  background-color: #f9f9f9;
+  border-width: 0 0 1px 0;
+}
+.waf-theme.wakanda_admin .waf-container.waf-role-dashboardBox-header2 {
+  background-color: #f9f9f9;
+  border-width: 0 0 1px 0;
+  box-shadow: -6px 0 #616469;
+}
+.waf-theme.wakanda_admin .waf-container.waf-role-dashboardBox-body {
+  background-color: #f2f2f2;
+  border-width: 0;
+}
+.waf-theme.wakanda_admin .waf-container.waf-role-dashboardBox-footer {
+  background-color: #f9f9f9;
+  border-width: 1px 0 0 0;
+}
+
+.waf-theme.wakanda_admin .waf-container.waf-role-empty {
+  background-color: transparent;
+  border-width: 0;
+}
+.waf-theme.wakanda_admin .waf-dataGrid {
+  border-width: 1px;
+  border-style: solid;
+  border-color: #d2d2d2;
+  background-color: #ffffff;
+}
+.waf-theme.wakanda_admin .waf-dataGrid .waf-dataGrid-header {
+  background-color: #f9f9f9;
+  font-size: 16px;
+  font-weight: normal;
+}
+.waf-theme.wakanda_admin .waf-dataGrid .waf-dataGrid-footer {
+  background-color: #f9f9f9;
+}
+.waf-theme.wakanda_admin .waf-dataGrid .waf-dataGrid-body {
+  background-color: #f2f2f2;
+}
+.waf-theme.wakanda_admin .waf-dataGrid .waf-dataGrid-row {
+  border-width: 0 0 1px 0;
+  border-style: solid;
+  border-color: #d2d2d2;
+  background-color: #f2f2f2;
+}
+.waf-theme.wakanda_admin .waf-dataGrid .waf-dataGrid-cell > input[type="text"] {
+  border-width: 1px;
+  border-style: solid;
+  border-color: #d2d2d2;
+  background-color: #ffffff;
+  color: #1e1e1e;
+  line-height: 1.5;
+  font-family: "Myriad Pro", sans-serif;
+  font-size: 14px;
+  padding-top: 0;
+  padding-bottom: 0;
+  max-width: 100%;
+  height: 100%;
+  outline: none;
+}
+.waf-theme.wakanda_admin .waf-dataGrid ul.waf-toolbar {
+  list-style: none;
+  margin-top: 0;
+  margin-bottom: 0;
+  padding-left: 0;
+}
+.waf-theme.wakanda_admin .waf-dataGrid[data-header-hide="true"] .waf-dataGrid-body {
+  border-top-left-radius: _;
+  border-top-right-radius: _;
+}
+.waf-theme.wakanda_admin .waf-dataGrid[data-footer-hide="true"] .waf-dataGrid-body {
+  border-bottom-left-radius: _;
+  border-bottom-right-radius: _;
+}
+.waf-theme.wakanda_admin .waf-dialog .waf-dialog-header,
+.waf-theme.wakanda_admin .waf-dialog .waf-dialog-body,
+.waf-theme.wakanda_admin .waf-dialog .waf-dialog-footer {
+  box-shadow: none;
+}
+.waf-theme.wakanda_admin .waf-dialog .waf-dialog-body {
+  border-width: 0;
+}
+.waf-theme.wakanda_admin .waf-dialog .waf-dialog-header .waf-dialog-header-title {
+  text-align: center;
+}
+.waf-theme.wakanda_admin .waf-fileUpload {
+  border-width: 1px;
+  border-style: solid;
+  border-color: #d2d2d2;
+  background-color: #ffffff;
+}
+.waf-theme.wakanda_admin .waf-fileUpload .waf-fileUpload-paragraph {
+  margin: 0;
+}
+.waf-theme.wakanda_admin .waf-fileUpload.waf-state-disabled {
+  opacity: 0.4;
+}
+.waf-theme.wakanda_admin .waf-frame {
+  border-width: 1px;
+  border-style: solid;
+  border-color: #d2d2d2;
+  background-color: #ffffff;
+}
+.waf-theme.wakanda_admin .waf-label.waf-state-disabled {
+  opacity: 0.4;
+}
+.waf-theme.wakanda_admin .waf-login {
+  border-width: 1px;
+  border-style: solid;
+  border-color: #d2d2d2;
+  background-color: #ffffff;
+}
+.waf-theme.wakanda_admin .waf-login-dialog {
+  padding: 0;
+  border-width: 1px;
+  border-style: solid;
+  border-color: #d2d2d2;
+  background-color: #ffffff;
+}
+.waf-theme.wakanda_admin .waf-login-dialog .waf-widget-header {
+  padding: 8px;
+}
+.waf-theme.wakanda_admin .waf-login-dialog .waf-widget-header .ui-dialog-title {
+  margin: 0;
+}
+.waf-theme.wakanda_admin .waf-login-dialog .waf-widget-body {
+  padding: 8px;
+  border-width: 0;
+  border-radius: inherit;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  line-height: 1.5;
+  font-family: "Myriad Pro", sans-serif;
+  font-size: 14px;
+  color: #1e1e1e;
+}
+.waf-theme.wakanda_admin .waf-login-dialog .waf-widget-body .waf-login-button {
+  padding: 5px 9px;
+}
+.waf-theme.wakanda_admin .waf-matrix .waf-matrix-element {
+  -webkit-transition: border 0.2s ease-in-out, -webkit-box-shadow 0.2s ease-in-out;
+  -moz-transition: border 0.2s ease-in-out, background-image 0.2s ease-in-out, -moz-box-shadow 0.2s ease-in-out;
+  -o-transition: border 0.2s ease-in-out, background-image 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+.waf-theme.wakanda_admin .waf-menuBar {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-width: 1px;
+  border-style: solid;
+  border-color: #d2d2d2;
+  background-color: #ffffff;
+}
+.waf-theme.wakanda_admin .waf-menuBar.waf-role-menuOptions {
+  border-width: 1px 0;
+  border-color: #393a3e;
+  background-color: transparent;
+  box-shadow: 0 -1px #212226;
+}
+.waf-theme.wakanda_admin .waf-menuBar.waf-role-menuOptions .waf-menuItem {
+  border-width: 0;
+  background-color: transparent;
+  box-shadow: -1px 0 #212226 inset, 1px 0 #393a3e inset;
+}
+.waf-theme.wakanda_admin .waf-menuBar.waf-role-menuOptions .waf-menuItem.waf-state-hover {
+  box-shadow: 0 2px #fab800 inset, -1px 0 #212226 inset, 1px 0 #393a3e inset;
+  background-color: #232428;
+}
+.waf-theme.wakanda_admin .waf-menuBar.waf-role-menuOptions .waf-menuItem.waf-state-active {
+  box-shadow: 0 2px #fab800 inset, -1px 0 #212226 inset, 1px 0 #393a3e inset;
+  background-color: #232428;
+}
+.waf-theme.wakanda_admin .waf-menuBar.waf-role-menuOptions .waf-menuItem.waf-state-selected {
+/*  background-color: #ffb600;
+  box-shadow: none;*/
+}
+.waf-theme.wakanda_admin .waf-menuItem {
+  border-width: 0;
+  border-style: inherit;
+  border-color: inherit;
+}
+.waf-theme.wakanda_admin .waf-menuItem.waf-menuItem-horizontal {
+  border-right-width: 1px;
+}
+.waf-theme.wakanda_admin .waf-menuItem.waf-menuItem-horizontal.waf-menuItem-first {
+  border-top-left-radius: inherit;
+  border-bottom-left-radius: inherit;
+}
+.waf-theme.wakanda_admin .waf-menuItem.waf-menuItem-horizontal.waf-menuItem-last {
+  border-right-width: 0;
+  border-top-right-radius: inherit;
+  border-bottom-right-radius: inherit;
+}
+.waf-theme.wakanda_admin .waf-menuItem.waf-menuItem-vertical {
+  border-bottom-width: 1px;
+}
+.waf-theme.wakanda_admin .waf-menuItem.waf-menuItem-vertical.waf-menuItem-first {
+  border-top-left-radius: inherit;
+  border-top-right-radius: inherit;
+}
+.waf-theme.wakanda_admin .waf-menuItem.waf-menuItem-vertical.waf-menuItem-last {
+  border-bottom-width: 0;
+  border-bottom-left-radius: inherit;
+  border-bottom-right-radius: inherit;
+}
+.waf-theme.wakanda_admin .waf-menuItem.waf-role-tabDashboard {
+  background-image: url('images/tab_dashboard_inactive.png');
+  background-repeat: no-repeat;
+  background-position: 20px 8px;
+}
+.waf-theme.wakanda_admin .waf-menuItem.waf-role-tabDashboard.waf-state-selected {
+  background-image: url('images/tab_dashboard_active.png');
+}
+.waf-theme.wakanda_admin .waf-menuItem.waf-role-tabSettings {
+  background-image: url('images/tab_settings_inactive.png');
+  background-repeat: no-repeat;
+  background-position: 20px 8px;
+}
+.waf-theme.wakanda_admin .waf-menuItem.waf-role-tabSettings.waf-state-selected {
+  background-image: url('images/tab_settings_active.png');
+}
+.waf-theme.wakanda_admin .waf-menuItem.waf-role-tabLogs {
+  background-image: url('images/tab_logs_inactive.png');
+  background-repeat: no-repeat;
+  background-position: 20px 8px;
+}
+.waf-theme.wakanda_admin .waf-menuItem.waf-role-tabLogs.waf-state-selected {
+  background-image: url('images/tab_logs_active.png');
+}
+.waf-theme.wakanda_admin .waf-menuItem.waf-role-tabOptions-playStop {
+  background-image: url('images/Solution_icons/play_grey.png');
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-color: rgb(116, 196, 116) !important;
+}
+.waf-theme.wakanda_admin .waf-menuItem.waf-role-tabOptions-playStop.waf-state-hover {
+  background-image: url('images/Solution_icons/play_white.png');
+}
+.waf-theme.wakanda_admin .waf-menuItem.waf-role-tabOptions-playStop.waf-state-active {
+  background-image: url('images/Solution_icons/play_white.png');
+}
+.waf-theme.wakanda_admin .waf-menuItem.waf-role-tabOptions-playStop.waf-state-selected {
+  background-image: url('images/Solution_icons/play_white.png');
+}
+
+.waf-theme.wakanda_admin .waf-menuItem.waf-role-tabOptions-playStop.stop {
+  background-image: url('images/Solution_icons/stop_grey.png');
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-color: rgb(240, 153, 153)!important;
+}
+.waf-theme.wakanda_admin .waf-menuItem.waf-role-tabOptions-playStop.stop.waf-state-hover {
+  background-image: url('images/Solution_icons/stop_white.png');
+}
+.waf-theme.wakanda_admin .waf-menuItem.waf-role-tabOptions-playStop.stop.waf-state-active {
+  background-image: url('images/Solution_icons/stop_white.png');
+}
+.waf-theme.wakanda_admin .waf-menuItem.waf-role-tabOptions-playStop.stop.waf-state-selected {
+  background-image: url('images/Solution_icons/stop_white.png');
+}
+
+.waf-theme.wakanda_admin .waf-menuItem.waf-role-tabOptions-browse {
+  background-image: url('images/Solution_icons/mag_grey.png');
+  background-repeat: no-repeat;
+  background-position: center center;
+}
+.waf-theme.wakanda_admin .waf-menuItem.waf-role-tabOptions-browse.waf-state-hover {
+  background-image: url('images/Solution_icons/mag_white.png');
+}
+.waf-theme.wakanda_admin .waf-menuItem.waf-role-tabOptions-browse.waf-state-active {
+  background-image: url('images/Solution_icons/mag_white.png');
+}
+.waf-theme.wakanda_admin .waf-menuItem.waf-role-tabOptions-browse.waf-state-selected {
+  background-image: url('images/Solution_icons/mag_white.png');
+}
+.waf-theme.wakanda_admin .waf-menuItem.waf-role-tabOptions-debugger {
+  background-image: url('images/Solution_icons/bug_grey.png');
+  background-repeat: no-repeat;
+  background-position: center center;
+}
+.waf-theme.wakanda_admin .waf-menuItem.waf-role-tabOptions-debugger.waf-state-hover {
+  background-image: url('images/Solution_icons/bug_white.png');
+}
+.waf-theme.wakanda_admin .waf-menuItem.waf-role-tabOptions-debugger.waf-state-active {
+  background-image: url('images/Solution_icons/bug_white.png');
+}
+.waf-theme.wakanda_admin .waf-menuItem.waf-role-tabOptions-debugger.waf-state-selected {
+  background-image: url('images/Solution_icons/bug_white.png');
+}
+.waf-theme.wakanda_admin .waf-menuItem.waf-role-tabOptions-settings {
+  background-image: url('images/Solution_icons/settings_grey.png');
+  background-repeat: no-repeat;
+  background-position: center center;
+}
+.waf-theme.wakanda_admin .waf-menuItem.waf-role-tabOptions-settings.waf-state-hover {
+  background-image: url('images/Solution_icons/settings_white.png');
+}
+.waf-theme.wakanda_admin .waf-menuItem.waf-role-tabOptions-settings.waf-state-active {
+  background-image: url('images/Solution_icons/settings_white.png');
+}
+.waf-theme.wakanda_admin .waf-menuItem.waf-role-tabOptions-settings.waf-state-selected {
+  background-image: url('images/Solution_icons/settings_white.png');
+}
+.waf-theme.wakanda_admin .waf-progressBar {
+  border-width: 1px;
+  border-style: solid;
+  border-color: #d2d2d2;
+  background-color: #ffffff;
+}
+.waf-theme.wakanda_admin .waf-progressBar .waf-progressBar-range {
+  border-width: 2px;
+  border-style: solid;
+  border-color: transparent;
+  background-color: #eaebef;
+  background-clip: content-box;
+  box-shadow: 0 0 0 1px #9398ad inset;
+}
+.waf-theme.wakanda_admin .waf-radioGroup {
+  list-style: none;
+  margin-top: 0;
+  margin-bottom: 0;
+  padding-left: 0;
+}
+.waf-theme.wakanda_admin .waf-radioGroup .waf-radio .waf-radio-box {
+  background-color: #ffffff;
+  border-width: 1px;
+  border-style: solid;
+  border-color: #d2d2d2;
+}
+.waf-theme.wakanda_admin .waf-radioGroup .waf-radio .waf-radio-icon.waf-icon-svg {
+  display: none;
+}
+.waf-theme.wakanda_admin .waf-radioGroup .waf-radio .waf-radio-icon-symbol {
+  fill: #eaebef;
+}
+.waf-theme.wakanda_admin .waf-radioGroup .waf-radio .waf-radio-icon-symbol-shadow {
+  fill: transparent;
+}
+.waf-theme.wakanda_admin .waf-radioGroup .waf-radio.waf-state-hover .waf-radio-icon.waf-icon-svg {
+  display: block;
+}
+.waf-theme.wakanda_admin .waf-radioGroup .waf-radio.waf-state-hover .waf-radio-icon-symbol {
+  fill: #eaebef;
+}
+.waf-theme.wakanda_admin .waf-radioGroup .waf-radio.waf-state-hover .waf-radio-icon-symbol-shadow {
+  fill: transparent;
+}
+.waf-theme.wakanda_admin .waf-radioGroup .waf-radio.waf-state-active .waf-radio-icon.waf-icon-svg {
+  display: block;
+}
+.waf-theme.wakanda_admin .waf-radioGroup .waf-radio.waf-state-active .waf-radio-icon-symbol {
+  fill: #eaebef;
+}
+.waf-theme.wakanda_admin .waf-radioGroup .waf-radio.waf-state-active .waf-radio-icon-symbol-shadow {
+  fill: transparent;
+}
+.waf-theme.wakanda_admin .waf-radioGroup .waf-radio.waf-state-selected .waf-radio-icon.waf-icon-svg {
+  display: block;
+}
+.waf-theme.wakanda_admin .waf-radioGroup .waf-radio.waf-state-selected .waf-radio-icon-symbol {
+  fill: #eaebef;
+}
+.waf-theme.wakanda_admin .waf-radioGroup .waf-radio.waf-state-selected .waf-radio-icon-symbol-shadow {
+  fill: transparent;
+}
+.waf-theme.wakanda_admin .waf-radioGroup.waf-state-disabled {
+  opacity: 0.4;
+}
+.waf-theme.wakanda_admin .waf-richText.waf-role-stat {
+  color: #e6a600;
+  text-align: center;
+  font-size: 18px;
+  border-right: 1px solid #3e3f43;
+}
+.waf-theme.wakanda_admin .waf-richText.waf-role-stat::after {
+  content: attr(data-unit);
+  display: block;
+  position: absolute;
+  width: 100%;
+  bottom: 0;
+  left: 0;
+  color: #62606e;
+  font-size: 0.7em;
+  line-height: 1;
+}
+.waf-theme.wakanda_admin .waf-select {
+  border-width: 1px;
+  border-style: solid;
+  border-color: #d2d2d2;
+}
+.waf-theme.wakanda_admin .waf-slider {
+  border-width: 1px;
+  border-style: solid;
+  border-color: #d2d2d2;
+  background: none;
+  /* jquery ui */
+  background-color: #ffffff;
+}
+.waf-theme.wakanda_admin .waf-slider .ui-slider-range {
+  border-width: 2px;
+  border-style: solid;
+  border-color: transparent;
+  background-color: #eaebef;
+  background-clip: content-box;
+  box-shadow: 0 0 0 1px #9398ad inset;
+}
+.waf-theme.wakanda_admin .waf-slider .ui-slider-handle {
+  position: absolute;
+  border-width: 1px;
+  border-style: solid;
+  border-color: #b3b3b3;
+  border-radius: 1000px;
+  background-image: none;
+  background-color: #ffffff;
+}
+.waf-theme.wakanda_admin .waf-slider.ui-slider-horizontal .ui-slider-handle {
+  top: -4px;
+  bottom: -4px;
+}
+.waf-theme.wakanda_admin .waf-slider.ui-slider-vertical .ui-slider-handle {
+  margin-left: 0;
+  left: -4px;
+  right: -4px;
+}
+.waf-theme.wakanda_admin .waf-slider.waf-state-disabled {
+  opacity: 0.4;
+}
+.waf-theme.wakanda_admin .waf-tabView .waf-tabView-menuBar {
+  border-width: 0;
+  border-radius: inherit;
+}
+.waf-theme.wakanda_admin .waf-tabView .waf-tabView-menuBar .waf-menItem.waf-state-disabled {
+  opacity: 0.4;
+}
+.waf-theme.wakanda_admin .waf-tabView .waf-container {
+  border-radius: inherit;
+}
+.waf-theme.wakanda_admin .waf-tabView.waf-tabView-menu-position-top-left > .waf-tabView-menuBar,
+.waf-theme.wakanda_admin .waf-tabView.waf-tabView-menu-position-top-right > .waf-tabView-menuBar {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+.waf-theme.wakanda_admin .waf-tabView.waf-tabView-menu-position-top-left > .waf-container,
+.waf-theme.wakanda_admin .waf-tabView.waf-tabView-menu-position-top-right > .waf-container {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+.waf-theme.wakanda_admin .waf-tabView.waf-tabView-menu-position-bottom-left > .waf-tabView-menuBar,
+.waf-theme.wakanda_admin .waf-tabView.waf-tabView-menu-position-bottom-right > .waf-tabView-menuBar {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+.waf-theme.wakanda_admin .waf-tabView.waf-tabView-menu-position-bottom-left > .waf-container,
+.waf-theme.wakanda_admin .waf-tabView.waf-tabView-menu-position-bottom-right > .waf-container {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+.waf-theme.wakanda_admin .waf-tabView.waf-tabView-menu-position-left-top > .waf-tabView-menuBar,
+.waf-theme.wakanda_admin .waf-tabView.waf-tabView-menu-position-left-bottom > .waf-tabView-menuBar {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+.waf-theme.wakanda_admin .waf-tabView.waf-tabView-menu-position-left-top > .waf-container,
+.waf-theme.wakanda_admin .waf-tabView.waf-tabView-menu-position-left-bottom > .waf-container {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+.waf-theme.wakanda_admin .waf-tabView.waf-tabView-menu-position-right-top > .waf-tabView-menuBar,
+.waf-theme.wakanda_admin .waf-tabView.waf-tabView-menu-position-right-bottom > .waf-tabView-menuBar {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+.waf-theme.wakanda_admin .waf-tabView.waf-tabView-menu-position-right-top > .waf-container,
+.waf-theme.wakanda_admin .waf-tabView.waf-tabView-menu-position-right-bottom > .waf-container {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+.waf-theme.wakanda_admin .waf-tabView.waf-role-adminNavTabs.waf-tabView-menu-position-top-left .waf-tabView-menuBar {
+  background-color: transparent;
+}
+.waf-theme.wakanda_admin .waf-tabView.waf-role-adminNavTabs.waf-tabView-menu-position-top-left .waf-tabView-menuBar .waf-menuItem {
+  border-width: 1px 1px 0 1px;
+  border-color: transparent;
+  border-radius: 4px 4px 0 0;
+  background-color: transparent;
+  color: #909398;
+}
+.waf-theme.wakanda_admin .waf-tabView.waf-role-adminNavTabs.waf-tabView-menu-position-top-left .waf-tabView-menuBar .waf-menuItem.waf-state-selected {
+  border-color: #d2d2d2;
+  background-color: #f9f9f9;
+  color: #6c7272;
+}
+.waf-theme.wakanda_admin .waf-tabView.waf-role-adminNavTabs.waf-tabView-menu-position-top-left .waf-tabView-menuBar .waf-menuItem.waf-menuItem-first {
+  margin-left: 40px;
+}
+.waf-theme.wakanda_admin .waf-tabView.waf-role-adminNavTabs.waf-tabView-menu-position-top-left div[class*="waf-tabView-container"] {
+  background-color: #f9f9f9;
+  border-width: 1px 0 0 0;
+}
+.waf-theme.wakanda_admin .waf-textField {
+  border-width: 1px;
+  border-style: solid;
+  border-color: #d2d2d2;
+  background-color: #ffffff;
+  color: #1e1e1e;
+  line-height: 1.5;
+  font-family: "Myriad Pro", sans-serif;
+  font-size: 14px;
+  padding: 5px;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+.waf-theme.wakanda_admin .waf-video {
+  border-width: 1px;
+  border-style: solid;
+  border-color: #d2d2d2;
+  background-color: #ffffff;
+}
+.waf-theme.wakanda_admin {
+  background-color: #eef2f5;
+}
+#studio-tmp-bodyContainer.waf-theme.wakanda_admin {
+  background-color: transparent !important;
+}
+.waf-theme.wakanda_admin {
+  line-height: 1.5;
+  font-family: "Myriad Pro", sans-serif;
+  font-size: 14px;
+  color: #1e1e1e;
+}
+.waf-theme.wakanda_admin h1,
+.waf-theme.wakanda_admin h2,
+.waf-theme.wakanda_admin h3,
+.waf-theme.wakanda_admin h4,
+.waf-theme.wakanda_admin h5,
+.waf-theme.wakanda_admin h6 {
+  line-height: 1.5;
+}
+.waf-theme.wakanda_admin h1,
+.waf-theme.wakanda_admin h2,
+.waf-theme.wakanda_admin h3 {
+  margin-top: 28px;
+  margin-bottom: 14px;
+}
+.waf-theme.wakanda_admin h4,
+.waf-theme.wakanda_admin h5,
+.waf-theme.wakanda_admin h6 {
+  margin-top: 14px;
+  margin-bottom: 14px;
+}
+.waf-theme.wakanda_admin h1 {
+  font-family: "Myriad Pro", sans-serif;
+  font-size: 40px;
+}
+.waf-theme.wakanda_admin h2 {
+  font-family: "Myriad Pro", sans-serif;
+  font-size: 34px;
+}
+.waf-theme.wakanda_admin h3 {
+  font-family: "Myriad Pro", sans-serif;
+  font-size: 28px;
+}
+.waf-theme.wakanda_admin h4 {
+  font-family: "Myriad Pro", sans-serif;
+  font-size: 23px;
+}
+.waf-theme.wakanda_admin h5 {
+  font-family: "Myriad Pro", sans-serif;
+  font-size: 20px;
+}
+.waf-theme.wakanda_admin h6 {
+  font-family: "Myriad Pro", sans-serif;
+  font-size: 17px;
+}
+.waf-theme.wakanda_admin p {
+  margin-top: 7px;
+  margin-bottom: 7px;
+}
+.waf-theme.wakanda_admin a {
+  color: #1e1e1e;
+}
+.waf-theme.wakanda_admin ul,
+.waf-theme.wakanda_admin ol {
+  margin-top: 7px;
+  margin-bottom: 7px;
+}
+.waf-theme.wakanda_admin ul ul,
+.waf-theme.wakanda_admin ol ul,
+.waf-theme.wakanda_admin ul ol,
+.waf-theme.wakanda_admin ol ol {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+.waf-theme.wakanda_admin .waf-ui-textHeaders {
+  font-size: 16px;
+  font-weight: normal;
+}
+.waf-theme.wakanda_admin .waf-ui-input {
+  padding: 5px;
+  border-width: 1px;
+  border-style: solid;
+  border-color: #d2d2d2;
+  background-color: #ffffff;
+  color: #1e1e1e;
+  line-height: 1.5;
+  font-family: "Myriad Pro", sans-serif;
+  font-size: 14px;
+}
+.waf-theme.wakanda_admin .waf-ui-button {
+  padding: 5px 9px;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  border-width: 1px;
+  border-style: solid;
+  border-color: transparent;
+  border-radius: 3px;
+  background-color: #eaebef;
+  color: #7b7c80;
+  line-height: 1.5;
+  font-family: "Myriad Pro", sans-serif;
+  font-size: 14px;
+}
+.waf-theme.wakanda_admin .waf-ui-button:hover {
+  background-color: #edeef1;
+}
+.waf-theme.wakanda_admin .waf-ui-button.waf-ui-success {
+  border-color: transparent;
+  background-color: #9fbf2d;
+  color: #ffffff;
+}
+.waf-theme.wakanda_admin .waf-ui-button.waf-ui-success:hover {
+  background-color: #adc94d;
+}
+.waf-theme.wakanda_admin .waf-ui-button.waf-ui-warning {
+  border-color: transparent;
+  background-color: #f05924;
+  color: #ffffff;
+}
+.waf-theme.wakanda_admin .waf-ui-button.waf-ui-warning:hover {
+  background-color: #f27245;
+}
+.waf-theme.wakanda_admin .waf-ui-button.waf-ui-danger {
+  border-color: transparent;
+  background-color: #ef2523;
+  color: #ffffff;
+}
+.waf-theme.wakanda_admin .waf-ui-button.waf-ui-danger:hover {
+  background-color: #f14644;
+}
+.waf-theme.wakanda_admin .waf-ui-button.waf-ui-info {
+  border-color: transparent;
+  background-color: #808388;
+  color: #ffffff;
+}
+.waf-theme.wakanda_admin .waf-ui-button.waf-ui-info:hover {
+  background-color: #93969a;
+}
+.waf-theme.wakanda_admin ::-webkit-input-placeholder {
+  color: #d2d2d2;
+}
+.waf-theme.wakanda_admin ::-moz-placeholder {
+  color: #d2d2d2;
+}
+.waf-theme.wakanda_admin :-ms-input-placeholder {
+  color: #d2d2d2;
+}
+.waf-theme.wakanda_admin input:-moz-placeholder {
+  color: #d2d2d2;
+}
+.waf-theme.wakanda_admin .waf-ui-table {
+  width: 100%;
+  max-width: 100%;
+  border-width: 1px;
+  border-style: solid;
+  border-color: #d2d2d2;
+  font-size: 12px;
+}
+.waf-theme.wakanda_admin .waf-ui-table thead,
+.waf-theme.wakanda_admin .waf-ui-table tbody,
+.waf-theme.wakanda_admin .waf-ui-table tfoot,
+.waf-theme.wakanda_admin .waf-ui-table tr,
+.waf-theme.wakanda_admin .waf-ui-table th,
+.waf-theme.wakanda_admin .waf-ui-table td {
+  border-width: 0;
+  border-style: inherit;
+  border-color: inherit;
+}
+.waf-theme.wakanda_admin .waf-ui-table th,
+.waf-theme.wakanda_admin .waf-ui-table td {
+  padding: 12px;
+  border-width: 1px;
+}
+.waf-theme.wakanda_admin .waf-ui-table thead th {
+  text-align: center;
+}
+.waf-theme.wakanda_admin .waf-ui-table thead th,
+.waf-theme.wakanda_admin .waf-ui-table thead td {
+  background-color: #f9f9f9;
+  font-size: 16px;
+  font-weight: normal;
+}
+.waf-theme.wakanda_admin .waf-ui-table tfoot th,
+.waf-theme.wakanda_admin .waf-ui-table tfoot td {
+  background-color: #f9f9f9;
+}
+.waf-theme.wakanda_admin .waf-ui-table tbody th {
+  background-color: #f9f9f9;
+  font-size: 16px;
+  font-weight: normal;
+}
+.waf-theme.wakanda_admin .waf-ui-table tbody td {
+  background-color: #f2f2f2;
+}
+.waf-theme.wakanda_admin .waf-ui-table .waf-state-loading {
+  height: 120px;
+}
+.waf-theme.wakanda_admin .waf-ui-table .waf-state-loading .waf-ui-spinner,
+.waf-theme.wakanda_admin .waf-ui-table .waf-state-loading .waf-ui-loader {
+  margin: auto;
+}
+.waf-theme.wakanda_admin .waf-ui-box {
+  border-width: 1px;
+  border-style: solid;
+  border-color: #d2d2d2;
+  background-color: #ffffff;
+}
+.waf-theme.wakanda_admin .waf-ui-header {
+  background-color: #f9f9f9;
+  font-size: 16px;
+  font-weight: normal;
+}
+.waf-theme.wakanda_admin .waf-ui-footer {
+  background-color: #f9f9f9;
+}
+.waf-theme.wakanda_admin .waf-ui-body {
+  background-color: #f2f2f2;
+}
+/**
+ * -------------------------------------------------------
+ * @section navBar
+ * @section tabBar
+ * -------------------------------------------------------
+ */
+.waf-theme.wakanda_admin .waf-ui-navBar {
+  list-style: none;
+}
+.waf-theme.wakanda_admin .waf-ui-navBar li {
+  display: block;
+}
+.waf-theme.wakanda_admin .waf-ui-tabBar {
+  list-style: none;
+}
+.waf-theme.wakanda_admin .waf-ui-tabBar::before,
+.waf-theme.wakanda_admin .waf-ui-tabBar::after {
+  content: " ";
+  display: table;
+  clear: both;
+}
+.waf-theme.wakanda_admin .waf-ui-tabBar li {
+  display: block;
+  float: left;
+}
+.waf-theme.wakanda_admin .waf-ui-spinner {
+  position: relative;
+  overflow: hidden;
+  width: 3em;
+  height: 3em;
+  font-size: 14px;
+  -webkit-animation: waf-kf-spin_2t 1.3s infinite alternate;
+  animation: waf-kf-spin_2t 1.3s infinite alternate;
+}
+@-webkit-keyframes waf-kf-spin_2t {
+  to {
+    -webkit-transform: rotate(2turn);
+    transform: rotate(2turn);
+  }
+}
+@keyframes waf-kf-spin-spin_2t {
+  to {
+    -webkit-transform: rotate(2turn);
+    transform: rotate(2turn);
+  }
+}
+.waf-theme.wakanda_admin .waf-ui-box.waf-ui-dashboard-boxes .waf-ui-header {
+  height: 55px;
+  font-size: 26px;
+  line-height: 55px;
+}

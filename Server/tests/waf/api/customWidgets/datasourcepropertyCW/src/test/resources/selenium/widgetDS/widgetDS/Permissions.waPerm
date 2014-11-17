@@ -1,0 +1,4 @@
+﻿<?xml version="1.0" encoding="UTF-8"?><permissions>
+	<allow action="execute" groupName="Admin" groupID="01000000000000000000000000000000" resource="Model.Person.testClass" temporaryForcePermissions="false" type="method"/>
+	<allow action="promote" groupName="Admin" groupID="01000000000000000000000000000000" resource="Model.Person.testClass" temporaryForcePermissions="false" type="method"/>
+</permissions>

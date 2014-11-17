@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="UTF-8"?><solution>
+	<project path="../datasourceAPI/datasourceAPI.waProject"/>
+	<project path="../listPropertyAPI/listPropertyAPI.waProject"/>
+	<project path="../propertiesAPI/propertiesAPI.waProject"/>
+	<project path="../widgetAPI/widgetAPI.waProject"/>
+	<file path="./Settings.waSettings">
+		<tag name="settings"/>
+	</file>
+	<file path="./Directory.waDirectory">
+		<tag name="directory"/>
+	</file>
+</solution>

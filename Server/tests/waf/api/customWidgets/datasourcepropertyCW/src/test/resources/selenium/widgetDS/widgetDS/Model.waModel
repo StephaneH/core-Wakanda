@@ -1,0 +1,164 @@
+﻿{
+	"toJSON": true,
+	"extraProperties": {
+		"version": "2",
+		"classes": {
+			"DataClass1": {
+				"panelColor": "#548DD4",
+				"panel": {
+					"isOpen": "true",
+					"position": {
+						"X": 25,
+						"Y": 20
+					}
+				}
+			},
+			"Person": {
+				"panelColor": "#996699",
+				"panel": {
+					"isOpen": "true",
+					"pathVisible": true,
+					"position": {
+						"X": 255,
+						"Y": 20
+					}
+				}
+			},
+			"Car": {
+				"panelColor": "#BFBFBF",
+				"panel": {
+					"isOpen": "true",
+					"position": {
+						"X": 689,
+						"Y": 136
+					},
+					"pathVisible": true
+				}
+			}
+		},
+		"model": {
+			"scriptMode": "manual",
+			"workspaceLeft": 0,
+			"workspaceTop": 0,
+			"lastScriptLocation": {
+				"Person": {
+					"method": "Person/Person-methods.js",
+					"events": "Person/Person-events.js"
+				}
+			}
+		}
+	},
+	"dataClasses": [
+		{
+			"name": "DataClass1",
+			"className": "DataClass1",
+			"collectionName": "DataClass1Collection",
+			"scope": "public",
+			"attributes": [
+				{
+					"name": "ID",
+					"kind": "storage",
+					"scope": "public",
+					"unique": true,
+					"autosequence": true,
+					"type": "long",
+					"primKey": true
+				}
+			]
+		},
+		{
+			"name": "Person",
+			"className": "Person",
+			"collectionName": "PersonCollection",
+			"scope": "public",
+			"attributes": [
+				{
+					"name": "ID",
+					"kind": "storage",
+					"scope": "public",
+					"unique": true,
+					"autosequence": true,
+					"type": "long",
+					"primKey": true
+				},
+				{
+					"name": "name",
+					"kind": "storage",
+					"scope": "public",
+					"type": "string"
+				},
+				{
+					"name": "carCollection",
+					"scope": "public",
+					"reversePath": true,
+					"path": "owner",
+					"type": "CarCollection",
+					"kind": "relatedEntities"
+				}
+			],
+			"events": [
+				{
+					"kind": "validateremove",
+					"from": "$mainModel.Person.events.validateremove",
+					"userDefined": true
+				},
+				{
+					"kind": "clientrefresh",
+					"from": "$mainModel.Person.events.clientrefresh",
+					"userDefined": true
+				}
+			],
+			"methods": [
+				{
+					"name": "testClass",
+					"applyTo": "dataClass",
+					"scope": "public",
+					"from": "$mainModel.Person.methods.testClass",
+					"userDefined": true
+				},
+				{
+					"name": "testCollection",
+					"applyTo": "entityCollection",
+					"scope": "publicOnServer",
+					"from": "$mainModel.Person.collectionMethods.testCollection",
+					"userDefined": true
+				},
+				{
+					"name": "testEntity",
+					"applyTo": "entity",
+					"scope": "publicOnServer",
+					"from": "$mainModel.Person.entityMethods.testEntity",
+					"userDefined": true
+				}
+			]
+		},
+		{
+			"collectionName": "CarCollection",
+			"className": "Car",
+			"attributes": [
+				{
+					"name": "ID",
+					"kind": "storage",
+					"type": "long",
+					"autosequence": "true",
+					"unique": "true",
+					"primKey": "true"
+				},
+				{
+					"name": "name",
+					"scope": "public",
+					"type": "string",
+					"kind": "storage"
+				},
+				{
+					"name": "owner",
+					"scope": "public",
+					"path": "Person",
+					"type": "Person",
+					"kind": "relatedEntity"
+				}
+			]
+		}
+	],
+	"type": []
+}

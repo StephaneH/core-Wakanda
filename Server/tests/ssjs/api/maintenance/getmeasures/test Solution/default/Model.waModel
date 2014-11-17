@@ -1,0 +1,164 @@
+
+{
+	"toJSON" : true,
+	"extraProperties" : 
+	{
+		"version" : "2",
+		"classes" : 
+		{
+			"Person" : 
+			{
+				"panelColor" : "rgb(255, 78, 89)",
+				"panel" : 
+				{
+					"isOpen" : "true",
+					"pathVisible" : true,
+					"position" : 
+					{
+						"X" : 46,
+						"Y" : 36
+					}
+				}
+			},
+			"Employee" : 
+			{
+				"panelColor" : "#B2A2C7",
+				"panel" : 
+				{
+					"isOpen" : "true",
+					"pathVisible" : true,
+					"position" : 
+					{
+						"X" : 386,
+						"Y" : 69
+					}
+				}
+			},
+			"Enterprise" : 
+			{
+				"panelColor" : "#996699",
+				"panel" : 
+				{
+					"isOpen" : "true",
+					"pathVisible" : true,
+					"position" : 
+					{
+						"X" : 688,
+						"Y" : 71
+					}
+				}
+			}
+		},
+		"model" : 
+		{
+			"scriptMode" : "manual",
+			"workspaceLeft" : 0,
+			"workspaceTop" : 0,
+			"lastScriptLocation" : 
+			{
+			}
+		}
+	},
+	"dataClasses" : 
+	[
+		{
+			"name" : "Enterprise",
+			"className" : "Enterprise",
+			"collectionName" : "EnterpriseCollection",
+			"scope" : "public",
+			"attributes" : 
+			[
+				{
+					"name" : "ID",
+					"kind" : "storage",
+					"scope" : "public",
+					"indexed" : true,
+					"unique" : true,
+					"autosequence" : true,
+					"type" : "long",
+					"indexKind" : "btree"
+				},
+				{
+					"name" : "name",
+					"kind" : "storage",
+					"scope" : "public",
+					"type" : "string"
+				},
+				{
+					"name" : "CA",
+					"kind" : "storage",
+					"scope" : "public",
+					"type" : "number"
+				},
+				{
+					"name" : "employees",
+					"kind" : "relatedEntities",
+					"scope" : "public",
+					"type" : "EmployeeCollection",
+					"reversePath" : true,
+					"path" : "employer"
+				}
+			],
+			"key" : 
+			[
+				{
+					"name" : "ID"
+				}
+			]
+		},
+		{
+			"name" : "Person",
+			"className" : "Person",
+			"collectionName" : "PersonCollection",
+			"scope" : "public",
+			"attributes" : 
+			[
+				{
+					"name" : "ID",
+					"kind" : "storage",
+					"scope" : "public",
+					"indexed" : true,
+					"unique" : true,
+					"autosequence" : true,
+					"type" : "long",
+					"indexKind" : "btree"
+				},
+				{
+					"name" : "attribute1",
+					"kind" : "storage",
+					"scope" : "public",
+					"type" : "string"
+				},
+				{
+					"name" : "age",
+					"kind" : "storage",
+					"scope" : "public",
+					"type" : "number"
+				}
+			],
+			"key" : 
+			[
+				{
+					"name" : "ID"
+				}
+			]
+		},
+		{
+			"name" : "Employee",
+			"className" : "Employee",
+			"collectionName" : "EmployeeCollection",
+			"scope" : "public",
+			"extends" : "Person",
+			"attributes" : 
+			[
+				{
+					"name" : "employer",
+					"kind" : "relatedEntity",
+					"scope" : "public",
+					"type" : "Enterprise",
+					"path" : "Enterprise"
+				}
+			]
+		}
+	]
+}

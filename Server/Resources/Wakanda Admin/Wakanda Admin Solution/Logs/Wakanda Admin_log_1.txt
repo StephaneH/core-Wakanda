@@ -1,0 +1,15 @@
+2014-07-17 12:33:24 [com.wakanda-software.Wakanda Admin] INFO - Users and groups directory opened
+2014-07-17 12:33:24 [com.wakanda-software.Wakanda Admin.Wakanda Admin] INFO - Datastore opened
+2014-07-17 12:33:24 [com.wakanda-software.Wakanda Admin.Wakanda Admin] INFO - "Wakanda Admin" project opened
+2014-07-17 12:33:24 [com.wakanda-software.Wakanda Admin] INFO - "Wakanda Admin" solution opened
+2014-07-17 12:33:24 [com.wakanda-software] INFO - Starts "Wakanda Admin" solution
+2014-07-17 12:33:24 [com.wakanda-software.Wakanda Admin.Wakanda Admin] INFO - >buildInit() - mode :  release
+2014-07-17 12:33:24 [com.wakanda-software.Wakanda Admin.Wakanda Admin] INFO - >buildInit() - minified core files detected - try to add package definition to storage
+2014-07-17 12:33:24 [com.wakanda-software.Wakanda Admin.Wakanda Admin] INFO - >buildInit() - added package definition to storage
+2014-07-17 12:33:24 [com.wakanda-software.Wakanda Admin.Wakanda Admin] INFO - <buildInit()
+2014-07-17 12:33:24 [com.wakanda-software.Wakanda Admin.Wakanda Admin] INFO - HTTP Server started
+2014-07-17 12:33:24 [com.wakanda-software.Wakanda Admin.Wakanda Admin] INFO - "Wakanda Admin" project started
+2014-07-17 12:33:24 [com.wakanda-software.Wakanda Admin.Wakanda Admin] INFO - Executes the bootstrap file(s)
+2014-07-17 12:33:24 [com.wakanda-software.Wakanda Admin.Wakanda Admin] INFO - Bootstrap file(s) executed
+2014-07-17 12:33:24 [com.wakanda-software.Wakanda Admin] INFO - "Wakanda Admin" solution started
+2014-07-17 12:33:24 [com.wakanda-software] INFO - "Wakanda Admin" solution has been successfully opened for running (duration: 540 ms)

@@ -1,0 +1,89 @@
+﻿{
+	"toJSON": true,
+	"extraProperties": {
+		"version": "2",
+		"classes": {
+			"ListTests": {
+				"panelColor": "#7F7F7F",
+				"panel": {
+					"isOpen": "true",
+					"position": {
+						"X": 75,
+						"Y": 30
+					},
+					"pathVisible": true
+				}
+			},
+			"DataClass1": {
+				"panelColor": "#eee",
+				"panel": {
+					"isOpen": "true",
+					"position": {
+						"X": 285,
+						"Y": 20
+					}
+				}
+			}
+		},
+		"model": {
+			"scriptMode": "manual",
+			"workspaceLeft": 0,
+			"workspaceTop": 0,
+			"lastScriptLocation": {
+				"ListTests": {
+					"computed": "ListTests/ListTests-events.js"
+				}
+			}
+		}
+	},
+	"dataClasses": [
+		{
+			"collectionName": "ListTestsCollection",
+			"className": "ListTests",
+			"attributes": [
+				{
+					"name": "ID",
+					"kind": "storage",
+					"type": "long",
+					"autosequence": "true",
+					"unique": "true",
+					"primKey": "true"
+				},
+				{
+					"name": "var",
+					"scope": "public",
+					"type": "string",
+					"kind": "storage"
+				},
+				{
+					"name": "result",
+					"scope": "public",
+					"type": "string",
+					"kind": "calculated",
+					"scriptKind": "javascript"
+				},
+				{
+					"name": "expected",
+					"scope": "public",
+					"type": "string",
+					"kind": "storage"
+				}
+			]
+		},
+		{
+			"collectionName": "DataClass1Collection",
+			"className": "DataClass1",
+			"attributes": [
+				{
+					"name": "ID",
+					"kind": "storage",
+					"type": "long",
+					"autosequence": "true",
+					"unique": "true",
+					"primKey": "true"
+				}
+			]
+		}
+	],
+	"type": []
+}

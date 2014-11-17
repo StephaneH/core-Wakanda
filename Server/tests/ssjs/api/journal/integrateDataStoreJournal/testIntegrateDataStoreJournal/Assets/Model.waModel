@@ -1,0 +1,83 @@
+
+{
+	"toJSON" : true,
+	"extraProperties" : 
+	{
+		"version" : "2",
+		"classes" : 
+		{
+			"Book" : 
+			{
+				"panelColor" : "#B7DDE8",
+				"panel" : 
+				{
+					"isOpen" : "true",
+					"pathVisible" : true,
+					"position" : 
+					{
+						"X" : 25,
+						"Y" : 20
+					}
+				}
+			}
+		},
+		"model" : 
+		{
+			"scriptMode" : "manual",
+			"workspaceLeft" : 0,
+			"workspaceTop" : 0,
+			"lastScriptLocation" : 
+			{
+				"Book" : 
+				{
+					"method" : "Book/Book-methods.js"
+				}
+			}
+		}
+	},
+	"dataClasses" : 
+	[
+		{
+			"name" : "Book",
+			"className" : "Book",
+			"collectionName" : "BookCollection",
+			"scope" : "public",
+			"attributes" : 
+			[
+				{
+					"name" : "ID",
+					"kind" : "storage",
+					"scope" : "public",
+					"indexed" : true,
+					"unique" : true,
+					"autosequence" : true,
+					"type" : "long",
+					"indexKind" : "btree"
+				},
+				{
+					"name" : "title",
+					"kind" : "storage",
+					"matchColumn" : "string",
+					"scope" : "public",
+					"type" : "string"
+				}
+			],
+			"methods" : 
+			[
+				{
+					"name" : "createBooks",
+					"applyTo" : "dataClass",
+					"scope" : "public",
+					"from" : "$mainModel.Book.methods.createBooks",
+					"userDefined" : true
+				}
+			],
+			"key" : 
+			[
+				{
+					"name" : "ID"
+				}
+			]
+		}
+	]
+}
